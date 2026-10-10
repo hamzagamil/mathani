@@ -3,5 +3,20 @@
   "appName": "Mathani",
   "@appName": {
     "description": "App name shown in the interface."
+  },
+  "juzLabel": "Juz {number}",
+  "@juzLabel": {
+    "description": "Reader header: current juz. Number is pre-formatted.",
+    "placeholders": { "number": { "type": "String" } }
+  },
+  "pageLabel": "Page {number}",
+  "@pageLabel": {
+    "description": "Reader header: current Mushaf page. Number is pre-formatted.",
+    "placeholders": { "number": { "type": "String" } }
+  },
+  "pageSemantics": "Page {page}, Surah {surah}",
+  "@pageSemantics": {
+    "description": "Screen-reader label for a Mushaf page.",
+    "placeholders": { "page": { "type": "String" }, "surah": { "type": "String" } }
   }
 }

@@ -24,7 +24,7 @@ must show every attribution marked **required**.
 
 | Asset | Used for | Licence | Requirements |
 | --- | --- | --- | --- |
-| Lucide icons (selected SVGs compiled into `MathaniIcons.ttf`) | Interface icons | ISC | Keep the ISC notice |
+| Lucide icons, `lucide-static` 1.48.0 font (`assets/fonts/Lucide.ttf`, tree-shaken in release builds) | Interface icons | ISC (`assets/fonts/LICENSE-Lucide.txt`) | Keep the ISC notice |
 | Mathani logos and app icon (brand guide «مثاني — دليل الهوية») | App icon, launch screen, About | Owned by the project | — |
 
 ## Permissions

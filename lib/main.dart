@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const MainApp());
-}
+import 'app/app.dart';
+import 'data/quran_repository.dart';
+import 'data/user_repository.dart';
+import 'shared/reader_state.dart';
 
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(body: Center(child: Text('Hello World!'))),
-    );
-  }
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  // Both databases open in parallel; no network and no background work at startup.
+  final (quran, user) = await (QuranRepository.open(), UserRepository.open()).wait;
+  final (anchor, preferences) = await user.loadStartup();
+  final controller = ReaderController(
+    quran: quran,
+    user: user,
+    anchor: anchor,
+    preferences: preferences,
+  );
+  runApp(MathaniApp(controller: controller));
 }

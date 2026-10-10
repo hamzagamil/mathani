@@ -136,7 +136,7 @@ state that every story uses.
     https://tanzil.net/download/.
 
   Download them and record the checksums.
-- [ ] T013 [P] Implement the Arabic search normaliser in
+- [X] T013 [P] Implement the Arabic search normaliser in
   `lib/features/search/arabic_normalizer.dart`, as a pure Dart function with no Flutter imports so
   `tool/` can reuse it. Exact rules from research R7:
   - strip tashkeel and Quranic annotation marks (U+0610–U+061A, U+064B–U+065F, U+0670,
@@ -144,7 +144,7 @@ state that every story uses.
   - unify «أ/إ/آ/ٱ → ا, ى → ي, ؤ → و, ئ → ي, ة → ه»;
   - remove tatweel (U+0640);
   - collapse whitespace.
-- [ ] T014 Implement `tool/build_quran_db.dart` (depends on T012 and T013). It writes
+- [X] T014 Implement `tool/build_quran_db.dart` (depends on T012 and T013). It writes
   `assets/db/quran.db` with exactly the schema in
   [contracts/quran-db.md](./contracts/quran-db.md): `meta`, `surahs`, `ayahs`, `words`,
   `mushaf_lines` and `divisions`, including the CHECK constraints and indexes. It also:
@@ -159,7 +159,7 @@ state that every story uses.
   different code point) in `tool/encoding_map.json`, each with a written justification, and
   document them in `tool/encoding_map.md`. The owner reviews and approves the map before it is
   used. Never include a pair that changes a letter, diacritic or pause mark (FR-002).
-- [ ] T016 Implement `tool/verify_quran.dart`, the research R10 checks. It applies **only** the
+- [X] T016 Implement `tool/verify_quran.dart`, the research R10 checks. It applies **only** the
   substitutions in `tool/encoding_map.json` (T015). It exits non-zero on any
   failure and prints `PASS (...)` with the counts otherwise:
   - counts are 114 surahs, 6,236 ayat, 604 pages, 30 juz, 240 hizb quarters and 15 sajdah ayat;
@@ -169,7 +169,7 @@ state that every story uses.
   - there is no `basmallah` line for surah 9 and no separate `basmallah` line for surah 1.
 
   Print the SHA-256 of `quran.db`.
-- [ ] T017 Implement `tool/measure_line_widths_test.dart`, run with
+- [X] T017 Implement `tool/measure_line_widths_test.dart`, run with
   `flutter test tool/measure_line_widths_test.dart` (depends on T007 and T014). It loads the
   `QuranText` font, lays out every `ayah` line of all 604 pages at a 100 px font size with
   `TextPainter`, and writes `meta.max_line_width_em` (widest line ÷ 100) into
@@ -186,13 +186,13 @@ state that every story uses.
 
 ### App foundation (`lib/`)
 
-- [ ] T019 [P] Create immutable models in `lib/data/models.dart`: `Surah`, `Ayah`, `Word`,
+- [X] T019 [P] Create immutable models in `lib/data/models.dart`: `Surah`, `Ayah`, `Word`,
   `MushafLine`, `Division`, `Bookmark` and `ReaderPreferences`, with fields exactly as in
   [data-model.md](./data-model.md). Use enums `Revelation {makki, madani}`,
   `LineType {ayah, surahName, basmallah}`, `DivisionKind {juz, hizbQuarter}`,
   `ReadingLayout {mushaf, flowing}`, `ThemePref {system, day, night}` and
   `LanguagePref {system, ar, en}`.
-- [ ] T020 Implement `lib/data/quran_repository.dart` (depends on T019). It:
+- [X] T020 Implement `lib/data/quran_repository.dart` (depends on T019). It:
   - on first launch, or when the bundled `meta.built_at` differs, copies `assets/db/quran.db` to
     the sqflite databases path, then opens it read-only;
   - refuses to open if the major part of `meta.schema_version` is not "1";
@@ -200,7 +200,7 @@ state that every story uses.
     `allDivisions()` (both cached in memory after first load), `pageOf(surah, ayah)`,
     `firstAyahStartingOnPage(p)` and `maxLineWidthEm()`;
   - keeps the per-query budgets in contracts/quran-db.md (page queries ≤ 10 ms).
-- [ ] T021 Implement `lib/data/user_repository.dart` (depends on T019). It:
+- [X] T021 Implement `lib/data/user_repository.dart` (depends on T019). It:
   - creates `user.db` schema v1 exactly as in [contracts/user-data.md](./contracts/user-data.md)
     (`bookmarks`, `reading_state` with `CHECK (id = 1)`, `preferences`), with `PRAGMA user_version`
     migrations that are forward-only and never delete bookmarks;
@@ -209,26 +209,26 @@ state that every story uses.
   - provides `saveAnchor(surah, ayah)` and `setPreference(key, value)`;
   - resets out-of-range preference values to their defaults: layout `mushaf`, theme `system`,
     flow_font_size 24 (allowed 18–34), keep_screen_on false, language `system`.
-- [ ] T022 [P] Read `project/tokens.json` from the Mathani brand design system (claude.ai artifact
+- [X] T022 [P] Read `project/tokens.json` from the Mathani brand design system (claude.ai artifact
   `2b08b81b-3fa4-4d13-8806-2681e820b520`) and transcribe it:
   - every colour token, with its day and night values, into `lib/app/theme/tokens.dart`;
   - spacing, radius, shadow and text styles (`display`, `title-lg`, `appbar-title`, `title-sm`,
     `body`, `caption`, `label`, `quran-page` 24/48, `quran-card` 20/38, `basmala` 22/40).
-- [ ] T023 Build `lib/app/theme/app_theme.dart` (depends on T022). It provides day and night
+- [X] T023 Build `lib/app/theme/app_theme.dart` (depends on T022). It provides day and night
   `ThemeData` using `PlexArabic` and a `MathaniColors` `ThemeExtension` exposing the semantic
   tokens: `surface`, `surface-raised`, `surface-sunken`, `bar`, `ink-on-bar`, `ink`, `ink-muted`,
   `accent`, `on-accent`, `accent-ink`, `selected`, `row-selected`, `secondary`, `secondary-soft`,
   `line`, `focus-ring` and `focus-ring-on-bar`. Set the minimum interactive size to 44 pt on iOS
   and 48 dp on Android (contracts/ui-screens.md).
-- [ ] T024 [P] Implement `lib/shared/numerals.dart` with `toEasternArabic(int)` (٠–٩) and
+- [X] T024 [P] Implement `lib/shared/numerals.dart` with `toEasternArabic(int)` (٠–٩) and
   `formatNumber(int, Locale)`, which gives Eastern Arabic digits for `ar` and Western digits for
   `en` (contracts/ui-screens.md › Direction rules).
-- [ ] T025 Implement the `ReaderController` `ChangeNotifier` in `lib/shared/reader_state.dart`
+- [X] T025 Implement the `ReaderController` `ChangeNotifier` in `lib/shared/reader_state.dart`
   (depends on T020 and T021). It holds the anchor ayah, layout, selected ayah and highlighted
   ayah, and provides `jumpTo(surah, ayah, {highlight = true})`, which sets the target page and
   clears the highlight after 1.5 s. It saves the anchor with a 500 ms debounce on change and
   immediately when `AppLifecycleState` becomes `paused` or `inactive` (research R6).
-- [ ] T026 Implement startup in `lib/main.dart` and the app shell in `lib/app/app.dart` (depends
+- [X] T026 Implement startup in `lib/main.dart` and the app shell in `lib/app/app.dart` (depends
   on T023 and T025):
   - open `quran.db` and `user.db` in parallel and call `loadStartup()` before `runApp`;
   - in `MaterialApp`, set `supportedLocales` to ar and en and resolve the locale: pref `system`
@@ -236,12 +236,15 @@ state that every story uses.
   - apply the day, night or system theme mode from preferences;
   - set the home to `ReaderScreen`;
   - read no network and run no work in the background.
-- [ ] T027 [P] Generate the icon font. Put the Lucide (ISC) SVGs in `tool/icons/`: book-open,
+- [X] T027 [P] Generate the icon font. Put the Lucide (ISC) SVGs in `tool/icons/`: book-open,
   list, search, settings, bookmark, bookmark-check, copy, share-2, chevron-left, chevron-right, x,
   sun, moon, type, rows-3 and info. Run `npx fantasticon` to produce
   `assets/fonts/MathaniIcons.ttf`, declare the family in `pubspec.yaml`, and write
   `lib/shared/mathani_icons.dart` with an `IconData` constant per glyph. Mark back and forward
   chevrons `matchTextDirection: true` and never mirror media icons.
+  *Done differently:* used the prebuilt `lucide-static` 1.48.0 font (`assets/fonts/Lucide.ttf`)
+  instead of fantasticon. Lucide icons are strokes, which icon-font generators cannot fill.
+  Release builds tree-shake the unused glyphs.
 
 **Checkpoint**: `dart run tool/verify_quran.dart` prints PASS. The app launches to an empty
 `ReaderScreen` stub with the brand theme in Arabic and English.
@@ -258,14 +261,14 @@ and restores the last page.
 through several surahs (including pages 1, 187 and 604), force-stop and reopen. The Mushaf is
 fully readable and reopens on the same page.
 
-- [ ] T028 [P] [US1] Implement `lib/features/reader/mushaf_layout_metrics.dart`. It computes one
+- [X] T028 [P] [US1] Implement `lib/features/reader/mushaf_layout_metrics.dart`. It computes one
   Quran font size per screen geometry: `min(contentWidth / maxLineWidthEm,
   contentHeight / (15 × 2.0))`, where line height is 2.0× (research R4). Cache by size, and
   recompute only when the size changes.
-- [ ] T029 [P] [US1] Implement `lib/features/reader/surah_header_painter.dart`. It paints the surah
+- [X] T029 [P] [US1] Implement `lib/features/reader/surah_header_painter.dart`. It paints the surah
   name frame for `surah_name` lines: an `accent-ink` outline frame with the surah name in
   `QuranText`, using brand colours and no shadows (brand guide: no decoration behind ayah text).
-- [ ] T030 [US1] Implement `lib/features/reader/mushaf_page_renderer.dart` (depends on T028 and
+- [X] T030 [US1] Implement `lib/features/reader/mushaf_page_renderer.dart` (depends on T028 and
   T029). It is a `LeafRenderObjectWidget` and `RenderBox` that:
   - lays out 15 line slots; caches one `TextPainter` per word in `QuranText`;
   - justifies `ayah` lines by spreading leftover width evenly between words, and centres them when
@@ -275,10 +278,10 @@ fully readable and reopens on the same page.
   - paints the selected or highlighted ayah's words with a `secondary-soft` background;
   - exposes `ayahAt(Offset)` hit-testing that maps a word to its surah:ayah;
   - uses the theme's `ink` and `surface` so the night theme works.
-- [ ] T031 [US1] Add FR-007 markers to `lib/features/reader/mushaf_page_renderer.dart`: a
+- [X] T031 [US1] Add FR-007 markers to `lib/features/reader/mushaf_page_renderer.dart`: a
   rub'-al-hizb ۞ marker in the line margin at each hizb-quarter start ayah, and the sajdah marker
   ۩ at the 15 sajdah ayat (from `ayahs.sajdah`), in `accent-ink`.
-- [ ] T032 [US1] Implement `lib/features/reader/mushaf_view.dart`. It is a `PageView.builder` of
+- [X] T032 [US1] Implement `lib/features/reader/mushaf_view.dart`. It is a `PageView.builder` of
   604 pages:
   - wrap it in `Directionality(textDirection: TextDirection.rtl)` whatever the interface language
     is, so the next page lies to the left (FR-004);
@@ -286,16 +289,16 @@ fully readable and reopens on the same page.
   - load page data from `QuranRepository` with an in-memory cache of the last 5 pages;
   - on page change, set the controller anchor to `firstAyahStartingOnPage(p)`;
   - add semantics label "Page <n>, Surah <name>" in the interface language.
-- [ ] T033 [US1] Implement `lib/features/reader/reader_screen.dart`:
+- [X] T033 [US1] Implement `lib/features/reader/reader_screen.dart`:
   - a `bar` header within safe areas, showing the current surah name, juz number and page number
     in Eastern Arabic numerals inside the Mushaf context (FR-008);
   - the body holds `MushafView`;
   - a toolbar row shows only actions that already exist (FR-028; later stories add their buttons);
   - on first build, open the page that contains the startup anchor through
     `ReaderController.jumpTo(..., highlight: false)`.
-- [ ] T034 [US1] Add the reader strings to `lib/app/l10n/app_en.arb` and
+- [X] T034 [US1] Add the reader strings to `lib/app/l10n/app_en.arb` and
   `lib/app/l10n/app_ar.arb`: header labels (juz, page) and page semantics labels.
-- [ ] T035 [US1] Verify FR-006 in the running app: no basmala line before surah 9 (page 187), and
+- [X] T035 [US1] Verify FR-006 in the running app: no basmala line before surah 9 (page 187), and
   Al-Fatiha's basmala rendered as ayah 1 (page 1). Fix any data or rendering issue found in
   `tool/build_quran_db.dart` or `lib/features/reader/mushaf_page_renderer.dart`.
 

@@ -11,4 +11,19 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get appName => 'مثاني';
+
+  @override
+  String juzLabel(String number) {
+    return 'الجزء $number';
+  }
+
+  @override
+  String pageLabel(String number) {
+    return 'صفحة $number';
+  }
+
+  @override
+  String pageSemantics(String page, String surah) {
+    return 'الصفحة $page، سورة $surah';
+  }
 }

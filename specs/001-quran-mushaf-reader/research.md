@@ -85,6 +85,17 @@ parallel with development. If permission is not granted in time, ship with Amiri
 Mushaf layout still works, but line widths must be re-checked because justification tolerances
 differ (R4).
 
+**Font check (T018), 2026-10-10, development data (Tanzil Uthmani encoding)**:
+- **Coverage**: Amiri Quran has a glyph for every code point the text uses (266 mapped, 0
+  missing), checked against the font's cmap.
+- **Rendering**: pages 1, 2, 50, 187, 255 and 604 render correctly. Ayah-end markers (U+06DD +
+  Eastern Arabic digits) draw as ornamented numbers, and diacritics do not collide at line
+  height 2.0.
+- **Measurement**: the widest dev-layout line is 26.9 em (p98 22.8 em). The renderer sizes pages
+  by the p98 width and shrinks only wider lines.
+- **Re-run required**: this must be repeated once the QUL KFGQPC word text replaces the dev data,
+  because its encoding differs from Tanzil's.
+
 **Alternatives considered**: *DigitalKhatt Madina* (open source, designed for justified Mushaf
 layout). Promising, but its encoding and stability on mobile need evaluation. It is noted as a
 future option, not chosen for v1.

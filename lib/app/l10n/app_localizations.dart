@@ -103,6 +103,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Mathani'**
   String get appName;
+
+  /// Reader header: current juz. Number is pre-formatted.
+  ///
+  /// In en, this message translates to:
+  /// **'Juz {number}'**
+  String juzLabel(String number);
+
+  /// Reader header: current Mushaf page. Number is pre-formatted.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {number}'**
+  String pageLabel(String number);
+
+  /// Screen-reader label for a Mushaf page.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {page}, Surah {surah}'**
+  String pageSemantics(String page, String surah);
 }
 
 class _AppLocalizationsDelegate

@@ -1,4 +1,7 @@
 {
   "@@locale": "ar",
-  "appName": "مثاني"
+  "appName": "مثاني",
+  "juzLabel": "الجزء {number}",
+  "pageLabel": "صفحة {number}",
+  "pageSemantics": "الصفحة {page}، سورة {surah}"
 }

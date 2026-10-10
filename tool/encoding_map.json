@@ -1,0 +1,6 @@
+{
+  "approved": false,
+  "approved_by": null,
+  "note": "Pairs of code-point sequences that differ between the QUL KFGQPC text and the Tanzil Uthmani reference IN ENCODING ONLY. Each pair needs a justification in tool/encoding_map.md. Never add a pair that changes a letter, diacritic or pause mark. verify_quran.dart --release requires approved=true.",
+  "pairs": []
+}

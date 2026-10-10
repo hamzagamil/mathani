@@ -53,3 +53,7 @@ flutter:
     - family: QuranText
       fonts:
         - asset: assets/fonts/AmiriQuran-Regular.ttf
+    # Lucide icons (ISC), tree-shaken to the glyphs in lib/shared/mathani_icons.dart.
+    - family: Lucide
+      fonts:
+        - asset: assets/fonts/Lucide.ttf

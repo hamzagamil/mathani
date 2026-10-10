@@ -11,4 +11,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appName => 'Mathani';
+
+  @override
+  String juzLabel(String number) {
+    return 'Juz $number';
+  }
+
+  @override
+  String pageLabel(String number) {
+    return 'Page $number';
+  }
+
+  @override
+  String pageSemantics(String page, String surah) {
+    return 'Page $page, Surah $surah';
+  }
 }
