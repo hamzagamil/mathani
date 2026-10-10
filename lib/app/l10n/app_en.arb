@@ -146,5 +146,36 @@
       }
     }
   },
-  "deleteBookmark": "Delete bookmark"
+  "deleteBookmark": "Delete bookmark",
+  "settingsTitle": "Settings",
+  "openSettings": "Open settings",
+  "layoutSetting": "Reading layout",
+  "layoutMushaf": "Mushaf pages",
+  "layoutFlowing": "Flowing text",
+  "switchToFlowing": "Switch to flowing text",
+  "switchToMushaf": "Switch to Mushaf pages",
+  "themeSetting": "Theme",
+  "themeSystem": "System",
+  "themeDay": "Day",
+  "themeNight": "Night",
+  "textSizeSetting": "Quran text size",
+  "textSizeHint": "Applies to the flowing layout.",
+  "keepScreenOnSetting": "Keep screen on",
+  "keepScreenOnHint": "The screen stays on while the Mushaf is open.",
+  "languageSetting": "Language",
+  "languageSystem": "Device",
+  "aboutTitle": "About",
+  "versionLabel": "Version {version}",
+  "@versionLabel": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "sourcesTitle": "Sources",
+  "tanzilCredit": "Quran text verified against the Tanzil Project",
+  "qulCredit": "Mushaf layout: Quranic Universal Library (QUL)",
+  "kfgqpcCredit": "Madinah Mushaf: King Fahd Glorious Quran Printing Complex",
+  "licencesButton": "Open-source licences"
 }

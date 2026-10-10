@@ -37,6 +37,10 @@ flutter:
   assets:
     - assets/db/
     - assets/images/
+    # Licences shown on the open-source licences page (registerAssetLicences).
+    - assets/fonts/OFL-IBMPlexSansArabic.txt
+    - assets/fonts/OFL-AmiriQuran.txt
+    - assets/fonts/LICENSE-Lucide.txt
 
   fonts:
     - family: PlexArabic

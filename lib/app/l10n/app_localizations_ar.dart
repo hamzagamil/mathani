@@ -145,4 +145,79 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get deleteBookmark => 'احذف العلامة';
+
+  @override
+  String get settingsTitle => 'الإعدادات';
+
+  @override
+  String get openSettings => 'افتح الإعدادات';
+
+  @override
+  String get layoutSetting => 'طريقة العرض';
+
+  @override
+  String get layoutMushaf => 'صفحات المصحف';
+
+  @override
+  String get layoutFlowing => 'نص متصل';
+
+  @override
+  String get switchToFlowing => 'اعرض النص المتصل';
+
+  @override
+  String get switchToMushaf => 'اعرض صفحات المصحف';
+
+  @override
+  String get themeSetting => 'المظهر';
+
+  @override
+  String get themeSystem => 'حسب الجهاز';
+
+  @override
+  String get themeDay => 'نهاري';
+
+  @override
+  String get themeNight => 'ليلي';
+
+  @override
+  String get textSizeSetting => 'حجم خط المصحف';
+
+  @override
+  String get textSizeHint => 'يُطبَّق على النص المتصل.';
+
+  @override
+  String get keepScreenOnSetting => 'إبقاء الشاشة مضاءة';
+
+  @override
+  String get keepScreenOnHint => 'تبقى الشاشة مضاءة ما دام المصحف مفتوحاً.';
+
+  @override
+  String get languageSetting => 'اللغة';
+
+  @override
+  String get languageSystem => 'حسب الجهاز';
+
+  @override
+  String get aboutTitle => 'عن التطبيق';
+
+  @override
+  String versionLabel(String version) {
+    return 'الإصدار $version';
+  }
+
+  @override
+  String get sourcesTitle => 'المصادر';
+
+  @override
+  String get tanzilCredit => 'نص القرآن الكريم مُتحقَّق منه مقابل مشروع تنزيل';
+
+  @override
+  String get qulCredit => 'توزيع صفحات المصحف: المكتبة القرآنية الشاملة (QUL)';
+
+  @override
+  String get kfgqpcCredit =>
+      'مصحف المدينة: مجمع الملك فهد لطباعة المصحف الشريف';
+
+  @override
+  String get licencesButton => 'تراخيص البرمجيات المفتوحة';
 }

@@ -301,6 +301,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete bookmark'**
   String get deleteBookmark;
+
+  /// No description provided for @settingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settingsTitle;
+
+  /// No description provided for @openSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open settings'**
+  String get openSettings;
+
+  /// No description provided for @layoutSetting.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading layout'**
+  String get layoutSetting;
+
+  /// No description provided for @layoutMushaf.
+  ///
+  /// In en, this message translates to:
+  /// **'Mushaf pages'**
+  String get layoutMushaf;
+
+  /// No description provided for @layoutFlowing.
+  ///
+  /// In en, this message translates to:
+  /// **'Flowing text'**
+  String get layoutFlowing;
+
+  /// No description provided for @switchToFlowing.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to flowing text'**
+  String get switchToFlowing;
+
+  /// No description provided for @switchToMushaf.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to Mushaf pages'**
+  String get switchToMushaf;
+
+  /// No description provided for @themeSetting.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme'**
+  String get themeSetting;
+
+  /// No description provided for @themeSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get themeSystem;
+
+  /// No description provided for @themeDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Day'**
+  String get themeDay;
+
+  /// No description provided for @themeNight.
+  ///
+  /// In en, this message translates to:
+  /// **'Night'**
+  String get themeNight;
+
+  /// No description provided for @textSizeSetting.
+  ///
+  /// In en, this message translates to:
+  /// **'Quran text size'**
+  String get textSizeSetting;
+
+  /// No description provided for @textSizeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Applies to the flowing layout.'**
+  String get textSizeHint;
+
+  /// No description provided for @keepScreenOnSetting.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep screen on'**
+  String get keepScreenOnSetting;
+
+  /// No description provided for @keepScreenOnHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The screen stays on while the Mushaf is open.'**
+  String get keepScreenOnHint;
+
+  /// No description provided for @languageSetting.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get languageSetting;
+
+  /// No description provided for @languageSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'Device'**
+  String get languageSystem;
+
+  /// No description provided for @aboutTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get aboutTitle;
+
+  /// No description provided for @versionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version}'**
+  String versionLabel(String version);
+
+  /// No description provided for @sourcesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sources'**
+  String get sourcesTitle;
+
+  /// No description provided for @tanzilCredit.
+  ///
+  /// In en, this message translates to:
+  /// **'Quran text verified against the Tanzil Project'**
+  String get tanzilCredit;
+
+  /// No description provided for @qulCredit.
+  ///
+  /// In en, this message translates to:
+  /// **'Mushaf layout: Quranic Universal Library (QUL)'**
+  String get qulCredit;
+
+  /// No description provided for @kfgqpcCredit.
+  ///
+  /// In en, this message translates to:
+  /// **'Madinah Mushaf: King Fahd Glorious Quran Printing Complex'**
+  String get kfgqpcCredit;
+
+  /// No description provided for @licencesButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Open-source licences'**
+  String get licencesButton;
 }
 
 class _AppLocalizationsDelegate

@@ -143,4 +143,80 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deleteBookmark => 'Delete bookmark';
+
+  @override
+  String get settingsTitle => 'Settings';
+
+  @override
+  String get openSettings => 'Open settings';
+
+  @override
+  String get layoutSetting => 'Reading layout';
+
+  @override
+  String get layoutMushaf => 'Mushaf pages';
+
+  @override
+  String get layoutFlowing => 'Flowing text';
+
+  @override
+  String get switchToFlowing => 'Switch to flowing text';
+
+  @override
+  String get switchToMushaf => 'Switch to Mushaf pages';
+
+  @override
+  String get themeSetting => 'Theme';
+
+  @override
+  String get themeSystem => 'System';
+
+  @override
+  String get themeDay => 'Day';
+
+  @override
+  String get themeNight => 'Night';
+
+  @override
+  String get textSizeSetting => 'Quran text size';
+
+  @override
+  String get textSizeHint => 'Applies to the flowing layout.';
+
+  @override
+  String get keepScreenOnSetting => 'Keep screen on';
+
+  @override
+  String get keepScreenOnHint =>
+      'The screen stays on while the Mushaf is open.';
+
+  @override
+  String get languageSetting => 'Language';
+
+  @override
+  String get languageSystem => 'Device';
+
+  @override
+  String get aboutTitle => 'About';
+
+  @override
+  String versionLabel(String version) {
+    return 'Version $version';
+  }
+
+  @override
+  String get sourcesTitle => 'Sources';
+
+  @override
+  String get tanzilCredit => 'Quran text verified against the Tanzil Project';
+
+  @override
+  String get qulCredit => 'Mushaf layout: Quranic Universal Library (QUL)';
+
+  @override
+  String get kfgqpcCredit =>
+      'Madinah Mushaf: King Fahd Glorious Quran Printing Complex';
+
+  @override
+  String get licencesButton => 'Open-source licences';
 }

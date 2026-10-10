@@ -1,30 +1,59 @@
 import 'package:flutter/material.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../../app/l10n/app_localizations.dart';
 import '../../app/theme/app_theme.dart';
 import '../../app/theme/tokens.dart';
+import '../../data/models.dart';
 import '../../shared/mathani_icons.dart';
 import '../../shared/numerals.dart';
 import '../../shared/reader_state.dart';
 import '../index/index_screen.dart';
+import '../settings/settings_screen.dart';
+import 'flowing_view.dart';
 import 'mushaf_view.dart';
 
-/// Home screen: the Mushaf with a header showing the current surah, juz and page (FR-008).
-/// Toolbar actions appear only for features that exist (FR-028).
-class ReaderScreen extends StatelessWidget {
+/// Home screen: the Mushaf (page or flowing layout) with a header showing the current surah,
+/// juz and page (FR-008). Toolbar actions appear only for features that exist (FR-028).
+class ReaderScreen extends StatefulWidget {
   const ReaderScreen({super.key});
 
   @override
+  State<ReaderScreen> createState() => _ReaderScreenState();
+}
+
+class _ReaderScreenState extends State<ReaderScreen> {
+  bool? _wakelock;
+
+  @override
+  void dispose() {
+    if (_wakelock == true) WakelockPlus.disable();
+    super.dispose();
+  }
+
+  /// Keeps the screen on while the reader is shown and the setting is on (FR-018).
+  void _syncWakelock(bool on) {
+    if (_wakelock == on) return;
+    _wakelock = on;
+    WakelockPlus.toggle(enable: on).catchError((_) {}); // unavailable in tests
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final reader = ReaderScope.of(context);
     final colors = MathaniColors.of(context);
+    _syncWakelock(reader.preferences.keepScreenOn);
     return Scaffold(
       backgroundColor: colors.surface,
       appBar: const _ReaderHeader(),
-      body: const SafeArea(
+      body: SafeArea(
         top: false,
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: Space.s2),
-          child: MushafView(),
+          padding: const EdgeInsets.symmetric(horizontal: Space.s2),
+          child: switch (reader.layout) {
+            ReadingLayout.mushaf => const MushafView(),
+            ReadingLayout.flowing => const FlowingView(),
+          },
         ),
       ),
     );
@@ -57,7 +86,24 @@ class _ReaderHeader extends StatelessWidget implements PreferredSizeWidget {
           MaterialPageRoute<void>(builder: (_) => const IndexScreen()),
         ),
       ),
-      actions: const [_BookmarkToggle()],
+      actions: [
+        IconButton(
+          icon: Icon(reader.layout == ReadingLayout.mushaf ? MathaniIcons.flowing : MathaniIcons.mushaf),
+          tooltip: reader.layout == ReadingLayout.mushaf ? l10n.switchToFlowing : l10n.switchToMushaf,
+          // One tap; the new layout opens at the same ayah (FR-003, SC-010).
+          onPressed: () => reader.updatePreferences(reader.preferences.copyWith(
+            layout: reader.layout == ReadingLayout.mushaf ? ReadingLayout.flowing : ReadingLayout.mushaf,
+          )),
+        ),
+        const _BookmarkToggle(),
+        IconButton(
+          icon: const Icon(MathaniIcons.settings),
+          tooltip: l10n.openSettings,
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(builder: (_) => const SettingsScreen()),
+          ),
+        ),
+      ],
       title: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

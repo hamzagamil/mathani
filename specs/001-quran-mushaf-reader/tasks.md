@@ -376,7 +376,7 @@ theme, keep-screen-on, the interface language switch, and Settings with About an
 flowing size 18→34 with no collisions, use night theme and keep-screen-on, switch the language
 between English and Arabic, restart, and see that everything persisted.
 
-- [ ] T045 [P] [US4] Implement `lib/features/reader/flowing_view.dart`. It is a
+- [X] T045 [P] [US4] Implement `lib/features/reader/flowing_view.dart`. It is a
   `ListView.builder` with 604 items, one per Mushaf page:
   - each item is one `RichText` of that page's ayat with inline ayah-end markers, and surah header
     plus basmala where surahs begin;
@@ -384,10 +384,10 @@ between English and Arabic, restart, and see that everything persisted.
   - always lay out RTL;
   - the anchor is the first ayah visible at the top; the header page number is the topmost item's
     page (research R5).
-- [ ] T046 [US4] Add the one-tap layout toggle to `lib/features/reader/reader_screen.dart`. It
+- [X] T046 [US4] Add the one-tap layout toggle to `lib/features/reader/reader_screen.dart`. It
   swaps between `MushafView` and `FlowingView`, jumps to the page or item containing the current
   anchor, persists pref `layout`, and finishes within 1 s (FR-003, SC-010).
-- [ ] T047 [P] [US4] Implement `lib/features/settings/settings_screen.dart` with these settings:
+- [X] T047 [P] [US4] Implement `lib/features/settings/settings_screen.dart` with these settings:
   - layout (mushaf/flowing);
   - theme (system/day/night);
   - flowing text size slider 18–34, shown only for the flowing layout;
@@ -395,16 +395,16 @@ between English and Arabic, restart, and see that everything persisted.
   - language (system/ar/en).
 
   Each change calls `UserRepository.setPreference` and applies immediately.
-- [ ] T048 [P] [US4] Implement `lib/features/settings/about_section.dart`. It shows the app version
+- [X] T048 [P] [US4] Implement `lib/features/settings/about_section.dart`. It shows the app version
   and the attributions from `quran.db` meta: Tanzil Project with a tappable https://tanzil.net
   link opened in the system browser via `url_launcher` (required by the Tanzil CC BY 3.0 terms),
   QUL and KFGQPC. It also lists the font and icon
   licences from `docs/licences.md`.
-- [ ] T049 [US4] Wire preferences into `lib/app/app.dart` so theme mode and locale switch live
+- [X] T049 [US4] Wire preferences into `lib/app/app.dart` so theme mode and locale switch live
   without a restart. Toggle `WakelockPlus` in `lib/features/reader/reader_screen.dart` while the
   reader is visible and `keep_screen_on` is true. Use `name_translit` alongside the Arabic name in
   the header and surahs tab when the locale is `en` (FR-025).
-- [ ] T050 [US4] Add the settings button to the toolbar in
+- [X] T050 [US4] Add the settings button to the toolbar in
   `lib/features/reader/reader_screen.dart`, and add the settings and about strings to
   `lib/app/l10n/app_en.arb` and `lib/app/l10n/app_ar.arb`.
 
