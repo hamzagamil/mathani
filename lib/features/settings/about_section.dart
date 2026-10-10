@@ -41,7 +41,7 @@ class AboutSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         ListTile(
-          leading: const Icon(MathaniIcons.info),
+          leading: Image.asset('assets/images/mark_navy.png', width: 32, color: colors.ink),
           title: Text(l10n.appName),
           // Isolated left-to-right so + and dots keep their order in Arabic.
           subtitle: Text(l10n.versionLabel(_ltr(appVersion)), style: caption),

@@ -31,7 +31,8 @@ class BookmarksTab extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(MathaniIcons.bookmark, size: 48, color: colors.accentInk),
+                // Brand mark, single colour: navy on cream by day, cream on night surfaces.
+                Image.asset('assets/images/mark_navy.png', width: 72, color: colors.ink),
                 const SizedBox(height: Space.s4),
                 Text(
                   l10n.bookmarksEmpty,

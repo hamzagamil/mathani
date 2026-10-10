@@ -1,0 +1,3 @@
+tags:
+  # Pixel goldens depend on the platform's font rasteriser; CI runs `--exclude-tags golden`.
+  golden:

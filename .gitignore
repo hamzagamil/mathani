@@ -54,3 +54,6 @@ desktop.ini
 # Secrets
 .env
 .env.*
+
+# Brand rendering tool dependencies (tool/brand/package.json)
+tool/brand/node_modules/

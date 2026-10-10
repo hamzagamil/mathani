@@ -20,7 +20,7 @@ jobs:
           channel: stable
       - run: flutter pub get
       - run: flutter analyze
-      - run: flutter test
+      - run: flutter test --exclude-tags golden
       # quran.db is built from licensed sources that are not in git (tool/README.md); verify the
       # committed database when present.
       - name: Verify Quran text

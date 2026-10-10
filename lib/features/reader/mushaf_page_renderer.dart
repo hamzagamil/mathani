@@ -94,6 +94,26 @@ class RenderMushafPage extends RenderBox {
     }
   }
 
+  /// Smallest per-line shrink factor on this page (1 = no line shrunk). Layout tests use it to
+  /// catch lines squeezed beyond legibility (risk R-a).
+  @visibleForTesting
+  double get minLineScale =>
+      _placements.fold(1.0, (m, l) => l.words.isEmpty ? m : math.min(m, l.scale));
+
+  /// Whether every ayah line fits inside the content width after shrinking.
+  @visibleForTesting
+  bool get allLinesFit {
+    final m = _metrics;
+    if (m == null) return false;
+    for (final l in _placements) {
+      for (final w in l.words) {
+        final r = l.wordRect(w);
+        if (r.left < m.sideMargin - 0.5 || r.right > size.width - m.sideMargin + 0.5) return false;
+      }
+    }
+    return true;
+  }
+
   /// The ayah under [localPosition], for long-press selection (FR-020).
   AyahRef? ayahAt(Offset localPosition) {
     for (final line in _placements) {

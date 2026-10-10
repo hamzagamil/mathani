@@ -1,0 +1,9 @@
+{
+  "name": "mathani-brand-render",
+  "private": true,
+  "description": "Renders the Mathani brand SVGs (from the brand design system) to app icons, launch marks and in-app PNGs. Run: npm ci && node render.mjs",
+  "type": "module",
+  "dependencies": {
+    "@resvg/resvg-js": "2.6.2"
+  }
+}

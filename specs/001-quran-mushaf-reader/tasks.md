@@ -473,39 +473,39 @@ highlighted results and a count in under 1 s, and a tap opens the ayah. «ززز
 
 **Purpose**: Brand assets, store compliance, verification gates and release readiness.
 
-- [ ] T057 [P] Download the brand logos (`mathani-app-icon.svg`, `mathani-mark-gold.svg`,
+- [X] T057 [P] Download the brand logos (`mathani-app-icon.svg`, `mathani-mark-gold.svg`,
   `mathani-mark-navy.svg`, `mathani-lockup-navy.svg`) from the brand design system's Logos asset
   group into `tool/brand/`. Render PNGs at @1x/@2x/@3x into `assets/images/` with
   `npx @resvg/resvg-js-cli`, without redrawing or changing proportions (brand guide).
-- [ ] T058 [P] Generate the app icons from `tool/brand/mathani-app-icon.svg`:
+- [X] T058 [P] Generate the app icons from `tool/brand/mathani-app-icon.svg`:
   - `android/app/src/main/res/mipmap-*/` (including an adaptive icon foreground on a `bar` navy
     background);
   - `ios/Runner/Assets.xcassets/AppIcon.appiconset/` (1024×1024 full-bleed).
-- [ ] T059 [P] Configure native launch screens with `mathani-mark-gold` on `bar` navy `#183159`:
+- [X] T059 [P] Configure native launch screens with `mathani-mark-gold` on `bar` navy `#183159`:
   - `android/app/src/main/res/drawable/launch_background.xml` and the `values-v31/styles.xml`
     splash attributes;
   - `ios/Runner/Base.lproj/LaunchScreen.storyboard`.
 
   Add no runtime splash package.
-- [ ] T060 [P] Add `ios/Runner/PrivacyInfo.xcprivacy`, declaring no tracking and no collected data
+- [X] T060 [P] Add `ios/Runner/PrivacyInfo.xcprivacy`, declaring no tracking and no collected data
   plus the required-reason API entries Flutter plugins use. Write `docs/store/privacy.md` with the
   App Store "Data Not Collected" and Play Data safety "No data collected / shared" answers
   (FR-027).
-- [ ] T061 [P] Write the store listings in `docs/store/listing_ar.md` (name «مثاني: تلاوة وتدبر
+- [X] T061 [P] Write the store listings in `docs/store/listing_ar.md` (name «مثاني: تلاوة وتدبر
   المتشابه») and `docs/store/listing_en.md` (name to be decided by the owner; the suggestion is
   "Mathani: Quran & Mutashabihat"). Each has a short description, full description and screenshot
   plan in the brand tone: plain Modern Standard Arabic, no exclamation marks.
-- [ ] T062 [P] Add golden tests for the Mushaf renderer at 3 screen widths (320, 375 and 412 dp)
+- [X] T062 [P] Add golden tests for the Mushaf renderer at 3 screen widths (320, 375 and 412 dp)
   for pages 1, 2, 187 and 604 in `test/widget/mushaf_page_renderer_golden_test.dart`. They cover
   risk R-a: justified lines with no overflow or clipping.
-- [ ] T063 [P] Add `integration_test/app_flow_test.dart` covering quickstart scenarios 1, 2, 4, 5,
+- [X] T063 [P] Add `integration_test/app_flow_test.dart` covering quickstart scenarios 1, 2, 4, 5,
   6, 7 and 10: offline launch, paging, restore after restart, navigation, bookmarks, layout toggle
   keeping the ayah, and language switch.
-- [ ] T064 [P] Add `integration_test/paging_perf_test.dart` and `test_driver/perf_driver.dart`.
+- [X] T064 [P] Add `integration_test/paging_perf_test.dart` and `test_driver/perf_driver.dart`.
   They page through 50 Mushaf pages and scroll the flowing layout under `flutter drive --profile`,
   write a timeline summary, and fail on any frame over 16 ms at the 90th percentile or on missed
   frames during paging (constitution III).
-- [ ] T065 Add `docs/release.md` with the release build commands:
+- [X] T065 Add `docs/release.md` with the release build commands:
   - `flutter build appbundle --release --obfuscate --split-debug-info=symbols/android
     --analyze-size`;
   - `flutter build ipa --release --obfuscate --split-debug-info=symbols/ios --analyze-size`.
