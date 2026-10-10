@@ -219,4 +219,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get licencesButton => 'Open-source licences';
+
+  @override
+  String get copyAyah => 'Copy';
+
+  @override
+  String get shareAyah => 'Share';
+
+  @override
+  String get bookmarkAyah => 'Bookmark';
+
+  @override
+  String get ayahCopied => 'Ayah copied.';
 }

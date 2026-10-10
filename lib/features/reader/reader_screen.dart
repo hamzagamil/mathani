@@ -10,6 +10,7 @@ import '../../shared/numerals.dart';
 import '../../shared/reader_state.dart';
 import '../index/index_screen.dart';
 import '../settings/settings_screen.dart';
+import 'ayah_actions.dart';
 import 'flowing_view.dart';
 import 'mushaf_view.dart';
 
@@ -51,8 +52,8 @@ class _ReaderScreenState extends State<ReaderScreen> {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: Space.s2),
           child: switch (reader.layout) {
-            ReadingLayout.mushaf => const MushafView(),
-            ReadingLayout.flowing => const FlowingView(),
+            ReadingLayout.mushaf => MushafView(onAyahLongPress: (ref) => showAyahActions(context, ref)),
+            ReadingLayout.flowing => FlowingView(onAyahLongPress: (ref) => showAyahActions(context, ref)),
           },
         ),
       ),

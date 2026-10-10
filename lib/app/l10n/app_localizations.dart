@@ -445,6 +445,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open-source licences'**
   String get licencesButton;
+
+  /// No description provided for @copyAyah.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get copyAyah;
+
+  /// No description provided for @shareAyah.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get shareAyah;
+
+  /// No description provided for @bookmarkAyah.
+  ///
+  /// In en, this message translates to:
+  /// **'Bookmark'**
+  String get bookmarkAyah;
+
+  /// No description provided for @ayahCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Ayah copied.'**
+  String get ayahCopied;
 }
 
 class _AppLocalizationsDelegate

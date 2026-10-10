@@ -177,5 +177,9 @@
   "tanzilCredit": "Quran text verified against the Tanzil Project",
   "qulCredit": "Mushaf layout: Quranic Universal Library (QUL)",
   "kfgqpcCredit": "Madinah Mushaf: King Fahd Glorious Quran Printing Complex",
-  "licencesButton": "Open-source licences"
+  "licencesButton": "Open-source licences",
+  "copyAyah": "Copy",
+  "shareAyah": "Share",
+  "bookmarkAyah": "Bookmark",
+  "ayahCopied": "Ayah copied."
 }

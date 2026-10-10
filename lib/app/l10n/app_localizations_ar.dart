@@ -220,4 +220,16 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get licencesButton => 'تراخيص البرمجيات المفتوحة';
+
+  @override
+  String get copyAyah => 'انسخ';
+
+  @override
+  String get shareAyah => 'شارك';
+
+  @override
+  String get bookmarkAyah => 'احفظ';
+
+  @override
+  String get ayahCopied => 'نُسخت الآية.';
 }

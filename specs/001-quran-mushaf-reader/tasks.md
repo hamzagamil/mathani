@@ -420,16 +420,16 @@ format.
 **Independent Test**: quickstart scenario 11. Long-press 2:255 and share it to a messaging app;
 the text matches the contract format exactly.
 
-- [ ] T051 [P] [US5] Implement `formatAyahForShare(words, surah, ayah, locale)` in
+- [X] T051 [P] [US5] Implement `formatAyahForShare(words, surah, ayah, locale)` in
   `lib/features/reader/ayah_actions.dart`, exactly as in
   [contracts/ui-screens.md](./contracts/ui-screens.md):
   - Arabic: `﴿<Uthmani text without ayah-end marker>﴾` + newline + `سورة <name_ar>: <ayah in
     Eastern Arabic numerals>`;
   - English: the same first line + newline + `Surah <name_translit> <surah>:<ayah>`.
-- [ ] T052 [US5] Add the action sheet in `lib/features/reader/ayah_actions.dart` (depends on T051).
+- [X] T052 [US5] Add the action sheet in `lib/features/reader/ayah_actions.dart` (depends on T051).
   It offers Copy (`Clipboard.setData`), Share (`share_plus`) and Bookmark (calls
   `UserRepository.addBookmark`; hide it if US3 is not built), and shows a short confirmation.
-- [ ] T053 [US5] Wire long-press selection:
+- [X] T053 [US5] Wire long-press selection:
   - in `lib/features/reader/mushaf_view.dart`, use `ayahAt(Offset)` from the renderer;
   - in `lib/features/reader/flowing_view.dart`, add a `LongPressGestureRecognizer` per ayah
     `TextSpan`.
