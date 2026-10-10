@@ -469,6 +469,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Ayah copied.'**
   String get ayahCopied;
+
+  /// No description provided for @searchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get searchTitle;
+
+  /// No description provided for @openSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search the Quran'**
+  String get openSearch;
+
+  /// No description provided for @searchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Type a word or phrase'**
+  String get searchHint;
+
+  /// No description provided for @searchEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search the Quran text in Arabic, with or without diacritics.'**
+  String get searchEmptyHint;
+
+  /// No description provided for @searchNoResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No results.'**
+  String get searchNoResults;
+
+  /// No description provided for @searchResultCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 result} other{{shown} results}}'**
+  String searchResultCount(int count, String shown);
+
+  /// No description provided for @clearSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get clearSearch;
 }
 
 class _AppLocalizationsDelegate

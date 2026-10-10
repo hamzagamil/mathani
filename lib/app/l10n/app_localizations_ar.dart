@@ -232,4 +232,35 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get ayahCopied => 'نُسخت الآية.';
+
+  @override
+  String get searchTitle => 'البحث';
+
+  @override
+  String get openSearch => 'ابحث في القرآن الكريم';
+
+  @override
+  String get searchHint => 'اكتب كلمة أو عبارة';
+
+  @override
+  String get searchEmptyHint => 'ابحث في نص القرآن الكريم بالتشكيل أو بدونه.';
+
+  @override
+  String get searchNoResults => 'لا توجد نتائج.';
+
+  @override
+  String searchResultCount(int count, String shown) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$shown نتيجة',
+      few: '$shown نتائج',
+      two: 'نتيجتان',
+      one: 'نتيجة واحدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get clearSearch => 'امسح';
 }

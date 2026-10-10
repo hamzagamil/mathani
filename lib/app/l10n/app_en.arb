@@ -181,5 +181,22 @@
   "copyAyah": "Copy",
   "shareAyah": "Share",
   "bookmarkAyah": "Bookmark",
-  "ayahCopied": "Ayah copied."
+  "ayahCopied": "Ayah copied.",
+  "searchTitle": "Search",
+  "openSearch": "Search the Quran",
+  "searchHint": "Type a word or phrase",
+  "searchEmptyHint": "Search the Quran text in Arabic, with or without diacritics.",
+  "searchNoResults": "No results.",
+  "searchResultCount": "{count, plural, =1{1 result} other{{shown} results}}",
+  "@searchResultCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "shown": {
+        "type": "String"
+      }
+    }
+  },
+  "clearSearch": "Clear"
 }

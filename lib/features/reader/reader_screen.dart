@@ -9,13 +9,15 @@ import '../../shared/mathani_icons.dart';
 import '../../shared/numerals.dart';
 import '../../shared/reader_state.dart';
 import '../index/index_screen.dart';
+import '../search/search_screen.dart';
 import '../settings/settings_screen.dart';
 import 'ayah_actions.dart';
 import 'flowing_view.dart';
 import 'mushaf_view.dart';
 
-/// Home screen: the Mushaf (page or flowing layout) with a header showing the current surah,
-/// juz and page (FR-008). Toolbar actions appear only for features that exist (FR-028).
+/// Home screen: the Mushaf (page or flowing layout), a header showing the current surah, juz
+/// and page (FR-008), and a bottom toolbar within one-handed reach (constitution II). Toolbar
+/// actions appear only for features that exist (FR-028).
 class ReaderScreen extends StatefulWidget {
   const ReaderScreen({super.key});
 
@@ -47,6 +49,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
     return Scaffold(
       backgroundColor: colors.surface,
       appBar: const _ReaderHeader(),
+      bottomNavigationBar: const _ReaderToolbar(),
       body: SafeArea(
         top: false,
         child: Padding(
@@ -80,31 +83,6 @@ class _ReaderHeader extends StatelessWidget implements PreferredSizeWidget {
 
     return AppBar(
       automaticallyImplyLeading: false,
-      leading: IconButton(
-        icon: const Icon(MathaniIcons.index),
-        tooltip: l10n.openIndex,
-        onPressed: () => Navigator.of(context).push(
-          MaterialPageRoute<void>(builder: (_) => const IndexScreen()),
-        ),
-      ),
-      actions: [
-        IconButton(
-          icon: Icon(reader.layout == ReadingLayout.mushaf ? MathaniIcons.flowing : MathaniIcons.mushaf),
-          tooltip: reader.layout == ReadingLayout.mushaf ? l10n.switchToFlowing : l10n.switchToMushaf,
-          // One tap; the new layout opens at the same ayah (FR-003, SC-010).
-          onPressed: () => reader.updatePreferences(reader.preferences.copyWith(
-            layout: reader.layout == ReadingLayout.mushaf ? ReadingLayout.flowing : ReadingLayout.mushaf,
-          )),
-        ),
-        const _BookmarkToggle(),
-        IconButton(
-          icon: const Icon(MathaniIcons.settings),
-          tooltip: l10n.openSettings,
-          onPressed: () => Navigator.of(context).push(
-            MaterialPageRoute<void>(builder: (_) => const SettingsScreen()),
-          ),
-        ),
-      ],
       title: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -146,7 +124,7 @@ class _BookmarkToggle extends StatelessWidget {
         final marked = onPage.isNotEmpty;
         return IconButton(
           icon: Icon(marked ? MathaniIcons.bookmarked : MathaniIcons.bookmark),
-          color: marked ? colors.accent : colors.inkOnBar,
+          color: marked ? colors.accentInk : colors.ink,
           tooltip: marked ? l10n.removeBookmark : l10n.addBookmark,
           onPressed: () async {
             final messenger = ScaffoldMessenger.of(context);
@@ -166,6 +144,63 @@ class _BookmarkToggle extends StatelessWidget {
           },
         );
       },
+    );
+  }
+}
+
+/// Reader actions: index, search, layout toggle, bookmark, settings.
+class _ReaderToolbar extends StatelessWidget {
+  const _ReaderToolbar();
+
+  @override
+  Widget build(BuildContext context) {
+    final reader = ReaderScope.of(context);
+    final l10n = AppLocalizations.of(context);
+    final colors = MathaniColors.of(context);
+    void push(Widget screen) =>
+        Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => screen));
+    final mushaf = reader.layout == ReadingLayout.mushaf;
+
+    return Material(
+      color: colors.surfaceRaised,
+      child: SafeArea(
+        top: false,
+        child: DecoratedBox(
+          decoration: BoxDecoration(border: Border(top: BorderSide(color: colors.line))),
+          child: IconTheme(
+            data: IconThemeData(color: colors.ink),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                IconButton(
+                  icon: const Icon(MathaniIcons.index),
+                  tooltip: l10n.openIndex,
+                  onPressed: () => push(const IndexScreen()),
+                ),
+                IconButton(
+                  icon: const Icon(MathaniIcons.search),
+                  tooltip: l10n.openSearch,
+                  onPressed: () => push(const SearchScreen()),
+                ),
+                IconButton(
+                  icon: Icon(mushaf ? MathaniIcons.flowing : MathaniIcons.mushaf),
+                  tooltip: mushaf ? l10n.switchToFlowing : l10n.switchToMushaf,
+                  // One tap; the new layout opens at the same ayah (FR-003, SC-010).
+                  onPressed: () => reader.updatePreferences(reader.preferences.copyWith(
+                    layout: mushaf ? ReadingLayout.flowing : ReadingLayout.mushaf,
+                  )),
+                ),
+                const _BookmarkToggle(),
+                IconButton(
+                  icon: const Icon(MathaniIcons.settings),
+                  tooltip: l10n.openSettings,
+                  onPressed: () => push(const SettingsScreen()),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

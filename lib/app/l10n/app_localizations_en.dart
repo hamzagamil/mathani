@@ -231,4 +231,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ayahCopied => 'Ayah copied.';
+
+  @override
+  String get searchTitle => 'Search';
+
+  @override
+  String get openSearch => 'Search the Quran';
+
+  @override
+  String get searchHint => 'Type a word or phrase';
+
+  @override
+  String get searchEmptyHint =>
+      'Search the Quran text in Arabic, with or without diacritics.';
+
+  @override
+  String get searchNoResults => 'No results.';
+
+  @override
+  String searchResultCount(int count, String shown) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$shown results',
+      one: '1 result',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get clearSearch => 'Clear';
 }

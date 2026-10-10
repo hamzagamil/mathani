@@ -449,20 +449,20 @@ with a count, and opens the result in the Mushaf.
 **Independent Test**: quickstart scenario 12. «الرحمن الرحيم» typed without diacritics returns
 highlighted results and a count in under 1 s, and a tap opens the ayah. «زززز» shows "no results".
 
-- [ ] T054 [US6] Implement `lib/features/search/search_index.dart`:
+- [X] T054 [US6] Implement `lib/features/search/search_index.dart`:
   - on first use, lazily load all `ayahs.search_text` and `words.search_offset` from
     `QuranRepository` (≤ 150 ms) and cache them;
   - `search(query)` normalises the query with `arabic_normalizer.dart` and runs a substring scan
     over all 6,236 strings;
   - map match character ranges to word ids through `search_offset`;
   - return results (surah, ayah, matched word ids) plus the total count (research R7).
-- [ ] T055 [US6] Implement `lib/features/search/search_screen.dart` (depends on T054):
+- [X] T055 [US6] Implement `lib/features/search/search_screen.dart` (depends on T054):
   - a query field debounced 200 ms, with the result count;
   - results in `ListView.builder` using the `quran-card` style (20/38), with matched Uthmani words
     on a `selected`/accent background and the surah name and ayah number;
   - an empty-query hint and a "no results" message;
   - a tap calls `ReaderController.jumpTo(surah, ayah)` with a 1.5 s highlight and pops.
-- [ ] T056 [US6] Add the search button to the toolbar in `lib/features/reader/reader_screen.dart`,
+- [X] T056 [US6] Add the search button to the toolbar in `lib/features/reader/reader_screen.dart`,
   and add the search strings to `lib/app/l10n/app_en.arb` and `lib/app/l10n/app_ar.arb`.
 
 **Checkpoint**: All six user stories work.
