@@ -5,34 +5,31 @@ import '../../app/theme/app_theme.dart';
 import '../../app/theme/tokens.dart';
 import '../../shared/mathani_icons.dart';
 import 'ajza_tab.dart';
+import 'bookmarks_tab.dart';
 import 'goto_sheet.dart';
 import 'surahs_tab.dart';
 
-/// A tab of the index: a label and the page it shows.
-typedef IndexTab = ({String label, Widget body});
-
-/// Index with brand chip tabs (Surahs · Ajza', plus Bookmarks once built) and a go-to action.
+/// Index with brand chip tabs, Surahs · Ajza' · Bookmarks (FR-009), and a go-to action.
 class IndexScreen extends StatefulWidget {
-  const IndexScreen({super.key, this.extraTabs = const []});
+  const IndexScreen({super.key, this.initialTab = 0});
 
-  /// Tabs added by later features (Bookmarks, FR-009).
-  final List<IndexTab Function(BuildContext)> extraTabs;
+  final int initialTab;
 
   @override
   State<IndexScreen> createState() => _IndexScreenState();
 }
 
 class _IndexScreenState extends State<IndexScreen> {
-  int _tab = 0;
+  late int _tab = widget.initialTab;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final colors = MathaniColors.of(context);
-    final tabs = <IndexTab>[
+    final tabs = [
       (label: l10n.tabSurahs, body: const SurahsTab()),
       (label: l10n.tabAjza, body: const AjzaTab()),
-      for (final t in widget.extraTabs) t(context),
+      (label: l10n.tabBookmarks, body: const BookmarksTab()),
     ];
 
     return Scaffold(

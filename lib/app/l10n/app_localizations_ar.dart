@@ -118,4 +118,31 @@ class AppLocalizationsAr extends AppLocalizations {
   String surahRowSemantics(String name, String count, String page) {
     return '$name، $count آية، صفحة $page';
   }
+
+  @override
+  String get tabBookmarks => 'المحفوظات';
+
+  @override
+  String get addBookmark => 'احفظ هذه الصفحة';
+
+  @override
+  String get removeBookmark => 'احذف العلامة';
+
+  @override
+  String get bookmarkAdded => 'حُفظت العلامة.';
+
+  @override
+  String get bookmarkRemoved => 'حُذفت العلامة.';
+
+  @override
+  String get bookmarksEmpty =>
+      'لا توجد محفوظات بعد. اضغط رمز العلامة في أي صفحة لحفظ موضعك.';
+
+  @override
+  String bookmarkTitle(String surah, String ayah) {
+    return 'سورة $surah، الآية $ayah';
+  }
+
+  @override
+  String get deleteBookmark => 'احذف العلامة';
 }

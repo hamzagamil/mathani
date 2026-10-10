@@ -128,5 +128,23 @@
         "type": "String"
       }
     }
-  }
+  },
+  "tabBookmarks": "Bookmarks",
+  "addBookmark": "Bookmark this page",
+  "removeBookmark": "Remove bookmark",
+  "bookmarkAdded": "Bookmark added.",
+  "bookmarkRemoved": "Bookmark removed.",
+  "bookmarksEmpty": "No bookmarks yet. Tap the bookmark icon on a page to save your place.",
+  "bookmarkTitle": "Surah {surah}, ayah {ayah}",
+  "@bookmarkTitle": {
+    "placeholders": {
+      "surah": {
+        "type": "String"
+      },
+      "ayah": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteBookmark": "Delete bookmark"
 }

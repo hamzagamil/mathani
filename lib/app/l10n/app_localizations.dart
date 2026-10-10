@@ -253,6 +253,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{name}, {count} ayat, page {page}'**
   String surahRowSemantics(String name, String count, String page);
+
+  /// No description provided for @tabBookmarks.
+  ///
+  /// In en, this message translates to:
+  /// **'Bookmarks'**
+  String get tabBookmarks;
+
+  /// No description provided for @addBookmark.
+  ///
+  /// In en, this message translates to:
+  /// **'Bookmark this page'**
+  String get addBookmark;
+
+  /// No description provided for @removeBookmark.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove bookmark'**
+  String get removeBookmark;
+
+  /// No description provided for @bookmarkAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Bookmark added.'**
+  String get bookmarkAdded;
+
+  /// No description provided for @bookmarkRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Bookmark removed.'**
+  String get bookmarkRemoved;
+
+  /// No description provided for @bookmarksEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No bookmarks yet. Tap the bookmark icon on a page to save your place.'**
+  String get bookmarksEmpty;
+
+  /// No description provided for @bookmarkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Surah {surah}, ayah {ayah}'**
+  String bookmarkTitle(String surah, String ayah);
+
+  /// No description provided for @deleteBookmark.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete bookmark'**
+  String get deleteBookmark;
 }
 
 class _AppLocalizationsDelegate

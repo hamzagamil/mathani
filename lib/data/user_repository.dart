@@ -12,6 +12,10 @@ class UserRepository extends ChangeNotifier {
 
   final Database _db;
 
+  /// Bookmarks, newest first (FR-015). Kept in memory; the table is small.
+  List<Bookmark> _bookmarks = const [];
+  List<Bookmark> get bookmarks => _bookmarks;
+
   static Future<UserRepository> open() async {
     final db = await openDatabase(
       '${await getDatabasesPath()}/user.db',
@@ -19,8 +23,54 @@ class UserRepository extends ChangeNotifier {
       onCreate: (db, version) => _migrate(db, 0, version),
       onUpgrade: _migrate,
     );
-    return UserRepository._(db);
+    final repo = UserRepository._(db);
+    await repo._loadBookmarks();
+    return repo;
   }
+
+  Future<void> _loadBookmarks() async {
+    _bookmarks = [
+      for (final r in await _db.query('bookmarks', orderBy: 'created_at DESC, id DESC'))
+        Bookmark(
+          id: r['id'] as int,
+          ref: AyahRef(r['surah'] as int, r['ayah'] as int),
+          page: r['page'] as int,
+          createdAt: DateTime.fromMillisecondsSinceEpoch(r['created_at'] as int),
+        ),
+    ];
+  }
+
+  /// Adds a bookmark for [ref] on [page]. Adding an ayah that is already bookmarked is a no-op
+  /// (`UNIQUE (surah, ayah)` with INSERT OR IGNORE) that returns the existing bookmark.
+  Future<Bookmark> addBookmark(AyahRef ref, int page) async {
+    await _db.insert(
+      'bookmarks',
+      {
+        'surah': ref.surah,
+        'ayah': ref.ayah,
+        'page': page,
+        'created_at': DateTime.now().millisecondsSinceEpoch,
+      },
+      conflictAlgorithm: ConflictAlgorithm.ignore,
+    );
+    await _loadBookmarks();
+    notifyListeners();
+    return _bookmarks.firstWhere((b) => b.ref == ref);
+  }
+
+  Future<void> removeBookmark(int id) async {
+    await _db.delete('bookmarks', where: 'id = ?', whereArgs: [id]);
+    await _loadBookmarks();
+    notifyListeners();
+  }
+
+  /// Bookmarks on [page], for the page indicator.
+  List<Bookmark> bookmarksOnPage(int page) => [
+        for (final b in _bookmarks)
+          if (b.page == page) b,
+      ];
+
+  bool isBookmarked(AyahRef ref) => _bookmarks.any((b) => b.ref == ref);
 
   /// Forward-only migrations. A migration never deletes bookmarks.
   static Future<void> _migrate(Database db, int from, int to) async {

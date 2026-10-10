@@ -57,6 +57,7 @@ class _ReaderHeader extends StatelessWidget implements PreferredSizeWidget {
           MaterialPageRoute<void>(builder: (_) => const IndexScreen()),
         ),
       ),
+      actions: const [_BookmarkToggle()],
       title: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -77,6 +78,47 @@ class _ReaderHeader extends StatelessWidget implements PreferredSizeWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Bookmarks the current page, or removes the bookmarks on it. Filled when the page has one
+/// (the page indicator, FR-014). A page bookmark is stored against the first ayah on the page.
+class _BookmarkToggle extends StatelessWidget {
+  const _BookmarkToggle();
+
+  @override
+  Widget build(BuildContext context) {
+    final reader = ReaderScope.of(context);
+    final l10n = AppLocalizations.of(context);
+    final colors = MathaniColors.of(context);
+    return ListenableBuilder(
+      listenable: reader.user,
+      builder: (context, _) {
+        final onPage = reader.user.bookmarksOnPage(reader.page);
+        final marked = onPage.isNotEmpty;
+        return IconButton(
+          icon: Icon(marked ? MathaniIcons.bookmarked : MathaniIcons.bookmark),
+          color: marked ? colors.accent : colors.inkOnBar,
+          tooltip: marked ? l10n.removeBookmark : l10n.addBookmark,
+          onPressed: () async {
+            final messenger = ScaffoldMessenger.of(context);
+            if (marked) {
+              for (final b in onPage) {
+                await reader.user.removeBookmark(b.id);
+              }
+            } else {
+              await reader.user.addBookmark(reader.quran.firstAyahOnPage(reader.page).ref, reader.page);
+            }
+            messenger
+              ..hideCurrentSnackBar()
+              ..showSnackBar(SnackBar(
+                content: Text(marked ? l10n.bookmarkRemoved : l10n.bookmarkAdded),
+                duration: const Duration(seconds: 2),
+              ));
+          },
+        );
+      },
     );
   }
 }

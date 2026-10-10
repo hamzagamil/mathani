@@ -346,20 +346,20 @@ taps or entries or fewer.
 **Independent Test**: quickstart scenario 6. Bookmark three places (one twice), restart, see three
 rows newest first, open one and delete one.
 
-- [ ] T041 [US3] Add bookmark operations to `lib/data/user_repository.dart`:
+- [X] T041 [US3] Add bookmark operations to `lib/data/user_repository.dart`:
   - `addBookmark(surah, ayah, page)` uses `INSERT OR IGNORE`, because `UNIQUE (surah, ayah)` makes
     a duplicate a no-op that returns the existing row;
   - `removeBookmark(id)`;
   - `listBookmarks()` uses `ORDER BY created_at DESC`;
   - `isBookmarked(page)`;
   - all of them notify listeners on change.
-- [ ] T042 [US3] Add the bookmark toggle to the toolbar of `lib/features/reader/reader_screen.dart`
+- [X] T042 [US3] Add the bookmark toggle to the toolbar of `lib/features/reader/reader_screen.dart`
   with an on-page indicator. A page bookmark is stored against `firstAyahStartingOnPage(p)`
   (data-model.md › Bookmark).
-- [ ] T043 [P] [US3] Implement `lib/features/index/bookmarks_tab.dart`. Each row shows the surah
+- [X] T043 [P] [US3] Implement `lib/features/index/bookmarks_tab.dart`. Each row shows the surah
   name, ayah, page and date added. A tap jumps to the bookmark; a swipe or the delete button
   removes it. Show an empty state with `mathani-mark-navy` and guidance text.
-- [ ] T044 [US3] Add the Bookmarks tab as the third chip in `lib/features/index/index_screen.dart`
+- [X] T044 [US3] Add the Bookmarks tab as the third chip in `lib/features/index/index_screen.dart`
   (FR-009), and add the bookmark strings to `lib/app/l10n/app_en.arb` and
   `lib/app/l10n/app_ar.arb`.
 

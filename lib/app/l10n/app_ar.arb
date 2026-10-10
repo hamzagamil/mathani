@@ -25,5 +25,13 @@
   "hizbQuarter": "ربع الحزب {number}",
   "hizbHalf": "نصف الحزب {number}",
   "hizbThreeQuarters": "ثلاثة أرباع الحزب {number}",
-  "surahRowSemantics": "{name}، {count} آية، صفحة {page}"
+  "surahRowSemantics": "{name}، {count} آية، صفحة {page}",
+  "tabBookmarks": "المحفوظات",
+  "addBookmark": "احفظ هذه الصفحة",
+  "removeBookmark": "احذف العلامة",
+  "bookmarkAdded": "حُفظت العلامة.",
+  "bookmarkRemoved": "حُذفت العلامة.",
+  "bookmarksEmpty": "لا توجد محفوظات بعد. اضغط رمز العلامة في أي صفحة لحفظ موضعك.",
+  "bookmarkTitle": "سورة {surah}، الآية {ayah}",
+  "deleteBookmark": "احذف العلامة"
 }
