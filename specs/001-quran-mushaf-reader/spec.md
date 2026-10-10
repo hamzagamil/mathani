@@ -364,8 +364,8 @@ expected ayat, then open one in the Mushaf.
 - The app is free with no ads in this release. Monetisation is not considered.
 - No accounts and no cloud sync: all user data stays on the device. If a user deletes the app,
   their bookmarks and position are lost. This is acceptable for the first release.
-- The minimum supported iOS and Android versions are set in the implementation plan, as the
-  constitution requires.
+- Minimum supported versions: **iOS 15.0+** and **Android 7.0 (API 24)+**, targeting Android API
+  36 (see research R11).
 
 ## Out of Scope (Future Features)
 

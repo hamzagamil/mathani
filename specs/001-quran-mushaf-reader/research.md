@@ -161,7 +161,7 @@ splitting does not match Uthmani spelling anyway); a bundled search engine (size
 
 ## R8. Storage and dependencies (Constitution IV)
 
-**Decision**: the runtime third-party packages are limited to these four. Each is justified in
+**Decision**: the runtime third-party packages are limited to these five. Each is justified in
 the plan.
 
 | Package | Purpose | Why not built in |
@@ -169,6 +169,7 @@ the plan.
 | `sqflite` | read `quran.db`, read/write `user.db` | Uses the platform's system SQLite, so it adds no binary size. Flutter has no built-in database. |
 | `wakelock_plus` | keep-screen-on (FR-018) | Needs native APIs on both platforms. A tiny, maintained plugin. |
 | `share_plus` | native share sheet (FR-021) | Native share UI on both platforms. Copy uses the built-in `Clipboard`. |
+| `url_launcher` | open https://tanzil.net from About | The Tanzil CC BY 3.0 terms require a link to tanzil.net. Official flutter.dev package; opens the system browser. |
 | `flutter_localizations` + `intl` (SDK) | Arabic/English, RTL/LTR, plurals (FR-025) | Official Flutter localisation. Not third-party in practice. |
 
 - Not used: state-management libraries (built-in `ChangeNotifier`/`ValueNotifier` are enough),

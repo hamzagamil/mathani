@@ -19,7 +19,7 @@ Technical approach:
 - **Mushaf rendering**: a custom word-level page renderer.
 - **Search**: in-memory, over normalised text.
 - **User data**: a tiny on-device database.
-- **Footprint**: four runtime packages; estimated download about 12 MB on Android and 20 MB on
+- **Footprint**: five runtime packages; estimated download about 12 MB on Android and 20 MB on
   iOS.
 
 ## Technical Context
@@ -28,7 +28,7 @@ Technical approach:
 project creation)
 
 **Primary Dependencies**: Flutter SDK (`flutter_localizations`, `intl`), `sqflite`,
-`wakelock_plus`, `share_plus`. Nothing else at runtime; justified in research R8.
+`wakelock_plus`, `share_plus`, `url_launcher`. Nothing else at runtime; justified in research R8.
 
 **Storage**: SQLite. `quran.db` is bundled and read-only (see
 [contracts/quran-db.md](./contracts/quran-db.md)). `user.db` holds on-device bookmarks, reading
@@ -73,7 +73,7 @@ state and preferences (see [contracts/user-data.md](./contracts/user-data.md)).
 | I. Cross-Platform Parity | Every feature on iOS and Android; platform conventions respected; min OS stated | ✅ single Flutter codebase | ✅ Identical shaping engine on both platforms (R1). Native share sheet and system back. Min OS iOS 15 / Android API 24 (R11). |
 | II. Mobile-First Design | Phone portrait; 44 pt / 48 dp targets; safe areas; dark mode; font scaling; screen readers | ✅ spec FR-029 | ✅ Portrait locked. Android targets set to 48 dp, overriding the brand's 44 ([ui-screens](./contracts/ui-screens.md)). Night theme. Labelled controls. |
 | III. Performance (NON-NEGOTIABLE) | ≤2 s cold start, 60 fps, ≤100 ms feedback, cached content, virtualised lists | ✅ spec SC-001/002/006 | ✅ No startup network or parsing. One startup query (≤30 ms). Pages preloaded (n±1). Cached word painters. Virtualised flowing list. Measured on reference devices ([quickstart](./quickstart.md)). |
-| IV. Lean by Default | Every dependency justified; shrinking; ≤30 MB; efficient assets; no background work | ✅ | ✅ 4 runtime packages (R8). R8 shrink, obfuscation, icon tree-shaking. Icon font instead of an SVG runtime. Estimate about 12/20 MB (R12). No background work. |
+| IV. Lean by Default | Every dependency justified; shrinking; ≤30 MB; efficient assets; no background work | ✅ | ✅ 5 runtime packages (R8). R8 shrink, obfuscation, icon tree-shaking. Icon font instead of an SVG runtime. Estimate about 12/20 MB (R12). No background work. |
 | V. Simplicity | Simplest solution; reuse; complexity justified | ✅ | ✅ Feature folders, no repository interfaces, no state or routing libraries. Two justified items in Complexity Tracking. |
 | Store & privacy | Store policies; no unneeded permissions; secure storage for sensitive data | ✅ | ✅ No permissions requested. No personal data, so secure storage is not needed. Privacy forms declare "no data collected". |
 
