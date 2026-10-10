@@ -1,0 +1,56 @@
+# Claude Code: keep shared skills, ignore per-machine settings and credentials
+.claude/settings.local.json
+.claude/*.local.*
+
+# Quran data sources downloaded for tool/build_quran_db.dart (licensed; not redistributed via git)
+tool/sources/
+
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+coverage/
+*.g.dart.incremental
+.fvm/flutter_sdk
+
+# Android
+android/.gradle/
+android/captures/
+android/local.properties
+android/**/GeneratedPluginRegistrant.java
+android/key.properties
+*.jks
+*.keystore
+
+# iOS
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
+ios/Flutter/ephemeral/
+ios/Runner/GeneratedPluginRegistrant.*
+ios/**/xcuserdata/
+*.mobileprovision
+*.p12
+*.cer
+
+# Release debug symbols (--split-debug-info output)
+symbols/
+
+# IDE / OS
+.idea/
+*.iml
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Secrets
+.env
+.env.*
