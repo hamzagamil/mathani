@@ -30,13 +30,13 @@ own.
 
 **Purpose**: Create the Flutter project, configure the platforms, and add fonts and licences.
 
-- [ ] T001 Install the latest stable Flutter SDK, then create the project at the repository root
+- [X] T001 Install the latest stable Flutter SDK, then create the project at the repository root
   with `flutter create --org app.mathani --project-name mathani --platforms android,ios .`. This
   generates `pubspec.yaml`, `lib/main.dart`, `android/` and `ios/`. Install Android SDK API 36 and
   confirm with `flutter doctor`. JDK 17 is already installed. Confirm the bundle ID
   `app.mathani.mathani` with the owner before the first store upload, because it cannot change
   afterwards.
-- [ ] T002 Edit `pubspec.yaml`:
+- [X] T002 Edit `pubspec.yaml`:
   - pin `environment: sdk` and `flutter` to the installed stable version;
   - add runtime dependencies `sqflite`, `wakelock_plus`, `share_plus`, `url_launcher`,
     `flutter_localizations` (sdk) and `intl`. These are the only runtime packages allowed
@@ -46,16 +46,16 @@ own.
   - set `flutter: generate: true`;
   - declare assets `assets/db/` and `assets/images/`;
   - remove the default `cupertino_icons` dependency.
-- [ ] T003 [P] Create `analysis_options.yaml` that includes `package:flutter_lints/flutter.yaml`,
+- [X] T003 [P] Create `analysis_options.yaml` that includes `package:flutter_lints/flutter.yaml`,
   with `prefer_const_constructors`, `prefer_final_locals` and `avoid_print` enabled.
-- [ ] T004 [P] Create `l10n.yaml` with:
+- [X] T004 [P] Create `l10n.yaml` with:
   - `arb-dir: lib/app/l10n`, `template-arb-file: app_en.arb`;
   - `output-localization-file: app_localizations.dart`, `output-class: AppLocalizations`;
   - `nullable-getter: false`.
 
   Then create empty `lib/app/l10n/app_en.arb` and `lib/app/l10n/app_ar.arb` that each hold only
   `appName` ("Mathani" / "مثاني").
-- [ ] T005 [P] Configure Android:
+- [X] T005 [P] Configure Android:
   - in `android/app/build.gradle.kts`: `minSdk = 24`, `targetSdk = 36`, and for release
     `isMinifyEnabled = true` and `isShrinkResources = true`;
   - in `android/app/src/main/AndroidManifest.xml`: `android:screenOrientation="portrait"` on
@@ -64,19 +64,19 @@ own.
     `android/app/src/main/res/values-ar/strings.xml` (app_name "مثاني");
   - add no permissions; add a `<queries>` entry for `https` VIEW intents so `url_launcher` can
     open links on Android 11+.
-- [ ] T006 [P] Configure iOS:
+- [X] T006 [P] Configure iOS:
   - set the deployment target to 15.0 in `ios/Podfile` (`platform :ios, '15.0'`) and in
     `ios/Runner.xcodeproj/project.pbxproj`;
   - in `ios/Runner/Info.plist`: portrait-only `UISupportedInterfaceOrientations`,
     `CFBundleLocalizations` = `ar` and `en`, and `CFBundleDisplayName` taken from localised
     `ios/Runner/ar.lproj/InfoPlist.strings` ("مثاني") and
     `ios/Runner/en.lproj/InfoPlist.strings` ("Mathani").
-- [ ] T007 [P] Download IBM Plex Sans Arabic Regular, Medium, SemiBold and Bold (SIL OFL) and
+- [X] T007 [P] Download IBM Plex Sans Arabic Regular, Medium, SemiBold and Bold (SIL OFL) and
   Amiri Quran (SIL OFL) into `assets/fonts/`, and declare them in `pubspec.yaml`:
   - family `PlexArabic` with weights 400/500/600/700;
   - family `QuranText` pointing to `assets/fonts/AmiriQuran-Regular.ttf`. The KFGQPC Hafs font
     replaces this file only once permission D1 is granted (research R3).
-- [ ] T008 [P] Create `docs/licences.md` listing each source and asset with its licence and the
+- [X] T008 [P] Create `docs/licences.md` listing each source and asset with its licence and the
   attribution it requires:
   - Tanzil: CC BY 3.0, verbatim only, credit "Tanzil Project", link to https://tanzil.net;
   - QUL layout and word data: terms unconfirmed, dependency D2;
@@ -106,7 +106,7 @@ own.
     platforms.
 
   Document the procedure in `docs/release.md` (constitution › Platform & Store Requirements).
-- [ ] T011 Add `tool/size_check.dart` and a CI step in `.github/workflows/ci.yml`:
+- [X] T011 Add `tool/size_check.dart` and a CI step in `.github/workflows/ci.yml`:
   - build with `--analyze-size` on both platforms and compare with `docs/size_baseline.json`;
   - fail if any platform exceeds 30 MB, or grows by more than 1 MB without a PR label
     `size-approved`.

@@ -1,0 +1,7 @@
+{
+  "@@locale": "en",
+  "appName": "Mathani",
+  "@appName": {
+    "description": "App name shown in the interface."
+  }
+}
