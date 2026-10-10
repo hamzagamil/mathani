@@ -121,6 +121,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Page {page}, Surah {surah}'**
   String pageSemantics(String page, String surah);
+
+  /// No description provided for @indexTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Index'**
+  String get indexTitle;
+
+  /// No description provided for @tabSurahs.
+  ///
+  /// In en, this message translates to:
+  /// **'Surahs'**
+  String get tabSurahs;
+
+  /// No description provided for @tabAjza.
+  ///
+  /// In en, this message translates to:
+  /// **'Ajza\''**
+  String get tabAjza;
+
+  /// No description provided for @openIndex.
+  ///
+  /// In en, this message translates to:
+  /// **'Open index'**
+  String get openIndex;
+
+  /// No description provided for @goTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to'**
+  String get goTo;
+
+  /// No description provided for @goToPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Page'**
+  String get goToPage;
+
+  /// No description provided for @goToSurahAyah.
+  ///
+  /// In en, this message translates to:
+  /// **'Surah and ayah'**
+  String get goToSurahAyah;
+
+  /// No description provided for @pageField.
+  ///
+  /// In en, this message translates to:
+  /// **'Page number'**
+  String get pageField;
+
+  /// No description provided for @surahField.
+  ///
+  /// In en, this message translates to:
+  /// **'Surah'**
+  String get surahField;
+
+  /// No description provided for @ayahField.
+  ///
+  /// In en, this message translates to:
+  /// **'Ayah number'**
+  String get ayahField;
+
+  /// No description provided for @goButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Go'**
+  String get goButton;
+
+  /// No description provided for @pageRangeError.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a page from 1 to {max}.'**
+  String pageRangeError(String max);
+
+  /// No description provided for @ayahRangeError.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an ayah from 1 to {max}.'**
+  String ayahRangeError(String max);
+
+  /// count selects the plural form; shown is the same number formatted for the locale.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{{shown} ayah} other{{shown} ayat}}'**
+  String ayahCount(int count, String shown);
+
+  /// No description provided for @makki.
+  ///
+  /// In en, this message translates to:
+  /// **'Makki'**
+  String get makki;
+
+  /// No description provided for @madani.
+  ///
+  /// In en, this message translates to:
+  /// **'Madani'**
+  String get madani;
+
+  /// No description provided for @juzTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Juz {number}'**
+  String juzTitle(String number);
+
+  /// No description provided for @hizbStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Hizb {number}'**
+  String hizbStart(String number);
+
+  /// No description provided for @hizbQuarter.
+  ///
+  /// In en, this message translates to:
+  /// **'¼ Hizb {number}'**
+  String hizbQuarter(String number);
+
+  /// No description provided for @hizbHalf.
+  ///
+  /// In en, this message translates to:
+  /// **'½ Hizb {number}'**
+  String hizbHalf(String number);
+
+  /// No description provided for @hizbThreeQuarters.
+  ///
+  /// In en, this message translates to:
+  /// **'¾ Hizb {number}'**
+  String hizbThreeQuarters(String number);
+
+  /// No description provided for @surahRowSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}, {count} ayat, page {page}'**
+  String surahRowSemantics(String name, String count, String page);
 }
 
 class _AppLocalizationsDelegate

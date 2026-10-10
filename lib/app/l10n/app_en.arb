@@ -7,16 +7,126 @@
   "juzLabel": "Juz {number}",
   "@juzLabel": {
     "description": "Reader header: current juz. Number is pre-formatted.",
-    "placeholders": { "number": { "type": "String" } }
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
   },
   "pageLabel": "Page {number}",
   "@pageLabel": {
     "description": "Reader header: current Mushaf page. Number is pre-formatted.",
-    "placeholders": { "number": { "type": "String" } }
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
   },
   "pageSemantics": "Page {page}, Surah {surah}",
   "@pageSemantics": {
     "description": "Screen-reader label for a Mushaf page.",
-    "placeholders": { "page": { "type": "String" }, "surah": { "type": "String" } }
+    "placeholders": {
+      "page": {
+        "type": "String"
+      },
+      "surah": {
+        "type": "String"
+      }
+    }
+  },
+  "indexTitle": "Index",
+  "tabSurahs": "Surahs",
+  "tabAjza": "Ajza'",
+  "openIndex": "Open index",
+  "goTo": "Go to",
+  "goToPage": "Page",
+  "goToSurahAyah": "Surah and ayah",
+  "pageField": "Page number",
+  "surahField": "Surah",
+  "ayahField": "Ayah number",
+  "goButton": "Go",
+  "pageRangeError": "Enter a page from 1 to {max}.",
+  "@pageRangeError": {
+    "placeholders": {
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "ayahRangeError": "Enter an ayah from 1 to {max}.",
+  "@ayahRangeError": {
+    "placeholders": {
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "ayahCount": "{count, plural, =1{{shown} ayah} other{{shown} ayat}}",
+  "@ayahCount": {
+    "description": "count selects the plural form; shown is the same number formatted for the locale.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "shown": {
+        "type": "String"
+      }
+    }
+  },
+  "makki": "Makki",
+  "madani": "Madani",
+  "juzTitle": "Juz {number}",
+  "@juzTitle": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "hizbStart": "Hizb {number}",
+  "@hizbStart": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "hizbQuarter": "¼ Hizb {number}",
+  "@hizbQuarter": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "hizbHalf": "½ Hizb {number}",
+  "@hizbHalf": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "hizbThreeQuarters": "¾ Hizb {number}",
+  "@hizbThreeQuarters": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "surahRowSemantics": "{name}, {count} ayat, page {page}",
+  "@surahRowSemantics": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "String"
+      },
+      "page": {
+        "type": "String"
+      }
+    }
   }
 }

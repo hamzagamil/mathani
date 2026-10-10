@@ -198,7 +198,7 @@ void main(List<String> args) {
   final insDiv = db.prepare('INSERT INTO divisions VALUES (?, ?, ?, ?, ?, ?)');
   String opening(_Ayah a) => [
         for (var id = a.firstWordId; id <= a.lastWordId; id++)
-          if (!words[id - 1].isAyahEnd) words[id - 1].text,
+          if (!words[id - 1].isAyahEnd && !isMarkOnly(words[id - 1].text)) words[id - 1].text,
       ].take(4).join(' ');
   for (final (kind, refs) in [('juz', meta.juzs), ('hizb_quarter', meta.quarters)]) {
     for (final r in refs) {

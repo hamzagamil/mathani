@@ -44,8 +44,12 @@ class ReaderController extends ChangeNotifier with WidgetsBindingObserver {
   /// Increments on every programmatic navigation; views jump to [page] when it changes.
   int get jumpSerial => _jumpSerial;
 
-  /// Juz and surah shown in the header: those of the first ayah on the current page.
-  Ayah get pageHead => quran.firstAyahOnPage(_page);
+  /// Ayah whose surah and juz the header shows: the anchor when it is on the current page (so
+  /// opening Al-Kahf mid-page shows Al-Kahf), otherwise the first ayah on the page.
+  Ayah get pageHead {
+    final a = quran.ayahAt(_anchor);
+    return a.page == _page ? a : quran.firstAyahOnPage(_page);
+  }
 
   /// The Mushaf layout settled on [page]. The anchor becomes the first ayah on it, unless the
   /// selected or highlighted ayah is on that page.

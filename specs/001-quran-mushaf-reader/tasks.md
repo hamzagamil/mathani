@@ -315,24 +315,24 @@ taps or entries or fewer.
 **Independent Test**: quickstart scenario 5. Reach Al-Kahf, Juz 30, quarter 120, page 300 and
 2:255 in ≤ 3 taps each. Page 605 and 2:300 are rejected with the valid range shown.
 
-- [ ] T036 [P] [US2] Implement `lib/features/index/surahs_tab.dart`. It lists all 114 surahs in
+- [X] T036 [P] [US2] Implement `lib/features/index/surahs_tab.dart`. It lists all 114 surahs in
   Mushaf order with number, `name_ar` (plus `name_translit` in English), ayah count, Makki/Madani
   and start page (FR-010). Use `ListView.builder` with semantics "<surah name>, <ayah count> ayat,
   page <n>". A tap calls `ReaderController.jumpTo(surah, 1)` and pops.
-- [ ] T037 [P] [US2] Implement `lib/features/index/ajza_tab.dart` as a `ListView.builder`:
+- [X] T037 [P] [US2] Implement `lib/features/index/ajza_tab.dart` as a `ListView.builder`:
   - the 30 juz are **section headers**, each followed directly by its 8 hizb-quarter rows (240
     total, **no expand or collapse**);
   - each row shows `opening_words` and the start page (FR-011);
   - tapping a header or a row jumps to its start ayah and pops, so any juz or quarter is 3 taps
     away: Index → Ajza' → row (SC-004).
-- [ ] T038 [P] [US2] Implement `lib/features/index/goto_sheet.dart`. It has a page field (valid
+- [X] T038 [P] [US2] Implement `lib/features/index/goto_sheet.dart`. It has a page field (valid
   "1–604"), or a surah picker plus an ayah field (valid "1..ayah_count"). Invalid input shows the
   valid range inline and does not navigate (FR-012). Valid input calls `jumpTo` with a 1.5 s
   highlight.
-- [ ] T039 [US2] Implement `lib/features/index/index_screen.dart` (depends on T036–T038). It has
+- [X] T039 [US2] Implement `lib/features/index/index_screen.dart` (depends on T036–T038). It has
   brand ChipTabs Surahs · Ajza' and a go-to button opening the sheet. Add the index button to the
   toolbar in `lib/features/reader/reader_screen.dart`.
-- [ ] T040 [US2] Add the index, go-to and validation strings (including the range messages) to
+- [X] T040 [US2] Add the index, go-to and validation strings (including the range messages) to
   `lib/app/l10n/app_en.arb` and `lib/app/l10n/app_ar.arb`.
 
 **Checkpoint**: US1 and US2 work. This is a usable Mushaf MVP.
