@@ -185,13 +185,25 @@ void main(List<String> args) {
   }
 
   final insLine = db.prepare('INSERT INTO mushaf_lines VALUES (?, ?, ?, ?, ?, ?, ?)');
+  int? currentSurah;
   for (final l in lines) {
     final type = l['line_type'] as String;
+    // QUL leaves surah_number empty on basmallah lines; they belong to the surah whose name line
+    // precedes them (contract: surah is required for surah_name and basmallah lines).
+    if (type == 'surah_name') currentSurah = _int(l['surah_number']);
+    final surah = switch (type) {
+      'surah_name' => currentSurah,
+      'basmallah' => _int(l['surah_number']) ?? currentSurah,
+      _ => null,
+    };
+    if (type != 'ayah' && surah == null) {
+      _fail('Line ${l['page_number']}:${l['line_number']} ($type) has no surah.');
+    }
     insLine.execute([
       l['page_number'], l['line_number'], type, _int(l['is_centered']) == 1 ? 1 : 0,
       type == 'ayah' ? _int(l['first_word_id']) : null,
       type == 'ayah' ? _int(l['last_word_id']) : null,
-      type == 'ayah' ? null : _int(l['surah_number']),
+      surah,
     ]);
   }
 

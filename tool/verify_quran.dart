@@ -67,6 +67,9 @@ void main(List<String> args) {
       count("SELECT COUNT(*) FROM mushaf_lines WHERE type = 'basmallah' AND surah = 1"), 0);
   expect('surah name lines', count("SELECT COUNT(*) FROM mushaf_lines WHERE type = 'surah_name'"),
       114);
+  expect('basmallah lines', count("SELECT COUNT(*) FROM mushaf_lines WHERE type = 'basmallah'"), 112);
+  expect('header lines without a surah',
+      count("SELECT COUNT(*) FROM mushaf_lines WHERE type != 'ayah' AND surah IS NULL"), 0);
 
   // 4. Text identical to the Tanzil Uthmani reference, under the approved encoding map only.
   if (!dbOnly) {
