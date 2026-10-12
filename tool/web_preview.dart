@@ -6,11 +6,24 @@
 // apps) and needs web/sqlite3.wasm matching the locked sqlite3 package version.
 // The browser is not a supported platform: performance, gestures and text rendering differ from
 // phones, so verify anything that matters on a device (quickstart.md).
+// ignore_for_file: avoid_print
+import 'package:flutter/widgets.dart';
 import 'package:mathani/main.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   databaseFactory = databaseFactoryFfiWebNoWebWorker;
-  await runMathani();
+  try {
+    await runMathani();
+    print('[preview] app started');
+  } catch (e, s) {
+    // A failed startup otherwise leaves a white page with no message.
+    print('[preview] STARTUP FAILED: $e\n$s');
+    runApp(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Center(child: Text('Preview failed to start:\n$e')),
+    ));
+  }
 }
