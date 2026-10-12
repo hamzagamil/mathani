@@ -6,7 +6,10 @@ import 'data/user_repository.dart';
 import 'features/settings/about_section.dart';
 import 'shared/reader_state.dart';
 
-Future<void> main() async {
+Future<void> main() => runMathani();
+
+/// Opens the databases and starts the app. Shared with the browser preview (tool/web_preview.dart).
+Future<void> runMathani() async {
   WidgetsFlutterBinding.ensureInitialized();
   registerAssetLicences(); // lazy: the files are read only when the licences page opens
   // Both databases open in parallel; no network and no background work at startup.

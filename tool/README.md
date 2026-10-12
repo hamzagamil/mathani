@@ -44,3 +44,13 @@ asserts that all three agree on the word count and on the surah:ayah of every wo
 
 Licences: see [docs/licences.md](../docs/licences.md). Tanzil files must stay byte-for-byte as
 downloaded, including their copyright block.
+
+## Browser preview (development only)
+
+```powershell
+flutter run -d chrome -t tool/web_preview.dart
+```
+
+Uses WebAssembly SQLite from `sqflite_common_ffi_web` (a dev dependency, so it never enters the
+Android or iOS app) and `web/sqlite3.wasm`, which must match the locked `sqlite3` version
+(currently 3.7.0). The browser is not a target platform; verify behaviour on a phone.

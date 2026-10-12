@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:sqflite/sqflite.dart';
 
@@ -41,6 +42,14 @@ class QuranRepository {
   static Future<QuranRepository> open() async {
     final dir = await getDatabasesPath();
     final path = '$dir/quran.db';
+    if (kIsWeb) {
+      // Development preview in a browser only (tool/web_preview.dart): no files, so write the
+      // bundled bytes into the web SQLite store on every launch.
+      final data = await rootBundle.load(_assetDb);
+      await databaseFactory.writeDatabaseBytes(
+          path, data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes));
+      return _openAt(path);
+    }
     final bundledVersion = (await rootBundle.loadString(_assetVersion)).trim();
     final versionFile = File('$dir/quran.version');
     final installedVersion =
@@ -55,7 +64,10 @@ class QuranRepository {
       );
       await versionFile.writeAsString(bundledVersion, flush: true);
     }
+    return _openAt(path);
+  }
 
+  static Future<QuranRepository> _openAt(String path) async {
     final db = await openReadOnlyDatabase(path);
     final meta = {
       for (final r in await db.query('meta')) r['key'] as String: r['value'] as String,
