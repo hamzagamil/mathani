@@ -23,9 +23,7 @@ void main(List<String> args) {
   }
   final platform = positional[0];
   final analysis = jsonDecode(File(positional[1]).readAsStringSync()) as Map<String, dynamic>;
-  // --analyze-size reports the total size of the analysed archive at the top level as `value`
-  // (bytes). Stores compress and split builds further, so this is an upper bound on the download.
-  final size = (analysis['value'] as num).toInt();
+  final size = _shippedBytes(analysis);
 
   final baselineFile = File(_baselinePath);
   final baseline = baselineFile.existsSync()
@@ -58,4 +56,20 @@ void main(List<String> args) {
     stdout.writeln('Baseline updated.');
   }
   exit(failed ? 1 : 0);
+}
+
+/// Bytes that reach users' devices. `--analyze-size` JSON is a tree of {n, value, children}; for
+/// an app bundle the root `value` is 0 and `BUNDLE-METADATA` (debug symbols, mapping files) and
+/// `META-INF` (signatures) stay with the store, so they are excluded. Stores compress and split
+/// further, so this is an upper bound on the download.
+int _shippedBytes(Map<String, dynamic> node) {
+  const notShipped = {'BUNDLE-METADATA', 'META-INF'};
+  // A node's own value is authoritative; its children may break it down at uncompressed sizes
+  // (e.g. Dart packages inside libapp.so), so only recurse where the value is missing.
+  final value = (node['value'] as num?)?.toInt() ?? 0;
+  if (value > 0) return value;
+  final children = (node['children'] as List?)?.cast<Map<String, dynamic>>() ?? const [];
+  return children
+      .where((c) => !notShipped.contains(c['n']))
+      .fold(0, (sum, c) => sum + _shippedBytes(c));
 }
