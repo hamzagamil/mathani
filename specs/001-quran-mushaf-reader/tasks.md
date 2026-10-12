@@ -86,7 +86,7 @@ own.
 
   Add a "Permissions" table for D1 and D2 with status `requested / granted / refused` and the
   date.
-- [ ] T009 [P] Create a **private** GitHub repository for the project and push `main`. Then
+- [X] T009 [P] Create a **private** GitHub repository for the project and push `main`. Then
   create `.github/workflows/ci.yml` with four jobs:
   - (a) `ubuntu-latest`: `flutter analyze`, `flutter test` and `dart run tool/verify_quran.dart`;
   - (b) `macos-latest`: `flutter build ios --release --no-codesign`, so iOS builds even though the
