@@ -115,12 +115,18 @@ void main() {
 void _writeWords(String path, Iterable<(int, int, int, String)> rows) {
   final db = sqlite3.open(path);
   db.execute('DROP TABLE IF EXISTS words');
-  db.execute('CREATE TABLE words (word_index INTEGER PRIMARY KEY, word_key TEXT, surah INTEGER, '
-      'ayah INTEGER, text TEXT)');
-  final stmt = db.prepare('INSERT INTO words VALUES (?,?,?,?,?)');
+  // Same schema as the QUL word-by-word downloads.
+  db.execute('CREATE TABLE words (id INTEGER, location TEXT, surah INTEGER, ayah INTEGER, '
+      'word INTEGER, text TEXT)');
+  final stmt = db.prepare('INSERT INTO words VALUES (?,?,?,?,?,?)');
   db.execute('BEGIN');
+  var position = 0;
+  var lastAyah = '';
   for (final (id, sura, aya, text) in rows) {
-    stmt.execute([id, '$sura:$aya', sura, aya, text]);
+    final key = '$sura:$aya';
+    position = key == lastAyah ? position + 1 : 1;
+    lastAyah = key;
+    stmt.execute([id, '$key:$position', sura, aya, position, text]);
   }
   db.execute('COMMIT');
   stmt.close();

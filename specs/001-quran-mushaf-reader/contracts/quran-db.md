@@ -15,6 +15,7 @@ CREATE TABLE meta (
   value TEXT NOT NULL
 );
 -- Required keys: schema_version ("1.0"), built_at (ISO-8601), font ("kfgqpc-hafs" | "amiri-quran"),
+-- text_source ("tanzil-uthmani" for Amiri | "qul-kfgqpc-hafs"), p98_line_width_em, space_width_em,
 -- max_line_width_em (REAL as text, R4), source_<name>_sha256 for each source file,
 -- attribution_tanzil ("Tanzil Project — https://tanzil.net"), attribution_qul, attribution_kfgqpc.
 

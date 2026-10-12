@@ -19,7 +19,7 @@ void main(List<String> args) {
           .split('=')
           .last;
   checkSources(
-    [uthmaniXml, metadataXml, if (!dev) ...[qulLayoutDb, qulScriptDb, qulImlaeiDb]],
+    [uthmaniXml, simpleCleanXml, metadataXml, if (!dev) ...[qulLayoutDb, qulScriptDb, qulImlaeiDb]],
     record: args.contains('--record'),
   );
   final qulDir = dev ? devDir : sourcesDir;
@@ -33,11 +33,11 @@ void main(List<String> args) {
 
   // --- Words (verbatim) -------------------------------------------------------------------
   final script = sqlite3.open('$qulDir/$qulScriptDb', mode: OpenMode.readOnly);
-  final wordRows = script.select('SELECT word_index, surah, ayah, text FROM words ORDER BY word_index');
+  // QUL word-by-word schema: words(id, location "s:a:w", surah, ayah, word, text).
+  final wordRows = script.select('SELECT id, surah, ayah, text FROM words ORDER BY id');
   final imlaeiDb = sqlite3.open('$qulDir/$qulImlaeiDb', mode: OpenMode.readOnly);
   final imlaei = {
-    for (final r in imlaeiDb.select('SELECT word_index, surah, ayah, text FROM words'))
-      r['word_index'] as int: r,
+    for (final r in imlaeiDb.select('SELECT id, surah, ayah, text FROM words')) r['id'] as int: r,
   };
   if (imlaei.length != wordRows.length) {
     _fail('Word counts differ: script ${wordRows.length}, imla\'i ${imlaei.length}.');
@@ -45,7 +45,7 @@ void main(List<String> args) {
 
   final words = <_Word>[];
   for (final r in wordRows) {
-    final id = r['word_index'] as int;
+    final id = r['id'] as int;
     if (id != words.length + 1) _fail('Word ids are not contiguous at $id.');
     final s = r['surah'] as int, a = r['ayah'] as int;
     final im = imlaei[id];
@@ -57,6 +57,35 @@ void main(List<String> args) {
         : 1;
     final text = r['text'] as String;
     words.add(_Word(id, s, a, position, text, im['text'] as String, isAyahEndToken(text)));
+  }
+
+  // --- Display text for the chosen font (research R3) -------------------------------------
+  // KFGQPC text is encoded for the KFGQPC font. Amiri Quran is built for the Tanzil Uthmani
+  // encoding, so with Amiri each QUL word shows the Tanzil word(s) it aligns with; the line
+  // layout and word ids stay QUL's. Alignment is one Tanzil word per QUL word, except where a
+  // QUL word contains a space (e.g. 37:130 «إِلۡ يَاسِينَ»).
+  final textSource = font == 'kfgqpc-hafs' ? 'qul-kfgqpc-hafs' : 'tanzil-uthmani';
+  if (textSource == 'tanzil-uthmani') {
+    final tanzil = {for (final a in loadTanzilText('$sourcesDir/$uthmaniXml')) '${a.sura}:${a.aya}': a};
+    var i = 0;
+    while (i < words.length) {
+      final s = words[i].surah, a = words[i].ayah;
+      final ayahWords = <_Word>[];
+      while (i < words.length && words[i].surah == s && words[i].ayah == a) {
+        if (!words[i].isAyahEnd) ayahWords.add(words[i]);
+        i++;
+      }
+      final tokens = _tanzilTokens(tanzil['$s:$a']!.text);
+      var t = 0;
+      for (final w in ayahWords) {
+        // Space-separated parts that carry letters (a pause mark after a space is not a word).
+        final take = w.text.trim().split(' ').where((p) => p.isNotEmpty && !isMarkOnly(p)).length;
+        if (t + take > tokens.length) _fail('$s:$a: Tanzil has fewer words than QUL.');
+        w.text = tokens.sublist(t, t + take).join(' ');
+        t += take;
+      }
+      if (t != tokens.length) _fail('$s:$a: Tanzil has ${tokens.length - t} words more than QUL.');
+    }
   }
 
   // --- Ayahs ------------------------------------------------------------------------------
@@ -119,6 +148,31 @@ void main(List<String> args) {
     ayahIndex['${s.sura}:${s.aya}']!.sajdah = true;
   }
 
+  // --- Search forms (research R7) ----------------------------------------------------------
+  // Readers type standard spelling («ذلك», «الرحمن»); QUL's imla'i text is phonetic («ذالك»,
+  // «الرحمان»). Use Tanzil Simple-Clean words where an ayah has the same word count as QUL,
+  // otherwise keep QUL's imla'i words for that ayah.
+  final simpleClean = {
+    for (final a in loadTanzilText('$sourcesDir/$simpleCleanXml'))
+      // Pause marks appear as separate tokens even in Simple-Clean; they are not words.
+      '${a.sura}:${a.aya}': a.text.split(' ').where((t) => t.isNotEmpty && !isMarkOnly(t)).toList(),
+  };
+  var imlaeiFallbacks = 0;
+  for (final a in ayahs) {
+    final ayahWords = [
+      for (var id = a.firstWordId; id <= a.lastWordId; id++)
+        if (!words[id - 1].isAyahEnd) words[id - 1],
+    ];
+    final standard = simpleClean['${a.surah}:${a.ayah}']!;
+    if (standard.length == ayahWords.length) {
+      for (var k = 0; k < ayahWords.length; k++) {
+        ayahWords[k].imlaei = standard[k];
+      }
+    } else {
+      imlaeiFallbacks++;
+    }
+  }
+
   // --- Search text and word offsets (research R7) -------------------------------------------
   final searchText = <int, String>{};
   for (final a in ayahs) {
@@ -149,10 +203,12 @@ void main(List<String> args) {
     'schema_version': '1.0',
     'built_at': DateTime.now().toUtc().toIso8601String(),
     'font': font,
+    'text_source': textSource,
     'dev_layout': '$dev',
     'max_line_width_em': '0', // set by tool/measure_line_widths_test.dart
     'source_tanzil_uthmani_sha256': sha256Of('$sourcesDir/$uthmaniXml'),
     'source_tanzil_metadata_sha256': sha256Of('$sourcesDir/$metadataXml'),
+    'source_tanzil_simple_clean_sha256': sha256Of('$sourcesDir/$simpleCleanXml'),
     'source_qul_layout_sha256': sha256Of('$qulDir/$qulLayoutDb'),
     'source_qul_script_sha256': sha256Of('$qulDir/$qulScriptDb'),
     'source_qul_imlaei_sha256': sha256Of('$qulDir/$qulImlaeiDb'),
@@ -232,6 +288,8 @@ void main(List<String> args) {
 
   stdout.writeln('Wrote $outputDb: ${ayahs.length} ayahs, ${words.length} words, '
       '${lines.length} lines${dev ? ' (DEV LAYOUT — not for release)' : ''}.');
+  stdout.writeln('Search forms: Tanzil Simple-Clean for ${ayahs.length - imlaeiFallbacks} ayahs, '
+      'QUL imla\x27i for $imlaeiFallbacks.');
   if (pageMismatches > 0) {
     stdout.writeln('WARNING: $pageMismatches page starts differ from Tanzil\'s page table.');
   }
@@ -242,7 +300,8 @@ void main(List<String> args) {
 class _Word {
   _Word(this.id, this.surah, this.ayah, this.position, this.text, this.imlaei, this.isAyahEnd);
   final int id, surah, ayah, position;
-  final String text, imlaei;
+  String text; // display text: QUL KFGQPC, or the aligned Tanzil word(s) for Amiri
+  String imlaei; // search form: Tanzil Simple-Clean word, or QUL imla'i
   final bool isAyahEnd;
   int searchOffset = 0;
 }
@@ -253,6 +312,17 @@ class _Ayah {
   late int lastWordId;
   int page = 0, juz = 0, quarter = 0;
   bool sajdah = false;
+}
+
+/// Tanzil words of an ayah: pause marks attach to the preceding word (tanzilWords), and a
+/// leading rub' al-hizb mark (۞) attaches to the word after it, so joining the words with
+/// spaces gives back the Tanzil text exactly.
+List<String> _tanzilTokens(String text) {
+  final words = tanzilWords(text);
+  if (words.length > 1 && words.first.trim() == '۞') {
+    return ['${words[0]} ${words[1]}', ...words.skip(2)];
+  }
+  return words;
 }
 
 int? _int(Object? v) => v == null ? null : (v is int ? v : int.tryParse('$v'));

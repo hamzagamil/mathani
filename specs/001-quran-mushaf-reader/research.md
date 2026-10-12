@@ -96,6 +96,21 @@ differ (R4).
 - **Re-run required**: this must be repeated once the QUL KFGQPC word text replaces the dev data,
   because its encoding differs from Tanzil's.
 
+**Font check on the real QUL text (T018), 2026-10-12: Amiri Quran FAILS with the KFGQPC encoding.**
+U+065E (staggered dammatan) has no glyph, so boxes appear, and KFGQPC writes every final yaa as U+064A,
+relying on its own font to drop the dots, so Amiri shows dotted «فِي» where the Mushaf has «فِى».
+
+**Decision (2026-10-12)**: the display text follows the font.
+- **Amiri Quran**: each QUL word shows the Tanzil Uthmani word(s) it aligns with. Tanzil is
+  Amiri's native encoding and the verification reference. QUL's layout and word ids are kept.
+  Alignment is 1:1 in 6,235 of 6,236 ayahs; the exception (37:130 «إِلۡ يَاسِينَ», one QUL word
+  with a space) is handled by the space rule. Integrity: identical to Tanzil, with no encoding
+  map. Coverage: 0 missing glyphs; pages render as printed.
+- **KFGQPC Hafs (after D1)**: the QUL KFGQPC text, which then needs the approved encoding map
+  (T015) to verify.
+
+The build records this in `meta.text_source` (`tanzil-uthmani` or `qul-kfgqpc-hafs`).
+
 **Alternatives considered**: *DigitalKhatt Madina* (open source, designed for justified Mushaf
 layout). Promising, but its encoding and stability on mobile need evaluation. It is noted as a
 future option, not chosen for v1.
@@ -162,6 +177,11 @@ expensive to lay out). Rejected.
   أ/إ/آ/ٱ → ا, ى → ي, ؤ → و, ئ → ي, ة → ه; remove tatweel.
 - Matching is a substring scan. Matched character ranges map to word indices, which map to
   Uthmani words for highlighting.
+
+**Search forms (2026-10-12)**: QUL's imla'i text is phonetic («ذالك», «هاذا», «الرحمان»), but
+readers type standard spelling. Word search forms therefore come from Tanzil Simple-Clean where
+the ayah's word count matches QUL (5,872 ayahs, after dropping pause-mark tokens), and from QUL
+imla'i otherwise (364 ayahs, for example «يا أيها» against «ياأيها»).
 
 **Rationale**: A linear scan of about 0.7 MB in AOT Dart takes tens of milliseconds, well under 1 s
 (SC-006). It adds no native dependency, no index files and no size cost. Platform SQLite FTS5 is

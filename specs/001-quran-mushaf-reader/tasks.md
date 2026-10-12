@@ -126,7 +126,7 @@ state that every story uses.
 
 ### Quran data pipeline (build time, `tool/`)
 
-- [ ] T012 Create `tool/README.md` documenting the exact source files to download into the
+- [X] T012 Create `tool/README.md` documenting the exact source files to download into the
   gitignored `tool/sources/`, with download URL, expected filename and SHA-256 for each:
   - QUL "KFGQPC HAFS" Mushaf layout, 604 pages × 15 lines, `qpc-hafs`, SQLite export, from
     https://qul.tarteel.ai/mushaf_layouts;
@@ -159,6 +159,8 @@ state that every story uses.
   different code point) in `tool/encoding_map.json`, each with a written justification, and
   document them in `tool/encoding_map.md`. The owner reviews and approves the map before it is
   used. Never include a pair that changes a letter, diacritic or pause mark (FR-002).
+  *Scope changed (research R3, 2026-10-12):* needed only for the KFGQPC font path (T066). With
+  Amiri Quran the display text is Tanzil's, so verification needs no map.
 - [X] T016 Implement `tool/verify_quran.dart`, the research R10 checks. It applies **only** the
   substitutions in `tool/encoding_map.json` (T015). It exits non-zero on any
   failure and prints `PASS (...)` with the counts otherwise:
@@ -174,7 +176,7 @@ state that every story uses.
   `QuranText` font, lays out every `ayah` line of all 604 pages at a 100 px font size with
   `TextPainter`, and writes `meta.max_line_width_em` (widest line ÷ 100) into
   `assets/db/quran.db` (research R4).
-- [ ] T018 Check the fallback font early with `tool/font_spike_test.dart`, run with
+- [X] T018 Check the fallback font early with `tool/font_spike_test.dart`, run with
   `flutter test`. Render pages 1, 2, 50, 187, 255 and 604 with Amiri Quran. Use the KFGQPC font as
   a reference only if it is available locally for evaluation, without bundling or committing it.
   Check that:

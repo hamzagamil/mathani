@@ -78,7 +78,8 @@ void main(List<String> args) {
     final pairs = [
       for (final p in map['pairs'] as List) (p['from'] as String, p['to'] as String),
     ];
-    if (release && map['approved'] != true) {
+    // The map only bridges KFGQPC encoding to Tanzil; Tanzil-sourced text needs none.
+    if (release && meta['text_source'] == 'qul-kfgqpc-hafs' && map['approved'] != true) {
       _failures.add('tool/encoding_map.json is not approved by the owner');
     }
     final reference = loadTanzilText('$sourcesDir/$uthmaniXml');
