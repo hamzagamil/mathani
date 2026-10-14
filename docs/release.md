@@ -29,6 +29,11 @@ storeFile=C:\\Users\\Hamza\\keys\\mathani-upload.jks
 keys otherwise. A store upload must never be built without it. Enrol in Play App Signing on first
 upload.
 
+The upload key also lives in the GitHub repository secrets, for a future CI release job:
+`ANDROID_UPLOAD_KEYSTORE_BASE64` (the `.jks`, base64), `ANDROID_UPLOAD_STORE_PASSWORD`,
+`ANDROID_UPLOAD_KEY_PASSWORD` and `ANDROID_UPLOAD_KEY_ALIAS`. GitHub secrets cannot be read back,
+so they are not a backup: keep the offline copy too.
+
 ## iOS signing (CI)
 
 iOS builds and signing run on macOS CI, because the developer machine is Windows. In App Store
@@ -59,3 +64,4 @@ Keep `symbols/` from each release (gitignored) to symbolicate crash stack traces
 
 | Version | Date | quran.db SHA-256 | Android size | iOS size | Cold start (A15 / SE2) | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
+| 1.0.0+1 | 2026-10-14 | `0561d2fa1d59908609246add9c8244671a3608d1a8c732e8112a8ea940018bd2` | 20.2 MB (arm64 APK) | — | 0.49 s on Galaxy S24 FE / — | First Google Play release. Upload key SHA-256 `43:65:6C:58:…:CE:9B:20:C9` |
