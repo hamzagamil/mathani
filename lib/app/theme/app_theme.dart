@@ -156,6 +156,8 @@ ThemeData buildTheme(Brightness brightness) {
     listTileTheme: ListTileThemeData(
       tileColor: Colors.transparent,
       selectedTileColor: c.rowSelected,
+      // Without this, selected rows use `primary` (the bar navy), unreadable on the night row.
+      selectedColor: c.ink,
       iconColor: c.ink,
       textColor: c.ink,
       minVerticalPadding: Space.s3,

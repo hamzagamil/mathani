@@ -79,7 +79,9 @@ class SettingsScreen extends StatelessWidget {
                 ButtonSegment(
                   value: ThemePref.system,
                   icon: const Icon(MathaniIcons.themeSystem),
-                  label: Text(l10n.themeSystem),
+                  // With an icon, «حسب الجهاز» wraps to two lines in a third of a phone's width;
+                  // shrink it to one line instead.
+                  label: FittedBox(fit: BoxFit.scaleDown, child: Text(l10n.themeSystem)),
                 ),
                 ButtonSegment(
                   value: ThemePref.day,
