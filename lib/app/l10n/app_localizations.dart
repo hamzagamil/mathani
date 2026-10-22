@@ -500,11 +500,22 @@ abstract class AppLocalizations {
   /// **'No results.'**
   String get searchNoResults;
 
-  /// No description provided for @searchResultCount.
+  /// Search summary when every matching ayah matches once.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 result} other{{shown} results}}'**
-  String searchResultCount(int count, String shown);
+  /// **'{ayat, plural, =1{1 ayah} other{{ayatShown} ayat}}'**
+  String searchAyatCount(int ayat, String ayatShown);
+
+  /// Search summary: matches and the number of ayat they are in.
+  ///
+  /// In en, this message translates to:
+  /// **'{occurrences, plural, =1{1 occurrence} other{{occurrencesShown} occurrences}} in {ayat, plural, =1{1 ayah} other{{ayatShown} ayat}}'**
+  String searchSummary(
+    int occurrences,
+    String occurrencesShown,
+    int ayat,
+    String ayatShown,
+  );
 
   /// No description provided for @clearSearch.
   ///

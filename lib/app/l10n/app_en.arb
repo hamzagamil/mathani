@@ -187,13 +187,32 @@
   "searchHint": "Type a word or phrase",
   "searchEmptyHint": "Search the Quran text in Arabic, with or without diacritics.",
   "searchNoResults": "No results.",
-  "searchResultCount": "{count, plural, =1{1 result} other{{shown} results}}",
-  "@searchResultCount": {
+  "searchAyatCount": "{ayat, plural, =1{1 ayah} other{{ayatShown} ayat}}",
+  "@searchAyatCount": {
+    "description": "Search summary when every matching ayah matches once.",
     "placeholders": {
-      "count": {
+      "ayat": {
         "type": "int"
       },
-      "shown": {
+      "ayatShown": {
+        "type": "String"
+      }
+    }
+  },
+  "searchSummary": "{occurrences, plural, =1{1 occurrence} other{{occurrencesShown} occurrences}} in {ayat, plural, =1{1 ayah} other{{ayatShown} ayat}}",
+  "@searchSummary": {
+    "description": "Search summary: matches and the number of ayat they are in.",
+    "placeholders": {
+      "occurrences": {
+        "type": "int"
+      },
+      "occurrencesShown": {
+        "type": "String"
+      },
+      "ayat": {
+        "type": "int"
+      },
+      "ayatShown": {
         "type": "String"
       }
     }

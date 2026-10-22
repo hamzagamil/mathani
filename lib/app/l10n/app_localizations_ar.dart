@@ -249,16 +249,45 @@ class AppLocalizationsAr extends AppLocalizations {
   String get searchNoResults => 'لا توجد نتائج.';
 
   @override
-  String searchResultCount(int count, String shown) {
+  String searchAyatCount(int ayat, String ayatShown) {
     String _temp0 = intl.Intl.pluralLogic(
-      count,
+      ayat,
       locale: localeName,
-      other: '$shown نتيجة',
-      few: '$shown نتائج',
-      two: 'نتيجتان',
-      one: 'نتيجة واحدة',
+      other: '$ayatShown آية',
+      many: '$ayatShown آية',
+      few: '$ayatShown آيات',
+      two: 'آيتان',
+      one: 'آية واحدة',
     );
     return '$_temp0';
+  }
+
+  @override
+  String searchSummary(
+    int occurrences,
+    String occurrencesShown,
+    int ayat,
+    String ayatShown,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      occurrences,
+      locale: localeName,
+      other: '$occurrencesShown موضع',
+      many: '$occurrencesShown موضعًا',
+      few: '$occurrencesShown مواضع',
+      two: 'موضعان',
+      one: 'موضع واحد',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      ayat,
+      locale: localeName,
+      other: '$ayatShown آية',
+      many: '$ayatShown آية',
+      few: '$ayatShown آيات',
+      two: 'آيتين',
+      one: 'آية واحدة',
+    );
+    return '$_temp0 في $_temp1';
   }
 
   @override

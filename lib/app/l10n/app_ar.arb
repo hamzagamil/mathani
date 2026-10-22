@@ -67,6 +67,7 @@
   "searchHint": "اكتب كلمة أو عبارة",
   "searchEmptyHint": "ابحث في نص القرآن الكريم بالتشكيل أو بدونه.",
   "searchNoResults": "لا توجد نتائج.",
-  "searchResultCount": "{count, plural, =1{نتيجة واحدة} =2{نتيجتان} few{{shown} نتائج} other{{shown} نتيجة}}",
+  "searchAyatCount": "{ayat, plural, =1{آية واحدة} =2{آيتان} few{{ayatShown} آيات} many{{ayatShown} آية} other{{ayatShown} آية}}",
+  "searchSummary": "{occurrences, plural, =1{موضع واحد} =2{موضعان} few{{occurrencesShown} مواضع} many{{occurrencesShown} موضعًا} other{{occurrencesShown} موضع}} في {ayat, plural, =1{آية واحدة} =2{آيتين} few{{ayatShown} آيات} many{{ayatShown} آية} other{{ayatShown} آية}}",
   "clearSearch": "امسح"
 }

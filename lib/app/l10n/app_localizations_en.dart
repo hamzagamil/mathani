@@ -249,14 +249,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchNoResults => 'No results.';
 
   @override
-  String searchResultCount(int count, String shown) {
+  String searchAyatCount(int ayat, String ayatShown) {
     String _temp0 = intl.Intl.pluralLogic(
-      count,
+      ayat,
       locale: localeName,
-      other: '$shown results',
-      one: '1 result',
+      other: '$ayatShown ayat',
+      one: '1 ayah',
     );
     return '$_temp0';
+  }
+
+  @override
+  String searchSummary(
+    int occurrences,
+    String occurrencesShown,
+    int ayat,
+    String ayatShown,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      occurrences,
+      locale: localeName,
+      other: '$occurrencesShown occurrences',
+      one: '1 occurrence',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      ayat,
+      locale: localeName,
+      other: '$ayatShown ayat',
+      one: '1 ayah',
+    );
+    return '$_temp0 in $_temp1';
   }
 
   @override

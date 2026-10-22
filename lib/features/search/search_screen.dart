@@ -12,7 +12,8 @@ import '../../shared/reader_state.dart';
 import 'search_index.dart';
 
 /// Arabic search over the Quran text (FR-022): diacritic- and spelling-insensitive, results with
-/// the matched words highlighted and a total count; a tap opens the ayah in the Mushaf.
+/// the matched words highlighted and a summary of matching ayat and occurrences; a tap opens the
+/// ayah in the Mushaf.
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
 
@@ -41,6 +42,16 @@ class _SearchScreenState extends State<SearchScreen> {
       final results = (await _index).search(text);
       if (mounted && _query.text == text) setState(() => _results = results);
     });
+  }
+
+  /// «٢٥٤٧ موضعًا في ١٧٣٧ آية», or just the ayat when each matches once (FR-006).
+  String _summary(AppLocalizations l10n, Locale locale) {
+    final ayat = _results.ayahCount;
+    final occurrences = _results.occurrences;
+    if (ayat == 0) return l10n.searchNoResults;
+    if (occurrences == ayat) return l10n.searchAyatCount(ayat, formatNumber(ayat, locale));
+    return l10n.searchSummary(
+        occurrences, formatNumber(occurrences, locale), ayat, formatNumber(ayat, locale));
   }
 
   @override
@@ -92,10 +103,7 @@ class _SearchScreenState extends State<SearchScreen> {
               child: Semantics(
                 liveRegion: true,
                 child: Text(
-                  _results.hits.isEmpty
-                      ? l10n.searchNoResults
-                      : l10n.searchResultCount(
-                          _results.occurrences, formatNumber(_results.occurrences, locale)),
+                  _summary(l10n, locale),
                   style: TypeScale.caption.copyWith(color: colors.inkMuted),
                 ),
               ),
@@ -112,7 +120,11 @@ class _SearchScreenState extends State<SearchScreen> {
                   )
                 : ListView.builder(
                     itemCount: _results.hits.length,
-                    itemBuilder: (context, i) => _ResultRow(hit: _results.hits[i]),
+                    // Keyed by ayah: a row reused for another ayah would keep the old words.
+                    itemBuilder: (context, i) => _ResultRow(
+                      key: ValueKey('search-row-${_results.hits[i].ayah.id}'),
+                      hit: _results.hits[i],
+                    ),
                   ),
           ),
         ],
@@ -122,7 +134,7 @@ class _SearchScreenState extends State<SearchScreen> {
 }
 
 class _ResultRow extends StatefulWidget {
-  const _ResultRow({required this.hit});
+  const _ResultRow({super.key, required this.hit});
   final SearchHit hit;
 
   @override
@@ -135,8 +147,10 @@ class _ResultRowState extends State<_ResultRow> {
   @override
   void initState() {
     super.initState();
-    ReaderScope.read(context).quran.wordsOf(widget.hit.ayah.ref).then((w) {
-      if (mounted) setState(() => _words = w);
+    final ref = widget.hit.ayah.ref;
+    ReaderScope.read(context).quran.wordsOf(ref).then((w) {
+      // Never show words that arrive for an ayah this row no longer shows.
+      if (mounted && widget.hit.ayah.ref == ref) setState(() => _words = w);
     });
   }
 
