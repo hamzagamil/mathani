@@ -42,11 +42,11 @@ jobs:
           channel: stable
       - run: flutter pub get
       - name: Build app bundle with size analysis
-        run: flutter build appbundle --release --analyze-size --code-size-directory=build/size
+        run: flutter build appbundle --release --target-platform android-arm64 --analyze-size --code-size-directory=build/size
       - name: Size check
         run: >
           dart run tool/size_check.dart android
-          $(ls build/size/*code-size-analysis*.json | head -1)
+          $(ls -t ~/.flutter-devtools/*code-size-analysis*.json | head -1)
           ${{ contains(github.event.pull_request.labels.*.name, 'size-approved') && '--approved' || '' }}
       - name: Enable KVM
         run: |
@@ -76,7 +76,7 @@ jobs:
       - name: Size check
         run: >
           dart run tool/size_check.dart ios
-          $(ls build/size/*code-size-analysis*.json | head -1)
+          $(ls -t ~/.flutter-devtools/*code-size-analysis*.json | head -1)
           ${{ contains(github.event.pull_request.labels.*.name, 'size-approved') && '--approved' || '' }}
       - name: Integration tests on iOS simulator (iPhone SE 3rd gen)
         if: hashFiles('integration_test/**') != ''
