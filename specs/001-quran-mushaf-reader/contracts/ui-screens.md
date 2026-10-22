@@ -14,6 +14,8 @@ contract fixes what the screens are, what each one shows, and the exact output f
 | **Settings** | Reader settings button | layout, theme, text size (flowing only), keep-screen-on, language; About (version, data and font attributions: Tanzil link, QUL, KFGQPC) | back to Reader |
 | **Ayah action sheet** | long-press on an ayah | Copy · Share · Bookmark | dismiss |
 
+> **Updated by 002**: in the Mushaf layout the header and toolbar are an overlay shown on tap, and the page carries its own surah, juz and page number. See [002 reader-page-view](../../002-print-like-mushaf-page/contracts/reader-page-view.md).
+
 No screen or button exists for features that are not built yet (FR-028).
 
 ## Direction rules

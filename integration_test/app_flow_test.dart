@@ -11,6 +11,8 @@ import 'package:mathani/data/user_repository.dart';
 import 'package:mathani/shared/mathani_icons.dart';
 import 'package:mathani/shared/reader_state.dart';
 
+import 'toolbar.dart';
+
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
@@ -49,7 +51,7 @@ void main() {
 
   testWidgets('5: navigation to a juz in 3 taps', (tester) async {
     await launch(tester);
-    await tester.tap(find.byIcon(MathaniIcons.index));
+    await tapToolbar(tester, MathaniIcons.index);
     await tester.pumpAndSettle();
     await tester.tap(find.text(reader.preferences.language == LanguagePref.ar ? 'الأجزاء' : 'Ajza\''));
     await tester.pumpAndSettle();
@@ -62,7 +64,7 @@ void main() {
     await launch(tester);
     reader.jumpTo(const AyahRef(36, 1), highlight: false);
     await tester.pumpAndSettle();
-    await tester.tap(find.byIcon(MathaniIcons.bookmark));
+    await tapToolbar(tester, MathaniIcons.bookmark);
     await tester.pumpAndSettle();
     expect(reader.user.bookmarksOnPage(reader.page), isNotEmpty);
   });
@@ -72,10 +74,10 @@ void main() {
     const target = AyahRef(3, 92);
     reader.jumpTo(target, highlight: false);
     await tester.pumpAndSettle();
-    await tester.tap(find.byIcon(MathaniIcons.flowing));
+    await tapToolbar(tester, MathaniIcons.flowing);
     await tester.pumpAndSettle();
     expect(reader.anchor, target);
-    await tester.tap(find.byIcon(MathaniIcons.mushaf));
+    await tapToolbar(tester, MathaniIcons.mushaf);
     await tester.pumpAndSettle();
     expect(reader.anchor, target);
 

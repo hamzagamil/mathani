@@ -522,6 +522,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Clear'**
   String get clearSearch;
+
+  /// One-time hint when the reader controls first hide in the Mushaf layout.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the page to show controls'**
+  String get controlsHint;
+
+  /// Accessibility action on a Mushaf page that shows the reader controls.
+  ///
+  /// In en, this message translates to:
+  /// **'Show controls'**
+  String get showControls;
 }
 
 class _AppLocalizationsDelegate

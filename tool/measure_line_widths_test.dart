@@ -6,6 +6,10 @@
 // renderer (lib/features/reader/mushaf_page_renderer.dart) lays lines out with the same rule,
 // so dividing the content width by this value gives the largest font size at which every line
 // of all 604 pages fits.
+//
+// It also writes meta.justify_target_em, the width every justified line is filled to
+// (specs/002-print-like-mushaf-page, research P2): the widest line with its gaps tightened to
+// 0.6 of a space, then shrunk by the 5% a line may lose.
 import 'dart:io';
 
 import 'package:flutter/painting.dart';
@@ -52,6 +56,7 @@ void main() {
     final space = width(' ');
     final widths = <double>[];
     var widest = 0.0;
+    var target = 0.0;
     var widestAt = '';
     for (final l in db.select("SELECT page, line, first_word_id, last_word_id FROM mushaf_lines "
         "WHERE type = 'ayah'")) {
@@ -61,6 +66,8 @@ void main() {
         w += cache.putIfAbsent(id, () => width(words[id]!));
       }
       widths.add(w);
+      final tightened = (w - space * (last - first) * 0.4) * 0.95;
+      if (tightened > target) target = tightened;
       if (w > widest) {
         widest = w;
         widestAt = '${l['page']}:${l['line']}';
@@ -75,12 +82,15 @@ void main() {
     db.execute("INSERT OR REPLACE INTO meta VALUES ('p98_line_width_em', ?)", [p98.toStringAsFixed(4)]);
     db.execute("INSERT OR REPLACE INTO meta VALUES ('space_width_em', ?)",
         [(space / _probeSize).toStringAsFixed(4)]);
+    db.execute("INSERT OR REPLACE INTO meta VALUES ('justify_target_em', ?)",
+        [(target / _probeSize).toStringAsFixed(4)]);
     db.close();
     File(outputVersion).writeAsStringSync('${sha256Of(outputDb)}\n');
 
     // ignore: avoid_print
     print('max_line_width_em = ${em.toStringAsFixed(4)} (widest line $widestAt), '
-        'p98_line_width_em = ${p98.toStringAsFixed(4)}');
+        'p98_line_width_em = ${p98.toStringAsFixed(4)}, '
+        'justify_target_em = ${(target / _probeSize).toStringAsFixed(4)}');
     expect(em, greaterThan(0));
   }, timeout: const Timeout(Duration(minutes: 10)));
 }

@@ -283,4 +283,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get clearSearch => 'Clear';
+
+  @override
+  String get controlsHint => 'Tap the page to show controls';
+
+  @override
+  String get showControls => 'Show controls';
 }

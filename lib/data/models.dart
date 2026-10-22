@@ -165,6 +165,7 @@ class ReaderPreferences {
     this.flowFontSize = 24,
     this.keepScreenOn = false,
     this.language = LanguagePref.system,
+    this.controlsHintShown = false,
   });
 
   static const minFlowFontSize = 18;
@@ -176,12 +177,16 @@ class ReaderPreferences {
   final bool keepScreenOn;
   final LanguagePref language;
 
+  /// The one-time "tap the page to show controls" hint has been shown (specs/002).
+  final bool controlsHintShown;
+
   ReaderPreferences copyWith({
     ReadingLayout? layout,
     ThemePref? theme,
     int? flowFontSize,
     bool? keepScreenOn,
     LanguagePref? language,
+    bool? controlsHintShown,
   }) =>
       ReaderPreferences(
         layout: layout ?? this.layout,
@@ -189,5 +194,6 @@ class ReaderPreferences {
         flowFontSize: flowFontSize ?? this.flowFontSize,
         keepScreenOn: keepScreenOn ?? this.keepScreenOn,
         language: language ?? this.language,
+        controlsHintShown: controlsHintShown ?? this.controlsHintShown,
       );
 }

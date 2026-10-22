@@ -52,24 +52,24 @@ void main() {
     await settle(tester);
     final mushafPage = reader.page;
 
-    await tester.tap(find.byIcon(MathaniIcons.flowing)); // to flowing
+    await tapToolbar(tester, MathaniIcons.flowing); // to flowing
     await settle(tester, 10);
     expect(reader.layout, ReadingLayout.flowing);
     expect(reader.page, mushafPage);
     expect(reader.anchor, target);
     await shoot(tester, 'flowing_24_ar');
 
-    await tester.tap(find.byIcon(MathaniIcons.mushaf)); // back to Mushaf pages
+    await tapToolbar(tester, MathaniIcons.mushaf); // back to Mushaf pages
     await settle(tester);
     expect(reader.layout, ReadingLayout.mushaf);
     expect(reader.page, mushafPage);
     expect(reader.anchor, target);
 
     // A second round trip must not drift.
-    await tester.tap(find.byIcon(MathaniIcons.flowing));
+    await tapToolbar(tester, MathaniIcons.flowing);
     await settle(tester, 10);
     expect(reader.anchor, target);
-    await tester.tap(find.byIcon(MathaniIcons.mushaf));
+    await tapToolbar(tester, MathaniIcons.mushaf);
     await settle(tester);
     expect(reader.anchor, target);
   });
@@ -89,7 +89,7 @@ void main() {
   testWidgets('settings persist and apply live; language switches immediately', (tester) async {
     await pumpApp(tester, language: LanguagePref.en);
     expect(find.textContaining('Al-Faatiha'), findsOneWidget);
-    await tester.tap(find.byIcon(MathaniIcons.settings));
+    await tapToolbar(tester, MathaniIcons.settings);
     await settle(tester);
     await shoot(tester, 'settings_en');
 

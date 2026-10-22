@@ -132,6 +132,10 @@ class UserRepository extends ChangeNotifier {
           : d.flowFontSize,
       keepScreenOn: switch (p['keep_screen_on']) { 'true' => true, _ => d.keepScreenOn },
       language: pick(LanguagePref.values, p['language'], d.language),
+      controlsHintShown: switch (p['controls_hint_shown']) {
+        'true' => true,
+        _ => d.controlsHintShown,
+      },
     );
   }
 
@@ -154,6 +158,7 @@ class UserRepository extends ChangeNotifier {
       'flow_font_size': '${p.flowFontSize}',
       'keep_screen_on': '${p.keepScreenOn}',
       'language': p.language.name,
+      'controls_hint_shown': '${p.controlsHintShown}',
     }.entries) {
       batch.insert('preferences', {'key': entry.key, 'value': entry.value},
           conflictAlgorithm: ConflictAlgorithm.replace);

@@ -292,4 +292,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get clearSearch => 'امسح';
+
+  @override
+  String get controlsHint => 'اضغط على الصفحة لإظهار الأدوات';
+
+  @override
+  String get showControls => 'إظهار الأدوات';
 }

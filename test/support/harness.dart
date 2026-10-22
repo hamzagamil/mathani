@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mathani/data/quran_repository.dart';
@@ -35,4 +36,17 @@ Future<ReaderController> openTestReader() async {
   final (quran, user) = await (QuranRepository.open(), UserRepository.open()).wait;
   final (anchor, prefs) = await user.loadStartup();
   return ReaderController(quran: quran, user: user, anchor: anchor, preferences: prefs);
+}
+
+/// Taps a reader toolbar button. In the Mushaf layout the controls hide while reading
+/// (specs/002-print-like-mushaf-page), so the page is tapped first to bring them back.
+Future<void> tapToolbar(WidgetTester tester, IconData icon) async {
+  final button = find.byIcon(icon);
+  if (button.hitTestable().evaluate().isEmpty) {
+    await tester.tapAt(tester.getCenter(find.byType(PageView)));
+    for (var i = 0; i < 3; i++) {
+      await tester.pump(const Duration(milliseconds: 150));
+    }
+  }
+  await tester.tap(button);
 }

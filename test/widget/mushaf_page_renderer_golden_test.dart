@@ -1,8 +1,8 @@
 // Mushaf layout at three phone widths (task T062, risk R-a).
 //
 // 1. Every one of the 604 pages lays out with all lines inside the content width and no line
-//    shrunk below 80 %. Platform independent; runs in CI.
-// 2. Pixel goldens for pages 1, 2, 187 and 604, tagged `golden` because font rasterisation
+//    shrunk below 95 % (specs/002 FR-004). Platform independent; runs in CI.
+// 2. Pixel goldens for pages 1, 2, 3, 50, 187, 300 and 604, tagged `golden` because font rasterisation
 //    differs by platform. CI excludes them; regenerate locally with
 //    `flutter test --tags golden --update-goldens test/widget/mushaf_page_renderer_golden_test.dart`.
 import 'package:flutter/material.dart';
@@ -37,9 +37,10 @@ void main() {
             child: MushafPageRenderer(
               page: p,
               surahNames: {for (final s in reader.quran.surahList) s.number: s.nameAr},
-              lineWidthEm: reader.quran.p98LineWidthEm,
+              targetEm: reader.quran.justifyTargetEm,
               font: reader.quran.font,
               palette: palette,
+              details: MushafPageDetails.of(reader.quran, p.number),
             ),
           ),
         ),
@@ -66,13 +67,13 @@ void main() {
           minAt = p.number;
         }
       }
-      expect(minScale, greaterThanOrEqualTo(0.8),
+      expect(minScale, greaterThanOrEqualTo(0.95 - 1e-9),
           reason: 'page $minAt at $width dp shrinks a line to ${minScale.toStringAsFixed(2)}');
     }
   });
 
   for (final width in _widths) {
-    for (final number in [1, 2, 187, 604]) {
+    for (final number in [1, 2, 3, 50, 187, 300, 604]) {
       testWidgets('golden page $number at ${width.toInt()} dp', (tester) async {
         final p = (await tester.runAsync(() => reader.quran.page(number)))!;
         tester.view.physicalSize = Size(width * 2, _pageHeight * 2);

@@ -121,7 +121,12 @@ void main() {
     Future<void> search(String query) async {
       await tester.enterText(field, query);
       await settle(tester, 4);
-      final checked = await expectRowsMatchTitles(tester, query);
+      var checked = await expectRowsMatchTitles(tester, query);
+      // Under load (the full suite), row text can take a few more rounds to load.
+      for (var i = 0; i < 10 && checked == 0 && rows.evaluate().isNotEmpty; i++) {
+        await settle(tester, 1);
+        checked = await expectRowsMatchTitles(tester, query);
+      }
       if (rows.evaluate().isNotEmpty) expect(checked, greaterThan(0), reason: '«$query»');
     }
 

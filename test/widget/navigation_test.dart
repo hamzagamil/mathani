@@ -46,7 +46,7 @@ void main() {
 
   testWidgets('surah in 2 taps: index → Al-Kahf', (tester) async {
     await pumpApp(tester);
-    await tester.tap(find.byIcon(MathaniIcons.index));
+    await tapToolbar(tester, MathaniIcons.index);
     await settle(tester);
     await shoot(tester, 'index_surahs_ar');
     await tester.scrollUntilVisible(find.textContaining('الكهف'), 500);
@@ -58,7 +58,7 @@ void main() {
 
   testWidgets('juz and quarter in 3 taps: index → Ajza\' → row', (tester) async {
     await pumpApp(tester);
-    await tester.tap(find.byIcon(MathaniIcons.index));
+    await tapToolbar(tester, MathaniIcons.index);
     await settle(tester);
     await tester.tap(find.text('الأجزاء'));
     await settle(tester);
@@ -72,7 +72,7 @@ void main() {
 
   testWidgets('go-to rejects page 605 and 2:300, accepts page 300 and 2:255', (tester) async {
     await pumpApp(tester);
-    await tester.tap(find.byIcon(MathaniIcons.index));
+    await tapToolbar(tester, MathaniIcons.index);
     await settle(tester);
     await tester.tap(find.byIcon(MathaniIcons.goTo));
     await settle(tester);
@@ -91,7 +91,7 @@ void main() {
     // The surah field defaults to the current surah; start from Al-Baqarah.
     reader.jumpTo(const AyahRef(2, 1), highlight: false);
     await settle(tester);
-    await tester.tap(find.byIcon(MathaniIcons.index));
+    await tapToolbar(tester, MathaniIcons.index);
     await settle(tester);
     await tester.tap(find.byIcon(MathaniIcons.goTo));
     await settle(tester);

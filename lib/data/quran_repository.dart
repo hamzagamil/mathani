@@ -15,6 +15,7 @@ class QuranRepository {
     this._pageFirstAyah, {
     required this.maxLineWidthEm,
     required this.p98LineWidthEm,
+    required this.justifyTargetEm,
     required this.font,
   });
 
@@ -28,8 +29,12 @@ class QuranRepository {
   final List<int> _pageFirstAyah; // index = page - 1 → index into _ayahs (start or continuation)
   final double maxLineWidthEm;
 
-  /// 98th-percentile Mushaf line width in em; sizes the Mushaf layout (research R4).
+  /// 98th-percentile Mushaf line width in em (001 research R4).
   final double p98LineWidthEm;
+
+  /// Width every justified Mushaf line is filled to, in em; sizes the Mushaf layout
+  /// (specs/002-print-like-mushaf-page/contracts/page-typesetting.md).
+  final double justifyTargetEm;
 
   /// Quran font the database was built for (`amiri-quran` or `kfgqpc-hafs`).
   final String font;
@@ -108,12 +113,14 @@ class QuranRepository {
     }
 
     final maxEm = double.tryParse(meta['max_line_width_em'] ?? '') ?? 0;
+    final p98 = double.tryParse(meta['p98_line_width_em'] ?? '') ?? maxEm;
     final repo = QuranRepository._(
       db,
       ayahs,
       pageFirst,
       maxLineWidthEm: maxEm,
-      p98LineWidthEm: double.tryParse(meta['p98_line_width_em'] ?? '') ?? maxEm,
+      p98LineWidthEm: p98,
+      justifyTargetEm: double.tryParse(meta['justify_target_em'] ?? '') ?? p98 * 1.034,
       font: meta['font'] ?? 'amiri-quran',
     );
     // Small tables used by every page header and index; loaded once, before the first frame.

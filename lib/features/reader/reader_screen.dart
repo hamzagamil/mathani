@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../../app/l10n/app_localizations.dart';
@@ -18,6 +19,10 @@ import 'mushaf_view.dart';
 /// Home screen: the Mushaf (page or flowing layout), a header showing the current surah, juz
 /// and page (FR-008), and a bottom toolbar within one-handed reach (constitution II). Toolbar
 /// actions appear only for features that exist (FR-028).
+///
+/// In the Mushaf layout the page fills the screen like a sheet of paper, and the header and
+/// toolbar appear over it on a tap (specs/002-print-like-mushaf-page/contracts/
+/// reader-page-view.md). The flowing layout keeps them in place.
 class ReaderScreen extends StatefulWidget {
   const ReaderScreen({super.key});
 
@@ -26,12 +31,45 @@ class ReaderScreen extends StatefulWidget {
 }
 
 class _ReaderScreenState extends State<ReaderScreen> {
+  static const _slide = Duration(milliseconds: 200);
+
   bool? _wakelock;
+  bool _controlsVisible = true;
+  bool _immersive = false;
 
   @override
   void dispose() {
     if (_wakelock == true) WakelockPlus.disable();
+    if (_immersive) SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     super.dispose();
+  }
+
+  /// Screen-reader users always get the controls (FR-010).
+  bool get _keepControls => MediaQuery.of(context).accessibleNavigation;
+
+  void _setControls(bool visible) {
+    final show = visible || _keepControls;
+    if (show == _controlsVisible) return;
+    setState(() => _controlsVisible = show);
+    _setImmersive(!show);
+    // The hint sits over the toolbar; once the reader has tapped, it has done its job.
+    if (show) ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    final reader = ReaderScope.read(context);
+    if (!show && !reader.preferences.controlsHintShown) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(AppLocalizations.of(context).controlsHint),
+        duration: const Duration(seconds: 4),
+      ));
+      reader.updatePreferences(reader.preferences.copyWith(controlsHintShown: true));
+    }
+  }
+
+  /// Hides the system bars while reading, and brings them back with the controls.
+  void _setImmersive(bool immersive) {
+    if (immersive == _immersive) return;
+    _immersive = immersive;
+    SystemChrome.setEnabledSystemUIMode(
+        immersive ? SystemUiMode.immersiveSticky : SystemUiMode.edgeToEdge);
   }
 
   /// Keeps the screen on while the reader is shown and the setting is on (FR-018).
@@ -46,22 +84,80 @@ class _ReaderScreenState extends State<ReaderScreen> {
     final reader = ReaderScope.of(context);
     final colors = MathaniColors.of(context);
     _syncWakelock(reader.preferences.keepScreenOn);
+
+    if (reader.layout == ReadingLayout.flowing) {
+      if (_immersive || !_controlsVisible) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          _setImmersive(false);
+          setState(() => _controlsVisible = true);
+        });
+      }
+      return Scaffold(
+        backgroundColor: colors.surface,
+        appBar: const _ReaderHeader(),
+        bottomNavigationBar: const _ReaderToolbar(),
+        body: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: Space.s2),
+            child: FlowingView(onAyahLongPress: (ref) => showAyahActions(context, ref)),
+          ),
+        ),
+      );
+    }
+
+    final show = _controlsVisible || _keepControls;
     return Scaffold(
       backgroundColor: colors.surface,
-      appBar: const _ReaderHeader(),
-      bottomNavigationBar: const _ReaderToolbar(),
-      body: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: Space.s2),
-          child: switch (reader.layout) {
-            ReadingLayout.mushaf => MushafView(onAyahLongPress: (ref) => showAyahActions(context, ref)),
-            ReadingLayout.flowing => FlowingView(onAyahLongPress: (ref) => showAyahActions(context, ref)),
-          },
-        ),
+      body: Stack(
+        children: [
+          // The page sets its own margins (PageGeometry) inside the safe areas.
+          Positioned.fill(
+            child: SafeArea(
+              child: MushafView(
+                onAyahLongPress: (ref) => showAyahActions(context, ref),
+                onTapPage: () => _setControls(!_controlsVisible),
+                onPageTurned: () => _setControls(false),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: _Overlay(visible: show, hiddenOffset: const Offset(0, -1), child: const _ReaderHeader()),
+          ),
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: _Overlay(visible: show, hiddenOffset: const Offset(0, 1), child: const _ReaderToolbar()),
+          ),
+        ],
       ),
     );
   }
+}
+
+/// Slides [child] in and out of view; while hidden it takes no taps and is not announced.
+class _Overlay extends StatelessWidget {
+  const _Overlay({required this.visible, required this.hiddenOffset, required this.child});
+
+  final bool visible;
+  final Offset hiddenOffset;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => AnimatedSlide(
+        offset: visible ? Offset.zero : hiddenOffset,
+        duration: _ReaderScreenState._slide,
+        curve: Curves.easeOut,
+        child: IgnorePointer(
+          ignoring: !visible,
+          child: ExcludeSemantics(excluding: !visible, child: child),
+        ),
+      );
 }
 
 class _ReaderHeader extends StatelessWidget implements PreferredSizeWidget {

@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 
 import '../../app/l10n/app_localizations.dart';
 import '../../app/theme/app_theme.dart';
@@ -8,14 +9,21 @@ import '../../data/quran_repository.dart';
 import '../../shared/numerals.dart';
 import '../../shared/reader_state.dart';
 import 'mushaf_page_renderer.dart';
+import 'paper_sheet.dart';
 
 /// The 604-page Mushaf layout. Always right-to-left, so the next page lies to the left and the
 /// reader swipes from left to right to move forward (FR-004), in both interface languages.
 class MushafView extends StatefulWidget {
-  const MushafView({super.key, this.onAyahLongPress});
+  const MushafView({super.key, this.onAyahLongPress, this.onTapPage, this.onPageTurned});
 
   /// Called with the ayah under a long press (FR-020); null disables selection.
   final void Function(AyahRef ref)? onAyahLongPress;
+
+  /// Called on a tap that does not clear a selection: shows or hides the reader controls.
+  final VoidCallback? onTapPage;
+
+  /// Called when the reader turns to another page.
+  final VoidCallback? onPageTurned;
 
   @override
   State<MushafView> createState() => _MushafViewState();
@@ -59,11 +67,13 @@ class _MushafViewState extends State<MushafView> {
         onPageChanged: (i) {
           _cache.prefetchAround(i + 1);
           reader.onMushafPageShown(i + 1);
+          widget.onPageTurned?.call();
         },
         itemBuilder: (context, i) => _MushafPageItem(
           page: i + 1,
           cache: _cache,
           onAyahLongPress: widget.onAyahLongPress,
+          onTapPage: widget.onTapPage,
         ),
       ),
     );
@@ -71,11 +81,17 @@ class _MushafViewState extends State<MushafView> {
 }
 
 class _MushafPageItem extends StatefulWidget {
-  const _MushafPageItem({required this.page, required this.cache, this.onAyahLongPress});
+  const _MushafPageItem({
+    required this.page,
+    required this.cache,
+    this.onAyahLongPress,
+    this.onTapPage,
+  });
 
   final int page;
   final _PageCache cache;
   final void Function(AyahRef ref)? onAyahLongPress;
+  final VoidCallback? onTapPage;
 
   @override
   State<_MushafPageItem> createState() => _MushafPageItemState();
@@ -106,14 +122,19 @@ class _MushafPageItemState extends State<_MushafPageItem> {
     final l10n = AppLocalizations.of(context);
     final head = quran.firstAyahOnPage(page.number);
 
+    final onTapPage = widget.onTapPage;
     return Semantics(
       label: l10n.pageSemantics(
         toEasternArabic(page.number),
         quran.surahList[head.surah - 1].nameAr,
       ),
+      customSemanticsActions: {
+        CustomSemanticsAction(label: l10n.showControls): ?onTapPage,
+      },
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: reader.selected == null ? null : () => reader.select(null),
+        // A tap clears a selection; otherwise it shows or hides the reader controls.
+        onTap: reader.selected != null ? () => reader.select(null) : onTapPage,
         onLongPressStart: widget.onAyahLongPress == null
             ? null
             : (d) {
@@ -122,13 +143,13 @@ class _MushafPageItemState extends State<_MushafPageItem> {
                 final ref = box.ayahAt(box.globalToLocal(d.globalPosition));
                 if (ref != null) widget.onAyahLongPress!(ref);
               },
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
+        child: PaperSheet(
+          bindingOnRight: page.number.isOdd,
           child: MushafPageRenderer(
             key: _rendererKey,
             page: page,
             surahNames: {for (final s in quran.surahList) s.number: s.nameAr},
-            lineWidthEm: quran.p98LineWidthEm,
+            targetEm: quran.justifyTargetEm,
             font: quran.font,
             palette: MushafPalette(
               ink: colors.ink,
@@ -140,6 +161,7 @@ class _MushafPageItemState extends State<_MushafPageItem> {
             sajdahEndWords: widget.cache.sajdahEndWords(page.number),
             selected: reader.selected,
             highlighted: reader.highlighted,
+            details: MushafPageDetails.of(quran, page.number),
           ),
         ),
       ),

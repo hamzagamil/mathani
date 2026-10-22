@@ -16,6 +16,8 @@ import 'package:mathani/features/reader/reader_screen.dart';
 import 'package:mathani/shared/mathani_icons.dart';
 import 'package:mathani/shared/reader_state.dart';
 
+import 'toolbar.dart';
+
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
@@ -74,13 +76,13 @@ void main() {
 
     // 4. Surah index.
     await open(const AyahRef(18, 1));
-    await tester.tap(find.byIcon(MathaniIcons.index));
+    await tapToolbar(tester, MathaniIcons.index);
     await tester.pumpAndSettle();
     await shot('4-index');
     await back();
 
     // 5. Search with highlighted matches.
-    await tester.tap(find.byIcon(MathaniIcons.search));
+    await tapToolbar(tester, MathaniIcons.search);
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField), 'الصبر');
     await tester.pump(const Duration(milliseconds: 400)); // search debounce

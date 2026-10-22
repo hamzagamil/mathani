@@ -117,6 +117,9 @@ future option, not chosen for v1.
 
 ## R4. Rendering the page-faithful Mushaf layout (FR-003, FR-004)
 
+> **Superseded in part by 002**: justification (kashida instead of wider gaps), font size and
+> page geometry now follow [002 page-typesetting](../002-print-like-mushaf-page/contracts/page-typesetting.md).
+
 **Decision**:
 - **Words**: each page is laid out by a custom `RenderBox` (`MushafPageRenderer`) that draws
   15 line slots. Each word is shaped once into a cached `TextPainter`.

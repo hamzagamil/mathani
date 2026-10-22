@@ -69,5 +69,7 @@
   "searchNoResults": "لا توجد نتائج.",
   "searchAyatCount": "{ayat, plural, =1{آية واحدة} =2{آيتان} few{{ayatShown} آيات} many{{ayatShown} آية} other{{ayatShown} آية}}",
   "searchSummary": "{occurrences, plural, =1{موضع واحد} =2{موضعان} few{{occurrencesShown} مواضع} many{{occurrencesShown} موضعًا} other{{occurrencesShown} موضع}} في {ayat, plural, =1{آية واحدة} =2{آيتين} few{{ayatShown} آيات} many{{ayatShown} آية} other{{ayatShown} آية}}",
-  "clearSearch": "امسح"
+  "clearSearch": "امسح",
+  "controlsHint": "اضغط على الصفحة لإظهار الأدوات",
+  "showControls": "إظهار الأدوات"
 }

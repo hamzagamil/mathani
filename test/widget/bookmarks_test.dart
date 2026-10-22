@@ -43,7 +43,7 @@ void main() {
     }
 
     await settle();
-    await tester.tap(find.byIcon(MathaniIcons.index));
+    await tapToolbar(tester, MathaniIcons.index);
     await settle();
     await tester.tap(find.text('Bookmarks'));
     await settle();
@@ -59,7 +59,7 @@ void main() {
 
     // The header toggle shows this page as bookmarked, and removes it.
     expect(find.byIcon(MathaniIcons.bookmarked), findsOneWidget);
-    await tester.tap(find.byIcon(MathaniIcons.bookmarked));
+    await tapToolbar(tester, MathaniIcons.bookmarked);
     await settle();
     expect(reader.user.bookmarks.map((b) => b.ref), [const AyahRef(2, 255)]);
   });

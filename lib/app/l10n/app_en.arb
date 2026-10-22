@@ -217,5 +217,13 @@
       }
     }
   },
-  "clearSearch": "Clear"
+  "clearSearch": "Clear",
+  "controlsHint": "Tap the page to show controls",
+  "@controlsHint": {
+    "description": "One-time hint when the reader controls first hide in the Mushaf layout."
+  },
+  "showControls": "Show controls",
+  "@showControls": {
+    "description": "Accessibility action on a Mushaf page that shows the reader controls."
+  }
 }
