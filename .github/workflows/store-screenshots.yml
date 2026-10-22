@@ -1,0 +1,46 @@
+name: Store screenshots
+
+# Takes the Arabic store screenshots (integration_test/store_screenshots_test.dart) on an iPhone
+# simulator and saves them as an artifact. Run it from the Actions tab.
+on:
+  workflow_dispatch:
+    inputs:
+      device:
+        description: "Simulator device type (App Store 6.3\" display: iPhone 17 / 16 Pro)"
+        required: false
+        default: "iPhone 17"
+
+env:
+  FLUTTER_VERSION: "3.47.7" # keep in sync with pubspec.yaml environment.flutter
+
+jobs:
+  screenshots:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+      - run: flutter pub get
+      - name: Boot simulator
+        id: sim
+        run: |
+          xcrun simctl list devices available | grep -E "iPhone" || true
+          UDID=$(xcrun simctl list devices available | grep -m1 "${{ inputs.device }} (" | grep -oE '[0-9A-F-]{36}' || true)
+          if [ -z "$UDID" ]; then
+            UDID=$(xcrun simctl list devices available | grep -m1 -E "iPhone 1[6-9] Pro \(" | grep -oE '[0-9A-F-]{36}')
+          fi
+          xcrun simctl list devices | grep "$UDID"
+          xcrun simctl boot "$UDID"
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+      - name: Take screenshots
+        run: |
+          flutter drive --driver=test_driver/screenshot_driver.dart \
+            --target=integration_test/store_screenshots_test.dart --dart-define=STORE_SCREENSHOTS=true \
+            -d "${{ steps.sim.outputs.udid }}"
+          sips -g pixelWidth -g pixelHeight build/screenshots/*.png
+      - uses: actions/upload-artifact@v4
+        with:
+          name: store-screenshots
+          path: build/screenshots/*.png
