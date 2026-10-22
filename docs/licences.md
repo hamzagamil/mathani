@@ -18,6 +18,7 @@ must show every attribution marked **required**.
 | --- | --- | --- | --- |
 | KFGQPC Uthmanic Script HAFS | Quran text (production, preferred) | **Proprietary**: no reproduction or modification without written approval from KFGQPC | **Dependency D1**: not bundled until written approval is received |
 | Amiri Quran | Quran text (fallback; used until D1 is resolved) | SIL Open Font License 1.1 | Ship the OFL text; do not sell the font by itself |
+| KFGQPC Madinah Mushaf page fonts (one per page, 604) | Optional "printed Mushaf" download (specs/002, User Story 4) | **Proprietary**, as above | **Dependency D3**: not hosted or offered until written approval is received |
 | IBM Plex Sans Arabic (Regular, Medium, SemiBold, Bold) | Interface text, Arabic and Latin | SIL Open Font License 1.1 | Ship the OFL text |
 
 ## Icons and images
@@ -31,5 +32,6 @@ must show every attribution marked **required**.
 
 | ID | What | Asked | Status | Date | Notes |
 | --- | --- | --- | --- | --- | --- |
-| D1 | KFGQPC: embed the unmodified KFGQPC Uthmanic Script HAFS font in a free app on the App Store and Google Play | not yet | requested / granted / refused | — | Contact via https://fonts.qurancomplex.gov.sa |
-| D2 | QUL / Tarteel: redistribute the KFGQPC layout and word-by-word data inside the app | not yet | requested / granted / refused | — | Contact via https://qul.tarteel.ai |
+| D1 | KFGQPC: embed the unmodified KFGQPC Uthmanic Script HAFS font in a free app on the App Store and Google Play | not yet | requested / granted / refused | — | Contact via https://fonts.qurancomplex.gov.sa. Draft: [permissions/kfgqpc-request.md](permissions/kfgqpc-request.md) (with D3) |
+| D2 | QUL / Tarteel: redistribute the KFGQPC layout and word-by-word data inside the app | not yet | requested / granted / refused | — | Contact via https://qul.tarteel.ai. Draft: [permissions/qul-request.md](permissions/qul-request.md) |
+| D3 | KFGQPC: host the unmodified Madinah Mushaf page fonts (604) on our server as an optional in-app download | not yet | granted | — | Same request as D1. Unblocks specs/002 task T026 |
