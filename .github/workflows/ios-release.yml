@@ -1,0 +1,83 @@
+name: iOS release
+
+# Builds a signed App Store .ipa on macOS and uploads it to App Store Connect (TestFlight).
+# Run it from the Actions tab. Signing and API secrets are listed in docs/release.md.
+on:
+  workflow_dispatch:
+    inputs:
+      build_number:
+        description: "Build number (CFBundleVersion). Empty uses the +build in pubspec.yaml."
+        required: false
+        default: ""
+
+env:
+  FLUTTER_VERSION: "3.47.7" # keep in sync with pubspec.yaml environment.flutter
+
+jobs:
+  testflight:
+    name: Build, sign and upload to App Store Connect
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+      - run: flutter pub get
+
+      - name: Install distribution certificate and provisioning profile
+        env:
+          CERT_P12_BASE64: ${{ secrets.IOS_DIST_CERT_P12_BASE64 }}
+          CERT_PASSWORD: ${{ secrets.IOS_DIST_CERT_PASSWORD }}
+          PROFILE_BASE64: ${{ secrets.IOS_APPSTORE_PROFILE_BASE64 }}
+        run: |
+          KEYCHAIN="$RUNNER_TEMP/signing.keychain-db"
+          KEYCHAIN_PASSWORD="$(uuidgen)"
+          echo "$CERT_P12_BASE64" | base64 --decode > "$RUNNER_TEMP/dist.p12"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security import "$RUNNER_TEMP/dist.p12" -P "$CERT_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN"
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security list-keychains -d user -s "$KEYCHAIN" $(security list-keychains -d user | tr -d '"')
+          PROFILES="$HOME/Library/MobileDevice/Provisioning Profiles"
+          mkdir -p "$PROFILES"
+          echo "$PROFILE_BASE64" | base64 --decode > "$PROFILES/mathani-app-store.mobileprovision"
+          # Xcode 16+ also reads profiles from this location.
+          mkdir -p "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles"
+          cp "$PROFILES/mathani-app-store.mobileprovision" "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles/"
+          rm "$RUNNER_TEMP/dist.p12"
+
+      - name: Build signed .ipa
+        run: |
+          flutter build ipa --release --obfuscate --split-debug-info=symbols/ios \
+            --export-options-plist=ios/ExportOptions.plist \
+            ${{ inputs.build_number != '' && format('--build-number={0}', inputs.build_number) || '' }}
+
+      - name: Upload to App Store Connect
+        env:
+          KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
+        run: |
+          mkdir -p "$HOME/.appstoreconnect/private_keys"
+          printf '%s\n' "$PRIVATE_KEY" > "$HOME/.appstoreconnect/private_keys/AuthKey_$KEY_ID.p8"
+          xcrun altool --upload-app --type ios --file build/ios/ipa/*.ipa \
+            --apiKey "$KEY_ID" --apiIssuer "$ISSUER_ID"
+
+      # Keep the .ipa and the Dart symbols (needed to read obfuscated crash stack traces).
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ios-release-${{ github.run_number }}
+          path: |
+            build/ios/ipa/*.ipa
+            symbols/ios
+          if-no-files-found: ignore
+
+      - name: Remove signing files
+        if: always()
+        run: |
+          security delete-keychain "$RUNNER_TEMP/signing.keychain-db" || true
+          rm -rf "$HOME/.appstoreconnect/private_keys"
+          rm -f "$HOME/Library/MobileDevice/Provisioning Profiles/mathani-app-store.mobileprovision"

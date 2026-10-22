@@ -6,6 +6,11 @@
 `versionName`/`versionCode`, iOS as `CFBundleShortVersionString`/`CFBundleVersion`. Bump `build`
 for every store upload, and keep both platforms on the same `x.y.z+build`.
 
+## Android package name
+
+The Play Console app is `com.mthani.app` (`applicationId` in `android/app/build.gradle.kts`). It is
+permanent: every upload must keep it.
+
 ## Android signing (upload key)
 
 Create the upload keystore once, **outside the repository**, and keep an offline backup. Losing
@@ -36,11 +41,25 @@ so they are not a backup: keep the offline copy too.
 
 ## iOS signing (CI)
 
-iOS builds and signing run on macOS CI, because the developer machine is Windows. In App Store
-Connect, create an API key (Users and Access → Integrations, App Manager role), then store these
-as repository secrets: `APP_STORE_CONNECT_KEY_ID`, `APP_STORE_CONNECT_ISSUER_ID` and
-`APP_STORE_CONNECT_PRIVATE_KEY`. The bundle ID `app.mathani.mathani` must be registered in the
-Apple Developer account first.
+iOS builds and signing run on macOS CI (`.github/workflows/ios-release.yml`, started by hand
+from the Actions tab), because the developer machine is Windows. It builds a signed `.ipa` and
+uploads it to App Store Connect, where it appears in TestFlight.
+
+- **Team**: Mercury Engineering & Consultations LLC (`YJBH85NYZU`), the seller shown on the store.
+- **Bundle ID**: `com.mthani.app`, the same as the Android package name, and permanent once the
+  App Store Connect app exists.
+- **Signing**: manual for Release and Profile (`ios/Runner.xcodeproj`, `ios/ExportOptions.plist`):
+  certificate "Apple Distribution: Mercury Engineering & Consultations LLC" and profile
+  "Mathani App Store" (IOS_APP_STORE). Both expire on **22 Oct 2027**: create new ones then
+  and update the secrets.
+- **Repository secrets**: `IOS_DIST_CERT_P12_BASE64`, `IOS_DIST_CERT_PASSWORD`,
+  `IOS_APPSTORE_PROFILE_BASE64`, and the App Store Connect team API key
+  `APP_STORE_CONNECT_KEY_ID`, `APP_STORE_CONNECT_ISSUER_ID`, `APP_STORE_CONNECT_PRIVATE_KEY`.
+  Offline copies of the `.p12` (and its password), the certificate key and the `.p8` are kept with
+  the Android upload key.
+
+Every upload needs a new build number: bump `+build` in `pubspec.yaml`, or set the workflow's
+`build_number` input.
 
 ## Release builds
 

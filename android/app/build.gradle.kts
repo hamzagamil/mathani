@@ -23,8 +23,9 @@ android {
     }
 
     defaultConfig {
-        // Confirm with the owner before the first Play upload; it cannot change afterwards.
-        applicationId = "app.mathani.mathani"
+        // Fixed by the Play Console app; it can never change. `namespace` (the Kotlin package)
+        // is independent of it and stays app.mathani.mathani.
+        applicationId = "com.mthani.app"
         // Android 7.0+ and the API level Google Play requires from 31 Aug 2026 (research R11).
         minSdk = 24
         targetSdk = 36
