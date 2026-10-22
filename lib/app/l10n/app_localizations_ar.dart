@@ -298,4 +298,11 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get showControls => 'إظهار الأدوات';
+
+  @override
+  String get printedLetteringSetting => 'خط المصحف المطبوع';
+
+  @override
+  String get printedLetteringHint =>
+      'حروف مصحف المدينة كما طبعها مجمع الملك فهد. أطفئه لاستخدام الخط المدمج.';
 }

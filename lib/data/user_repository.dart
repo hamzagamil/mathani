@@ -136,6 +136,7 @@ class UserRepository extends ChangeNotifier {
         'true' => true,
         _ => d.controlsHintShown,
       },
+      lettering: pick(Lettering.values, p['lettering'], d.lettering),
     );
   }
 
@@ -159,6 +160,7 @@ class UserRepository extends ChangeNotifier {
       'keep_screen_on': '${p.keepScreenOn}',
       'language': p.language.name,
       'controls_hint_shown': '${p.controlsHintShown}',
+      'lettering': p.lettering.name,
     }.entries) {
       batch.insert('preferences', {'key': entry.key, 'value': entry.value},
           conflictAlgorithm: ConflictAlgorithm.replace);

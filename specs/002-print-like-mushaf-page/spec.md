@@ -35,6 +35,17 @@ breaks and text of the 604 pages do not change. The flowing layout is not affect
   the top and the page number at the bottom, controls shown on tap, and a page edge and subtle
   paper texture (FR-008 to FR-013).
 
+### Session 2026-10-23
+
+- Owner decision: **bundle the printed lettering in the app** instead of an optional download, and
+  drop the download host. The printed lettering is the default; the built-in lettering stays as a
+  setting. FR-014 to FR-021 and SC-007, SC-008 and SC-010 are revised below. The owner accepts the
+  larger app (about 128 MB more).
+- Finding: the King Fahd Complex V2 (1421 AH) edition has the same 604 pages and words per page as
+  the built-in layout, but 3,585 words (4.3%) sit on a different line, and 36 pages place a surah
+  title at the foot of the previous page. The printed lettering therefore uses that edition's own
+  line breaks (FR-017 revised); pages, and so the ayah on screen, never change.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Read lines that look like the printed Mushaf (Priority: P1)
@@ -130,6 +141,10 @@ bookmarks and settings from them.
 ---
 
 ### User Story 4 - Download an exact replica of the printed Mushaf (Priority: P4)
+
+> **Revised 2026-10-23**: the printed lettering is bundled with the app and is the default; there
+> is no download. The reader can switch to the built-in lettering in Settings. FR-014 to FR-021
+> below describe the current behaviour; the original story is kept as a record.
 
 A reader who wants the Mushaf exactly as printed, letter for letter, downloads the "printed
 Mushaf" pack from Settings. Before downloading, they see its size. After it finishes, every page
@@ -240,25 +255,22 @@ delete the pack and confirm the built-in lettering returns and the storage is fr
   screen size.
 - **FR-013**: The print look and paper sheet MUST apply in both day and night themes.
 
-**Exact replica (optional download)**
+**Exact replica (printed lettering, bundled; revised 2026-10-23)**
 
-- **FR-014**: Users MUST be able to download, from Settings, an optional pack that shows every page
-  in the lettering of the printed Madinah Mushaf, letter for letter.
-- **FR-015**: Before downloading, the app MUST show the pack's download size and the storage it
-  will use, check that there is enough free space, and ask for confirmation on mobile data.
-- **FR-016**: The download MUST be resumable and MUST NOT block reading. The pack MUST be checked
-  for completeness and integrity before it is used, and no page may be shown from a partial or
-  damaged pack.
-- **FR-017**: The replica MUST use the same 604 pages, line breaks and marker positions as the
-  built-in layout, so switching lettering never changes which ayah is on screen.
-- **FR-018**: Once installed, the pack MUST work fully offline.
-- **FR-019**: Users MUST be able to switch between the built-in and replica lettering and to delete
-  the pack. Deleting MUST free its storage. The choice MUST persist across restarts.
-- **FR-020**: The pack MUST be fetched as a plain file download with no account, no personal data
-  and no tracking. The app MUST make no network request unless the reader asks to download, update
-  or repair the pack.
-- **FR-021**: With the pack in use, ayah selection, highlighting, bookmarks, search, copy and share
-  MUST behave exactly as with the built-in lettering.
+- **FR-014**: The app MUST include the lettering of the printed Madinah Mushaf (the King Fahd
+  Complex page fonts) and show every page in it, letter for letter. It is the default lettering.
+- **FR-015**: *(Withdrawn: there is no download.)*
+- **FR-016**: Every word MUST have its printed glyph; this is checked when the app is built, and a
+  page whose font is still loading shows blank paper, never another lettering's text.
+- **FR-017**: The printed lettering MUST use the same 604 pages and the same words on each page as
+  the built-in layout, so switching lettering never changes the page or ayah on screen. Within a
+  page it uses the printed edition's own line breaks and surah-title placement.
+- **FR-018**: The printed lettering MUST work fully offline from first install.
+- **FR-019**: Users MUST be able to switch between the printed and built-in lettering in Settings.
+  The choice MUST persist across restarts.
+- **FR-020**: *(Withdrawn: the app makes no network requests.)*
+- **FR-021**: With the printed lettering, ayah selection, highlighting, bookmarks, search, copy and
+  share MUST behave exactly as with the built-in lettering.
 
 **Unchanged**
 
@@ -296,14 +308,14 @@ delete the pack and confirm the built-in lettering returns and the storage is fr
   page". With the replica pack, all 5 say it does.
 - **SC-006**: Page turning stays at 60 fps and cold start to a readable page stays at 2 seconds or
   less on the reference phones, with either lettering (feature 001 SC-001 and SC-002).
-- **SC-007**: The store download stays within the constitution's 30 MB per platform. The paper
-  look adds no more than 0.5 MB to it.
-- **SC-008**: With the replica pack, all 604 pages have the same line breaks as the built-in layout
-  and every page renders with no missing glyphs (checked automatically on every pack version).
+- **SC-007**: The paper look adds no more than 0.5 MB to the store download. The bundled printed
+  lettering adds about 128 MB (owner decision 2026-10-23; exceeds the constitution's 30 MB, see
+  plan › Complexity Tracking).
+- **SC-008**: With the printed lettering, all 604 pages have the same words as the built-in layout,
+  every word has a glyph, and every full line spans the text block (checked automatically).
 - **SC-009**: Readers can show and hide the controls with one tap, and in usability testing at
   least 9 of 10 first-time readers find the index and search within 30 seconds.
-- **SC-010**: An interrupted pack download resumes from where it stopped. On a typical home Wi-Fi
-  connection (50 Mbit/s), the full pack downloads and installs in under 1 minute.
+- **SC-010**: *(Withdrawn with the download.)*
 
 ## Download size estimate
 

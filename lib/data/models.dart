@@ -8,6 +8,10 @@ enum DivisionKind { juz, hizbQuarter }
 
 enum ReadingLayout { mushaf, flowing }
 
+/// How Mushaf pages are lettered (specs/002, User Story 4): the King Fahd Complex page fonts,
+/// exactly as printed, or the bundled Quran font set like print with kashida.
+enum Lettering { printed, builtin }
+
 enum ThemePref { system, day, night }
 
 enum LanguagePref { system, ar, en }
@@ -166,6 +170,7 @@ class ReaderPreferences {
     this.keepScreenOn = false,
     this.language = LanguagePref.system,
     this.controlsHintShown = false,
+    this.lettering = Lettering.printed,
   });
 
   static const minFlowFontSize = 18;
@@ -180,6 +185,10 @@ class ReaderPreferences {
   /// The one-time "tap the page to show controls" hint has been shown (specs/002).
   final bool controlsHintShown;
 
+  /// Lettering of the Mushaf layout. `printed` needs the bundled page fonts
+  /// ([QuranRepository.hasPrintedLettering]); without them the built-in font is used.
+  final Lettering lettering;
+
   ReaderPreferences copyWith({
     ReadingLayout? layout,
     ThemePref? theme,
@@ -187,6 +196,7 @@ class ReaderPreferences {
     bool? keepScreenOn,
     LanguagePref? language,
     bool? controlsHintShown,
+    Lettering? lettering,
   }) =>
       ReaderPreferences(
         layout: layout ?? this.layout,
@@ -195,5 +205,6 @@ class ReaderPreferences {
         keepScreenOn: keepScreenOn ?? this.keepScreenOn,
         language: language ?? this.language,
         controlsHintShown: controlsHintShown ?? this.controlsHintShown,
+        lettering: lettering ?? this.lettering,
       );
 }

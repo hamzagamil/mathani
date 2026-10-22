@@ -71,5 +71,7 @@
   "searchSummary": "{occurrences, plural, =1{موضع واحد} =2{موضعان} few{{occurrencesShown} مواضع} many{{occurrencesShown} موضعًا} other{{occurrencesShown} موضع}} في {ayat, plural, =1{آية واحدة} =2{آيتين} few{{ayatShown} آيات} many{{ayatShown} آية} other{{ayatShown} آية}}",
   "clearSearch": "امسح",
   "controlsHint": "اضغط على الصفحة لإظهار الأدوات",
-  "showControls": "إظهار الأدوات"
+  "showControls": "إظهار الأدوات",
+  "printedLetteringSetting": "خط المصحف المطبوع",
+  "printedLetteringHint": "حروف مصحف المدينة كما طبعها مجمع الملك فهد. أطفئه لاستخدام الخط المدمج."
 }

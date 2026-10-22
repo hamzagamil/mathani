@@ -225,5 +225,7 @@
   "showControls": "Show controls",
   "@showControls": {
     "description": "Accessibility action on a Mushaf page that shows the reader controls."
-  }
+  },
+  "printedLetteringSetting": "Printed Mushaf lettering",
+  "printedLetteringHint": "The Madinah Mushaf's lettering as printed by the King Fahd Complex. Turn off for the built-in font."
 }

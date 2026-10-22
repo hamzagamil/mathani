@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mathani/data/quran_repository.dart';
 import 'package:mathani/data/user_repository.dart';
+import 'package:mathani/features/reader/printed_fonts.dart';
 import 'package:mathani/shared/reader_state.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
@@ -29,6 +30,7 @@ Future<void> loadAppFonts() async {
 /// Opens the real repositories against the bundled quran.db, using SQLite through FFI and a
 /// fresh temporary user database.
 Future<ReaderController> openTestReader() async {
+  PrintedFonts.reset(); // font loads from a previous test can never finish
   sqfliteFfiInit();
   databaseFactory = databaseFactoryFfi;
   final dir = Directory.systemTemp.createTempSync('mathani_test');

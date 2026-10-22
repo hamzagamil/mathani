@@ -232,50 +232,50 @@ lettering returns and the storage is freed.
 
 ### Gate: must pass before T027 onwards
 
-- [ ] T024 [US4] **Spike S-1, layout match.** Obtain QUL's 15-line layout databases for the KFGQPC V2 (1421) and V4 editions, along with their per-word glyph-code scripts, into `tool/sources/` (gitignored). Write `tool/compare_layouts.dart`, a pure Dart `sqlite3` script that compares each candidate's `(page, line)` for every word id against `assets/db/quran.db` `mushaf_lines`. Report per edition the number of words on a different page or line. Write the result into `specs/002-print-like-mushaf-page/research.md` § P6. **Pass** = an edition with 0 differences whose lettering has no tajweed colours. Otherwise stop and ask the owner to choose (research P6 decision 1).
-- [ ] T025 [US4] **Spike S-2, font format and memory.** On one Android device or emulator (API 24+) and one iOS device or simulator (iOS 15+), in a debug-only screen behind `kDebugMode` in `lib/features/settings/settings_screen.dart`:
+- [X] T024 [US4] **Spike S-1, layout match.** Obtain QUL's 15-line layout databases for the KFGQPC V2 (1421) and V4 editions, along with their per-word glyph-code scripts, into `tool/sources/` (gitignored). Write `tool/compare_layouts.dart`, a pure Dart `sqlite3` script that compares each candidate's `(page, line)` for every word id against `assets/db/quran.db` `mushaf_lines`. Report per edition the number of words on a different page or line. Write the result into `specs/002-print-like-mushaf-page/research.md` § P6. **Pass** = an edition with 0 differences whose lettering has no tajweed colours. Otherwise stop and ask the owner to choose (research P6 decision 1).
+- [X] T025 [US4] **Spike S-2, font format and memory.** On one Android device or emulator (API 24+) and one iOS device or simulator (iOS 15+), in a debug-only screen behind `kDebugMode` in `lib/features/settings/settings_screen.dart`:
   - load page 3's font from WOFF2 bytes and from TTF bytes with `FontLoader`;
   - render the page's glyph strings and compare widths;
   - then load 100 page fonts and record the process memory growth.
 
   Write the results into `research.md` § P6. **Pass** = both formats are known for both platforms and the memory growth is recorded. Choose `format` = `woff2` if it loads on both, else `ttf.gz`. Remove the debug screen after the spike.
-- [ ] T026 [US4] **Gate D3/D4.** Confirm in `docs/licences.md` that KFGQPC permission to redistribute the page lettering has been received, and record the chosen host URL for `REPLICA_PACK_URL`. If not received, stop here: Phase 6 stays open and Phases 3–5 ship without it.
+- [X] T026 [US4] **Gate D3/D4.** Confirm in `docs/licences.md` that KFGQPC permission to redistribute the page lettering has been received, and record the chosen host URL for `REPLICA_PACK_URL`. If not received, stop here: Phase 6 stays open and Phases 3–5 ship without it.
 
 ### Tests for User Story 4 (after the gate)
 
-- [ ] T027 [P] [US4] Create `test/unit/replica_pack_test.dart` using a fake HTTP server (`HttpServer.bind` on loopback serving a 3-page fixture pack from `test/fixtures/replica/`) and a temp directory. Cover the [data-model](./data-model.md) state machine:
+- [X] T027 [P] [US4] **Withdrawn 2026-10-23 (bundled, no download or network).** Create `test/unit/replica_pack_test.dart` using a fake HTTP server (`HttpServer.bind` on loopback serving a 3-page fixture pack from `test/fixtures/replica/`) and a temp directory. Cover the [data-model](./data-model.md) state machine:
   - `notInstalled` → `downloading` → `verifying` → `installed`;
   - a stop mid-download leaves `paused` with finished files kept and `.part` deleted on resume;
   - a corrupted file (wrong CRC32) leads to `damaged`, and repair re-downloads only that file;
   - free space below `totalBytes × 1.1` refuses to start;
   - a manifest whose `layout_sha256` differs from `quran.db` `source_qul_layout_sha256` is refused;
   - delete removes `replica/` and reports the bytes freed.
-- [ ] T028 [P] [US4] Create `test/widget/replica_settings_test.dart`:
+- [X] T028 [P] [US4] Create `test/widget/replica_settings_test.dart`:
   - the Settings "Printed Mushaf" section shows the size before download, asks to confirm on mobile data (inject a connectivity flag), shows progress, offers use or delete when installed, and offers repair when damaged;
   - switching lettering keeps `reader.anchor`.
 
 ### Implementation for User Story 4 (after the gate)
 
-- [ ] T029 [US4] Create `tool/build_replica_pack.dart` per the contract's "Build tool" section:
+- [X] T029 [US4] Create `tool/build_replica_pack.dart` per the contract's "Build tool" section:
   - check that every word id in `quran.db` has a glyph and that its page and line match (100% or exit non-zero);
   - write `glyphs.json`, copy the page fonts in the format chosen in T025, and write `manifest.json` with `version`, `edition`, `format`, `layout_sha256` (= `source_qul_layout_sha256`), `totalBytes` and `files[]` (`name`, `bytes`, `crc32`), plus `latest.json`;
   - write output to `build/replica/<version>/`.
-- [ ] T030 [P] [US4] In `lib/data/models.dart`, add `enum Lettering { builtin, replica }` and `ReaderPreferences.lettering` (default `builtin`). In `lib/data/user_repository.dart`, parse and save the key `lettering` (`builtin` / `replica`). `replica` takes effect only while the pack is `installed`. Otherwise use `builtin` and leave the stored value alone.
-- [ ] T031 [US4] Create `lib/features/settings/replica_pack.dart`: `ReplicaPack` (a `ChangeNotifier`) with states `notInstalled`, `downloading`, `paused`, `verifying`, `installed`, `damaged` and `updateAvailable`, derived from disk at startup.
+- [X] T030 [P] [US4] In `lib/data/models.dart`, add `enum Lettering { builtin, replica }` and `ReaderPreferences.lettering` (default `builtin`). In `lib/data/user_repository.dart`, parse and save the key `lettering` (`builtin` / `replica`). `replica` takes effect only while the pack is `installed`. Otherwise use `builtin` and leave the stored value alone.
+- [X] T031 [US4] **Withdrawn 2026-10-23 (bundled, no download or network).** Create `lib/features/settings/replica_pack.dart`: `ReplicaPack` (a `ChangeNotifier`) with states `notInstalled`, `downloading`, `paused`, `verifying`, `installed`, `damaged` and `updateAvailable`, derived from disk at startup.
   - Paths: `getApplicationSupportDirectory()`/`replica/<version>/`; `path_provider` is already a transitive dependency, so confirm it in `pubspec.lock` and add it as a direct dependency only if missing, with a note in the plan.
   - Download: `HttpClient` from `REPLICA_PACK_URL` (`String.fromEnvironment`), one file at a time to `.part`, then rename. It runs only while the app is in the foreground and stops on `AppLifecycleState.paused`.
   - Verification: sizes and CRC32 (a small table-based CRC32 in the same file) against the manifest.
   - Repair, delete and free-space check (`totalBytes × 1.1`).
   - No request is made unless the user starts download, update or repair (FR-020).
-- [ ] T032 [US4] Create `lib/features/reader/replica_lettering.dart`:
+- [X] T032 [US4] Create `lib/features/reader/replica_lettering.dart`:
   - load `glyphs.json` once;
   - load page *n*'s font with `FontLoader('qcf_p${n.toString().padLeft(3, '0')}')` the first time page *n* is shown, prefetching n ± 2. For `ttf.gz`, inflate with `GZipCodec().decode`;
   - expose `glyphFor(wordId)` and `familyFor(page)`.
 
   In `lib/features/reader/mushaf_page_renderer.dart`, when the lettering is `replica` and the page font is loaded, paint each word's glyph string in that family at the same word placements, scaled so the line fills the block, with no kashida. Until the font is loaded, draw the built-in lettering. Hit testing and highlights use the same word rectangles (FR-021).
-- [ ] T033 [US4] In `lib/features/settings/settings_screen.dart`, add the "Printed Mushaf" section per the contract's "App behaviour" table, with strings added to both `.arb` files: size, download, progress, pause or resume, use built-in or printed lettering, delete with the bytes freed, repair, and the mobile-data confirmation dialog.
-- [ ] T034 [US4] Add `<uses-permission android:name="android.permission.INTERNET"/>` to `android/app/src/main/AndroidManifest.xml`. Update the store privacy notes in `docs/` (Data safety and App Privacy: still "no data collected"; the network is used only to download optional files on request) and the attribution for the page lettering in the About section (`lib/features/settings/about_section.dart`), per the D3 permission terms.
-- [ ] T035 [US4] Run `flutter test test/unit/replica_pack_test.dart test/widget/replica_settings_test.dart`, then the replica scenarios in [quickstart.md](./quickstart.md) § Replica pack on one Android and one iOS device.
+- [X] T033 [US4] In `lib/features/settings/settings_screen.dart`, add the "Printed Mushaf" section per the contract's "App behaviour" table, with strings added to both `.arb` files: size, download, progress, pause or resume, use built-in or printed lettering, delete with the bytes freed, repair, and the mobile-data confirmation dialog.
+- [X] T034 [US4] **Withdrawn 2026-10-23 (bundled, no download or network).** Add `<uses-permission android:name="android.permission.INTERNET"/>` to `android/app/src/main/AndroidManifest.xml`. Update the store privacy notes in `docs/` (Data safety and App Privacy: still "no data collected"; the network is used only to download optional files on request) and the attribution for the page lettering in the About section (`lib/features/settings/about_section.dart`), per the D3 permission terms.
+- [X] T035 [US4] Run `flutter test test/unit/replica_pack_test.dart test/widget/replica_settings_test.dart`, then the replica scenarios in [quickstart.md](./quickstart.md) § Replica pack on one Android and one iOS device.
 
 **Checkpoint**: the optional exact replica works offline and can be removed.
 
@@ -373,3 +373,29 @@ Task: "PaperSheet in lib/features/reader/paper_sheet.dart"                      
   when the controls are hidden (`test/support/harness.dart`, `integration_test/toolbar.dart`).
 - **T038**: Android bundle (as CI measures it) 10.34 MB vs baseline 10.32 MB. iOS is measured in CI.
 - **Open**: T024–T035 (User Story 4, gated by D3, S-1 and S-2) and T037, T040 (need a phone).
+
+## Printed lettering, bundled (2026-10-23)
+
+Owner decision: bundle the King Fahd Complex page fonts in the app instead of a download, and drop
+the host. What was built for User Story 4:
+
+- **T024 (S-1)**: `tool/compare_layouts.dart` compared all 83,668 words with the V2 (1421 AH)
+  edition through the Quran.com API: 0 on another page, 3,585 on another line (377 pages), and 36
+  pages with a surah title at the foot of the previous page. The printed lettering therefore uses
+  the V2 edition's own lines (spec FR-017 revised). Printed words spanning two of ours («بَعْدَ مَا»)
+  are aligned by letters; 574 ayah-end markers the source put on a neighbouring line follow their
+  word.
+- **T025 (S-2)**: the Flutter engine does not load WOFF2 (glyphs fell back to boxes), so fonts ship
+  as gzip-compressed TTF and are inflated with `dart:io`. Memory over a long session is still to be
+  measured on a phone (with T037).
+- **T026**: D3 recorded as granted by the owner in `docs/licences.md`; host dropped.
+- **T029**: `tool/build_replica_lettering_test.dart` writes `assets/qcf/p001…p604.ttf.gz`
+  (128.4 MB), the `replica_lines` and `replica_glyphs` tables, and `meta.replica_target_em`
+  (17.51) and `replica_space_em`. All page fonts are registered before measuring.
+- **T030, T033**: `Lettering { printed, builtin }`, default printed; Settings switch "Printed Mushaf
+  lettering".
+- **T032**: `PrintedFonts` loads a page font on first view (n ± 2 prefetched); the renderer draws
+  glyphs at the printed edition's lines with no kashida. Hit-testing allows 0.2 em of slack, since
+  printed lines have almost no word gaps.
+- **T028, T035**: `test/widget/printed_lettering_test.dart` checks all 604 pages (same words, every
+  word has a glyph, full lines, widest gap 0.69 em, 81 centred lines) and the settings switch.

@@ -79,6 +79,9 @@ class MushafPageRenderer extends LeafRenderObjectWidget {
     this.selected,
     this.highlighted,
     this.details,
+    this.printedGlyphs,
+    this.printedFamily,
+    this.printedSpaceEm = 0,
   });
 
   final MushafPage page;
@@ -93,6 +96,14 @@ class MushafPageRenderer extends LeafRenderObjectWidget {
 
   /// Surah and juz printed at the top of the page, with the page number at the bottom (FR-009).
   final MushafPageDetails? details;
+
+  /// Printed lettering (specs/002, User Story 4): each word drawn as its glyph in this page's
+  /// King Fahd Complex font, with no kashida. Null for the built-in font.
+  final Map<int, String>? printedGlyphs;
+  final String? printedFamily;
+
+  /// Gap between printed words, in em of the page font.
+  final double printedSpaceEm;
 
   @override
   RenderMushafPage createRenderObject(BuildContext context) => RenderMushafPage(this);
@@ -146,7 +157,9 @@ class RenderMushafPage extends RenderBox {
     if (!identical(old.page, next.page) ||
         old.palette != next.palette ||
         old.font != next.font ||
-        old.details != next.details) {
+        old.details != next.details ||
+        old.printedFamily != next.printedFamily ||
+        !identical(old.printedGlyphs, next.printedGlyphs)) {
       _disposePainters();
       markNeedsLayout();
     } else if (old.selected != next.selected || old.highlighted != next.highlighted) {
@@ -183,11 +196,14 @@ class RenderMushafPage extends RenderBox {
 
   /// The ayah under [localPosition], for long-press selection (FR-020).
   AyahRef? ayahAt(Offset localPosition) {
+    // Printed lines have almost no gap, so allow a little slack between words.
+    final slack = (_geometry?.fontSize ?? 0) * 0.2;
     for (final line in _placements) {
       if (localPosition.dy < line.top || localPosition.dy > line.top + line.height) continue;
+      final reach = math.max(line.gap / 2, slack);
       for (final w in line.words) {
         final r = line.wordRect(w);
-        if (localPosition.dx >= r.left - line.gap / 2 && localPosition.dx <= r.right + line.gap / 2) {
+        if (localPosition.dx >= r.left - reach && localPosition.dx <= r.right + reach) {
           return w.word.ref;
         }
       }
@@ -208,8 +224,9 @@ class RenderMushafPage extends RenderBox {
     final slots = math.max(PageGeometry.linesPerPage, page.lines.length);
     final lineHeight = block.height / slots;
     final firstTop = block.top + (slots - page.lines.length) * lineHeight / 2;
+    final printed = _config.printedGlyphs;
     final style = TextStyle(
-      fontFamily: TypeScale.quranFamily,
+      fontFamily: _config.printedFamily ?? TypeScale.quranFamily,
       fontSize: geometry.fontSize,
       color: _config.palette.ink,
     );
@@ -220,7 +237,9 @@ class RenderMushafPage extends RenderBox {
       return w;
     }
 
-    final spaceWidth = widthOf(' ');
+    // The page fonts' own spaces vary, so printed lines use one gap from the database.
+    final spaceWidth =
+        printed != null ? _config.printedSpaceEm * geometry.fontSize : widthOf(' ');
     final tatweelWidth = widthOf('ب$tatweelب') - widthOf('بب');
     final target = block.width;
     _layoutDetails(geometry);
@@ -243,14 +262,19 @@ class RenderMushafPage extends RenderBox {
       }
       final placed = [
         for (final w in line.words)
-          _PlacedWord(w, _wordPainters.putIfAbsent(w.id, () => _painter(_display(w), style))),
+          // A printed word whose glyph is drawn by the word before it («بَعْدَ مَا») takes no room.
+          if (printed == null || (printed[w.id] ?? '').isNotEmpty)
+            _PlacedWord(w, _wordPainters.putIfAbsent(w.id, () => _painter(_display(w), style))),
       ];
       final gaps = math.max(0, placed.length - 1);
       final naturalWidths = [for (final p in placed) p.painter.width];
       final natural = naturalWidths.fold<double>(0, (s, w) => s + w) + gaps * spaceWidth;
+      // Printed lines are already lettered to width: no kashida.
       final points = [
-        for (final w in line.words)
-          w.isAyahEnd ? const <JoinPoint>[] : _joinPoints.putIfAbsent(w.id, () => joinPoints(w.text)),
+        for (final p in placed)
+          p.word.isAyahEnd || printed != null
+              ? const <JoinPoint>[]
+              : _joinPoints.putIfAbsent(p.word.id, () => joinPoints(p.word.text)),
       ];
       // A tatweel adds less than its own width once the letters around it change form (about
       // 0.8 of it with Amiri Quran), so justify, shape, and correct by what it really added.
@@ -434,7 +458,11 @@ class RenderMushafPage extends RenderBox {
     p.dispose();
   }
 
-  String _display(Word w) => w.isAyahEnd ? ayahEndGlyphs(w.text, _config.font) : w.text;
+  String _display(Word w) {
+    final printed = _config.printedGlyphs?[w.id];
+    if (printed != null) return printed;
+    return w.isAyahEnd ? ayahEndGlyphs(w.text, _config.font) : w.text;
+  }
 
   TextPainter _painter(String text, TextStyle style) => TextPainter(
         text: TextSpan(text: text, style: style),

@@ -10,6 +10,7 @@ import '../../shared/numerals.dart';
 import '../../shared/reader_state.dart';
 import 'mushaf_page_renderer.dart';
 import 'paper_sheet.dart';
+import 'printed_fonts.dart';
 
 /// The 604-page Mushaf layout. Always right-to-left, so the next page lies to the left and the
 /// reader swipes from left to right to move forward (FR-004), in both interface languages.
@@ -32,7 +33,7 @@ class MushafView extends StatefulWidget {
 class _MushafViewState extends State<MushafView> {
   late final ReaderController _reader = ReaderScope.read(context);
   late final PageController _pages = PageController(initialPage: _reader.page - 1);
-  late final _PageCache _cache = _PageCache(_reader.quran);
+  late _PageCache _cache = _PageCache(_reader.quran, printed: _printed(_reader));
   late int _handledJump = _reader.jumpSerial;
 
   @override
@@ -40,6 +41,10 @@ class _MushafViewState extends State<MushafView> {
     super.initState();
     _cache.prefetchAround(_reader.page);
   }
+
+  /// Whether pages use the printed lettering (the setting, when the page fonts are bundled).
+  static bool _printed(ReaderController r) =>
+      r.preferences.lettering == Lettering.printed && r.quran.hasPrintedLettering;
 
   @override
   void dispose() {
@@ -50,6 +55,9 @@ class _MushafViewState extends State<MushafView> {
   @override
   Widget build(BuildContext context) {
     final reader = ReaderScope.of(context);
+    if (_printed(reader) != _cache.printed) {
+      _cache = _PageCache(reader.quran, printed: _printed(reader))..prefetchAround(reader.page);
+    }
     if (reader.jumpSerial != _handledJump) {
       _handledJump = reader.jumpSerial;
       final target = reader.page - 1;
@@ -70,6 +78,7 @@ class _MushafViewState extends State<MushafView> {
           widget.onPageTurned?.call();
         },
         itemBuilder: (context, i) => _MushafPageItem(
+          key: ValueKey((_cache.printed, i)),
           page: i + 1,
           cache: _cache,
           onAyahLongPress: widget.onAyahLongPress,
@@ -82,6 +91,7 @@ class _MushafViewState extends State<MushafView> {
 
 class _MushafPageItem extends StatefulWidget {
   const _MushafPageItem({
+    super.key,
     required this.page,
     required this.cache,
     this.onAyahLongPress,
@@ -99,7 +109,7 @@ class _MushafPageItem extends StatefulWidget {
 
 class _MushafPageItemState extends State<_MushafPageItem> {
   final _rendererKey = GlobalKey();
-  MushafPage? _page;
+  _CachedPage? _page;
 
   @override
   void initState() {
@@ -114,9 +124,17 @@ class _MushafPageItemState extends State<_MushafPageItem> {
 
   @override
   Widget build(BuildContext context) {
-    final page = _page;
-    if (page == null) return const SizedBox.expand(); // only before the very first load
     final reader = ReaderScope.of(context);
+    final cached = _page;
+    if (cached == null) {
+      // Blank paper while the page (and its printed font) loads; taps still work.
+      return GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: reader.selected != null ? () => reader.select(null) : widget.onTapPage,
+        child: PaperSheet(bindingOnRight: widget.page.isOdd, child: const SizedBox.expand()),
+      );
+    }
+    final page = cached.page;
     final quran = reader.quran;
     final colors = MathaniColors.of(context);
     final l10n = AppLocalizations.of(context);
@@ -149,7 +167,7 @@ class _MushafPageItemState extends State<_MushafPageItem> {
             key: _rendererKey,
             page: page,
             surahNames: {for (final s in quran.surahList) s.number: s.nameAr},
-            targetEm: quran.justifyTargetEm,
+            targetEm: cached.glyphs != null ? quran.printedTargetEm : quran.justifyTargetEm,
             font: quran.font,
             palette: MushafPalette(
               ink: colors.ink,
@@ -162,6 +180,9 @@ class _MushafPageItemState extends State<_MushafPageItem> {
             selected: reader.selected,
             highlighted: reader.highlighted,
             details: MushafPageDetails.of(quran, page.number),
+            printedGlyphs: cached.glyphs,
+            printedFamily: cached.family,
+            printedSpaceEm: quran.printedSpaceEm,
           ),
         ),
       ),
@@ -169,10 +190,19 @@ class _MushafPageItemState extends State<_MushafPageItem> {
   }
 }
 
+/// A page ready to draw: its lines, and for the printed lettering its glyphs and loaded font.
+class _CachedPage {
+  const _CachedPage(this.page, [this.glyphs, this.family]);
+  final MushafPage page;
+  final Map<int, String>? glyphs;
+  final String? family;
+}
+
 /// Small LRU cache of page data, with prefetching of the neighbouring pages so a page turn
-/// never shows an empty frame (SC-002).
+/// never shows an empty frame (SC-002). With [printed], pages come with the printed edition's
+/// lines, glyphs and page font (specs/002, User Story 4).
 class _PageCache {
-  _PageCache(this._quran)
+  _PageCache(this._quran, {required this.printed})
       : _quarterStarts = {
           for (final d in _quran.divisionList)
             if (d.kind == DivisionKind.hizbQuarter) d.start,
@@ -181,20 +211,21 @@ class _PageCache {
   static const _capacity = 7;
 
   final QuranRepository _quran;
+  final bool printed;
   final Set<AyahRef> _quarterStarts;
-  final _pages = <int, MushafPage>{}; // insertion-ordered: LRU
-  final _loading = <int, Future<MushafPage>>{};
+  final _pages = <int, _CachedPage>{}; // insertion-ordered: LRU
+  final _loading = <int, Future<_CachedPage>>{};
 
-  MushafPage? peek(int page) {
+  _CachedPage? peek(int page) {
     final p = _pages.remove(page);
     if (p != null) _pages[page] = p; // mark as recently used
     return p;
   }
 
-  Future<MushafPage> load(int page) {
+  Future<_CachedPage> load(int page) {
     final cached = peek(page);
     if (cached != null) return Future.value(cached);
-    return _loading[page] ??= _quran.page(page).then((p) {
+    return _loading[page] ??= _fetch(page).then((p) {
       _loading.remove(page);
       _pages[page] = p;
       while (_pages.length > _capacity) {
@@ -202,6 +233,12 @@ class _PageCache {
       }
       return p;
     });
+  }
+
+  Future<_CachedPage> _fetch(int page) async {
+    if (!printed) return _CachedPage(await _quran.page(page));
+    final (lines, family) = await (_quran.page(page, printed: true), PrintedFonts.load(page)).wait;
+    return _CachedPage(lines, await _quran.printedGlyphs(lines), family);
   }
 
   void prefetchAround(int page) {

@@ -160,4 +160,10 @@ only in the gated phase.
 | Item | Why Needed | Simpler Alternative Rejected Because |
 | --- | --- | --- |
 | Kashida justification engine (`kashida.dart`) | The only way to fill lines like print with Unicode fonts. Gaps alone are the defect (research P1, P2) | Gap-only justification is today's behaviour. Horizontal glyph scaling distorts letters. DigitalKhatt needs a layout engine Flutter lacks. |
-| Replica pack download and verification (pack phase) | The owner chose an exact replica as an optional download (spec Q1: C), which is too large to bundle (93 MB) | Bundling breaks the 30 MB limit. A third-party downloader or zip package adds dependencies, while `dart:io` covers it. |
+| ~~Replica pack download and verification~~ | Withdrawn 2026-10-23: the printed lettering is bundled instead | — |
+
+### Constitution violation (2026-10-23)
+
+| Principle | Violation | Why | Status |
+| --- | --- | --- | --- |
+| IV. Lean by Default: "Initial store download size MUST stay ≤ 30 MB per platform" | The bundled page fonts add **128.4 MB** (604 gzip-compressed TTF files) | Owner decision to bundle the exact printed lettering rather than download it. The Flutter engine cannot load WOFF2 (the 93 MB form), so TTF is required | **Needs a constitution amendment** (`/speckit-constitution`) before release; CI's size check fails until then |

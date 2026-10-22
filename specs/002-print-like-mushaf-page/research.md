@@ -205,3 +205,20 @@ gates now. The built-in print-like page (P2–P5) ships without it.
 **Alternatives considered**: bundling the pack in the app (90+ MB against the 30 MB limit);
 `package:archive` for a single zip (a new dependency, and resuming one large file is harder);
 background download services (Principle IV: no background work without need).
+
+## P7. Outcome of spikes S-1 and S-2, and the bundled lettering (2026-10-23)
+
+- **S-1, layout match**: all 83,668 words compared with the V2 (1421 AH) edition: 0 on another page,
+  3,585 (4.3%) on another line across 377 pages; 36 pages place a surah title at the foot of the
+  previous page. Decision: the printed lettering uses the V2 edition's own lines, which keeps every
+  page and its words, so the ayah on screen never changes when switching lettering.
+- **S-2, font format**: the Flutter engine does not load WOFF2 (all glyphs fell back to boxes in
+  the test engine). Decision: ship gzip-compressed TTF and inflate with `dart:io` when a page is
+  first shown. 604 files, 128.4 MB. Memory on a phone is still to be measured.
+- **Owner decision**: bundle the fonts in the app (no download, no host, no network permission).
+- **Data quality**: the source places 574 ayah-end markers on a neighbouring line; in print the
+  number follows the ayah's last word, so markers take their word's line. Printed words that span
+  two of ours («بَعْدَ مَا», 3 cases) are aligned by letters.
+- **Measuring**: register every page font before measuring; measuring right after registering one
+  font can fall back to another page's font. Gaps use the median space, since a few page fonts have
+  a much wider space glyph. Target width 17.51 em; 81 short lines centred.

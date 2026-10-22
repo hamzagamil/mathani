@@ -289,4 +289,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get showControls => 'Show controls';
+
+  @override
+  String get printedLetteringSetting => 'Printed Mushaf lettering';
+
+  @override
+  String get printedLetteringHint =>
+      'The Madinah Mushaf\'s lettering as printed by the King Fahd Complex. Turn off for the built-in font.';
 }

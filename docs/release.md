@@ -87,3 +87,4 @@ cannot be combined with `--split-debug-info`: measure size with a separate build
 | --- | --- | --- | --- | --- | --- | --- |
 | 1.0.0+1 | 2026-10-14 | `0561d2fa1d59908609246add9c8244671a3608d1a8c732e8112a8ea940018bd2` | 20.2 MB (arm64 APK) | — | 0.49 s on Galaxy S24 FE / — | First Google Play release. Upload key SHA-256 `43:65:6C:58:…:CE:9B:20:C9` |
 | 1.1.0+2 | 2026-10-22 | `694db8ed42ebdd6b339145b778a9a732865223122d0376ad82d28856bf88bf5d` | 10.34 MB (arm64 download, CI method) | — (CI) | not measured | Print-like Mushaf page (002), search fixes (003). Device checks T037/T040 not yet run |
+| 1.2.0+3 | 2026-10-23 | `fe92eb72a4c030b6999ded9c05103f4b873f6f1fac773a0ee76d21bc834881df` | ~139 MB (arm64 download; bundle 148.8 MB) | — (CI) | not measured | Printed lettering: King Fahd Complex V2 page fonts bundled (128 MB), default. Over the 30 MB constitution budget (owner decision; amendment pending). D3 request not yet sent |

@@ -17,6 +17,8 @@ class QuranRepository {
     required this.p98LineWidthEm,
     required this.justifyTargetEm,
     required this.font,
+    this.printedTargetEm = 0,
+    this.printedSpaceEm = 0,
   });
 
   static const pageCount = 604;
@@ -38,6 +40,16 @@ class QuranRepository {
 
   /// Quran font the database was built for (`amiri-quran` or `kfgqpc-hafs`).
   final String font;
+
+  /// Width every printed-lettering line is filled to, in em; 0 when the database has no printed
+  /// lettering (specs/002, tool/build_replica_lettering_test.dart).
+  final double printedTargetEm;
+
+  /// The gap between printed words, in em.
+  final double printedSpaceEm;
+
+  /// Whether the King Fahd Complex page fonts and their lines are bundled.
+  bool get hasPrintedLettering => printedTargetEm > 0;
 
   List<Surah>? _surahs;
   List<Division>? _divisions;
@@ -122,6 +134,8 @@ class QuranRepository {
       p98LineWidthEm: p98,
       justifyTargetEm: double.tryParse(meta['justify_target_em'] ?? '') ?? p98 * 1.034,
       font: meta['font'] ?? 'amiri-quran',
+      printedTargetEm: double.tryParse(meta['replica_target_em'] ?? '') ?? 0,
+      printedSpaceEm: double.tryParse(meta['replica_space_em'] ?? '') ?? 0,
     );
     // Small tables used by every page header and index; loaded once, before the first frame.
     await (repo.surahs(), repo.divisions()).wait;
@@ -162,9 +176,11 @@ class QuranRepository {
   }
 
   /// Lines of [page] with their words, for the Mushaf layout. Budget ≤ 10 ms.
-  Future<MushafPage> page(int page) async {
+  /// One Mushaf page. With [printed], its lines are the printed edition's: the same words on
+  /// the same page, with that edition's line breaks and surah-title placement.
+  Future<MushafPage> page(int page, {bool printed = false}) async {
     final lineRows = await _db.query(
-      'mushaf_lines',
+      printed ? 'replica_lines' : 'mushaf_lines',
       where: 'page = ?',
       whereArgs: [page],
       orderBy: 'line',
@@ -214,6 +230,20 @@ class QuranRepository {
   }
 
   /// Words of a single ayah (copy and share).
+  /// The printed-lettering glyphs of every word on [page]: word id → glyph string, drawn in
+  /// that page's font. Empty when the previous word's glyph covers this word too.
+  Future<Map<int, String>> printedGlyphs(MushafPage page) async {
+    final ids = [for (final l in page.lines) for (final w in l.words) w.id];
+    if (ids.isEmpty) return const {};
+    return {
+      for (final r in await _db.rawQuery(
+        'SELECT word_id, glyphs FROM replica_glyphs WHERE word_id BETWEEN ? AND ?',
+        [ids.reduce(_min), ids.reduce(_max)],
+      ))
+        r['word_id'] as int: r['glyphs'] as String,
+    };
+  }
+
   Future<List<Word>> wordsOf(AyahRef ref) {
     final a = ayahAt(ref);
     return _words(a.firstWordId, a.lastWordId);

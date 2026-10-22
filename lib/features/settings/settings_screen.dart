@@ -126,6 +126,21 @@ class SettingsScreen extends StatelessWidget {
               ),
               hint: l10n.textSizeHint,
             ),
+          if (reader.quran.hasPrintedLettering)
+            Padding(
+              padding: const EdgeInsets.only(top: Space.s3),
+              child: SwitchListTile(
+                secondary: const Icon(MathaniIcons.mushaf),
+                title: Text(l10n.printedLetteringSetting),
+                subtitle: Text(
+                  l10n.printedLetteringHint,
+                  style: TypeScale.caption.copyWith(color: colors.inkMuted),
+                ),
+                value: prefs.lettering == Lettering.printed,
+                onChanged: (v) =>
+                    set((p) => p.copyWith(lettering: v ? Lettering.printed : Lettering.builtin)),
+              ),
+            ),
           Padding(
             padding: const EdgeInsets.only(top: Space.s3),
             child: SwitchListTile(

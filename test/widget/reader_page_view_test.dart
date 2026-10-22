@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mathani/app/app.dart';
 import 'package:mathani/data/models.dart';
+import 'package:mathani/features/reader/mushaf_page_renderer.dart';
 import 'package:mathani/shared/mathani_icons.dart';
 import 'package:mathani/shared/reader_state.dart';
 
@@ -93,6 +94,10 @@ void main() {
     expect(reader.selected, isNull, reason: 'a tap clears the selection');
     expect(controlsShown(tester), isFalse, reason: '...and leaves the controls alone');
 
+    // The printed page font loads in the background; long-press needs the page drawn.
+    for (var i = 0; i < 30 && find.byType(MushafPageRenderer).evaluate().isEmpty; i++) {
+      await settle(tester, 1);
+    }
     await tester.longPressAt(tester.getCenter(find.byType(PageView)));
     await settle(tester, 3);
     expect(find.byType(BottomSheet), findsOneWidget, reason: 'long-press opens the ayah actions');

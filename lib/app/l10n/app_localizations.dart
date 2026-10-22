@@ -534,6 +534,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Show controls'**
   String get showControls;
+
+  /// No description provided for @printedLetteringSetting.
+  ///
+  /// In en, this message translates to:
+  /// **'Printed Mushaf lettering'**
+  String get printedLetteringSetting;
+
+  /// No description provided for @printedLetteringHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The Madinah Mushaf\'s lettering as printed by the King Fahd Complex. Turn off for the built-in font.'**
+  String get printedLetteringHint;
 }
 
 class _AppLocalizationsDelegate
