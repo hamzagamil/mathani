@@ -48,6 +48,12 @@ jobs:
           dart run tool/size_check.dart android
           $(ls -t ~/.flutter-devtools/*code-size-analysis*.json | head -1)
           ${{ contains(github.event.pull_request.labels.*.name, 'size-approved') && '--approved' || '' }}
+      # The emulator needs more free disk than the runner has after the build.
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/.ghcup /usr/share/swift \
+            /opt/hostedtoolcache/CodeQL /usr/local/share/powershell /usr/local/share/chromium
+          df -h /
       - name: Enable KVM
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -81,6 +87,15 @@ jobs:
       - name: Integration tests on iOS simulator (iPhone SE 3rd gen)
         if: hashFiles('integration_test/**') != ''
         run: |
-          UDID=$(xcrun simctl list devices available | grep -m1 "iPhone SE (3rd generation)" | grep -oE '[0-9A-F-]{36}')
+          # The runner image may ship without an SE simulator: create one, else use any iPhone.
+          UDID=$(xcrun simctl list devices available | grep -m1 "iPhone SE (3rd generation)" | grep -oE '[0-9A-F-]{36}' || true)
+          if [ -z "$UDID" ]; then
+            RUNTIME=$(xcrun simctl list runtimes available | grep -oE 'com\.apple\.CoreSimulator\.SimRuntime\.iOS-[0-9-]+' | tail -1)
+            UDID=$(xcrun simctl create "iPhone SE CI" com.apple.CoreSimulator.SimDeviceType.iPhone-SE-3rd-generation "$RUNTIME" || true)
+          fi
+          if [ -z "$UDID" ]; then
+            UDID=$(xcrun simctl list devices available | grep -m1 "iPhone" | grep -oE '[0-9A-F-]{36}')
+          fi
+          xcrun simctl list devices | grep "$UDID"
           xcrun simctl boot "$UDID"
           flutter test integration_test -d "$UDID"
