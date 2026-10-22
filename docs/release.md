@@ -64,11 +64,13 @@ Every upload needs a new build number: bump `+build` in `pubspec.yaml`, or set t
 ## Release builds
 
 ```powershell
-flutter build appbundle --release --obfuscate --split-debug-info=symbols/android --analyze-size
-flutter build ipa --release --obfuscate --split-debug-info=symbols/ios --analyze-size   # macOS CI
+flutter build appbundle --release --obfuscate --split-debug-info=symbols/android
+flutter build ipa --release --obfuscate --split-debug-info=symbols/ios   # macOS CI
 ```
 
-Keep `symbols/` from each release (gitignored) to symbolicate crash stack traces.
+Keep `symbols/` from each release (gitignored) to symbolicate crash stack traces. `--analyze-size`
+cannot be combined with `--split-debug-info`: measure size with a separate build, as CI does
+(`flutter build appbundle --release --target-platform android-arm64 --analyze-size`).
 
 ## Release checklist
 
@@ -84,3 +86,4 @@ Keep `symbols/` from each release (gitignored) to symbolicate crash stack traces
 | Version | Date | quran.db SHA-256 | Android size | iOS size | Cold start (A15 / SE2) | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
 | 1.0.0+1 | 2026-10-14 | `0561d2fa1d59908609246add9c8244671a3608d1a8c732e8112a8ea940018bd2` | 20.2 MB (arm64 APK) | — | 0.49 s on Galaxy S24 FE / — | First Google Play release. Upload key SHA-256 `43:65:6C:58:…:CE:9B:20:C9` |
+| 1.1.0+2 | 2026-10-22 | `694db8ed42ebdd6b339145b778a9a732865223122d0376ad82d28856bf88bf5d` | 10.34 MB (arm64 download, CI method) | — (CI) | not measured | Print-like Mushaf page (002), search fixes (003). Device checks T037/T040 not yet run |
