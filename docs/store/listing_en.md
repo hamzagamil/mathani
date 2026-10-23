@@ -28,13 +28,23 @@ you.
 - Index of surahs, ajza' and hizb quarters; go to any page or ayah.
 - Bookmarks to save your place and return to it.
 - Search the Quran text in Arabic, with or without diacritics.
+- Listen ayah by ayah to Sheikh Mahmoud Khalil Al-Husary or Sheikh Mohamed Siddiq El-Minshawi
+  (Murattal), with the recited ayah highlighted as the Mushaf follows along. Keeps playing with
+  the screen off; download surahs to listen offline.
 - Copy and share an ayah with its surah and ayah number.
 - Night theme and keep-screen-on for reading.
-- Fully offline from the first launch.
+- Reading, search and bookmarks work fully offline from the first launch; recitations stream
+  over the internet unless downloaded.
 - Arabic and English interface.
 - No account, no ads, no data collected.
 
 Every ayah is verified against the Tanzil Project text (tanzil.net).
+
+## What's new (1.3.0)
+
+Listen to the Quran ayah by ayah: Sheikh Mahmoud Khalil Al-Husary or Sheikh Mohamed Siddiq
+El-Minshawi (Murattal). The recited ayah is highlighted and the Mushaf turns with it. Play from any
+page or ayah, keep listening with the screen off, and download surahs to listen offline.
 
 ## Keywords (App Store, 100 characters)
 
