@@ -546,6 +546,288 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The Madinah Mushaf\'s lettering as printed by the King Fahd Complex. Turn off for the built-in font.'**
   String get printedLetteringHint;
+
+  /// Reader toolbar: start the recitation from this page (specs/004).
+  ///
+  /// In en, this message translates to:
+  /// **'Listen'**
+  String get listen;
+
+  /// No description provided for @playFromAyah.
+  ///
+  /// In en, this message translates to:
+  /// **'Play from this ayah'**
+  String get playFromAyah;
+
+  /// Screen-reader label of the docked recitation bar.
+  ///
+  /// In en, this message translates to:
+  /// **'Recitation player'**
+  String get recitationPlayer;
+
+  /// Recitation bar and lock screen: the ayah being recited. In English, name is the transliterated surah name and ref is surah:ayah (67:12).
+  ///
+  /// In en, this message translates to:
+  /// **'{name} · {ref}'**
+  String recitedAyah(String name, String ref);
+
+  /// Recitation bar and lock screen: the basmala before ayah 1 is being recited.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} · Basmala'**
+  String recitedBasmala(String name);
+
+  /// No description provided for @basmala.
+  ///
+  /// In en, this message translates to:
+  /// **'Basmala'**
+  String get basmala;
+
+  /// No description provided for @murattal.
+  ///
+  /// In en, this message translates to:
+  /// **'Murattal'**
+  String get murattal;
+
+  /// No description provided for @reciter.
+  ///
+  /// In en, this message translates to:
+  /// **'Reciter'**
+  String get reciter;
+
+  /// No description provided for @chooseReciter.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose reciter'**
+  String get chooseReciter;
+
+  /// Settings section title.
+  ///
+  /// In en, this message translates to:
+  /// **'Recitations'**
+  String get recitations;
+
+  /// No description provided for @playRecitation.
+  ///
+  /// In en, this message translates to:
+  /// **'Play'**
+  String get playRecitation;
+
+  /// No description provided for @pauseRecitation.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get pauseRecitation;
+
+  /// No description provided for @previousAyah.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous ayah'**
+  String get previousAyah;
+
+  /// No description provided for @nextAyah.
+  ///
+  /// In en, this message translates to:
+  /// **'Next ayah'**
+  String get nextAyah;
+
+  /// No description provided for @closePlayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop and close'**
+  String get closePlayer;
+
+  /// No description provided for @recitationOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection. Download this surah to listen offline.'**
+  String get recitationOffline;
+
+  /// No description provided for @recitationFetchFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load this ayah.'**
+  String get recitationFetchFailed;
+
+  /// No description provided for @retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retry;
+
+  /// No description provided for @reciterNotDownloaded.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} isn\'t downloaded for this surah'**
+  String reciterNotDownloaded(String name);
+
+  /// No description provided for @recitationEnded.
+  ///
+  /// In en, this message translates to:
+  /// **'Recitation finished'**
+  String get recitationEnded;
+
+  /// No description provided for @backToRecitation.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to recitation'**
+  String get backToRecitation;
+
+  /// No description provided for @download.
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get download;
+
+  /// No description provided for @downloads.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloads'**
+  String get downloads;
+
+  /// No description provided for @downloadRecitation.
+  ///
+  /// In en, this message translates to:
+  /// **'Download recitation ({size})'**
+  String downloadRecitation(String size);
+
+  /// No description provided for @stopDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop download'**
+  String get stopDownload;
+
+  /// No description provided for @deleteDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete download'**
+  String get deleteDownload;
+
+  /// No description provided for @deleteAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete all'**
+  String get deleteAll;
+
+  /// No description provided for @deleteAllConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete all {name} downloads?'**
+  String deleteAllConfirm(String name);
+
+  /// No description provided for @waiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting'**
+  String get waiting;
+
+  /// No description provided for @stoppedResume.
+  ///
+  /// In en, this message translates to:
+  /// **'Stopped — Resume'**
+  String get stoppedResume;
+
+  /// No description provided for @resume.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume'**
+  String get resume;
+
+  /// No description provided for @stopReasonNoConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection'**
+  String get stopReasonNoConnection;
+
+  /// No description provided for @stopReasonNoStorage.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough storage'**
+  String get stopReasonNoStorage;
+
+  /// No description provided for @stopReasonFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t download'**
+  String get stopReasonFailed;
+
+  /// No description provided for @downloaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloaded'**
+  String get downloaded;
+
+  /// No description provided for @surahOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Surah options'**
+  String get surahOptions;
+
+  /// No description provided for @downloadsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No surahs downloaded yet. Download one from the Surahs index.'**
+  String get downloadsEmpty;
+
+  /// No description provided for @downloadOnMobileData.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re on mobile data. Download {size}?'**
+  String downloadOnMobileData(String size);
+
+  /// No description provided for @notEnoughStorage.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough storage: {size} needed'**
+  String notEnoughStorage(String size);
+
+  /// No description provided for @noInternet.
+  ///
+  /// In en, this message translates to:
+  /// **'No internet connection'**
+  String get noInternet;
+
+  /// No description provided for @clearRecent.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear recent recitations'**
+  String get clearRecent;
+
+  /// No description provided for @clearRecentConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete recently played ayat ({size})? Downloads are kept.'**
+  String clearRecentConfirm(String size);
+
+  /// No description provided for @spaceFreed.
+  ///
+  /// In en, this message translates to:
+  /// **'{size} freed'**
+  String spaceFreed(String size);
+
+  /// No description provided for @sizeMb.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} MB'**
+  String sizeMb(String n);
+
+  /// No description provided for @sizeKb.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} KB'**
+  String sizeKb(String n);
+
+  /// Android notification channel name for the recitation player.
+  ///
+  /// In en, this message translates to:
+  /// **'Recitation'**
+  String get recitationChannel;
+
+  /// No description provided for @recitationAttribution.
+  ///
+  /// In en, this message translates to:
+  /// **'Recitations: Sheikh Mahmoud Khalil Al-Husary and Sheikh Mohamed Siddiq El-Minshawi (Murattal), via EveryAyah.com'**
+  String get recitationAttribution;
 }
 
 class _AppLocalizationsDelegate

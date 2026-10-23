@@ -53,6 +53,9 @@ class QuranRepository {
 
   List<Surah>? _surahs;
   List<Division>? _divisions;
+  List<Reciter> _reciters = const [];
+  final Map<(String, int), List<int>> _recordingBytes = {};
+  final Map<bool, List<int>> _basmalaPages = {};
 
   /// Copies the bundled database on first launch (or when the bundled build changed), then
   /// opens it read-only and loads the small in-memory ayah index used for navigation.
@@ -138,7 +141,7 @@ class QuranRepository {
       printedSpaceEm: double.tryParse(meta['replica_space_em'] ?? '') ?? 0,
     );
     // Small tables used by every page header and index; loaded once, before the first frame.
-    await (repo.surahs(), repo.divisions()).wait;
+    await (repo.surahs(), repo.divisions(), repo._loadReciters()).wait;
     return repo;
   }
 
@@ -277,6 +280,87 @@ class QuranRepository {
             openingWords: r['opening_words'] as String,
           ),
       ];
+
+  // --- Recitations (specs/004-ayah-recitations/contracts/recitation-catalogue.md) -----------
+
+  /// Reciters in list order. Empty when the database has no recitation catalogue.
+  List<Reciter> get reciters => _reciters;
+
+  Reciter? reciter(String id) {
+    for (final r in _reciters) {
+      if (r.id == id) return r;
+    }
+    return null;
+  }
+
+  /// The reciter with [id], or the default when it is unknown (for example, removed in a later
+  /// release). Null only when there is no catalogue at all.
+  Reciter? reciterOrDefault(String id) =>
+      reciter(id) ?? reciter(Reciter.defaultId) ?? (_reciters.isEmpty ? null : _reciters.first);
+
+  Future<void> _loadReciters() async {
+    final exists = await _db.rawQuery(
+        "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'reciters'");
+    if (exists.isEmpty) return;
+    _reciters = [
+      for (final r in await _db.query('reciters', orderBy: 'sort'))
+        Reciter(
+          id: r['id'] as String,
+          nameAr: r['name_ar'] as String,
+          nameEn: r['name_en'] as String,
+          shortAr: r['short_ar'] as String,
+          shortEn: r['short_en'] as String,
+          style: r['style'] as String,
+          baseUrl: r['base_url'] as String,
+          mirrorUrl: r['mirror_url'] as String,
+          bitrateKbps: r['bitrate_kbps'] as int,
+          sort: r['sort'] as int,
+        ),
+    ];
+  }
+
+  /// Whether a basmala is recited before ayah 1 of [surah]: not in Al-Fatiha (its 1:1 is the
+  /// basmala) and not in At-Tawbah.
+  static bool hasBasmalaItem(int surah) => surah != 1 && surah != 9;
+
+  /// File sizes of [reciter]'s recordings of ayat 1..n of [surah]. Loaded on first use per
+  /// surah, never on the startup path.
+  Future<List<int>> recordingBytes(String reciter, int surah) async {
+    final key = (reciter, surah);
+    final cached = _recordingBytes[key];
+    if (cached != null) return cached;
+    final rows = await _db.query('recitation_files',
+        columns: ['bytes'],
+        where: 'reciter = ? AND surah = ?',
+        whereArgs: [reciter, surah],
+        orderBy: 'ayah');
+    return _recordingBytes[key] = [for (final r in rows) r['bytes'] as int];
+  }
+
+  /// Bytes to download [surah] for [reciter]: every ayah, plus 1:1 as the basmala when the surah
+  /// has one (FR-028).
+  Future<int> surahDownloadBytes(String reciter, int surah) async {
+    var total = (await recordingBytes(reciter, surah)).fold(0, (a, b) => a + b);
+    if (hasBasmalaItem(surah)) total += (await recordingBytes(reciter, 1)).first;
+    return total;
+  }
+
+  /// The page holding [surah]'s basmala line, in the printed edition's lines when [printed]
+  /// (where 36 surah titles sit at the foot of the previous page) or the built-in layout's.
+  /// Falls back to the page of ayah 1 when the surah has no basmala line.
+  Future<int> basmalaPageOf(int surah, {required bool printed}) async {
+    final table = printed && hasPrintedLettering ? 'replica_lines' : 'mushaf_lines';
+    final pages = _basmalaPages[printed && hasPrintedLettering] ??= await () async {
+      final byStart = [for (final s in _surahs!) s.startPage];
+      for (final r in await _db.rawQuery(
+          "SELECT surah, MIN(page) AS page FROM $table WHERE type = 'basmallah' GROUP BY surah")) {
+        final s = r['surah'] as int?;
+        if (s != null && s >= 1 && s <= 114) byStart[s - 1] = r['page'] as int;
+      }
+      return byStart;
+    }();
+    return pages[surah - 1];
+  }
 
   /// Attribution strings from `meta` for the About screen.
   Future<Map<String, String>> attributions() async => {

@@ -7,6 +7,7 @@ import '../../data/models.dart';
 import '../../shared/mathani_icons.dart';
 import '../../shared/numerals.dart';
 import '../../shared/reader_state.dart';
+import '../recitation/recitation_settings.dart';
 import 'about_section.dart';
 
 /// Reading layout, theme, flowing text size, keep-screen-on and language. Every change applies
@@ -154,6 +155,7 @@ class SettingsScreen extends StatelessWidget {
               onChanged: (v) => set((p) => p.copyWith(keepScreenOn: v)),
             ),
           ),
+          const RecitationSettings(),
           section(
             l10n.languageSetting,
             SegmentedButton<LanguagePref>(

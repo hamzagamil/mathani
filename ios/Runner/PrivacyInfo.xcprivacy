@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <!-- App privacy manifest. Mathani collects no data and does no tracking (FR-027).
-     Flutter and each plugin ship their own manifests for the required-reason APIs they use. -->
+     Flutter and each plugin ship their own manifests for the required-reason APIs they use.
+     App code (specs/004 recitations) checks free disk space before a download (AppDelegate.swift)
+     and reads modification times of its own cached recordings to trim the cache. -->
 <plist version="1.0">
 <dict>
 	<key>NSPrivacyTracking</key>
@@ -11,6 +13,23 @@
 	<key>NSPrivacyCollectedDataTypes</key>
 	<array/>
 	<key>NSPrivacyAccessedAPITypes</key>
-	<array/>
+	<array>
+		<dict>
+			<key>NSPrivacyAccessedAPIType</key>
+			<string>NSPrivacyAccessedAPICategoryDiskSpace</string>
+			<key>NSPrivacyAccessedAPITypeReasons</key>
+			<array>
+				<string>E174.1</string>
+			</array>
+		</dict>
+		<dict>
+			<key>NSPrivacyAccessedAPIType</key>
+			<string>NSPrivacyAccessedAPICategoryFileTimestamp</string>
+			<key>NSPrivacyAccessedAPITypeReasons</key>
+			<array>
+				<string>C617.1</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

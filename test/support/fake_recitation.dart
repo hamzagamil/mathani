@@ -1,0 +1,139 @@
+import 'dart:async';
+import 'dart:io';
+
+import 'package:mathani/data/models.dart';
+import 'package:mathani/features/recitation/audio_engine.dart';
+import 'package:mathani/features/recitation/ayah_fetcher.dart';
+import 'package:mathani/features/recitation/recitation_controller.dart';
+import 'package:mathani/features/recitation/recited_item.dart';
+import 'package:mathani/shared/reader_state.dart';
+
+/// A player that only records what it is told and lets tests end items (specs/004 tests).
+class FakeAudioEngine implements AudioEngine {
+  final _events = StreamController<EngineEvent>.broadcast();
+  final window = <RecitedItem>[];
+  int current = 0;
+  bool playing = false;
+  int stops = 0;
+
+  RecitedItem? get currentItem => window.isEmpty ? null : window[current];
+
+  @override
+  Stream<EngineEvent> get events => _events.stream;
+
+  @override
+  Future<void> setWindow(List<(RecitedItem, File)> items, {int currentIndex = 0}) async {
+    window
+      ..clear()
+      ..addAll([for (final (i, _) in items) i]);
+    current = currentIndex;
+    _events.add(ItemStarted(window[current]));
+  }
+
+  @override
+  Future<void> append(RecitedItem item, File file) async => window.add(item);
+
+  @override
+  Future<void> removeFirst() async {
+    if (window.isEmpty) return;
+    window.removeAt(0);
+    current = current > 0 ? current - 1 : 0;
+  }
+
+  @override
+  Future<void> play() async => playing = true;
+
+  @override
+  Future<void> pause() async => playing = false;
+
+  @override
+  Future<void> stop() async {
+    playing = false;
+    window.clear();
+    stops++;
+  }
+
+  @override
+  Future<void> dispose() => _events.close();
+
+  /// The current item finishes: the next one in the window starts, or the window completes.
+  void finishCurrent() {
+    if (current + 1 < window.length) {
+      current++;
+      _events.add(ItemStarted(window[current]));
+    } else {
+      _events.add(WindowCompleted(window[current]));
+    }
+  }
+
+  /// The system paused playback (a call, unplugged headphones).
+  void pausedBySystem() {
+    playing = false;
+    _events.add(const EnginePausedBySystem());
+  }
+}
+
+/// A fetcher whose resolves can be held, failed or answered at once.
+class FakeFetcher extends AyahFetcher {
+  FakeFetcher()
+      : super(
+          recordingSize: (_, _, _) async => 1,
+          cacheRoot: () async => Directory.systemTemp,
+          supportRoot: () async => Directory.systemTemp,
+        );
+
+  /// Every resolve, in call order: (reciter id, item).
+  final resolved = <(String, RecitedItem)>[];
+  final failing = <RecitedItem, FetchError>{};
+  final holding = <RecitedItem>{};
+  bool holdAll = false;
+  final _held = <RecitedItem, Completer<File>>{};
+
+  /// Reciters whose files are "not downloaded" while offline.
+  final offlineReciters = <String>{};
+
+  List<RecitedItem> get resolvedItems => [for (final (_, i) in resolved) i];
+
+  @override
+  Future<File> resolve(Reciter r, RecitedItem item, {bool priority = true}) {
+    resolved.add((r.id, item));
+    if (offlineReciters.contains(r.id)) {
+      return Future.error(const FetchException(FetchError.offline));
+    }
+    final error = failing[item];
+    if (error != null) return Future.error(FetchException(error));
+    if (holdAll || holding.contains(item)) {
+      return (_held[item] ??= Completer<File>()).future;
+    }
+    return Future.value(File('${r.id}-$item.mp3'));
+  }
+
+  /// Answers a held resolve.
+  void release(RecitedItem item) {
+    holding.remove(item);
+    _held.remove(item)?.complete(File('$item.mp3'));
+  }
+
+  /// Fails a held resolve.
+  void failHeld(RecitedItem item, FetchError error) {
+    holding.remove(item);
+    _held.remove(item)?.completeError(FetchException(error));
+  }
+
+  @override
+  void cancelPrefetch() {}
+
+  @override
+  void protect(Iterable<String> paths) {}
+
+  @override
+  Future<File> cacheFile(String reciter, int surah, int ayah) async => File('$reciter-$surah-$ayah');
+}
+
+/// A recitation controller over [reader] with a fake engine and fetcher.
+(RecitationController, FakeAudioEngine, FakeFetcher) openTestRecitation(ReaderController reader) {
+  final engine = FakeAudioEngine();
+  final fetcher = FakeFetcher();
+  final controller = RecitationController(reader: reader, fetcher: fetcher, engine: () => engine);
+  return (controller, engine, fetcher);
+}

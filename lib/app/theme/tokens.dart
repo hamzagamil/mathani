@@ -37,6 +37,9 @@ abstract final class SemanticColors {
   static const rowSelected = ThemedColor(Color(0xFFEADCC0), Color(0xFF2B2B26));
   static const secondary = ThemedColor(Color(0xFF456967), Color(0xFF86AFAB));
   static const secondarySoft = ThemedColor(Color(0xFFDCE6E3), Color(0xFF1C3436));
+  // Derived for specs/004 (not yet in the brand guide): the ayah being recited. A stronger
+  // secondarySoft, so it reads apart from the 1.5 s jump highlight and from selection.
+  static const recited = ThemedColor(Color(0xFFC9DCD7), Color(0xFF23484A));
   static const line = ThemedColor(Color(0xFFD9CCB5), Color(0xFF2B3D59));
   static const focusRing = ThemedColor(Color(0xFF183159), Color(0xFFD9BD82));
   static const focusRingOnBar = ThemedColor(Color(0xFFBA9757), Color(0xFFD9BD82));

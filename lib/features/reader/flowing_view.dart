@@ -9,6 +9,7 @@ import '../../data/quran_repository.dart';
 import '../../shared/numerals.dart';
 import '../../shared/quran_text.dart';
 import '../../shared/reader_state.dart';
+import '../recitation/recitation_controller.dart';
 import 'surah_header_painter.dart';
 
 /// The flowing layout (research R5): continuous text at the reader's chosen size, one list item
@@ -123,13 +124,20 @@ class _FlowingViewState extends State<FlowingView> {
     final reader = ReaderScope.of(context);
     if (reader.jumpSerial != _handledJump) {
       _handledJump = reader.jumpSerial;
-      // Re-centre the list on the target page and reveal the ayah after layout.
-      _centerPage = reader.page;
-      _centerKey = UniqueKey();
-      _reveal = reader.anchor;
-      _scroll.dispose();
-      _scroll = ScrollController();
-      WidgetsBinding.instance.addPostFrameCallback((_) => _revealPending());
+      final follow = RecitationScope.read(context)?.followSerial == reader.jumpSerial;
+      if (follow && _locate(reader.anchor) != null) {
+        // Following the recitation: keep the ayah in view without re-centring the list.
+        final ref = reader.anchor;
+        WidgetsBinding.instance.addPostFrameCallback((_) => _ensureVisible(ref));
+      } else {
+        // Re-centre the list on the target page and reveal the ayah after layout.
+        _centerPage = reader.page;
+        _centerKey = UniqueKey();
+        _reveal = reader.anchor;
+        _scroll.dispose();
+        _scroll = ScrollController();
+        WidgetsBinding.instance.addPostFrameCallback((_) => _revealPending());
+      }
     }
     final fontSize = reader.preferences.flowFontSize.toDouble();
     if (fontSize != _fontSize) {
@@ -151,39 +159,70 @@ class _FlowingViewState extends State<FlowingView> {
 
     return Directionality(
       textDirection: TextDirection.rtl,
-      child: NotificationListener<ScrollEndNotification>(
-        onNotification: (_) {
-          if (_programmatic) {
-            _programmatic = false;
-          } else {
-            // Read positions after the scroll has been laid out.
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (mounted) _updateTopAyah();
-            });
-          }
+      child: NotificationListener<ScrollStartNotification>(
+        // A scroll the reader starts stops following the recitation (FR-014).
+        onNotification: (n) {
+          if (n.dragDetails != null) RecitationScope.read(context)?.onReaderScroll();
           return false;
         },
-        child: CustomScrollView(
-          controller: _scroll,
-          center: _centerKey,
-          slivers: [
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, i) => item(_centerPage - 1 - i),
-                childCount: _centerPage - 1,
+        child: NotificationListener<ScrollEndNotification>(
+          onNotification: (_) {
+            if (_programmatic) {
+              _programmatic = false;
+            } else {
+              // Read positions after the scroll has been laid out.
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) _updateTopAyah();
+              });
+            }
+            return false;
+          },
+          child: CustomScrollView(
+            controller: _scroll,
+            center: _centerKey,
+            slivers: [
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, i) => item(_centerPage - 1 - i),
+                  childCount: _centerPage - 1,
+                ),
               ),
-            ),
-            SliverList(
-              key: _centerKey,
-              delegate: SliverChildBuilderDelegate(
-                (context, i) => item(_centerPage + i),
-                childCount: QuranRepository.pageCount - _centerPage + 1,
+              SliverList(
+                key: _centerKey,
+                delegate: SliverChildBuilderDelegate(
+                  (context, i) => item(_centerPage + i),
+                  childCount: QuranRepository.pageCount - _centerPage + 1,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  /// Keeps the recited ayah [ref] in view: scrolls only when its first line is outside the top
+  /// two thirds of the viewport, and then places it a third of the way down (research R9).
+  void _ensureVisible(AyahRef ref) {
+    if (!mounted || !_scroll.hasClients) return;
+    final target = _locate(ref);
+    final box = context.findRenderObject() as RenderBox?;
+    if (target == null || box == null || !box.hasSize) {
+      _reveal = ref;
+      _revealPending();
+      return;
+    }
+    final (paragraph, caret) = target;
+    final top = box.localToGlobal(Offset.zero).dy;
+    final height = box.size.height;
+    final y = paragraph.localToGlobal(caret.topLeft).dy;
+    if (y >= top && y <= top + height * 2 / 3) return;
+    final reveal = RenderAbstractViewport.of(paragraph).getOffsetToReveal(paragraph, 0, rect: caret);
+    final to = (reveal.offset - height / 3)
+        .clamp(_scroll.position.minScrollExtent, _scroll.position.maxScrollExtent);
+    if (to == _scroll.position.pixels) return;
+    _programmatic = true;
+    _scroll.animateTo(to, duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
   }
 }
 
@@ -258,6 +297,7 @@ class _FlowingPageState extends State<_FlowingPage> {
     final ayahs = _ayahs;
     if (ayahs == null) return SizedBox(height: widget.fontSize * 2 * 15);
     final reader = ReaderScope.of(context);
+    final recited = RecitationScope.maybeOf(context)?.recited;
     final colors = MathaniColors.of(context);
     final quran = reader.quran;
     final style = TextStyle(
@@ -291,7 +331,9 @@ class _FlowingPageState extends State<_FlowingPage> {
             ? colors.selected
             : ayah.ref == reader.highlighted
                 ? colors.secondarySoft
-                : null;
+                : recited != null && !recited.isBasmala && ayah.ref == recited.ref
+                    ? colors.recited
+                    : null;
         LongPressGestureRecognizer? recognizer;
         if (widget.onAyahLongPress != null) {
           recognizer = LongPressGestureRecognizer()
@@ -327,11 +369,21 @@ class _FlowingPageState extends State<_FlowingPage> {
           color: colors.accentInk,
         ));
         if (ayah.surah != 1 && ayah.surah != 9) {
+          final basmalaRecited = recited != null && recited.isBasmala && recited.surah == ayah.surah;
           children.add(Center(
-            child: Text(
-              basmalaText,
-              textScaler: TextScaler.noScaling,
-              style: style.copyWith(color: colors.accentInk, fontSize: widget.fontSize * 0.92),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: basmalaRecited ? colors.recited : null,
+                borderRadius: BorderRadius.circular(Radii.sm),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: Space.s3),
+                child: Text(
+                  basmalaText,
+                  textScaler: TextScaler.noScaling,
+                  style: style.copyWith(color: colors.accentInk, fontSize: widget.fontSize * 0.92),
+                ),
+              ),
             ),
           ));
         }

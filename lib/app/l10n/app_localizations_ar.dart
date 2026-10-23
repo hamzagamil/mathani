@@ -305,4 +305,169 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get printedLetteringHint =>
       'حروف مصحف المدينة كما طبعها مجمع الملك فهد. أطفئه لاستخدام الخط المدمج.';
+
+  @override
+  String get listen => 'استمع';
+
+  @override
+  String get playFromAyah => 'تشغيل من هذه الآية';
+
+  @override
+  String get recitationPlayer => 'مشغّل التلاوة';
+
+  @override
+  String recitedAyah(String name, String ref) {
+    return 'سورة $name · $ref';
+  }
+
+  @override
+  String recitedBasmala(String name) {
+    return 'سورة $name · البسملة';
+  }
+
+  @override
+  String get basmala => 'البسملة';
+
+  @override
+  String get murattal => 'مرتّل';
+
+  @override
+  String get reciter => 'القارئ';
+
+  @override
+  String get chooseReciter => 'اختر القارئ';
+
+  @override
+  String get recitations => 'التلاوات';
+
+  @override
+  String get playRecitation => 'تشغيل';
+
+  @override
+  String get pauseRecitation => 'إيقاف مؤقت';
+
+  @override
+  String get previousAyah => 'الآية السابقة';
+
+  @override
+  String get nextAyah => 'الآية التالية';
+
+  @override
+  String get closePlayer => 'إيقاف وإغلاق';
+
+  @override
+  String get recitationOffline =>
+      'لا يوجد اتصال. نزّل السورة للاستماع دون إنترنت.';
+
+  @override
+  String get recitationFetchFailed => 'تعذّر تحميل الآية.';
+
+  @override
+  String get retry => 'إعادة المحاولة';
+
+  @override
+  String reciterNotDownloaded(String name) {
+    return '$name غير منزّل لهذه السورة';
+  }
+
+  @override
+  String get recitationEnded => 'انتهت التلاوة';
+
+  @override
+  String get backToRecitation => 'العودة إلى التلاوة';
+
+  @override
+  String get download => 'تنزيل';
+
+  @override
+  String get downloads => 'التنزيلات';
+
+  @override
+  String downloadRecitation(String size) {
+    return 'تنزيل التلاوة ($size)';
+  }
+
+  @override
+  String get stopDownload => 'إيقاف التنزيل';
+
+  @override
+  String get deleteDownload => 'حذف التنزيل';
+
+  @override
+  String get deleteAll => 'حذف الكل';
+
+  @override
+  String deleteAllConfirm(String name) {
+    return 'حذف كل تنزيلات $name؟';
+  }
+
+  @override
+  String get waiting => 'في الانتظار';
+
+  @override
+  String get stoppedResume => 'متوقف — استئناف';
+
+  @override
+  String get resume => 'استئناف';
+
+  @override
+  String get stopReasonNoConnection => 'لا يوجد اتصال';
+
+  @override
+  String get stopReasonNoStorage => 'المساحة غير كافية';
+
+  @override
+  String get stopReasonFailed => 'تعذّر التنزيل';
+
+  @override
+  String get downloaded => 'منزّلة';
+
+  @override
+  String get surahOptions => 'خيارات السورة';
+
+  @override
+  String get downloadsEmpty => 'لم تنزّل أي سورة بعد. نزّل سورة من فهرس السور.';
+
+  @override
+  String downloadOnMobileData(String size) {
+    return 'أنت على بيانات الجوال. تنزيل $size؟';
+  }
+
+  @override
+  String notEnoughStorage(String size) {
+    return 'المساحة غير كافية: تحتاج $size';
+  }
+
+  @override
+  String get noInternet => 'لا يوجد اتصال بالإنترنت';
+
+  @override
+  String get clearRecent => 'مسح التلاوات المؤقتة';
+
+  @override
+  String clearRecentConfirm(String size) {
+    return 'حذف الآيات التي استمعت إليها مؤخرًا ($size)؟ تبقى التنزيلات.';
+  }
+
+  @override
+  String spaceFreed(String size) {
+    return 'تم تحرير $size';
+  }
+
+  @override
+  String sizeMb(String n) {
+    return '$n م.ب';
+  }
+
+  @override
+  String sizeKb(String n) {
+    return '$n ك.ب';
+  }
+
+  @override
+  String get recitationChannel => 'التلاوة';
+
+  @override
+  String get recitationAttribution =>
+      'التلاوات: الشيخ محمود خليل الحصري والشيخ محمد صديق المنشاوي (مرتّل)، عن EveryAyah.com';
 }

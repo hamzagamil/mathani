@@ -4,5 +4,7 @@
   "quran-data.xml": "8867c1d88191472adec9db694b3cd9f135b1a2ef580574d32cf888dcb22c5c7a",
   "qul-layout-kfgqpc-v4.db": "4b3fb1cbe8dff749ab0173c4b86cb40fe3c48dd072f41d3c7e715654a9f843cd",
   "qul-script-kfgqpc-hafs-wbw.db": "e1cf266ed47a56e58100c08f69499f635f84c97233318cc53daf17200fb9048e",
-  "qul-script-imlaei-simple-wbw.db": "0ffcc50b72678f89d8ec8ef4547aecb851805d4a282f0eaccdd0c00ffbd4e5f8"
+  "qul-script-imlaei-simple-wbw.db": "0ffcc50b72678f89d8ec8ef4547aecb851805d4a282f0eaccdd0c00ffbd4e5f8",
+  "recitations/husary.json": "c25b8c14a0fd6eda8ce1a1769ba562414ec26a605e594bab3a161ae4beaa22c3",
+  "recitations/minshawy.json": "994e324314e01a9e07d3b77de7c4deec908a15a33b54fe35e7faa9897eb207c6"
 }

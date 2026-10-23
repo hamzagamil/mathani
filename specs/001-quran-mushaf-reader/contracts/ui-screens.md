@@ -60,3 +60,16 @@ Example (Arabic): `﴿ٱللَّهُ لَآ إِلَٰهَ إِلَّا هُوَ
 | App name (home screen) | مثاني | Mathani |
 | Store listing name | مثاني: تلاوة وتدبر المتشابه | owner to decide (suggested: "Mathani: Quran & Mutashabihat") |
 | Privacy disclosures | App Store "Data Not Collected"; Play Data safety "No data collected / shared" (FR-027) | same |
+
+## Updated by specs/004 (recitations)
+
+Ayah-by-ayah recitations change these screens; the details are in
+[specs/004 recitation-ui](../../004-ayah-recitations/contracts/recitation-ui.md):
+
+- **Reader toolbar**: a **Listen** button between the layout switch and the bookmark. While a
+  recitation is on, the recitation bar docks at the bottom of the reader in both layouts.
+- **Ayah actions**: «تشغيل من هذه الآية» / "Play from this ayah" comes first, then Copy, Share,
+  Bookmark.
+- **Index › Surahs**: each row has a "⋯" menu (and long-press) to download, stop or delete the
+  surah's recitation, and a mark when it is downloaded for the chosen reciter.
+- **Settings**: a Recitations section (reciter, downloads, clear recent recitations).

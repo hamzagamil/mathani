@@ -162,6 +162,52 @@ class Bookmark {
   final DateTime createdAt;
 }
 
+/// A reciter offered in the app, from the `reciters` table of quran.db
+/// (specs/004-ayah-recitations/contracts/recitation-catalogue.md). Every reciter has a
+/// recording of all 6,236 ayat; Al-Fatiha 1:1 doubles as the basmala.
+class Reciter {
+  const Reciter({
+    required this.id,
+    required this.nameAr,
+    required this.nameEn,
+    required this.shortAr,
+    required this.shortEn,
+    required this.style,
+    required this.baseUrl,
+    required this.mirrorUrl,
+    required this.bitrateKbps,
+    required this.sort,
+  });
+
+  static const defaultId = 'husary';
+
+  final String id; // stable slug, used in preferences and file paths
+  final String nameAr;
+  final String nameEn;
+  final String shortAr; // bar chip
+  final String shortEn;
+  final String style; // 'murattal'
+  final String baseUrl; // no trailing slash
+  final String mirrorUrl;
+  final int bitrateKbps;
+  final int sort;
+
+  String name({required bool arabic}) => arabic ? nameAr : nameEn;
+  String shortName({required bool arabic}) => arabic ? shortAr : shortEn;
+
+  /// `<base>/<SSS><AAA>.mp3`, zero-padded.
+  String urlFor(int surah, int ayah, {bool mirror = false}) =>
+      '${mirror ? mirrorUrl : baseUrl}/${pad3(surah)}${pad3(ayah)}.mp3';
+
+  @override
+  bool operator ==(Object other) => other is Reciter && other.id == id;
+
+  @override
+  int get hashCode => id.hashCode;
+}
+
+String pad3(int n) => n.toString().padLeft(3, '0');
+
 class ReaderPreferences {
   const ReaderPreferences({
     this.layout = ReadingLayout.mushaf,
@@ -171,6 +217,7 @@ class ReaderPreferences {
     this.language = LanguagePref.system,
     this.controlsHintShown = false,
     this.lettering = Lettering.printed,
+    this.reciter = Reciter.defaultId,
   });
 
   static const minFlowFontSize = 18;
@@ -189,6 +236,9 @@ class ReaderPreferences {
   /// ([QuranRepository.hasPrintedLettering]); without them the built-in font is used.
   final Lettering lettering;
 
+  /// Id of the chosen reciter (specs/004, FR-004).
+  final String reciter;
+
   ReaderPreferences copyWith({
     ReadingLayout? layout,
     ThemePref? theme,
@@ -197,6 +247,7 @@ class ReaderPreferences {
     LanguagePref? language,
     bool? controlsHintShown,
     Lettering? lettering,
+    String? reciter,
   }) =>
       ReaderPreferences(
         layout: layout ?? this.layout,
@@ -206,5 +257,6 @@ class ReaderPreferences {
         language: language ?? this.language,
         controlsHintShown: controlsHintShown ?? this.controlsHintShown,
         lettering: lettering ?? this.lettering,
+        reciter: reciter ?? this.reciter,
       );
 }

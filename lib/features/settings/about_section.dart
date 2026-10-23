@@ -30,6 +30,7 @@ class AboutSection extends StatelessWidget {
   const AboutSection({super.key});
 
   static final _tanzil = Uri.parse('https://tanzil.net');
+  static final _everyAyah = Uri.parse('https://everyayah.com');
 
   @override
   Widget build(BuildContext context) {
@@ -59,6 +60,13 @@ class AboutSection extends StatelessWidget {
         ),
         ListTile(title: Text(l10n.qulCredit)),
         ListTile(title: Text(l10n.kfgqpcCredit)),
+        // Recitations (specs/004): the reciters and EveryAyah, until D4 sets the wording.
+        ListTile(
+          title: Text(l10n.recitationAttribution),
+          subtitle: Text('https://everyayah.com', style: caption.copyWith(color: colors.secondary)),
+          trailing: const Icon(MathaniIcons.externalLink),
+          onTap: () => launchUrl(_everyAyah, mode: LaunchMode.externalApplication),
+        ),
         ListTile(
           title: Text(l10n.licencesButton),
           trailing: const Icon(MathaniIcons.forward),

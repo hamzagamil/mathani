@@ -8,6 +8,7 @@ import '../../data/models.dart';
 import '../../data/quran_repository.dart';
 import '../../shared/numerals.dart';
 import '../../shared/reader_state.dart';
+import '../recitation/recitation_controller.dart';
 import 'mushaf_page_renderer.dart';
 import 'paper_sheet.dart';
 import 'printed_fonts.dart';
@@ -36,6 +37,10 @@ class _MushafViewState extends State<MushafView> {
   late _PageCache _cache = _PageCache(_reader.quran, printed: _printed(_reader));
   late int _handledJump = _reader.jumpSerial;
 
+  /// Set around the page jump that follows the recitation, so it does not hide the reader
+  /// controls the way a page turn does (specs/004 recitation-playback › Following).
+  bool _followJumpInFlight = false;
+
   @override
   void initState() {
     super.initState();
@@ -61,9 +66,14 @@ class _MushafViewState extends State<MushafView> {
     if (reader.jumpSerial != _handledJump) {
       _handledJump = reader.jumpSerial;
       final target = reader.page - 1;
+      final follow = RecitationScope.read(context)?.followSerial == reader.jumpSerial;
       _cache.prefetchAround(reader.page);
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (_pages.hasClients && _pages.page?.round() != target) _pages.jumpToPage(target);
+        if (_pages.hasClients && _pages.page?.round() != target) {
+          _followJumpInFlight = follow;
+          _pages.jumpToPage(target); // onPageChanged runs inside this call
+          _followJumpInFlight = false;
+        }
       });
     }
     return Directionality(
@@ -75,7 +85,7 @@ class _MushafViewState extends State<MushafView> {
         onPageChanged: (i) {
           _cache.prefetchAround(i + 1);
           reader.onMushafPageShown(i + 1);
-          widget.onPageTurned?.call();
+          if (!_followJumpInFlight) widget.onPageTurned?.call();
         },
         itemBuilder: (context, i) => _MushafPageItem(
           key: ValueKey((_cache.printed, i)),
@@ -139,6 +149,7 @@ class _MushafPageItemState extends State<_MushafPageItem> {
     final colors = MathaniColors.of(context);
     final l10n = AppLocalizations.of(context);
     final head = quran.firstAyahOnPage(page.number);
+    final recited = RecitationScope.maybeOf(context)?.recited;
 
     final onTapPage = widget.onTapPage;
     return Semantics(
@@ -174,11 +185,14 @@ class _MushafPageItemState extends State<_MushafPageItem> {
               accentInk: colors.accentInk,
               highlight: colors.secondarySoft,
               selection: colors.selected,
+              recited: colors.recited,
             ),
             quarterStartWords: widget.cache.quarterStartWords(page.number),
             sajdahEndWords: widget.cache.sajdahEndWords(page.number),
             selected: reader.selected,
             highlighted: reader.highlighted,
+            recited: recited == null || recited.isBasmala ? null : recited.ref,
+            recitedBasmala: recited != null && recited.isBasmala ? recited.surah : null,
             details: MushafPageDetails.of(quran, page.number),
             printedGlyphs: cached.glyphs,
             printedFamily: cached.family,

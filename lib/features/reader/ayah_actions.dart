@@ -9,6 +9,7 @@ import '../../data/models.dart';
 import '../../shared/mathani_icons.dart';
 import '../../shared/numerals.dart';
 import '../../shared/reader_state.dart';
+import '../recitation/recitation_controller.dart';
 
 /// Text for copying or sharing an ayah, exactly as in contracts/ui-screens.md (FR-021):
 ///
@@ -23,7 +24,7 @@ String formatAyahForShare(List<Word> words, Surah surah, int ayah, {required boo
   return '﴿$text﴾\n$reference';
 }
 
-/// Long-press actions for an ayah: copy, share and bookmark (FR-020). The ayah stays
+/// Long-press actions for an ayah: play from it (specs/004), copy, share and bookmark (FR-020). The ayah stays
 /// highlighted while the sheet is open.
 Future<void> showAyahActions(BuildContext context, AyahRef ref) async {
   final reader = ReaderScope.read(context);
@@ -49,6 +50,7 @@ class _AyahActionsSheet extends StatelessWidget {
     final surah = reader.quran.surahList[ayah.surah - 1];
     final colors = MathaniColors.of(context);
     final messenger = ScaffoldMessenger.of(context);
+    final recitation = RecitationScope.read(context);
 
     Future<String> text() async => formatAyahForShare(
           await reader.quran.wordsOf(ayah),
@@ -77,6 +79,15 @@ class _AyahActionsSheet extends StatelessWidget {
               style: TypeScale.titleSm.copyWith(color: colors.accentInk),
             ),
           ),
+          if (recitation != null)
+            ListTile(
+              leading: const Icon(MathaniIcons.play),
+              title: Text(l10n.playFromAyah),
+              onTap: () {
+                Navigator.of(context).pop();
+                recitation.playFrom(ayah);
+              },
+            ),
           ListTile(
             leading: const Icon(MathaniIcons.copy),
             title: Text(l10n.copyAyah),

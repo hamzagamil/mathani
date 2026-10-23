@@ -10,6 +10,10 @@ import '../../shared/mathani_icons.dart';
 import '../../shared/numerals.dart';
 import '../../shared/reader_state.dart';
 import '../index/index_screen.dart';
+import '../recitation/download_queue.dart';
+import '../recitation/recitation_bar.dart';
+import '../recitation/recitation_controller.dart';
+import '../recitation/reciter_sheet.dart';
 import '../search/search_screen.dart';
 import '../settings/settings_screen.dart';
 import 'ayah_actions.dart';
@@ -84,6 +88,20 @@ class _ReaderScreenState extends State<ReaderScreen> {
     final reader = ReaderScope.of(context);
     final colors = MathaniColors.of(context);
     _syncWakelock(reader.preferences.keepScreenOn);
+    // The recitation bar (specs/004) docks at the bottom of both layouts while a session exists.
+    final recitation = RecitationScope.maybeOf(context);
+    final session = recitation?.session;
+    final docked = session != null;
+    final bar = RecitationBar(
+      onChooseReciter: () {
+        final downloads = recitation?.downloads;
+        downloads?.ensureScanned();
+        showReciterSheet(context, downloaded: downloads?.isComplete);
+      },
+      onDownload: recitation == null
+          ? null
+          : (reciter, surah) => startSurahDownload(context, recitation.downloads, reciter, surah),
+    );
 
     if (reader.layout == ReadingLayout.flowing) {
       if (_immersive || !_controlsVisible) {
@@ -96,7 +114,9 @@ class _ReaderScreenState extends State<ReaderScreen> {
       return Scaffold(
         backgroundColor: colors.surface,
         appBar: const _ReaderHeader(),
-        bottomNavigationBar: const _ReaderToolbar(),
+        bottomNavigationBar: docked
+            ? Column(mainAxisSize: MainAxisSize.min, children: [const _ReaderToolbar(safeBottom: false), bar])
+            : const _ReaderToolbar(),
         body: SafeArea(
           top: false,
           child: Padding(
@@ -108,8 +128,12 @@ class _ReaderScreenState extends State<ReaderScreen> {
     }
 
     final show = _controlsVisible || _keepControls;
+    // While a recitation is on, the bar is the Scaffold's bottom bar: the page sits above it (so
+    // no Quran text is ever covered; PageGeometry refits when it appears or goes), and snack
+    // bars float above it instead of covering it.
     return Scaffold(
       backgroundColor: colors.surface,
+      bottomNavigationBar: docked ? bar : null,
       body: Stack(
         children: [
           // The page sets its own margins (PageGeometry) inside the safe areas.
@@ -132,7 +156,11 @@ class _ReaderScreenState extends State<ReaderScreen> {
             bottom: 0,
             left: 0,
             right: 0,
-            child: _Overlay(visible: show, hiddenOffset: const Offset(0, 1), child: const _ReaderToolbar()),
+            child: _Overlay(
+              visible: show,
+              hiddenOffset: const Offset(0, 1),
+              child: _ReaderToolbar(safeBottom: !docked),
+            ),
           ),
         ],
       ),
@@ -246,7 +274,10 @@ class _BookmarkToggle extends StatelessWidget {
 
 /// Reader actions: index, search, layout toggle, bookmark, settings.
 class _ReaderToolbar extends StatelessWidget {
-  const _ReaderToolbar();
+  const _ReaderToolbar({this.safeBottom = true});
+
+  /// False when the recitation bar sits below and takes the bottom safe area.
+  final bool safeBottom;
 
   @override
   Widget build(BuildContext context) {
@@ -256,11 +287,13 @@ class _ReaderToolbar extends StatelessWidget {
     void push(Widget screen) =>
         Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => screen));
     final mushaf = reader.layout == ReadingLayout.mushaf;
+    final recitation = RecitationScope.maybeOf(context);
 
     return Material(
       color: colors.surfaceRaised,
       child: SafeArea(
         top: false,
+        bottom: safeBottom,
         child: DecoratedBox(
           decoration: BoxDecoration(border: Border(top: BorderSide(color: colors.line))),
           child: IconTheme(
@@ -286,6 +319,16 @@ class _ReaderToolbar extends StatelessWidget {
                     layout: mushaf ? ReadingLayout.flowing : ReadingLayout.mushaf,
                   )),
                 ),
+                // Listen (specs/004): from this page, or from the top ayah in the flowing layout. The
+                // recitation bar takes its place while a recitation is on.
+                if (recitation != null && recitation.session == null)
+                  IconButton(
+                    icon: const Icon(MathaniIcons.play),
+                    tooltip: l10n.listen,
+                    onPressed: () => mushaf
+                        ? recitation.playFromPage(reader.page)
+                        : recitation.playFrom(reader.anchor),
+                  ),
                 const _BookmarkToggle(),
                 IconButton(
                   icon: const Icon(MathaniIcons.settings),

@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'app/app.dart';
 import 'data/quran_repository.dart';
 import 'data/user_repository.dart';
+import 'features/recitation/ayah_fetcher.dart';
+import 'features/recitation/media_handler.dart';
+import 'features/recitation/recitation_controller.dart';
 import 'features/settings/about_section.dart';
 import 'shared/reader_state.dart';
 
@@ -25,5 +28,15 @@ Future<void> runMathani() async {
     anchor: anchor,
     preferences: preferences,
   );
-  runApp(MathaniApp(controller: controller));
+  // Recitations (specs/004): nothing here touches the network, audio or disk before the first
+  // frame; the fetcher and player start on the first play.
+  final recitation = RecitationController(
+    reader: controller,
+    fetcher: AyahFetcher(
+      recordingSize: (r, s, a) async => (await quran.recordingBytes(r, s))[a - 1],
+    ),
+  );
+  // Lock screen and notification controls start with the first recitation, not at launch.
+  recitation.onFirstPlay = () => RecitationMediaHandler.start(recitation);
+  runApp(MathaniApp(controller: controller, recitation: recitation));
 }

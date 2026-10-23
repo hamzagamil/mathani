@@ -227,5 +227,122 @@
     "description": "Accessibility action on a Mushaf page that shows the reader controls."
   },
   "printedLetteringSetting": "Printed Mushaf lettering",
-  "printedLetteringHint": "The Madinah Mushaf's lettering as printed by the King Fahd Complex. Turn off for the built-in font."
+  "printedLetteringHint": "The Madinah Mushaf's lettering as printed by the King Fahd Complex. Turn off for the built-in font.",
+  "listen": "Listen",
+  "@listen": {
+    "description": "Reader toolbar: start the recitation from this page (specs/004)."
+  },
+  "playFromAyah": "Play from this ayah",
+  "recitationPlayer": "Recitation player",
+  "@recitationPlayer": {
+    "description": "Screen-reader label of the docked recitation bar."
+  },
+  "recitedAyah": "{name} · {ref}",
+  "@recitedAyah": {
+    "description": "Recitation bar and lock screen: the ayah being recited. In English, name is the transliterated surah name and ref is surah:ayah (67:12).",
+    "placeholders": {
+      "name": {"type": "String"},
+      "ref": {"type": "String"}
+    }
+  },
+  "recitedBasmala": "{name} · Basmala",
+  "@recitedBasmala": {
+    "description": "Recitation bar and lock screen: the basmala before ayah 1 is being recited.",
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "basmala": "Basmala",
+  "murattal": "Murattal",
+  "reciter": "Reciter",
+  "chooseReciter": "Choose reciter",
+  "recitations": "Recitations",
+  "@recitations": {
+    "description": "Settings section title."
+  },
+  "playRecitation": "Play",
+  "pauseRecitation": "Pause",
+  "previousAyah": "Previous ayah",
+  "nextAyah": "Next ayah",
+  "closePlayer": "Stop and close",
+  "recitationOffline": "No connection. Download this surah to listen offline.",
+  "recitationFetchFailed": "Couldn't load this ayah.",
+  "retry": "Retry",
+  "reciterNotDownloaded": "{name} isn't downloaded for this surah",
+  "@reciterNotDownloaded": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "recitationEnded": "Recitation finished",
+  "backToRecitation": "Back to recitation",
+  "download": "Download",
+  "downloads": "Downloads",
+  "downloadRecitation": "Download recitation ({size})",
+  "@downloadRecitation": {
+    "placeholders": {
+      "size": {"type": "String"}
+    }
+  },
+  "stopDownload": "Stop download",
+  "deleteDownload": "Delete download",
+  "deleteAll": "Delete all",
+  "deleteAllConfirm": "Delete all {name} downloads?",
+  "@deleteAllConfirm": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "waiting": "Waiting",
+  "stoppedResume": "Stopped — Resume",
+  "resume": "Resume",
+  "stopReasonNoConnection": "No connection",
+  "stopReasonNoStorage": "Not enough storage",
+  "stopReasonFailed": "Couldn't download",
+  "downloaded": "Downloaded",
+  "surahOptions": "Surah options",
+  "downloadsEmpty": "No surahs downloaded yet. Download one from the Surahs index.",
+  "downloadOnMobileData": "You're on mobile data. Download {size}?",
+  "@downloadOnMobileData": {
+    "placeholders": {
+      "size": {"type": "String"}
+    }
+  },
+  "notEnoughStorage": "Not enough storage: {size} needed",
+  "@notEnoughStorage": {
+    "placeholders": {
+      "size": {"type": "String"}
+    }
+  },
+  "noInternet": "No internet connection",
+  "clearRecent": "Clear recent recitations",
+  "clearRecentConfirm": "Delete recently played ayat ({size})? Downloads are kept.",
+  "@clearRecentConfirm": {
+    "placeholders": {
+      "size": {"type": "String"}
+    }
+  },
+  "spaceFreed": "{size} freed",
+  "@spaceFreed": {
+    "placeholders": {
+      "size": {"type": "String"}
+    }
+  },
+  "sizeMb": "{n} MB",
+  "@sizeMb": {
+    "placeholders": {
+      "n": {"type": "String"}
+    }
+  },
+  "sizeKb": "{n} KB",
+  "@sizeKb": {
+    "placeholders": {
+      "n": {"type": "String"}
+    }
+  },
+  "recitationChannel": "Recitation",
+  "@recitationChannel": {
+    "description": "Android notification channel name for the recitation player."
+  },
+  "recitationAttribution": "Recitations: Sheikh Mahmoud Khalil Al-Husary and Sheikh Mohamed Siddiq El-Minshawi (Murattal), via EveryAyah.com"
 }

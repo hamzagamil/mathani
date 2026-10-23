@@ -296,4 +296,170 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get printedLetteringHint =>
       'The Madinah Mushaf\'s lettering as printed by the King Fahd Complex. Turn off for the built-in font.';
+
+  @override
+  String get listen => 'Listen';
+
+  @override
+  String get playFromAyah => 'Play from this ayah';
+
+  @override
+  String get recitationPlayer => 'Recitation player';
+
+  @override
+  String recitedAyah(String name, String ref) {
+    return '$name · $ref';
+  }
+
+  @override
+  String recitedBasmala(String name) {
+    return '$name · Basmala';
+  }
+
+  @override
+  String get basmala => 'Basmala';
+
+  @override
+  String get murattal => 'Murattal';
+
+  @override
+  String get reciter => 'Reciter';
+
+  @override
+  String get chooseReciter => 'Choose reciter';
+
+  @override
+  String get recitations => 'Recitations';
+
+  @override
+  String get playRecitation => 'Play';
+
+  @override
+  String get pauseRecitation => 'Pause';
+
+  @override
+  String get previousAyah => 'Previous ayah';
+
+  @override
+  String get nextAyah => 'Next ayah';
+
+  @override
+  String get closePlayer => 'Stop and close';
+
+  @override
+  String get recitationOffline =>
+      'No connection. Download this surah to listen offline.';
+
+  @override
+  String get recitationFetchFailed => 'Couldn\'t load this ayah.';
+
+  @override
+  String get retry => 'Retry';
+
+  @override
+  String reciterNotDownloaded(String name) {
+    return '$name isn\'t downloaded for this surah';
+  }
+
+  @override
+  String get recitationEnded => 'Recitation finished';
+
+  @override
+  String get backToRecitation => 'Back to recitation';
+
+  @override
+  String get download => 'Download';
+
+  @override
+  String get downloads => 'Downloads';
+
+  @override
+  String downloadRecitation(String size) {
+    return 'Download recitation ($size)';
+  }
+
+  @override
+  String get stopDownload => 'Stop download';
+
+  @override
+  String get deleteDownload => 'Delete download';
+
+  @override
+  String get deleteAll => 'Delete all';
+
+  @override
+  String deleteAllConfirm(String name) {
+    return 'Delete all $name downloads?';
+  }
+
+  @override
+  String get waiting => 'Waiting';
+
+  @override
+  String get stoppedResume => 'Stopped — Resume';
+
+  @override
+  String get resume => 'Resume';
+
+  @override
+  String get stopReasonNoConnection => 'No connection';
+
+  @override
+  String get stopReasonNoStorage => 'Not enough storage';
+
+  @override
+  String get stopReasonFailed => 'Couldn\'t download';
+
+  @override
+  String get downloaded => 'Downloaded';
+
+  @override
+  String get surahOptions => 'Surah options';
+
+  @override
+  String get downloadsEmpty =>
+      'No surahs downloaded yet. Download one from the Surahs index.';
+
+  @override
+  String downloadOnMobileData(String size) {
+    return 'You\'re on mobile data. Download $size?';
+  }
+
+  @override
+  String notEnoughStorage(String size) {
+    return 'Not enough storage: $size needed';
+  }
+
+  @override
+  String get noInternet => 'No internet connection';
+
+  @override
+  String get clearRecent => 'Clear recent recitations';
+
+  @override
+  String clearRecentConfirm(String size) {
+    return 'Delete recently played ayat ($size)? Downloads are kept.';
+  }
+
+  @override
+  String spaceFreed(String size) {
+    return '$size freed';
+  }
+
+  @override
+  String sizeMb(String n) {
+    return '$n MB';
+  }
+
+  @override
+  String sizeKb(String n) {
+    return '$n KB';
+  }
+
+  @override
+  String get recitationChannel => 'Recitation';
+
+  @override
+  String get recitationAttribution =>
+      'Recitations: Sheikh Mahmoud Khalil Al-Husary and Sheikh Mohamed Siddiq El-Minshawi (Murattal), via EveryAyah.com';
 }

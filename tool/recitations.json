@@ -1,0 +1,26 @@
+[
+  {
+    "id": "husary",
+    "name_ar": "محمود خليل الحصري",
+    "name_en": "Mahmoud Khalil Al-Husary",
+    "short_ar": "الحصري",
+    "short_en": "Al-Husary",
+    "style": "murattal",
+    "base_url": "https://everyayah.com/data/Husary_64kbps",
+    "mirror_url": "https://mirrors.quranicaudio.com/everyayah/Husary_64kbps",
+    "bitrate_kbps": 64,
+    "sort": 1
+  },
+  {
+    "id": "minshawy",
+    "name_ar": "محمد صديق المنشاوي",
+    "name_en": "Mohamed Siddiq El-Minshawi",
+    "short_ar": "المنشاوي",
+    "short_en": "El-Minshawi",
+    "style": "murattal",
+    "base_url": "https://everyayah.com/data/Minshawy_Murattal_128kbps",
+    "mirror_url": "https://mirrors.quranicaudio.com/everyayah/Minshawy_Murattal_128kbps",
+    "bitrate_kbps": 128,
+    "sort": 2
+  }
+]

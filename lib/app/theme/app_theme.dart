@@ -21,6 +21,7 @@ class MathaniColors extends ThemeExtension<MathaniColors> {
     required this.rowSelected,
     required this.secondary,
     required this.secondarySoft,
+    required this.recited,
     required this.line,
     required this.focusRing,
     required this.focusRingOnBar,
@@ -41,6 +42,7 @@ class MathaniColors extends ThemeExtension<MathaniColors> {
         rowSelected: SemanticColors.rowSelected.of(b),
         secondary: SemanticColors.secondary.of(b),
         secondarySoft: SemanticColors.secondarySoft.of(b),
+        recited: SemanticColors.recited.of(b),
         line: SemanticColors.line.of(b),
         focusRing: SemanticColors.focusRing.of(b),
         focusRingOnBar: SemanticColors.focusRingOnBar.of(b),
@@ -60,6 +62,7 @@ class MathaniColors extends ThemeExtension<MathaniColors> {
   final Color rowSelected;
   final Color secondary;
   final Color secondarySoft;
+  final Color recited;
   final Color line;
   final Color focusRing;
   final Color focusRingOnBar;

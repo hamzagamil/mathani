@@ -89,6 +89,17 @@ class ReaderController extends ChangeNotifier with WidgetsBindingObserver {
     notifyListeners();
   }
 
+  /// Shows Mushaf [page] without moving the anchor ayah: for following a recited basmala whose
+  /// line sits on the page before its ayah 1 (specs/004 recitation-playback › Following).
+  void jumpToPage(int page) {
+    if (page < 1 || page > QuranRepository.pageCount) return;
+    _page = page;
+    _jumpSerial++;
+    _highlightTimer?.cancel();
+    _highlighted = null;
+    notifyListeners();
+  }
+
   void select(AyahRef? ref) {
     if (ref == _selected) return;
     _selected = ref;

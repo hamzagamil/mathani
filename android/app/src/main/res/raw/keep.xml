@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Keep the recitation notification icon through resource shrinking (specs/004). audio_service's
+     own drawables are its notification buttons (play, pause, skip) and are kept by the plugin. -->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@drawable/ic_stat_recitation" />

@@ -137,6 +137,9 @@ class UserRepository extends ChangeNotifier {
         _ => d.controlsHintShown,
       },
       lettering: pick(Lettering.values, p['lettering'], d.lettering),
+      // Kept as stored; an id no longer in quran.db falls back to the default where it is
+      // resolved (QuranRepository.reciterOrDefault).
+      reciter: (p['reciter'] ?? '').isEmpty ? d.reciter : p['reciter']!,
     );
   }
 
@@ -161,6 +164,7 @@ class UserRepository extends ChangeNotifier {
       'language': p.language.name,
       'controls_hint_shown': '${p.controlsHintShown}',
       'lettering': p.lettering.name,
+      'reciter': p.reciter,
     }.entries) {
       batch.insert('preferences', {'key': entry.key, 'value': entry.value},
           conflictAlgorithm: ConflictAlgorithm.replace);

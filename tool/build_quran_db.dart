@@ -10,6 +10,7 @@ import 'dart:io';
 import 'package:mathani/features/search/arabic_normalizer.dart';
 import 'package:sqlite3/sqlite3.dart';
 
+import 'src/recitations.dart';
 import 'src/sources.dart';
 
 void main(List<String> args) {
@@ -279,6 +280,8 @@ void main(List<String> args) {
   for (final s in [insMeta, insSurah, insAyah, insWord, insLine, insDiv]) {
     s.close();
   }
+  // Recitation catalogue (specs/004): reciters and the size of every ayah recording.
+  writeRecitationTables(db);
   db.execute('VACUUM');
   db.close();
   for (final d in [script, imlaeiDb, layout]) {

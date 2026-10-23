@@ -19,12 +19,14 @@ class MushafPalette {
     required this.accentInk,
     required this.highlight,
     required this.selection,
+    this.recited = const Color(0x00000000),
   });
 
   final Color ink;
   final Color accentInk;
   final Color highlight; // jump target: secondary-soft
   final Color selection; // long-press selection: selected
+  final Color recited; // the ayah being recited (specs/004)
 
   @override
   bool operator ==(Object other) =>
@@ -32,10 +34,11 @@ class MushafPalette {
       other.ink == ink &&
       other.accentInk == accentInk &&
       other.highlight == highlight &&
-      other.selection == selection;
+      other.selection == selection &&
+      other.recited == recited;
 
   @override
-  int get hashCode => Object.hash(ink, accentInk, highlight, selection);
+  int get hashCode => Object.hash(ink, accentInk, highlight, selection, recited);
 }
 
 /// The page details printed around the text, as in the printed Mushaf: the surah and juz at the
@@ -78,6 +81,8 @@ class MushafPageRenderer extends LeafRenderObjectWidget {
     this.sajdahEndWords = const {},
     this.selected,
     this.highlighted,
+    this.recited,
+    this.recitedBasmala,
     this.details,
     this.printedGlyphs,
     this.printedFamily,
@@ -93,6 +98,12 @@ class MushafPageRenderer extends LeafRenderObjectWidget {
   final Set<int> sajdahEndWords; // word ids that end a sajdah ayah
   final AyahRef? selected;
   final AyahRef? highlighted;
+
+  /// The ayah being recited (specs/004 FR-012), drawn behind its words.
+  final AyahRef? recited;
+
+  /// The surah whose basmala is being recited: its basmala line is highlighted.
+  final int? recitedBasmala;
 
   /// Surah and juz printed at the top of the page, with the page number at the bottom (FR-009).
   final MushafPageDetails? details;
@@ -162,7 +173,10 @@ class RenderMushafPage extends RenderBox {
         !identical(old.printedGlyphs, next.printedGlyphs)) {
       _disposePainters();
       markNeedsLayout();
-    } else if (old.selected != next.selected || old.highlighted != next.highlighted) {
+    } else if (old.selected != next.selected ||
+        old.highlighted != next.highlighted ||
+        old.recited != next.recited ||
+        old.recitedBasmala != next.recitedBasmala) {
       markNeedsPaint();
     }
   }
@@ -345,6 +359,9 @@ class RenderMushafPage extends RenderBox {
         case LineType.surahName:
           _paintSurahHeader(canvas, line, geometry);
         case LineType.basmallah:
+          if (line.line.surah != null && line.line.surah == _config.recitedBasmala) {
+            _paintLineHighlight(canvas, line, geometry, palette.recited);
+          }
           _paintCentered(canvas, line, basmalaText, geometry.fontSize * 0.92, palette.accentInk);
         case LineType.ayah:
           _paintAyahLine(canvas, line, geometry);
@@ -393,8 +410,9 @@ class RenderMushafPage extends RenderBox {
 
   void _paintAyahLine(Canvas canvas, _LinePlacement line, PageGeometry geometry) {
     final palette = _config.palette;
-    // Selection and jump highlight behind the words of that ayah.
+    // Recitation, jump highlight and selection behind the words of that ayah; selection on top.
     for (final (ref, color) in [
+      (_config.recited, palette.recited),
       (_config.highlighted, palette.highlight),
       (_config.selected, palette.selection),
     ]) {
@@ -450,6 +468,21 @@ class RenderMushafPage extends RenderBox {
     paintSurahFrame(canvas, rect, _config.palette.accentInk);
     final name = _config.surahNames[line.line.surah] ?? '';
     _paintCentered(canvas, line, 'سُورَةُ $name', geometry.fontSize * 0.8, _config.palette.accentInk);
+  }
+
+  /// The recited highlight over a whole line (the basmala before ayah 1, specs/004).
+  void _paintLineHighlight(Canvas canvas, _LinePlacement line, PageGeometry geometry, Color color) {
+    final inset = geometry.textBlock.width * 0.18;
+    final r = Rect.fromLTRB(
+      geometry.textBlock.left + inset,
+      line.top + line.height * 0.08,
+      geometry.textBlock.right - inset,
+      line.top + line.height * 0.92,
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(r, Radius.circular(geometry.fontSize * 0.3)),
+      Paint()..color = color,
+    );
   }
 
   void _paintCentered(Canvas canvas, _LinePlacement line, String text, double fontSize, Color color) {

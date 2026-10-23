@@ -27,6 +27,17 @@ abstract final class MathaniIcons {
   static const language = IconData(0xe0fe, fontFamily: _family); // languages
   static const info = IconData(0xe0f9, fontFamily: _family);
   static const externalLink = IconData(0xe0b9, fontFamily: _family);
+  static const download = IconData(0xe0b2, fontFamily: _family);
+  static const downloaded = IconData(0xe226, fontFamily: _family); // circle-check
+  static const more = IconData(0xe0b6, fontFamily: _family); // ellipsis
+  static const recitation = IconData(0xe0f1, fontFamily: _family); // headphones
+
+  // Media controls (specs/004). They keep their left-to-right form in Arabic, as media players
+  // do everywhere: play points right, and previous/next follow the timeline, not the text.
+  static const play = IconData(0xe13c, fontFamily: _family);
+  static const pause = IconData(0xe12e, fontFamily: _family);
+  static const previous = IconData(0xe15f, fontFamily: _family); // skip-back
+  static const next = IconData(0xe160, fontFamily: _family); // skip-forward
 
   // Direction icons mirror with the interface direction; media icons never do (brand guide).
   // Glyphs are the left-to-right forms; they flip automatically in Arabic (RTL).

@@ -8,6 +8,8 @@ These scripts turn licensed source files into the app's bundled database,
 dart run tool/build_quran_db.dart --record        # tool/sources/* → assets/db/quran.db
 flutter test tool/measure_line_widths_test.dart   # writes meta line widths
 dart run tool/verify_quran.dart --release         # integrity checks; must print PASS
+dart run tool/build_recitation_manifest.dart     # recitations: size of every ayah file (network, ~5–20 min)
+dart run tool/add_recitations.dart               # recitations: reciters + sizes into quran.db
 flutter test tool/font_spike_test.dart            # font coverage + page images in build/font_spike/
 ```
 
@@ -54,3 +56,23 @@ flutter run -d chrome -t tool/web_preview.dart
 Uses WebAssembly SQLite from `sqflite_common_ffi_web` (a dev dependency, so it never enters the
 Android or iOS app) and `web/sqlite3.wasm`, which must match the locked `sqlite3` version
 (currently 3.7.0). The browser is not a target platform; verify behaviour on a phone.
+
+## Recitation catalogue (specs/004)
+
+`quran.db` lists the reciters and the size of every ayah recording, so the app can show download
+sizes offline and reject damaged files. Contract:
+[recitation-catalogue.md](../specs/004-ayah-recitations/contracts/recitation-catalogue.md).
+
+```powershell
+dart run tool/build_recitation_manifest.dart   # HEAD every ayah file of each reciter in tool/recitations.json
+dart run tool/add_recitations.dart             # write the reciters and recitation_files tables into quran.db
+```
+
+- `tool/recitations.json` (committed) defines the reciters: names, short names, style, base and
+  mirror URLs. Adding a reciter means adding a row here and running both commands; no app code
+  changes.
+- The manifest tool writes `tool/sources/recitations/<id>.json` (gitignored) and records its
+  SHA-256 in `sources.lock.json`. It exits with an error if any of the 6,236 ayat is missing
+  (FR-002, SC-003). It asks EveryAyah's CDN 4 files at a time; more gets throttled.
+- `add_recitations.dart` patches the existing `quran.db` in place, like the line-width and
+  printed-lettering steps; `build_quran_db.dart` writes the same tables in a full rebuild.

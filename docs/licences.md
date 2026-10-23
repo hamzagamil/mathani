@@ -21,6 +21,16 @@ must show every attribution marked **required**.
 | KFGQPC Madinah Mushaf page fonts, edition V2 (1421 AH), one per page (`assets/qcf/`) | Printed lettering of the Mushaf layout, the default (specs/002, User Story 4) | **Proprietary**, as above | **Dependency D3**: bundled unmodified; requires written approval |
 | IBM Plex Sans Arabic (Regular, Medium, SemiBold, Bold) | Interface text, Arabic and Latin | SIL Open Font License 1.1 | Ship the OFL text |
 
+## Recitations
+
+Streamed or downloaded on request; nothing is bundled (specs/004-ayah-recitations). The file
+sizes in `quran.db` (`recitation_files`) come from these servers.
+
+| Recording | Used for | Licence | Requirements |
+| --- | --- | --- | --- |
+| Sheikh Mahmoud Khalil Al-Husary, Murattal, EveryAyah `Husary_64kbps` (https://everyayah.com, mirror https://mirrors.quranicaudio.com/everyayah) | Ayah-by-ayah recitation (default reciter) | **Unconfirmed** (no terms stated on the site) | **Dependency D4**: written permission before release. **Required** until D4 says otherwise: the About screen credits both reciters and EveryAyah.com with a link (`recitationAttribution`) |
+| Sheikh Mohamed Siddiq El-Minshawi, Murattal, EveryAyah `Minshawy_Murattal_128kbps` (same hosts) | Ayah-by-ayah recitation | **Unconfirmed** (no terms stated on the site) | **Dependency D4**: as above |
+
 ## Icons and images
 
 | Asset | Used for | Licence | Requirements |
@@ -35,3 +45,4 @@ must show every attribution marked **required**.
 | D1 | KFGQPC: embed the unmodified KFGQPC Uthmanic Script HAFS font in a free app on the App Store and Google Play | not yet | requested / granted / refused | — | Contact via https://fonts.qurancomplex.gov.sa. Draft: [permissions/kfgqpc-request.md](permissions/kfgqpc-request.md) (with D3) |
 | D2 | QUL / Tarteel: redistribute the KFGQPC layout and word-by-word data inside the app | not yet | requested / granted / refused | — | Contact via https://qul.tarteel.ai. Draft: [permissions/qul-request.md](permissions/qul-request.md) |
 | D3 | KFGQPC: bundle the unmodified Madinah Mushaf page fonts (604) in the app (since 2026-10-23; previously planned as a hosted download) | not yet | granted | — | Same request as D1. Unblocks specs/002 task T026 |
+| D4 | Quran.com Foundation / EveryAyah: stream, cache and let readers download the Al-Husary and El-Minshawi Murattal recordings in a free app on the App Store and Google Play | not yet | requested / granted / refused | — | Contact via https://quran.zendesk.com/hc/en-us. Draft: [permissions/everyayah-request.md](permissions/everyayah-request.md). **Blocks the store release** of specs/004 |

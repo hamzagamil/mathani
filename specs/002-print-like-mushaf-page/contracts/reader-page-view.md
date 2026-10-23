@@ -46,3 +46,11 @@ with surah, juz and page in the interface language (001 FR-008). Touch targets 4
   footer bands are not read separately.
 - Controls overlay: a semantic "Show controls" action on the page, so switch-access users can
   open them.
+
+## Updated by specs/004 (recitations)
+
+While a recitation is on, its bar is the reader's bottom bar: it stays visible in the **Reading**
+state (controls hidden), the page sits above it and is never covered, and the toolbar overlay
+appears above it. A page turn made by following the recitation does not hide the controls; a
+swipe still does. See [specs/004 recitation-ui](../../004-ayah-recitations/contracts/recitation-ui.md)
+and [recitation-playback › Following](../../004-ayah-recitations/contracts/recitation-playback.md).
