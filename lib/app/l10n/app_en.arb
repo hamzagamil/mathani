@@ -412,5 +412,145 @@
   "@muallim": {"description":"Recording style: each ayah recited with repetitions for learners (specs/006 research R3)."},
   "searchReciters": "Search reciters",
   "noReciterFound": "No reciter with this name",
-  "qulRecitationsCredit": "Ayah timings and some recitations: Quranic Universal Library (QUL)"
+  "qulRecitationsCredit": "Ayah timings and some recitations: Quranic Universal Library (QUL)",
+  "memorize": "Memorize",
+  "memorizeFromAyah": "Memorize from this ayah",
+  "memorizeTitle": "Test your memorization",
+  "memorizeFrom": "From ayah",
+  "memorizeTo": "To ayah",
+  "memorizeSummary": "{ayat} · {pages}",
+  "@memorizeSummary": {
+    "placeholders": {
+      "ayat": {"type": "String"},
+      "pages": {"type": "String"}
+    }
+  },
+  "memorizePage": "page {page}",
+  "@memorizePage": {
+    "placeholders": {
+      "page": {"type": "String"}
+    }
+  },
+  "memorizePages": "pages {from}–{to}",
+  "@memorizePages": {
+    "placeholders": {
+      "from": {"type": "String"},
+      "to": {"type": "String"}
+    }
+  },
+  "memorizeModelNeeded": "Memorization needs a one-time download of the recitation model ({size}). After that it works offline.",
+  "@memorizeModelNeeded": {
+    "placeholders": {
+      "size": {"type": "String"}
+    }
+  },
+  "memorizeModelDownloading": "Downloading the model… {percent}%",
+  "@memorizeModelDownloading": {
+    "placeholders": {
+      "percent": {"type": "String"}
+    }
+  },
+  "memorizeModelFailed": "The model couldn't be downloaded. Try again.",
+  "memorizeStart": "Start",
+  "memorizeUnsupported": "Memorization isn't available on this device",
+  "memorizeUnsupported64": "It needs a 64-bit processor.",
+  "memorizeUnsupportedMemory": "It needs at least 3 GB of memory.",
+  "micExplainerTitle": "The microphone is only for following you",
+  "micExplainerBody": "Mathani listens to your recitation to reveal each ayah as you complete it. This happens on your device only; your voice is never recorded or sent.",
+  "micExplainerContinue": "Continue",
+  "micDenied": "Memorization can't start without the microphone.",
+  "memorizeListening": "Listening",
+  "memorizeMicOn": "Microphone on",
+  "memorizePreparing": "Getting ready…",
+  "memorizePaused": "Paused",
+  "memorizePausedSilence": "Stopped listening after 30 seconds of silence",
+  "memorizePausedInterruption": "Paused for a call or other audio",
+  "memorizePausedBackground": "Paused when you left the app",
+  "memorizePausedRoute": "The microphone was disconnected",
+  "memorizeProgress": "Ayah {n} of {total}",
+  "@memorizeProgress": {
+    "placeholders": {
+      "n": {"type": "String"},
+      "total": {"type": "String"}
+    }
+  },
+  "memorizePause": "Pause",
+  "memorizeResume": "Resume",
+  "memorizeNextWord": "Next word",
+  "memorizeShowAyah": "Show this ayah",
+  "memorizeEnd": "End",
+  "memorizeMistake": "Mistake — carry on from the word",
+  "memorizeBackToAyah": "Back to the ayah",
+  "memorizeHiddenAyah": "Ayah {n}, hidden",
+  "@memorizeHiddenAyah": {
+    "placeholders": {
+      "n": {"type": "String"}
+    }
+  },
+  "memorizeRevealed": "Ayah {n} revealed",
+  "@memorizeRevealed": {
+    "placeholders": {
+      "n": {"type": "String"}
+    }
+  },
+  "resultTitle": "Your result",
+  "resultOutOf": "out of 100",
+  "resultNoMistake": "No mistake {n}",
+  "@resultNoMistake": {
+    "placeholders": {
+      "n": {"type": "String"}
+    }
+  },
+  "resultCorrected": "Corrected {n}",
+  "@resultCorrected": {
+    "placeholders": {
+      "n": {"type": "String"}
+    }
+  },
+  "resultHinted": "Hinted {n}",
+  "@resultHinted": {
+    "placeholders": {
+      "n": {"type": "String"}
+    }
+  },
+  "resultRevealedCount": "Revealed {n}",
+  "@resultRevealedCount": {
+    "placeholders": {
+      "n": {"type": "String"}
+    }
+  },
+  "resultNotReachedCount": "Not reached {n}",
+  "@resultNotReachedCount": {
+    "placeholders": {
+      "n": {"type": "String"}
+    }
+  },
+  "resultReached": "You reached {reached} of {total}",
+  "@resultReached": {
+    "placeholders": {
+      "reached": {"type": "String"},
+      "total": {"type": "String"}
+    }
+  },
+  "resultRevealed": "Revealed",
+  "resultNotReached": "Not reached",
+  "resultNotFinished": "Not finished",
+  "resultMissed": "missed",
+  "resultWrong": "heard “{heard}”",
+  "@resultWrong": {
+    "placeholders": {
+      "heard": {"type": "String"}
+    }
+  },
+  "resultAdded": "added word",
+  "resultTryAgain": "Try again",
+  "resultDone": "Done",
+  "mistakeSignal": "Mistake alert",
+  "mistakeSignalVibrate": "Vibrate",
+  "mistakeSignalSound": "Sound",
+  "mistakeSignalNone": "None",
+  "memorizationModel": "Memorization model",
+  "deleteMemorizationModel": "Delete the memorization model",
+  "tourMemorize": "Test your memorization: recite from memory and each ayah appears as you complete it",
+  "openSystemSettings": "Open Settings"
 }

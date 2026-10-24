@@ -604,4 +604,222 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get qulRecitationsCredit =>
       'Ayah timings and some recitations: Quranic Universal Library (QUL)';
+
+  @override
+  String get memorize => 'Memorize';
+
+  @override
+  String get memorizeFromAyah => 'Memorize from this ayah';
+
+  @override
+  String get memorizeTitle => 'Test your memorization';
+
+  @override
+  String get memorizeFrom => 'From ayah';
+
+  @override
+  String get memorizeTo => 'To ayah';
+
+  @override
+  String memorizeSummary(String ayat, String pages) {
+    return '$ayat · $pages';
+  }
+
+  @override
+  String memorizePage(String page) {
+    return 'page $page';
+  }
+
+  @override
+  String memorizePages(String from, String to) {
+    return 'pages $from–$to';
+  }
+
+  @override
+  String memorizeModelNeeded(String size) {
+    return 'Memorization needs a one-time download of the recitation model ($size). After that it works offline.';
+  }
+
+  @override
+  String memorizeModelDownloading(String percent) {
+    return 'Downloading the model… $percent%';
+  }
+
+  @override
+  String get memorizeModelFailed =>
+      'The model couldn\'t be downloaded. Try again.';
+
+  @override
+  String get memorizeStart => 'Start';
+
+  @override
+  String get memorizeUnsupported =>
+      'Memorization isn\'t available on this device';
+
+  @override
+  String get memorizeUnsupported64 => 'It needs a 64-bit processor.';
+
+  @override
+  String get memorizeUnsupportedMemory => 'It needs at least 3 GB of memory.';
+
+  @override
+  String get micExplainerTitle => 'The microphone is only for following you';
+
+  @override
+  String get micExplainerBody =>
+      'Mathani listens to your recitation to reveal each ayah as you complete it. This happens on your device only; your voice is never recorded or sent.';
+
+  @override
+  String get micExplainerContinue => 'Continue';
+
+  @override
+  String get micDenied => 'Memorization can\'t start without the microphone.';
+
+  @override
+  String get memorizeListening => 'Listening';
+
+  @override
+  String get memorizeMicOn => 'Microphone on';
+
+  @override
+  String get memorizePreparing => 'Getting ready…';
+
+  @override
+  String get memorizePaused => 'Paused';
+
+  @override
+  String get memorizePausedSilence =>
+      'Stopped listening after 30 seconds of silence';
+
+  @override
+  String get memorizePausedInterruption => 'Paused for a call or other audio';
+
+  @override
+  String get memorizePausedBackground => 'Paused when you left the app';
+
+  @override
+  String get memorizePausedRoute => 'The microphone was disconnected';
+
+  @override
+  String memorizeProgress(String n, String total) {
+    return 'Ayah $n of $total';
+  }
+
+  @override
+  String get memorizePause => 'Pause';
+
+  @override
+  String get memorizeResume => 'Resume';
+
+  @override
+  String get memorizeNextWord => 'Next word';
+
+  @override
+  String get memorizeShowAyah => 'Show this ayah';
+
+  @override
+  String get memorizeEnd => 'End';
+
+  @override
+  String get memorizeMistake => 'Mistake — carry on from the word';
+
+  @override
+  String get memorizeBackToAyah => 'Back to the ayah';
+
+  @override
+  String memorizeHiddenAyah(String n) {
+    return 'Ayah $n, hidden';
+  }
+
+  @override
+  String memorizeRevealed(String n) {
+    return 'Ayah $n revealed';
+  }
+
+  @override
+  String get resultTitle => 'Your result';
+
+  @override
+  String get resultOutOf => 'out of 100';
+
+  @override
+  String resultNoMistake(String n) {
+    return 'No mistake $n';
+  }
+
+  @override
+  String resultCorrected(String n) {
+    return 'Corrected $n';
+  }
+
+  @override
+  String resultHinted(String n) {
+    return 'Hinted $n';
+  }
+
+  @override
+  String resultRevealedCount(String n) {
+    return 'Revealed $n';
+  }
+
+  @override
+  String resultNotReachedCount(String n) {
+    return 'Not reached $n';
+  }
+
+  @override
+  String resultReached(String reached, String total) {
+    return 'You reached $reached of $total';
+  }
+
+  @override
+  String get resultRevealed => 'Revealed';
+
+  @override
+  String get resultNotReached => 'Not reached';
+
+  @override
+  String get resultNotFinished => 'Not finished';
+
+  @override
+  String get resultMissed => 'missed';
+
+  @override
+  String resultWrong(String heard) {
+    return 'heard “$heard”';
+  }
+
+  @override
+  String get resultAdded => 'added word';
+
+  @override
+  String get resultTryAgain => 'Try again';
+
+  @override
+  String get resultDone => 'Done';
+
+  @override
+  String get mistakeSignal => 'Mistake alert';
+
+  @override
+  String get mistakeSignalVibrate => 'Vibrate';
+
+  @override
+  String get mistakeSignalSound => 'Sound';
+
+  @override
+  String get mistakeSignalNone => 'None';
+
+  @override
+  String get memorizationModel => 'Memorization model';
+
+  @override
+  String get deleteMemorizationModel => 'Delete the memorization model';
+
+  @override
+  String get tourMemorize =>
+      'Test your memorization: recite from memory and each ayah appears as you complete it';
+
+  @override
+  String get openSystemSettings => 'Open Settings';
 }

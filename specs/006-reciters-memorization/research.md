@@ -47,6 +47,17 @@ Hafs recitation across both libraries, one per reciter and style.
 - *Timed surah files for every reciter QUL has*: a second playback path for no new recitations.
 - *Untimed surah files*: can't be followed ayah by ayah.
 
+**Catalogue build results (T018, 2026-10-24)**: 46 of the 51 planned rows pass. These five are
+left out of `tool/recitations.json` until their sources are fixed:
+
+| Reciter | Source | Why |
+| --- | --- | --- |
+| `ayyoub` (Muhammad Ayyoub) | EveryAyah | 28:87 is missing on both hosts (FR-002 forbids skipping an ayah) |
+| `minshawy_children` | QUL surah files | Surah 33 timings: 54 problems (ayat out of order, 33:23–25 without timing), as expected |
+| `mostafa_ismail` | quranicaudio surah files + QUL timings | 74:55 starts past the end of its surah file |
+| `husary_ijazah` | quranicaudio surah files + QUL timings | In 18 surahs (2, 3, 5, 6, 7, 9, 10, 11, …), the last ayah starts past the end of the file: the timings belong to a longer edition |
+| `salimi` (Mansour Al-Salimi) | Tarteel surah files | Surahs 6, 43 and 45: no MPEG Layer III frame where the header probe expects one (not CBR as the others, or a damaged file) |
+
 ## R1. Which EveryAyah recordings are offered (FR-001, FR-002, SC-001)
 
 **Finding**: `recitations.js` lists 79 recording sets. Six ayat (1:1, 2:282, 9:129, 18:110,

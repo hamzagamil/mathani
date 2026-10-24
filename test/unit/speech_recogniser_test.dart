@@ -68,11 +68,12 @@ void main() {
         }
         r.accept(Float32List(micSampleRate));
         r.flush();
-        // Done when nothing more arrives for 5 s (decoding takes about 1 s per segment here).
+        // Done when nothing more arrives for 8 s (decoding takes about 1 s per segment here, more
+        // when the rest of the suite runs alongside).
         var count = -1;
         while (count != heard.length) {
           count = heard.length;
-          await Future<void>.delayed(const Duration(seconds: 5));
+          await Future<void>.delayed(const Duration(seconds: 8));
         }
         await sub.cancel();
         var completed = false;
@@ -96,5 +97,5 @@ void main() {
     // A smoke check of the whole chain on professional recordings; accuracy on ordinary readers
     // is spike S1's gate (T035).
     expect(clean / clips.length, greaterThanOrEqualTo(0.85), reason: report.join('\n'));
-  }, skip: !available, timeout: const Timeout(Duration(minutes: 5)));
+  }, skip: !available, timeout: const Timeout(Duration(minutes: 10)));
 }

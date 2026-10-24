@@ -9,6 +9,8 @@ import '../../data/models.dart';
 import '../../shared/mathani_icons.dart';
 import '../../shared/numerals.dart';
 import '../../shared/reader_state.dart';
+import '../memorization/memorization_controller.dart';
+import '../memorization/range_sheet.dart';
 import '../recitation/recitation_controller.dart';
 
 /// Text for copying or sharing an ayah, exactly as in contracts/ui-screens.md (FR-021):
@@ -24,7 +26,8 @@ String formatAyahForShare(List<Word> words, Surah surah, int ayah, {required boo
   return '﴿$text﴾\n$reference';
 }
 
-/// Long-press actions for an ayah: play from it (specs/004), copy, share and bookmark (FR-020). The ayah stays
+/// Long-press actions for an ayah: play from it (specs/004), memorize from it (specs/006), copy,
+/// share and bookmark (FR-020). The ayah stays
 /// highlighted while the sheet is open.
 Future<void> showAyahActions(BuildContext context, AyahRef ref) async {
   final reader = ReaderScope.read(context);
@@ -32,14 +35,17 @@ Future<void> showAyahActions(BuildContext context, AyahRef ref) async {
   await showModalBottomSheet<void>(
     context: context,
     showDragHandle: true,
-    builder: (_) => _AyahActionsSheet(ayah: ref),
+    builder: (_) => _AyahActionsSheet(ayah: ref, screen: context),
   );
   reader.select(null);
 }
 
 class _AyahActionsSheet extends StatelessWidget {
-  const _AyahActionsSheet({required this.ayah});
+  const _AyahActionsSheet({required this.ayah, required this.screen});
   final AyahRef ayah;
+
+  /// The reading screen, which outlives this sheet.
+  final BuildContext screen;
 
   @override
   Widget build(BuildContext context) {
@@ -51,6 +57,7 @@ class _AyahActionsSheet extends StatelessWidget {
     final colors = MathaniColors.of(context);
     final messenger = ScaffoldMessenger.of(context);
     final recitation = RecitationScope.read(context);
+    final memorization = MemorizationScope.read(context);
 
     Future<String> text() async => formatAyahForShare(
           await reader.quran.wordsOf(ayah),
@@ -86,6 +93,15 @@ class _AyahActionsSheet extends StatelessWidget {
               onTap: () {
                 Navigator.of(context).pop();
                 recitation.playFrom(ayah);
+              },
+            ),
+          if (memorization != null && !memorization.active)
+            ListTile(
+              leading: const Icon(MathaniIcons.memorize),
+              title: Text(l10n.memorizeFromAyah),
+              onTap: () {
+                Navigator.of(context).pop();
+                showMemorizeSheet(screen, from: ayah);
               },
             ),
           ListTile(

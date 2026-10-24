@@ -8,6 +8,7 @@ import '../../data/models.dart';
 import '../../data/quran_repository.dart';
 import '../../shared/numerals.dart';
 import '../../shared/reader_state.dart';
+import '../memorization/memorization_controller.dart';
 import '../onboarding/onboarding_controller.dart';
 import '../recitation/recitation_controller.dart';
 import 'mushaf_page_renderer.dart';
@@ -153,6 +154,7 @@ class _MushafPageItemState extends State<_MushafPageItem> {
     final l10n = AppLocalizations.of(context);
     final head = quran.firstAyahOnPage(page.number);
     final recited = RecitationScope.maybeOf(context)?.recited;
+    final memorization = MemorizationScope.maybeOf(context);
 
     final onTapPage = widget.onTapPage;
     return Semantics(
@@ -173,7 +175,12 @@ class _MushafPageItemState extends State<_MushafPageItem> {
                 final box = _rendererKey.currentContext?.findRenderObject();
                 if (box is! RenderMushafPage) return;
                 final ref = box.ayahAt(box.globalToLocal(d.globalPosition));
-                if (ref != null) widget.onAyahLongPress!(ref);
+                // During memorization the range's ayat have no actions (specs/006).
+                final inSession = memorization != null &&
+                    memorization.active &&
+                    ref != null &&
+                    (memorization.range?.contains(ref) ?? false);
+                if (ref != null && !inSession) widget.onAyahLongPress!(ref);
               },
         child: PaperSheet(
           bindingOnRight: page.number.isOdd,
@@ -189,6 +196,8 @@ class _MushafPageItemState extends State<_MushafPageItem> {
               highlight: colors.secondarySoft,
               selection: colors.selected,
               recited: colors.recited,
+              hint: colors.hint,
+              mistake: colors.mistake,
             ),
             quarterStartWords: widget.cache.quarterStartWords(page.number),
             sajdahEndWords: widget.cache.sajdahEndWords(page.number),
@@ -196,6 +205,15 @@ class _MushafPageItemState extends State<_MushafPageItem> {
             highlighted: reader.highlighted,
             recited: recited == null || recited.isBasmala ? null : recited.ref,
             recitedBasmala: recited != null && recited.isBasmala ? recited.surah : null,
+            marks: memorization == null || !memorization.active
+                ? null
+                : WordMarks(
+                    hidden: memorization.isHidden,
+                    hinted: memorization.isHinted,
+                    mistake: memorization.hasMistake,
+                    expected: memorization.expected,
+                    revision: memorization.revision,
+                  ),
             details: MushafPageDetails.of(quran, page.number),
             printedGlyphs: cached.glyphs,
             printedFamily: cached.family,

@@ -1074,6 +1074,372 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Ayah timings and some recitations: Quranic Universal Library (QUL)'**
   String get qulRecitationsCredit;
+
+  /// No description provided for @memorize.
+  ///
+  /// In en, this message translates to:
+  /// **'Memorize'**
+  String get memorize;
+
+  /// No description provided for @memorizeFromAyah.
+  ///
+  /// In en, this message translates to:
+  /// **'Memorize from this ayah'**
+  String get memorizeFromAyah;
+
+  /// No description provided for @memorizeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Test your memorization'**
+  String get memorizeTitle;
+
+  /// No description provided for @memorizeFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'From ayah'**
+  String get memorizeFrom;
+
+  /// No description provided for @memorizeTo.
+  ///
+  /// In en, this message translates to:
+  /// **'To ayah'**
+  String get memorizeTo;
+
+  /// No description provided for @memorizeSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{ayat} · {pages}'**
+  String memorizeSummary(String ayat, String pages);
+
+  /// No description provided for @memorizePage.
+  ///
+  /// In en, this message translates to:
+  /// **'page {page}'**
+  String memorizePage(String page);
+
+  /// No description provided for @memorizePages.
+  ///
+  /// In en, this message translates to:
+  /// **'pages {from}–{to}'**
+  String memorizePages(String from, String to);
+
+  /// No description provided for @memorizeModelNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Memorization needs a one-time download of the recitation model ({size}). After that it works offline.'**
+  String memorizeModelNeeded(String size);
+
+  /// No description provided for @memorizeModelDownloading.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading the model… {percent}%'**
+  String memorizeModelDownloading(String percent);
+
+  /// No description provided for @memorizeModelFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The model couldn\'t be downloaded. Try again.'**
+  String get memorizeModelFailed;
+
+  /// No description provided for @memorizeStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get memorizeStart;
+
+  /// No description provided for @memorizeUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Memorization isn\'t available on this device'**
+  String get memorizeUnsupported;
+
+  /// No description provided for @memorizeUnsupported64.
+  ///
+  /// In en, this message translates to:
+  /// **'It needs a 64-bit processor.'**
+  String get memorizeUnsupported64;
+
+  /// No description provided for @memorizeUnsupportedMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'It needs at least 3 GB of memory.'**
+  String get memorizeUnsupportedMemory;
+
+  /// No description provided for @micExplainerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The microphone is only for following you'**
+  String get micExplainerTitle;
+
+  /// No description provided for @micExplainerBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Mathani listens to your recitation to reveal each ayah as you complete it. This happens on your device only; your voice is never recorded or sent.'**
+  String get micExplainerBody;
+
+  /// No description provided for @micExplainerContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get micExplainerContinue;
+
+  /// No description provided for @micDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Memorization can\'t start without the microphone.'**
+  String get micDenied;
+
+  /// No description provided for @memorizeListening.
+  ///
+  /// In en, this message translates to:
+  /// **'Listening'**
+  String get memorizeListening;
+
+  /// No description provided for @memorizeMicOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Microphone on'**
+  String get memorizeMicOn;
+
+  /// No description provided for @memorizePreparing.
+  ///
+  /// In en, this message translates to:
+  /// **'Getting ready…'**
+  String get memorizePreparing;
+
+  /// No description provided for @memorizePaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused'**
+  String get memorizePaused;
+
+  /// No description provided for @memorizePausedSilence.
+  ///
+  /// In en, this message translates to:
+  /// **'Stopped listening after 30 seconds of silence'**
+  String get memorizePausedSilence;
+
+  /// No description provided for @memorizePausedInterruption.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused for a call or other audio'**
+  String get memorizePausedInterruption;
+
+  /// No description provided for @memorizePausedBackground.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused when you left the app'**
+  String get memorizePausedBackground;
+
+  /// No description provided for @memorizePausedRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'The microphone was disconnected'**
+  String get memorizePausedRoute;
+
+  /// No description provided for @memorizeProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Ayah {n} of {total}'**
+  String memorizeProgress(String n, String total);
+
+  /// No description provided for @memorizePause.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get memorizePause;
+
+  /// No description provided for @memorizeResume.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume'**
+  String get memorizeResume;
+
+  /// No description provided for @memorizeNextWord.
+  ///
+  /// In en, this message translates to:
+  /// **'Next word'**
+  String get memorizeNextWord;
+
+  /// No description provided for @memorizeShowAyah.
+  ///
+  /// In en, this message translates to:
+  /// **'Show this ayah'**
+  String get memorizeShowAyah;
+
+  /// No description provided for @memorizeEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'End'**
+  String get memorizeEnd;
+
+  /// No description provided for @memorizeMistake.
+  ///
+  /// In en, this message translates to:
+  /// **'Mistake — carry on from the word'**
+  String get memorizeMistake;
+
+  /// No description provided for @memorizeBackToAyah.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to the ayah'**
+  String get memorizeBackToAyah;
+
+  /// No description provided for @memorizeHiddenAyah.
+  ///
+  /// In en, this message translates to:
+  /// **'Ayah {n}, hidden'**
+  String memorizeHiddenAyah(String n);
+
+  /// No description provided for @memorizeRevealed.
+  ///
+  /// In en, this message translates to:
+  /// **'Ayah {n} revealed'**
+  String memorizeRevealed(String n);
+
+  /// No description provided for @resultTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your result'**
+  String get resultTitle;
+
+  /// No description provided for @resultOutOf.
+  ///
+  /// In en, this message translates to:
+  /// **'out of 100'**
+  String get resultOutOf;
+
+  /// No description provided for @resultNoMistake.
+  ///
+  /// In en, this message translates to:
+  /// **'No mistake {n}'**
+  String resultNoMistake(String n);
+
+  /// No description provided for @resultCorrected.
+  ///
+  /// In en, this message translates to:
+  /// **'Corrected {n}'**
+  String resultCorrected(String n);
+
+  /// No description provided for @resultHinted.
+  ///
+  /// In en, this message translates to:
+  /// **'Hinted {n}'**
+  String resultHinted(String n);
+
+  /// No description provided for @resultRevealedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Revealed {n}'**
+  String resultRevealedCount(String n);
+
+  /// No description provided for @resultNotReachedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Not reached {n}'**
+  String resultNotReachedCount(String n);
+
+  /// No description provided for @resultReached.
+  ///
+  /// In en, this message translates to:
+  /// **'You reached {reached} of {total}'**
+  String resultReached(String reached, String total);
+
+  /// No description provided for @resultRevealed.
+  ///
+  /// In en, this message translates to:
+  /// **'Revealed'**
+  String get resultRevealed;
+
+  /// No description provided for @resultNotReached.
+  ///
+  /// In en, this message translates to:
+  /// **'Not reached'**
+  String get resultNotReached;
+
+  /// No description provided for @resultNotFinished.
+  ///
+  /// In en, this message translates to:
+  /// **'Not finished'**
+  String get resultNotFinished;
+
+  /// No description provided for @resultMissed.
+  ///
+  /// In en, this message translates to:
+  /// **'missed'**
+  String get resultMissed;
+
+  /// No description provided for @resultWrong.
+  ///
+  /// In en, this message translates to:
+  /// **'heard “{heard}”'**
+  String resultWrong(String heard);
+
+  /// No description provided for @resultAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'added word'**
+  String get resultAdded;
+
+  /// No description provided for @resultTryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get resultTryAgain;
+
+  /// No description provided for @resultDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get resultDone;
+
+  /// No description provided for @mistakeSignal.
+  ///
+  /// In en, this message translates to:
+  /// **'Mistake alert'**
+  String get mistakeSignal;
+
+  /// No description provided for @mistakeSignalVibrate.
+  ///
+  /// In en, this message translates to:
+  /// **'Vibrate'**
+  String get mistakeSignalVibrate;
+
+  /// No description provided for @mistakeSignalSound.
+  ///
+  /// In en, this message translates to:
+  /// **'Sound'**
+  String get mistakeSignalSound;
+
+  /// No description provided for @mistakeSignalNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get mistakeSignalNone;
+
+  /// No description provided for @memorizationModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Memorization model'**
+  String get memorizationModel;
+
+  /// No description provided for @deleteMemorizationModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete the memorization model'**
+  String get deleteMemorizationModel;
+
+  /// No description provided for @tourMemorize.
+  ///
+  /// In en, this message translates to:
+  /// **'Test your memorization: recite from memory and each ayah appears as you complete it'**
+  String get tourMemorize;
+
+  /// No description provided for @openSystemSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Settings'**
+  String get openSystemSettings;
 }
 
 class _AppLocalizationsDelegate

@@ -26,6 +26,7 @@ class TourTargets {
   final index = GlobalKey(debugLabel: 'tour.index');
   final search = GlobalKey(debugLabel: 'tour.search');
   final listen = GlobalKey(debugLabel: 'tour.listen');
+  final memorize = GlobalKey(debugLabel: 'tour.memorize');
   final settings = GlobalKey(debugLabel: 'tour.settings');
 
   /// The recitation bar, which takes the Listen button's place during a recitation.
@@ -71,6 +72,7 @@ class _ButtonTourState extends State<ButtonTour> with WidgetsBindingObserver {
         OnboardingStep.player => (RecitationScope.maybeOf(context)?.session != null)
             ? widget.targets.player
             : widget.targets.listen,
+        OnboardingStep.memorize => widget.targets.memorize,
         OnboardingStep.settings => widget.targets.settings,
         _ => null,
       };
@@ -173,6 +175,7 @@ class _ButtonTourState extends State<ButtonTour> with WidgetsBindingObserver {
       OnboardingStep.surahIndex => (l10n.tourIndexTitle, l10n.tourIndexBody),
       OnboardingStep.search => (l10n.tourSearchTitle, l10n.tourSearchBody),
       OnboardingStep.player => (l10n.tourPlayerTitle, l10n.tourPlayerBody),
+      OnboardingStep.memorize => (l10n.memorize, l10n.tourMemorize),
       _ => (l10n.tourSettingsTitle, l10n.tourSettingsBody),
     };
 

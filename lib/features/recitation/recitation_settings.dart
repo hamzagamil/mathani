@@ -6,6 +6,8 @@ import '../../app/theme/app_theme.dart';
 import '../../app/theme/tokens.dart';
 import '../../shared/mathani_icons.dart';
 import '../../shared/reader_state.dart';
+import '../../data/models.dart';
+import '../memorization/memorization_controller.dart';
 import 'download_queue.dart';
 import 'downloads_screen.dart';
 import 'recitation_controller.dart';
@@ -48,6 +50,29 @@ class RecitationSettings extends StatelessWidget {
           _DownloadsRow(queue: recitation.downloads),
           const _ClearRecentRow(),
         ],
+        // How a mistake is signalled during memorization (specs/006 FR-015, Q5).
+        if (MemorizationScope.maybeOf(context) != null)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(Space.s4, Space.s2, Space.s4, Space.s2),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(l10n.mistakeSignal, style: TypeScale.body.copyWith(color: colors.ink)),
+                const SizedBox(height: Space.s2),
+                SegmentedButton<MistakeSignal>(
+                  showSelectedIcon: false,
+                  segments: [
+                    ButtonSegment(value: MistakeSignal.vibrate, label: Text(l10n.mistakeSignalVibrate)),
+                    ButtonSegment(value: MistakeSignal.sound, label: Text(l10n.mistakeSignalSound)),
+                    ButtonSegment(value: MistakeSignal.none, label: Text(l10n.mistakeSignalNone)),
+                  ],
+                  selected: {reader.preferences.mistakeSignal},
+                  onSelectionChanged: (s) =>
+                      reader.updatePreferences(reader.preferences.copyWith(mistakeSignal: s.first)),
+                ),
+              ],
+            ),
+          ),
       ],
     );
   }

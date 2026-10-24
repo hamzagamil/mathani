@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
@@ -10,6 +11,11 @@ import '../../shared/mathani_icons.dart';
 import '../../shared/numerals.dart';
 import '../../shared/reader_state.dart';
 import '../index/index_screen.dart';
+import '../memorization/memorization_bar.dart';
+import '../memorization/memorization_controller.dart';
+import '../memorization/memorization_score.dart';
+import '../memorization/range_sheet.dart';
+import '../memorization/result_screen.dart';
 import '../onboarding/button_tour.dart';
 import '../onboarding/onboarding_controller.dart';
 import '../recitation/download_queue.dart';
@@ -76,6 +82,34 @@ class _ReaderScreenState extends State<ReaderScreen> {
         immersive ? SystemUiMode.immersiveSticky : SystemUiMode.edgeToEdge);
   }
 
+  SessionResult? _shownResult;
+  AyahRef? _announced;
+
+  /// Announces reveals to screen readers, and opens the result screen when a session ends
+  /// (specs/006 contracts/memorization-ui.md).
+  void _followMemorization(MemorizationController m) {
+    final revealed = m.lastRevealed;
+    if (revealed != null && revealed != _announced && m.active) {
+      _announced = revealed;
+      final l10n = AppLocalizations.of(context);
+      SemanticsService.sendAnnouncement(View.of(context),
+          l10n.memorizeRevealed(formatNumber(revealed.ayah, Localizations.localeOf(context))),
+          Directionality.of(context));
+    }
+    final result = m.result, range = m.range;
+    if (m.phase != MemorizationPhase.ended || result == null || range == null ||
+        identical(result, _shownResult)) {
+      return;
+    }
+    _shownResult = result;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      Navigator.of(context).push(MaterialPageRoute<void>(
+        builder: (_) => ResultScreen(controller: m, range: range, result: result),
+      ));
+    });
+  }
+
   /// Keeps the screen on while the reader is shown and the setting is on (FR-018).
   void _syncWakelock(bool on) {
     if (_wakelock == on) return;
@@ -91,8 +125,14 @@ class _ReaderScreenState extends State<ReaderScreen> {
     // The recitation bar (specs/004) docks at the bottom of both layouts while a session exists.
     final recitation = RecitationScope.maybeOf(context);
     final session = recitation?.session;
-    final docked = session != null;
-    final bar = RecitationBar(
+    // A memorization session (specs/006) docks its own bar in the same place.
+    final memorization = MemorizationScope.maybeOf(context);
+    final memorizing = memorization?.active ?? false;
+    if (memorization != null) _followMemorization(memorization);
+    final docked = session != null || memorizing;
+    final bar = memorizing
+        ? MemorizationBar(controller: memorization!)
+        : RecitationBar(
       key: _targets.player,
       onChooseReciter: () {
         final downloads = recitation?.downloads;
@@ -322,6 +362,8 @@ class _ReaderToolbar extends StatelessWidget {
         Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => screen));
     final mushaf = reader.layout == ReadingLayout.mushaf;
     final recitation = RecitationScope.maybeOf(context);
+    final memorization = MemorizationScope.maybeOf(context);
+    final memorizing = memorization?.active ?? false;
 
     return Material(
       color: colors.surfaceRaised,
@@ -357,7 +399,7 @@ class _ReaderToolbar extends StatelessWidget {
                 ),
                 // Listen (specs/004): from this page, or from the top ayah in the flowing layout. The
                 // recitation bar takes its place while a recitation is on.
-                if (recitation != null && recitation.session == null)
+                if (recitation != null && recitation.session == null && !memorizing)
                   IconButton(
                     key: targets.listen,
                     icon: const Icon(MathaniIcons.play),
@@ -365,6 +407,15 @@ class _ReaderToolbar extends StatelessWidget {
                     onPressed: () => mushaf
                         ? recitation.playFromPage(reader.page)
                         : recitation.playFrom(reader.anchor),
+                  ),
+                // Memorize (specs/006): from this page; the memorization bar takes its place during
+                // a session.
+                if (memorization != null && !memorizing)
+                  IconButton(
+                    key: targets.memorize,
+                    icon: const Icon(MathaniIcons.memorize),
+                    tooltip: l10n.memorize,
+                    onPressed: () => showMemorizeSheet(context),
                   ),
                 const _BookmarkToggle(),
                 IconButton(
