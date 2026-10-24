@@ -177,4 +177,27 @@ void main() {
     expect(controlsShown(), isFalse, reason: 'a swipe still hides them (spec 002)');
     await finish(tester);
   });
+
+  testWidgets('following turns the visible page when the next ayah starts on the next page',
+      (tester) async {
+    await pumpApp(tester);
+    final lastOn50 = reader.quran.ayahsStartingOnPage(50).last.ref;
+    await tester.runAsync(() => recitation.playFrom(lastOn50));
+    await settle(tester);
+    int shown() => tester.widget<PageView>(find.byType(PageView)).controller!.page!.round() + 1;
+    expect(shown(), 50, reason: 'the recitation opens on its page');
+    for (final page in [51, 52]) {
+      // Play through to the first ayah of the next page.
+      final first = reader.quran.ayahsStartingOnPage(page).first.ref;
+      while (recitation.session!.item.ref != first) {
+        engine.finishCurrent();
+        await settle(tester, 2);
+      }
+      await settle(tester);
+      expect(reader.page, page);
+      expect(shown(), page, reason: 'the page on screen follows the recitation');
+      expect(recitation.session!.following, isTrue);
+    }
+    await finish(tester);
+  });
 }

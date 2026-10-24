@@ -93,6 +93,9 @@ class FakeAudioEngine implements AudioEngine {
     }
   }
 
+  /// Sends any event, as a late or stray one from the real player would arrive.
+  void emit(EngineEvent event) => _events.add(event);
+
   /// The system paused playback (a call, unplugged headphones).
   void pausedBySystem() {
     playing = false;

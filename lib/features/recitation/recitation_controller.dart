@@ -294,6 +294,8 @@ class RecitationController extends ChangeNotifier with WidgetsBindingObserver {
     if (s == null) return;
     switch (event) {
       case ItemStarted(:final item):
+        // Only an ayah of the current window: a late event from a replaced window is not news.
+        if (!_window.contains(item)) return;
         if (item != s.item && s.status != RecitationStatus.paused) {
           s.item = item;
           notifyListeners();

@@ -60,7 +60,10 @@ abstract interface class AudioEngine {
 class JustAudioEngine implements AudioEngine {
   JustAudioEngine() {
     _subscriptions
-      ..add(_player.currentIndexStream.listen(_onIndex))
+      // The playing ayah is the tag of the source the player is on, not an index into a copy of
+      // the playlist: just_audio reports the index on every playback event, and a copy runs ahead
+      // of the player while an item is being removed, which named the wrong ayah.
+      ..add(_player.sequenceStateStream.listen(_onSequence))
       ..add(_player.processingStateStream.listen(_onState))
       ..add(_player.errorStream.listen((e) => _events.add(EngineFailed(e))))
       ..add(_player.playingStream.listen((playing) {
@@ -75,7 +78,7 @@ class JustAudioEngine implements AudioEngine {
   final _player = AudioPlayer(handleInterruptions: true);
   final _events = StreamController<EngineEvent>.broadcast();
   final _subscriptions = <StreamSubscription<Object?>>[];
-  final _items = <RecitedItem>[];
+  RecitedItem? _started;
   bool _sessionConfigured = false;
   bool _wantPlaying = false;
 
@@ -91,25 +94,26 @@ class JustAudioEngine implements AudioEngine {
   @override
   Stream<EngineEvent> get events => _events.stream;
 
-  void _onIndex(int? index) {
-    if (index != null && index >= 0 && index < _items.length) {
-      _events.add(ItemStarted(_items[index]));
+  void _onSequence(SequenceState state) {
+    final tag = state.currentSource?.tag;
+    if (tag is RecitedItem && tag != _started) {
+      _started = tag;
+      _events.add(ItemStarted(tag));
     }
   }
 
   void _onState(ProcessingState state) {
-    if (state == ProcessingState.completed && _items.isNotEmpty) {
+    final last = _player.sequence.isEmpty ? null : _player.sequence.last.tag;
+    if (state == ProcessingState.completed && last is RecitedItem) {
       _wantPlaying = false;
-      _events.add(WindowCompleted(_items.last));
+      _events.add(WindowCompleted(last));
     }
   }
 
   @override
   Future<void> setWindow(List<(RecitedItem, File)> items, {int currentIndex = 0}) =>
       _serial(() async {
-        _items
-          ..clear()
-          ..addAll([for (final (item, _) in items) item]);
+        _started = null; // the new window's first item is reported even if it is the same ayah
         await _player.setAudioSources(
           [for (final (item, file) in items) AudioSource.file(file.path, tag: item)],
           initialIndex: currentIndex,
@@ -119,14 +123,12 @@ class JustAudioEngine implements AudioEngine {
 
   @override
   Future<void> append(RecitedItem item, File file) => _serial(() async {
-        _items.add(item);
         await _player.addAudioSource(AudioSource.file(file.path, tag: item));
       });
 
   @override
   Future<void> removeFirst() => _serial(() async {
-        if (_items.isEmpty) return;
-        _items.removeAt(0);
+        if (_player.sequence.isEmpty) return;
         await _player.removeAudioSourceAt(0);
       });
 
@@ -150,7 +152,7 @@ class JustAudioEngine implements AudioEngine {
   @override
   Future<void> stop() async {
     _wantPlaying = false;
-    _items.clear();
+    _started = null;
     await _player.stop();
   }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mathani/data/models.dart';
+import 'package:mathani/features/recitation/audio_engine.dart';
 import 'package:mathani/features/recitation/ayah_fetcher.dart';
 import 'package:mathani/features/recitation/recitation_controller.dart';
 import 'package:mathani/features/recitation/recited_item.dart';
@@ -312,6 +313,17 @@ void main() {
   });
 
   group('following (FR-012 to FR-014)', () {
+    recitationTest('a stray "started" event for an ayah outside the window is ignored', (tester) async {
+      c.playFrom(const AyahRef(67, 5));
+      await settle(tester);
+      final page = reader.page;
+      engine.emit(const ItemStarted(RecitedItem.ayah(2, 255))); // from a replaced window
+      await settle(tester);
+      expect(session().item, ayah(67, 5));
+      expect(reader.page, page);
+      expect(session().following, isTrue);
+    });
+
     recitationTest('the Mushaf follows the recited ayah across pages', (tester) async {
       final quran = reader.quran;
       final lastOn50 = quran.ayahsStartingOnPage(50).last;
