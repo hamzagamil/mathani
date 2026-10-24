@@ -132,14 +132,13 @@ class UserRepository extends ChangeNotifier {
           : d.flowFontSize,
       keepScreenOn: switch (p['keep_screen_on']) { 'true' => true, _ => d.keepScreenOn },
       language: pick(LanguagePref.values, p['language'], d.language),
-      controlsHintShown: switch (p['controls_hint_shown']) {
-        'true' => true,
-        _ => d.controlsHintShown,
-      },
       lettering: pick(Lettering.values, p['lettering'], d.lettering),
       // Kept as stored; an id no longer in quran.db falls back to the default where it is
       // resolved (QuranRepository.reciterOrDefault).
       reciter: (p['reciter'] ?? '').isEmpty ? d.reciter : p['reciter']!,
+      // Missing for readers updating from 1.3.0 or earlier: they see the onboarding once
+      // (specs/005 research R2). A stale `controls_hint_shown` row from 1.3.0 is ignored.
+      onboardingDone: switch (p['onboarding_done']) { 'true' => true, _ => d.onboardingDone },
     );
   }
 
@@ -162,9 +161,9 @@ class UserRepository extends ChangeNotifier {
       'flow_font_size': '${p.flowFontSize}',
       'keep_screen_on': '${p.keepScreenOn}',
       'language': p.language.name,
-      'controls_hint_shown': '${p.controlsHintShown}',
       'lettering': p.lettering.name,
       'reciter': p.reciter,
+      'onboarding_done': '${p.onboardingDone}',
     }.entries) {
       batch.insert('preferences', {'key': entry.key, 'value': entry.value},
           conflictAlgorithm: ConflictAlgorithm.replace);

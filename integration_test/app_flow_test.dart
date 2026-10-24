@@ -1,4 +1,5 @@
-// End-to-end on a real device or emulator (task T063): quickstart scenarios 1, 2, 4, 5, 6, 7, 10.
+// End-to-end on a real device or emulator (task T063): quickstart scenarios 1, 2, 4, 5, 6, 7, 10,
+// and the first-run onboarding (specs/005 T024).
 //   flutter test integration_test/app_flow_test.dart -d <device>
 // Run with networking disabled to prove scenario 1 (offline from first launch).
 import 'package:flutter/material.dart';
@@ -8,8 +9,11 @@ import 'package:mathani/app/app.dart';
 import 'package:mathani/data/models.dart';
 import 'package:mathani/data/quran_repository.dart';
 import 'package:mathani/data/user_repository.dart';
+import 'package:mathani/features/onboarding/onboarding_controller.dart';
+import 'package:mathani/features/onboarding/onboarding_screen.dart';
 import 'package:mathani/shared/mathani_icons.dart';
 import 'package:mathani/shared/reader_state.dart';
+import 'package:sqflite/sqflite.dart';
 
 import 'toolbar.dart';
 
@@ -21,7 +25,8 @@ void main() {
   Future<void> launch(WidgetTester tester) async {
     final (quran, user) = await (QuranRepository.open(), UserRepository.open()).wait;
     final (anchor, prefs) = await user.loadStartup();
-    reader = ReaderController(quran: quran, user: user, anchor: anchor, preferences: prefs);
+    reader = ReaderController(
+        quran: quran, user: user, anchor: anchor, preferences: prefs.copyWith(onboardingDone: true));
     await tester.pumpWidget(MathaniApp(controller: reader));
     await tester.pumpAndSettle();
   }
@@ -87,5 +92,48 @@ void main() {
     reader.updatePreferences(reader.preferences.copyWith(language: LanguagePref.ar));
     await tester.pumpAndSettle();
     expect(find.textContaining('الجزء'), findsOneWidget);
+  });
+
+  // First run (specs/005 T024): a fresh user.db opens on the onboarding.
+  Future<OnboardingController> firstRun(WidgetTester tester) async {
+    await deleteDatabase('${await getDatabasesPath()}/user.db');
+    final (quran, user) = await (QuranRepository.open(), UserRepository.open()).wait;
+    final (anchor, prefs) = await user.loadStartup();
+    expect(prefs.onboardingDone, isFalse);
+    reader = ReaderController(quran: quran, user: user, anchor: anchor, preferences: prefs);
+    final onboarding = OnboardingController(reader: reader);
+    await tester.pumpWidget(MathaniApp(controller: reader, onboarding: onboarding));
+    await tester.pumpAndSettle();
+    expect(find.byType(OnboardingScreen), findsOneWidget);
+    return onboarding;
+  }
+
+  testWidgets('first run: Skip opens the reader on page 1', (tester) async {
+    await firstRun(tester);
+    await tester.tap(find.textContaining(RegExp('^(Skip|تخطَّ)\$')));
+    await tester.pumpAndSettle();
+    expect(find.byType(OnboardingScreen), findsNothing);
+    expect(reader.page, 1);
+    expect(reader.preferences.onboardingDone, isTrue);
+  });
+
+  testWidgets('first run: every step to Done, then never again', (tester) async {
+    final onboarding = await firstRun(tester);
+    final next = find.textContaining(RegExp(r'^(Next|التالي|Done|تم)$'));
+    // Gesture stops animate in a loop, so pump a fixed time instead of settling.
+    while (onboarding.step != null) {
+      await tester.tap(next);
+      for (var i = 0; i < 4; i++) {
+        await tester.pump(const Duration(milliseconds: 250));
+      }
+    }
+    expect(reader.preferences.onboardingDone, isTrue);
+    expect(reader.page, 1);
+    final (anchor, prefs) = await reader.user.loadStartup();
+    expect(prefs.onboardingDone, isTrue);
+    final again = OnboardingController(
+        reader: ReaderController(
+            quran: reader.quran, user: reader.user, anchor: anchor, preferences: prefs));
+    expect(again.step, isNull, reason: 'the next launch opens on the reader');
   });
 }

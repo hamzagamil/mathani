@@ -27,7 +27,7 @@ void main() {
       quran: quran,
       user: user,
       anchor: const AyahRef(2, 1),
-      preferences: prefs.copyWith(layout: ReadingLayout.mushaf),
+      preferences: prefs.copyWith(layout: ReadingLayout.mushaf, onboardingDone: true),
     );
     final recitation = _withRecitation
         ? RecitationController(

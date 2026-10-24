@@ -1,5 +1,6 @@
-// Full-screen paper page: controls on tap, immersive reading, one-time hint
-// (specs/002-print-like-mushaf-page/contracts/reader-page-view.md).
+// Full-screen paper page: controls on tap, immersive reading
+// (specs/002-print-like-mushaf-page/contracts/reader-page-view.md). The one-time controls hint
+// was replaced by the onboarding (specs/005 research R2).
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -10,8 +11,6 @@ import 'package:mathani/shared/mathani_icons.dart';
 import 'package:mathani/shared/reader_state.dart';
 
 import '../support/harness.dart';
-
-const _hint = 'اضغط على الصفحة لإظهار الأدوات';
 
 void main() {
   late ReaderController reader;
@@ -65,8 +64,6 @@ void main() {
     await turnPage(tester);
     expect(controlsShown(tester), isFalse, reason: 'a page turn hides them');
     expect(uiModes.last, contains('immersiveSticky'));
-    expect(find.text(_hint), findsOneWidget, reason: 'first hide shows the hint once');
-    expect(reader.preferences.controlsHintShown, isTrue);
 
     await tapPage(tester);
     expect(controlsShown(tester), isTrue, reason: 'a tap shows them');
@@ -74,13 +71,6 @@ void main() {
 
     await tapPage(tester);
     expect(controlsShown(tester), isFalse, reason: 'a second tap hides them');
-
-    // The hint never comes back.
-    await tester.pump(const Duration(seconds: 5));
-    await settle(tester, 2);
-    await tapPage(tester);
-    await turnPage(tester);
-    expect(find.text(_hint), findsNothing);
   });
 
   testWidgets('selection and long-press keep their meaning', (tester) async {

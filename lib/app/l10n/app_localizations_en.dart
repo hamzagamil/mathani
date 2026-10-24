@@ -285,9 +285,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get clearSearch => 'Clear';
 
   @override
-  String get controlsHint => 'Tap the page to show controls';
-
-  @override
   String get showControls => 'Show controls';
 
   @override
@@ -462,4 +459,133 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get recitationAttribution =>
       'Recitations: Sheikh Mahmoud Khalil Al-Husary and Sheikh Mohamed Siddiq El-Minshawi (Murattal), via EveryAyah.com';
+
+  @override
+  String get onboardingWelcome => 'Welcome to Mathani';
+
+  @override
+  String get onboardingLanguageTitle => 'Choose the app language';
+
+  @override
+  String onboardingSystemLanguage(String language) {
+    return 'Device ($language)';
+  }
+
+  @override
+  String get onboardingThemeTitle => 'How should the Mushaf look?';
+
+  @override
+  String get onboardingLayoutTitle => 'How would you like to read?';
+
+  @override
+  String get onboardingLayoutMushafHint =>
+      'Pages as printed in the Madinah Mushaf';
+
+  @override
+  String get onboardingLayoutFlowingHint => 'Continuous text you can enlarge';
+
+  @override
+  String get onboardingTextSizeTitle => 'Choose the text size';
+
+  @override
+  String get onboardingReciterTitle => 'Whom would you like to listen to?';
+
+  @override
+  String get onboardingReciterHint =>
+      'You can change the reciter any time from the player or Settings.';
+
+  @override
+  String get playSample => 'Play sample';
+
+  @override
+  String get stopSample => 'Stop sample';
+
+  @override
+  String get sampleOffline =>
+      'Samples need an internet connection. You can still choose.';
+
+  @override
+  String onboardingStep(String index, String total) {
+    return 'Step $index of $total';
+  }
+
+  @override
+  String tourProgress(String index, String total) {
+    return '$index of $total';
+  }
+
+  @override
+  String get onboardingNext => 'Next';
+
+  @override
+  String get onboardingBack => 'Back';
+
+  @override
+  String get onboardingSkip => 'Skip';
+
+  @override
+  String get tourDone => 'Done';
+
+  @override
+  String get tourTurnPagesTitle => 'Turn the pages';
+
+  @override
+  String get tourTurnPagesMushaf =>
+      'Swipe to turn the page, as you would in a printed Mushaf.';
+
+  @override
+  String get tourTurnPagesFlowing =>
+      'Scroll to read on. The text flows from one surah to the next.';
+
+  @override
+  String get tourControlsTitle => 'The controls';
+
+  @override
+  String get tourControlsMushaf => 'Tap the page to show or hide the controls.';
+
+  @override
+  String get tourControlsFlowing =>
+      'The controls stay at the top and bottom. In the Mushaf pages layout, tap the page to show them.';
+
+  @override
+  String get tourAyahTitle => 'Ayah actions';
+
+  @override
+  String get tourAyahBody =>
+      'Press and hold an ayah to play from it, bookmark, copy or share it.';
+
+  @override
+  String get tourIndexTitle => 'Index';
+
+  @override
+  String get tourIndexBody =>
+      'Surahs, ajza\' and your bookmarks. Go anywhere from here.';
+
+  @override
+  String get tourSearchTitle => 'Search';
+
+  @override
+  String get tourSearchBody =>
+      'Search the Quran text, with or without diacritics.';
+
+  @override
+  String get tourPlayerTitle => 'Listen';
+
+  @override
+  String get tourPlayerBody =>
+      'Listen ayah by ayah as each one is highlighted. Download surahs from the Surahs index or the player to listen offline.';
+
+  @override
+  String get tourSettingsTitle => 'Settings';
+
+  @override
+  String get tourSettingsBody =>
+      'Change your choices any time, and find more: keep screen on, printed lettering, downloads, and this tour.';
+
+  @override
+  String get tourAgainSetting => 'See the tour again';
+
+  @override
+  String get tourAgainHint =>
+      'How to turn pages and use the ayah actions, index, search and player.';
 }

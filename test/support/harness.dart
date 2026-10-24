@@ -28,15 +28,18 @@ Future<void> loadAppFonts() async {
 }
 
 /// Opens the real repositories against the bundled quran.db, using SQLite through FFI and a
-/// fresh temporary user database.
-Future<ReaderController> openTestReader() async {
+/// fresh temporary user database. [onboarded]: the first-run onboarding is already done
+/// (specs/005), so the app opens on the reader.
+Future<ReaderController> openTestReader({bool onboarded = true}) async {
   PrintedFonts.reset(); // font loads from a previous test can never finish
   sqfliteFfiInit();
   databaseFactory = databaseFactoryFfi;
   final dir = Directory.systemTemp.createTempSync('mathani_test');
   await databaseFactory.setDatabasesPath(dir.path);
   final (quran, user) = await (QuranRepository.open(), UserRepository.open()).wait;
-  final (anchor, prefs) = await user.loadStartup();
+  final (anchor, loaded) = await user.loadStartup();
+  final prefs = onboarded ? loaded.copyWith(onboardingDone: true) : loaded;
+  if (onboarded) await user.savePreferences(prefs);
   return ReaderController(quran: quran, user: user, anchor: anchor, preferences: prefs);
 }
 

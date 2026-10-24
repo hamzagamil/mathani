@@ -58,7 +58,7 @@ class _ReciterSheet extends StatelessWidget {
               trailing: r.id == current ? Icon(MathaniIcons.check, color: colors.accentInk) : null,
               onTap: () {
                 Navigator.of(context).pop();
-                _choose(reader, recitation, r);
+                chooseReciter(reader, recitation, r);
               },
             ),
           const SizedBox(height: Space.s2),
@@ -66,12 +66,14 @@ class _ReciterSheet extends StatelessWidget {
       ),
     );
   }
+}
 
-  static void _choose(ReaderController reader, RecitationController? recitation, Reciter r) {
-    if (recitation != null) {
-      recitation.setReciter(r.id);
-    } else {
-      reader.updatePreferences(reader.preferences.copyWith(reciter: r.id));
-    }
+/// Saves [r] as the reciter; during a recitation, the current ayah restarts in the new voice
+/// (FR-004). Shared with the onboarding's reciter step (specs/005).
+void chooseReciter(ReaderController reader, RecitationController? recitation, Reciter r) {
+  if (recitation != null) {
+    recitation.setReciter(r.id);
+  } else {
+    reader.updatePreferences(reader.preferences.copyWith(reciter: r.id));
   }
 }

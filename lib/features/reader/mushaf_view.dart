@@ -8,6 +8,7 @@ import '../../data/models.dart';
 import '../../data/quran_repository.dart';
 import '../../shared/numerals.dart';
 import '../../shared/reader_state.dart';
+import '../onboarding/onboarding_controller.dart';
 import '../recitation/recitation_controller.dart';
 import 'mushaf_page_renderer.dart';
 import 'paper_sheet.dart';
@@ -63,7 +64,9 @@ class _MushafViewState extends State<MushafView> {
     if (_printed(reader) != _cache.printed) {
       _cache = _PageCache(reader.quran, printed: _printed(reader))..prefetchAround(reader.page);
     }
-    if (reader.jumpSerial != _handledJump) {
+    // No page turns under the onboarding's button hints; the latest jump applies when they end
+    // (specs/005, FR-017a).
+    if (reader.jumpSerial != _handledJump && !OnboardingScope.holdsReaderOf(context)) {
       _handledJump = reader.jumpSerial;
       final target = reader.page - 1;
       final follow = RecitationScope.read(context)?.followSerial == reader.jumpSerial;

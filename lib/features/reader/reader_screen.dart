@@ -10,6 +10,8 @@ import '../../shared/mathani_icons.dart';
 import '../../shared/numerals.dart';
 import '../../shared/reader_state.dart';
 import '../index/index_screen.dart';
+import '../onboarding/button_tour.dart';
+import '../onboarding/onboarding_controller.dart';
 import '../recitation/download_queue.dart';
 import '../recitation/recitation_bar.dart';
 import '../recitation/recitation_controller.dart';
@@ -41,6 +43,9 @@ class _ReaderScreenState extends State<ReaderScreen> {
   bool _controlsVisible = true;
   bool _immersive = false;
 
+  /// The controls the onboarding's button hints point at (specs/005).
+  final _targets = TourTargets();
+
   @override
   void dispose() {
     if (_wakelock == true) WakelockPlus.disable();
@@ -48,24 +53,19 @@ class _ReaderScreenState extends State<ReaderScreen> {
     super.dispose();
   }
 
-  /// Screen-reader users always get the controls (FR-010).
-  bool get _keepControls => MediaQuery.of(context).accessibleNavigation;
+  /// Screen-reader users always get the controls (FR-010), and so does the onboarding while its
+  /// hints point at them (specs/005, FR-017a).
+  bool get _keepControls =>
+      MediaQuery.of(context).accessibleNavigation ||
+      (OnboardingScope.read(context)?.holdsReader ?? false);
 
   void _setControls(bool visible) {
     final show = visible || _keepControls;
     if (show == _controlsVisible) return;
     setState(() => _controlsVisible = show);
     _setImmersive(!show);
-    // The hint sits over the toolbar; once the reader has tapped, it has done its job.
+    // Snack bars sit over the toolbar; clear them when the controls come back.
     if (show) ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    final reader = ReaderScope.read(context);
-    if (!show && !reader.preferences.controlsHintShown) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(AppLocalizations.of(context).controlsHint),
-        duration: const Duration(seconds: 4),
-      ));
-      reader.updatePreferences(reader.preferences.copyWith(controlsHintShown: true));
-    }
   }
 
   /// Hides the system bars while reading, and brings them back with the controls.
@@ -93,6 +93,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
     final session = recitation?.session;
     final docked = session != null;
     final bar = RecitationBar(
+      key: _targets.player,
       onChooseReciter: () {
         final downloads = recitation?.downloads;
         downloads?.ensureScanned();
@@ -111,12 +112,15 @@ class _ReaderScreenState extends State<ReaderScreen> {
           setState(() => _controlsVisible = true);
         });
       }
-      return Scaffold(
+      return _withTour(Scaffold(
         backgroundColor: colors.surface,
         appBar: const _ReaderHeader(),
         bottomNavigationBar: docked
-            ? Column(mainAxisSize: MainAxisSize.min, children: [const _ReaderToolbar(safeBottom: false), bar])
-            : const _ReaderToolbar(),
+            ? Column(mainAxisSize: MainAxisSize.min, children: [
+                _ReaderToolbar(safeBottom: false, targets: _targets),
+                bar,
+              ])
+            : _ReaderToolbar(targets: _targets),
         body: SafeArea(
           top: false,
           child: Padding(
@@ -124,14 +128,20 @@ class _ReaderScreenState extends State<ReaderScreen> {
             child: FlowingView(onAyahLongPress: (ref) => showAyahActions(context, ref)),
           ),
         ),
-      );
+      ));
     }
 
-    final show = _controlsVisible || _keepControls;
+    final touring = OnboardingScope.maybeOf(context)?.holdsReader ?? false;
+    if (touring && _immersive) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _setControls(true);
+      });
+    }
+    final show = _controlsVisible || _keepControls || touring;
     // While a recitation is on, the bar is the Scaffold's bottom bar: the page sits above it (so
     // no Quran text is ever covered; PageGeometry refits when it appears or goes), and snack
     // bars float above it instead of covering it.
-    return Scaffold(
+    return _withTour(Scaffold(
       backgroundColor: colors.surface,
       bottomNavigationBar: docked ? bar : null,
       body: Stack(
@@ -159,9 +169,30 @@ class _ReaderScreenState extends State<ReaderScreen> {
             child: _Overlay(
               visible: show,
               hiddenOffset: const Offset(0, 1),
-              child: _ReaderToolbar(safeBottom: !docked),
+              child: _ReaderToolbar(safeBottom: !docked, targets: _targets),
             ),
           ),
+        ],
+      ),
+    ));
+  }
+
+  /// While the onboarding's button hints show, they lie over [scaffold]: the reader underneath
+  /// is hidden from screen readers, and back goes to the previous hint (specs/005, research R4).
+  /// The tree keeps the same shape either way, so the reader's state survives the hints.
+  Widget _withTour(Widget scaffold) {
+    final onboarding = OnboardingScope.maybeOf(context);
+    final touring = onboarding?.holdsReader ?? false;
+    return PopScope(
+      canPop: !touring,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop && touring) onboarding!.back();
+      },
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          ExcludeSemantics(excluding: touring, child: scaffold),
+          if (touring) ButtonTour(targets: _targets),
         ],
       ),
     );
@@ -274,10 +305,13 @@ class _BookmarkToggle extends StatelessWidget {
 
 /// Reader actions: index, search, layout toggle, bookmark, settings.
 class _ReaderToolbar extends StatelessWidget {
-  const _ReaderToolbar({this.safeBottom = true});
+  const _ReaderToolbar({this.safeBottom = true, required this.targets});
 
   /// False when the recitation bar sits below and takes the bottom safe area.
   final bool safeBottom;
+
+  /// Keys for the onboarding's button hints (specs/005).
+  final TourTargets targets;
 
   @override
   Widget build(BuildContext context) {
@@ -302,11 +336,13 @@ class _ReaderToolbar extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 IconButton(
+                  key: targets.index,
                   icon: const Icon(MathaniIcons.index),
                   tooltip: l10n.openIndex,
                   onPressed: () => push(const IndexScreen()),
                 ),
                 IconButton(
+                  key: targets.search,
                   icon: const Icon(MathaniIcons.search),
                   tooltip: l10n.openSearch,
                   onPressed: () => push(const SearchScreen()),
@@ -323,6 +359,7 @@ class _ReaderToolbar extends StatelessWidget {
                 // recitation bar takes its place while a recitation is on.
                 if (recitation != null && recitation.session == null)
                   IconButton(
+                    key: targets.listen,
                     icon: const Icon(MathaniIcons.play),
                     tooltip: l10n.listen,
                     onPressed: () => mushaf
@@ -331,6 +368,7 @@ class _ReaderToolbar extends StatelessWidget {
                   ),
                 const _BookmarkToggle(),
                 IconButton(
+                  key: targets.settings,
                   icon: const Icon(MathaniIcons.settings),
                   tooltip: l10n.openSettings,
                   onPressed: () => push(const SettingsScreen()),

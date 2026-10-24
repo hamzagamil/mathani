@@ -215,9 +215,9 @@ class ReaderPreferences {
     this.flowFontSize = 24,
     this.keepScreenOn = false,
     this.language = LanguagePref.system,
-    this.controlsHintShown = false,
     this.lettering = Lettering.printed,
     this.reciter = Reciter.defaultId,
+    this.onboardingDone = false,
   });
 
   static const minFlowFontSize = 18;
@@ -229,9 +229,6 @@ class ReaderPreferences {
   final bool keepScreenOn;
   final LanguagePref language;
 
-  /// The one-time "tap the page to show controls" hint has been shown (specs/002).
-  final bool controlsHintShown;
-
   /// Lettering of the Mushaf layout. `printed` needs the bundled page fonts
   /// ([QuranRepository.hasPrintedLettering]); without them the built-in font is used.
   final Lettering lettering;
@@ -239,15 +236,18 @@ class ReaderPreferences {
   /// Id of the chosen reciter (specs/004, FR-004).
   final String reciter;
 
+  /// The first-run onboarding was finished or skipped (specs/005, FR-002).
+  final bool onboardingDone;
+
   ReaderPreferences copyWith({
     ReadingLayout? layout,
     ThemePref? theme,
     int? flowFontSize,
     bool? keepScreenOn,
     LanguagePref? language,
-    bool? controlsHintShown,
     Lettering? lettering,
     String? reciter,
+    bool? onboardingDone,
   }) =>
       ReaderPreferences(
         layout: layout ?? this.layout,
@@ -255,8 +255,8 @@ class ReaderPreferences {
         flowFontSize: flowFontSize ?? this.flowFontSize,
         keepScreenOn: keepScreenOn ?? this.keepScreenOn,
         language: language ?? this.language,
-        controlsHintShown: controlsHintShown ?? this.controlsHintShown,
         lettering: lettering ?? this.lettering,
         reciter: reciter ?? this.reciter,
+        onboardingDone: onboardingDone ?? this.onboardingDone,
       );
 }

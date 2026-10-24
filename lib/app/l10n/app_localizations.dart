@@ -523,12 +523,6 @@ abstract class AppLocalizations {
   /// **'Clear'**
   String get clearSearch;
 
-  /// One-time hint when the reader controls first hide in the Mushaf layout.
-  ///
-  /// In en, this message translates to:
-  /// **'Tap the page to show controls'**
-  String get controlsHint;
-
   /// Accessibility action on a Mushaf page that shows the reader controls.
   ///
   /// In en, this message translates to:
@@ -828,6 +822,228 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Recitations: Sheikh Mahmoud Khalil Al-Husary and Sheikh Mohamed Siddiq El-Minshawi (Murattal), via EveryAyah.com'**
   String get recitationAttribution;
+
+  /// Onboarding: greeting on the language step, shown in both languages.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to Mathani'**
+  String get onboardingWelcome;
+
+  /// No description provided for @onboardingLanguageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the app language'**
+  String get onboardingLanguageTitle;
+
+  /// Onboarding: the follow-the-device language choice, with the language it resolves to.
+  ///
+  /// In en, this message translates to:
+  /// **'Device ({language})'**
+  String onboardingSystemLanguage(String language);
+
+  /// No description provided for @onboardingThemeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How should the Mushaf look?'**
+  String get onboardingThemeTitle;
+
+  /// No description provided for @onboardingLayoutTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How would you like to read?'**
+  String get onboardingLayoutTitle;
+
+  /// No description provided for @onboardingLayoutMushafHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pages as printed in the Madinah Mushaf'**
+  String get onboardingLayoutMushafHint;
+
+  /// No description provided for @onboardingLayoutFlowingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Continuous text you can enlarge'**
+  String get onboardingLayoutFlowingHint;
+
+  /// No description provided for @onboardingTextSizeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the text size'**
+  String get onboardingTextSizeTitle;
+
+  /// No description provided for @onboardingReciterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Whom would you like to listen to?'**
+  String get onboardingReciterTitle;
+
+  /// No description provided for @onboardingReciterHint.
+  ///
+  /// In en, this message translates to:
+  /// **'You can change the reciter any time from the player or Settings.'**
+  String get onboardingReciterHint;
+
+  /// Onboarding: plays a few seconds of a reciter.
+  ///
+  /// In en, this message translates to:
+  /// **'Play sample'**
+  String get playSample;
+
+  /// No description provided for @stopSample.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop sample'**
+  String get stopSample;
+
+  /// No description provided for @sampleOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Samples need an internet connection. You can still choose.'**
+  String get sampleOffline;
+
+  /// Onboarding: progress through the preference steps. Numbers are already formatted.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {index} of {total}'**
+  String onboardingStep(String index, String total);
+
+  /// Onboarding: progress through the tour stops. Numbers are already formatted.
+  ///
+  /// In en, this message translates to:
+  /// **'{index} of {total}'**
+  String tourProgress(String index, String total);
+
+  /// No description provided for @onboardingNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get onboardingNext;
+
+  /// No description provided for @onboardingBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get onboardingBack;
+
+  /// No description provided for @onboardingSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get onboardingSkip;
+
+  /// Onboarding: the last tour stop's button.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get tourDone;
+
+  /// No description provided for @tourTurnPagesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn the pages'**
+  String get tourTurnPagesTitle;
+
+  /// No description provided for @tourTurnPagesMushaf.
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe to turn the page, as you would in a printed Mushaf.'**
+  String get tourTurnPagesMushaf;
+
+  /// No description provided for @tourTurnPagesFlowing.
+  ///
+  /// In en, this message translates to:
+  /// **'Scroll to read on. The text flows from one surah to the next.'**
+  String get tourTurnPagesFlowing;
+
+  /// No description provided for @tourControlsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The controls'**
+  String get tourControlsTitle;
+
+  /// No description provided for @tourControlsMushaf.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the page to show or hide the controls.'**
+  String get tourControlsMushaf;
+
+  /// No description provided for @tourControlsFlowing.
+  ///
+  /// In en, this message translates to:
+  /// **'The controls stay at the top and bottom. In the Mushaf pages layout, tap the page to show them.'**
+  String get tourControlsFlowing;
+
+  /// No description provided for @tourAyahTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ayah actions'**
+  String get tourAyahTitle;
+
+  /// No description provided for @tourAyahBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Press and hold an ayah to play from it, bookmark, copy or share it.'**
+  String get tourAyahBody;
+
+  /// No description provided for @tourIndexTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Index'**
+  String get tourIndexTitle;
+
+  /// No description provided for @tourIndexBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Surahs, ajza\' and your bookmarks. Go anywhere from here.'**
+  String get tourIndexBody;
+
+  /// No description provided for @tourSearchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get tourSearchTitle;
+
+  /// No description provided for @tourSearchBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Search the Quran text, with or without diacritics.'**
+  String get tourSearchBody;
+
+  /// No description provided for @tourPlayerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Listen'**
+  String get tourPlayerTitle;
+
+  /// No description provided for @tourPlayerBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Listen ayah by ayah as each one is highlighted. Download surahs from the Surahs index or the player to listen offline.'**
+  String get tourPlayerBody;
+
+  /// No description provided for @tourSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get tourSettingsTitle;
+
+  /// No description provided for @tourSettingsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Change your choices any time, and find more: keep screen on, printed lettering, downloads, and this tour.'**
+  String get tourSettingsBody;
+
+  /// No description provided for @tourAgainSetting.
+  ///
+  /// In en, this message translates to:
+  /// **'See the tour again'**
+  String get tourAgainSetting;
+
+  /// No description provided for @tourAgainHint.
+  ///
+  /// In en, this message translates to:
+  /// **'How to turn pages and use the ayah actions, index, search and player.'**
+  String get tourAgainHint;
 }
 
 class _AppLocalizationsDelegate

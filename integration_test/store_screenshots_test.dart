@@ -27,7 +27,8 @@ void main() {
   testWidgets('store screenshots', skip: !enabled, (tester) async {
     final (quran, user) = await (QuranRepository.open(), UserRepository.open()).wait;
     final (anchor, prefs) = await user.loadStartup();
-    final reader = ReaderController(quran: quran, user: user, anchor: anchor, preferences: prefs);
+    final reader = ReaderController(
+        quran: quran, user: user, anchor: anchor, preferences: prefs.copyWith(onboardingDone: true));
     await tester.pumpWidget(MathaniApp(controller: reader));
     await tester.pumpAndSettle();
 

@@ -218,10 +218,6 @@
     }
   },
   "clearSearch": "Clear",
-  "controlsHint": "Tap the page to show controls",
-  "@controlsHint": {
-    "description": "One-time hint when the reader controls first hide in the Mushaf layout."
-  },
   "showControls": "Show controls",
   "@showControls": {
     "description": "Accessibility action on a Mushaf page that shows the reader controls."
@@ -344,5 +340,71 @@
   "@recitationChannel": {
     "description": "Android notification channel name for the recitation player."
   },
-  "recitationAttribution": "Recitations: Sheikh Mahmoud Khalil Al-Husary and Sheikh Mohamed Siddiq El-Minshawi (Murattal), via EveryAyah.com"
+  "recitationAttribution": "Recitations: Sheikh Mahmoud Khalil Al-Husary and Sheikh Mohamed Siddiq El-Minshawi (Murattal), via EveryAyah.com",
+  "onboardingWelcome": "Welcome to Mathani",
+  "@onboardingWelcome": {
+    "description": "Onboarding: greeting on the language step, shown in both languages."
+  },
+  "onboardingLanguageTitle": "Choose the app language",
+  "onboardingSystemLanguage": "Device ({language})",
+  "@onboardingSystemLanguage": {
+    "description": "Onboarding: the follow-the-device language choice, with the language it resolves to.",
+    "placeholders": {
+      "language": {"type": "String"}
+    }
+  },
+  "onboardingThemeTitle": "How should the Mushaf look?",
+  "onboardingLayoutTitle": "How would you like to read?",
+  "onboardingLayoutMushafHint": "Pages as printed in the Madinah Mushaf",
+  "onboardingLayoutFlowingHint": "Continuous text you can enlarge",
+  "onboardingTextSizeTitle": "Choose the text size",
+  "onboardingReciterTitle": "Whom would you like to listen to?",
+  "onboardingReciterHint": "You can change the reciter any time from the player or Settings.",
+  "playSample": "Play sample",
+  "@playSample": {
+    "description": "Onboarding: plays a few seconds of a reciter."
+  },
+  "stopSample": "Stop sample",
+  "sampleOffline": "Samples need an internet connection. You can still choose.",
+  "onboardingStep": "Step {index} of {total}",
+  "@onboardingStep": {
+    "description": "Onboarding: progress through the preference steps. Numbers are already formatted.",
+    "placeholders": {
+      "index": {"type": "String"},
+      "total": {"type": "String"}
+    }
+  },
+  "tourProgress": "{index} of {total}",
+  "@tourProgress": {
+    "description": "Onboarding: progress through the tour stops. Numbers are already formatted.",
+    "placeholders": {
+      "index": {"type": "String"},
+      "total": {"type": "String"}
+    }
+  },
+  "onboardingNext": "Next",
+  "onboardingBack": "Back",
+  "onboardingSkip": "Skip",
+  "tourDone": "Done",
+  "@tourDone": {
+    "description": "Onboarding: the last tour stop's button."
+  },
+  "tourTurnPagesTitle": "Turn the pages",
+  "tourTurnPagesMushaf": "Swipe to turn the page, as you would in a printed Mushaf.",
+  "tourTurnPagesFlowing": "Scroll to read on. The text flows from one surah to the next.",
+  "tourControlsTitle": "The controls",
+  "tourControlsMushaf": "Tap the page to show or hide the controls.",
+  "tourControlsFlowing": "The controls stay at the top and bottom. In the Mushaf pages layout, tap the page to show them.",
+  "tourAyahTitle": "Ayah actions",
+  "tourAyahBody": "Press and hold an ayah to play from it, bookmark, copy or share it.",
+  "tourIndexTitle": "Index",
+  "tourIndexBody": "Surahs, ajza' and your bookmarks. Go anywhere from here.",
+  "tourSearchTitle": "Search",
+  "tourSearchBody": "Search the Quran text, with or without diacritics.",
+  "tourPlayerTitle": "Listen",
+  "tourPlayerBody": "Listen ayah by ayah as each one is highlighted. Download surahs from the Surahs index or the player to listen offline.",
+  "tourSettingsTitle": "Settings",
+  "tourSettingsBody": "Change your choices any time, and find more: keep screen on, printed lettering, downloads, and this tour.",
+  "tourAgainSetting": "See the tour again",
+  "tourAgainHint": "How to turn pages and use the ayah actions, index, search and player."
 }

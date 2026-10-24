@@ -7,17 +7,20 @@ import '../../data/models.dart';
 import '../../shared/mathani_icons.dart';
 import '../../shared/numerals.dart';
 import '../../shared/reader_state.dart';
+import '../onboarding/onboarding_controller.dart';
 import '../recitation/recitation_settings.dart';
 import 'about_section.dart';
 
 /// Reading layout, theme, flowing text size, keep-screen-on and language. Every change applies
-/// immediately and persists (FR-016–FR-019, FR-025).
+/// immediately and persists (FR-016–FR-019, FR-025). Also replays the onboarding's tour
+/// (specs/005, FR-021).
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     final reader = ReaderScope.of(context);
+    final onboarding = OnboardingScope.read(context);
     final prefs = reader.preferences;
     final l10n = AppLocalizations.of(context);
     final colors = MathaniColors.of(context);
@@ -169,6 +172,24 @@ class SettingsScreen extends StatelessWidget {
               onSelectionChanged: (s) => set((p) => p.copyWith(language: s.first)),
             ),
           ),
+          if (onboarding != null)
+            Padding(
+              padding: const EdgeInsets.only(top: Space.s3),
+              child: ListTile(
+                leading: const Icon(MathaniIcons.info),
+                title: Text(l10n.tourAgainSetting),
+                subtitle: Text(
+                  l10n.tourAgainHint,
+                  style: TypeScale.caption.copyWith(color: colors.inkMuted),
+                ),
+                trailing: const Icon(MathaniIcons.forward),
+                // The hints sit on the reading screen, so the replay starts from there (FR-022).
+                onTap: () {
+                  Navigator.of(context).popUntil((r) => r.isFirst);
+                  onboarding.startReplay();
+                },
+              ),
+            ),
           const SizedBox(height: Space.s4),
           Divider(color: colors.line),
           Padding(

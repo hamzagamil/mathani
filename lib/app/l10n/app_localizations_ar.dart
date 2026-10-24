@@ -294,9 +294,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get clearSearch => 'امسح';
 
   @override
-  String get controlsHint => 'اضغط على الصفحة لإظهار الأدوات';
-
-  @override
   String get showControls => 'إظهار الأدوات';
 
   @override
@@ -470,4 +467,132 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get recitationAttribution =>
       'التلاوات: الشيخ محمود خليل الحصري والشيخ محمد صديق المنشاوي (مرتّل)، عن EveryAyah.com';
+
+  @override
+  String get onboardingWelcome => 'أهلاً بك في مثاني';
+
+  @override
+  String get onboardingLanguageTitle => 'اختر لغة التطبيق';
+
+  @override
+  String onboardingSystemLanguage(String language) {
+    return 'حسب الجهاز ($language)';
+  }
+
+  @override
+  String get onboardingThemeTitle => 'كيف تحب أن يبدو المصحف؟';
+
+  @override
+  String get onboardingLayoutTitle => 'كيف تحب أن تقرأ؟';
+
+  @override
+  String get onboardingLayoutMushafHint => 'الصفحات كما طُبعت في مصحف المدينة';
+
+  @override
+  String get onboardingLayoutFlowingHint => 'نص متصل يمكنك تكبير خطه';
+
+  @override
+  String get onboardingTextSizeTitle => 'اختر حجم الخط';
+
+  @override
+  String get onboardingReciterTitle => 'لمن تحب أن تستمع؟';
+
+  @override
+  String get onboardingReciterHint =>
+      'يمكنك تغيير القارئ في أي وقت من المشغّل أو الإعدادات.';
+
+  @override
+  String get playSample => 'استمع إلى مقطع';
+
+  @override
+  String get stopSample => 'أوقف المقطع';
+
+  @override
+  String get sampleOffline =>
+      'تحتاج المقاطع إلى اتصال بالإنترنت، ويمكنك الاختيار دونها.';
+
+  @override
+  String onboardingStep(String index, String total) {
+    return 'الخطوة $index من $total';
+  }
+
+  @override
+  String tourProgress(String index, String total) {
+    return '$index من $total';
+  }
+
+  @override
+  String get onboardingNext => 'التالي';
+
+  @override
+  String get onboardingBack => 'السابق';
+
+  @override
+  String get onboardingSkip => 'تخطَّ';
+
+  @override
+  String get tourDone => 'تم';
+
+  @override
+  String get tourTurnPagesTitle => 'قلّب الصفحات';
+
+  @override
+  String get tourTurnPagesMushaf =>
+      'اسحب الصفحة لتقلبها كما تقلّب صفحات المصحف المطبوع.';
+
+  @override
+  String get tourTurnPagesFlowing =>
+      'مرّر الشاشة لتتابع القراءة؛ النص متصل من سورة إلى أخرى.';
+
+  @override
+  String get tourControlsTitle => 'أدوات التحكم';
+
+  @override
+  String get tourControlsMushaf =>
+      'انقر على الصفحة لإظهار أدوات التحكم أو إخفائها.';
+
+  @override
+  String get tourControlsFlowing =>
+      'تبقى أدوات التحكم في أعلى الشاشة وأسفلها. وفي عرض صفحات المصحف انقر على الصفحة لإظهارها.';
+
+  @override
+  String get tourAyahTitle => 'خيارات الآية';
+
+  @override
+  String get tourAyahBody =>
+      'اضغط مطولاً على آية لتستمع منها أو تحفظها أو تنسخها أو تشاركها.';
+
+  @override
+  String get tourIndexTitle => 'الفهرس';
+
+  @override
+  String get tourIndexBody =>
+      'السور والأجزاء ومحفوظاتك، ومنها تنتقل إلى أي موضع.';
+
+  @override
+  String get tourSearchTitle => 'البحث';
+
+  @override
+  String get tourSearchBody => 'ابحث في نص القرآن الكريم بالتشكيل أو دونه.';
+
+  @override
+  String get tourPlayerTitle => 'الاستماع';
+
+  @override
+  String get tourPlayerBody =>
+      'استمع آية آية مع تظليل الآية المتلوّة. ونزّل السور من فهرس السور أو من المشغّل لتستمع دون اتصال.';
+
+  @override
+  String get tourSettingsTitle => 'الإعدادات';
+
+  @override
+  String get tourSettingsBody =>
+      'غيّر اختياراتك متى شئت، وستجد المزيد: إبقاء الشاشة مضاءة، وخط المصحف المطبوع، والتنزيلات، وهذه الجولة.';
+
+  @override
+  String get tourAgainSetting => 'شاهد الجولة التعريفية مرة أخرى';
+
+  @override
+  String get tourAgainHint =>
+      'كيف تقلّب الصفحات وتستخدم خيارات الآية والفهرس والبحث والمشغّل.';
 }

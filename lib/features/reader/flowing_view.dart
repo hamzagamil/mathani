@@ -9,8 +9,29 @@ import '../../data/quran_repository.dart';
 import '../../shared/numerals.dart';
 import '../../shared/quran_text.dart';
 import '../../shared/reader_state.dart';
+import '../onboarding/onboarding_controller.dart';
 import '../recitation/recitation_controller.dart';
 import 'surah_header_painter.dart';
+
+/// The Quran text style of the flowing layout, also used by the onboarding's text size preview
+/// (specs/005).
+TextStyle flowingTextStyle(MathaniColors colors, double fontSize) => TextStyle(
+      fontFamily: TypeScale.quranFamily,
+      fontSize: fontSize,
+      height: TypeScale.quranLineHeight,
+      color: colors.ink,
+    );
+
+/// An ayah's words as the flowing layout sets them, ending with its end marker and a space.
+String flowingAyahText(List<Word> words, String font) {
+  final text = StringBuffer();
+  for (final w in words) {
+    text
+      ..write(w.isAyahEnd ? ayahEndGlyphs(w.text, font) : w.text)
+      ..write(' ');
+  }
+  return text.toString();
+}
 
 /// The flowing layout (research R5): continuous text at the reader's chosen size, one list item
 /// per Mushaf page. The list is centred on the target page (pages before it grow upwards), so a
@@ -122,7 +143,9 @@ class _FlowingViewState extends State<FlowingView> {
   @override
   Widget build(BuildContext context) {
     final reader = ReaderScope.of(context);
-    if (reader.jumpSerial != _handledJump) {
+    // No jumps under the onboarding's button hints; the latest applies when they end (specs/005,
+    // FR-017a).
+    if (reader.jumpSerial != _handledJump && !OnboardingScope.holdsReaderOf(context)) {
       _handledJump = reader.jumpSerial;
       final follow = RecitationScope.read(context)?.followSerial == reader.jumpSerial;
       if (follow && _locate(reader.anchor) != null) {
@@ -300,12 +323,7 @@ class _FlowingPageState extends State<_FlowingPage> {
     final recited = RecitationScope.maybeOf(context)?.recited;
     final colors = MathaniColors.of(context);
     final quran = reader.quran;
-    final style = TextStyle(
-      fontFamily: TypeScale.quranFamily,
-      fontSize: widget.fontSize,
-      height: TypeScale.quranLineHeight,
-      color: colors.ink,
-    );
+    final style = flowingTextStyle(colors, widget.fontSize);
     _disposeRecognizers();
 
     // Split into runs at surah starts; each run is one paragraph after its surah header.
@@ -321,12 +339,6 @@ class _FlowingPageState extends State<_FlowingPage> {
       var length = 0;
       for (final (ayah, words) in run) {
         starts.add((ayah.ref, length));
-        final text = StringBuffer();
-        for (final w in words) {
-          text
-            ..write(w.isAyahEnd ? ayahEndGlyphs(w.text, quran.font) : w.text)
-            ..write(' ');
-        }
         final background = ayah.ref == reader.selected
             ? colors.selected
             : ayah.ref == reader.highlighted
@@ -340,7 +352,7 @@ class _FlowingPageState extends State<_FlowingPage> {
             ..onLongPress = () => widget.onAyahLongPress!(ayah.ref);
           _recognizers.add(recognizer);
         }
-        final s = text.toString();
+        final s = flowingAyahText(words, quran.font);
         spans.add(TextSpan(
           text: s,
           recognizer: recognizer,

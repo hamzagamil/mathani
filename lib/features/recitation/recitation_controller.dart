@@ -30,6 +30,19 @@ class RecitationNotice {
   final Reciter reciter;
 }
 
+/// A reciter sample that doesn't start within this time is unavailable (specs/005 research R5).
+const sampleStartTimeout = Duration(seconds: 5);
+
+enum PreviewStatus { loading, playing, unavailable }
+
+/// A few seconds of a reciter on the onboarding's reciter step (specs/005 data-model ›
+/// ReciterPreview). Never persisted; never a session.
+class ReciterPreview {
+  ReciterPreview(this.reciterId);
+  final String reciterId;
+  PreviewStatus status = PreviewStatus.loading;
+}
+
 /// The recitation in progress. Never persisted (spec assumption).
 class RecitationSession {
   RecitationSession({required this.reciter, required this.item});
@@ -63,6 +76,9 @@ class RecitationController extends ChangeNotifier with WidgetsBindingObserver {
   StreamSubscription<EngineEvent>? _engineEvents;
   RecitationSession? _session;
   RecitationNotice? _notice;
+  ReciterPreview? _preview;
+  int _previewGeneration = 0;
+  Timer? _previewTimer;
 
   /// Increments whenever the current item is replaced; stale async work checks it and stops.
   int _generation = 0;
@@ -139,6 +155,7 @@ class RecitationController extends ChangeNotifier with WidgetsBindingObserver {
   Future<void> playFrom(AyahRef ref) async {
     final reciter = _session?.reciter ?? _preferredReciter;
     if (reciter == null) return; // no catalogue
+    _clearPreview(); // the recitation's window replaces the sample's
     _endedTimer?.cancel();
     _skipTimer?.cancel();
     final item = _order.startItem(ref);
@@ -291,7 +308,10 @@ class RecitationController extends ChangeNotifier with WidgetsBindingObserver {
 
   void _onEngineEvent(EngineEvent event) {
     final s = _session;
-    if (s == null) return;
+    if (s == null) {
+      _onPreviewEvent(event);
+      return;
+    }
     switch (event) {
       case ItemStarted(:final item):
         // Only an ayah of the current window: a late event from a replaced window is not news.
@@ -437,6 +457,82 @@ class RecitationController extends ChangeNotifier with WidgetsBindingObserver {
     await onStop?.call();
   }
 
+  // --- Reciter samples (specs/005 contracts/onboarding-flow.md › RecitationController) ---------
+
+  /// A sample loading, playing or unavailable; null when none.
+  ReciterPreview? get preview => _preview;
+
+  /// Plays Al-Fatiha 1:1 by [r] through the same fetcher and player as recitations, without a
+  /// session: no bar, highlight, follow jump or system media controls. Does nothing while a
+  /// recitation is on.
+  Future<void> previewReciter(Reciter r) async {
+    if (_session != null) return;
+    if (_preview != null) {
+      _clearPreview();
+      await _engine?.stop();
+    }
+    final generation = ++_previewGeneration;
+    final p = _preview = ReciterPreview(r.id);
+    notifyListeners();
+    _previewTimer = Timer(sampleStartTimeout, () {
+      if (generation == _previewGeneration && p.status == PreviewStatus.loading) {
+        _previewUnavailable();
+      }
+    });
+    const item = RecitedItem.ayah(1, 1);
+    // Replaced, stopped, or timed out: a late file must not start playing.
+    bool stale() => generation != _previewGeneration || p.status == PreviewStatus.unavailable;
+    try {
+      final file = await fetcher.resolve(r, item);
+      if (stale()) return;
+      await _player.setWindow([(item, file)]);
+      if (stale()) return;
+      await _player.play();
+    } on Object {
+      if (generation == _previewGeneration) _previewUnavailable();
+    }
+  }
+
+  /// Stops the sample, if any (FR-011).
+  Future<void> stopPreview() async {
+    if (_preview == null) return;
+    _clearPreview();
+    notifyListeners();
+    if (_session == null) await _engine?.stop();
+  }
+
+  void _clearPreview() {
+    ++_previewGeneration;
+    _previewTimer?.cancel();
+    _preview = null;
+  }
+
+  void _previewUnavailable() {
+    _previewTimer?.cancel();
+    _preview?.status = PreviewStatus.unavailable;
+    notifyListeners();
+    unawaited(_engine?.stop());
+  }
+
+  void _onPreviewEvent(EngineEvent event) {
+    final p = _preview;
+    if (p == null) return;
+    switch (event) {
+      case ItemStarted():
+        if (p.status != PreviewStatus.loading) return;
+        _previewTimer?.cancel();
+        p.status = PreviewStatus.playing;
+        notifyListeners();
+      case WindowCompleted():
+        _clearPreview();
+        notifyListeners();
+      case EngineFailed():
+        _previewUnavailable();
+      case EnginePausedBySystem():
+        unawaited(stopPreview());
+    }
+  }
+
   /// Called when the session ends (US3 stops the system media session here).
   Future<void> Function()? onStop;
 
@@ -564,6 +660,10 @@ class RecitationController extends ChangeNotifier with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    // A sample never plays on in the background (specs/005, FR-011).
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.hidden) {
+      unawaited(stopPreview());
+    }
     // Back from the background: show the recited page (US3 AS3).
     final s = _session;
     if (state == AppLifecycleState.resumed && s != null && s.following) {
@@ -577,6 +677,7 @@ class RecitationController extends ChangeNotifier with WidgetsBindingObserver {
     reader.removeListener(_onReaderChanged);
     _skipTimer?.cancel();
     _endedTimer?.cancel();
+    _previewTimer?.cancel();
     _cancelLoadTimers();
     unawaited(_engineEvents?.cancel());
     unawaited(_engine?.dispose());
