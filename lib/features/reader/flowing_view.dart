@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
+import '../../app/l10n/app_localizations.dart';
 import '../../app/theme/app_theme.dart';
 import '../../app/theme/tokens.dart';
 import '../../data/models.dart';
@@ -9,6 +10,7 @@ import '../../data/quran_repository.dart';
 import '../../shared/numerals.dart';
 import '../../shared/quran_text.dart';
 import '../../shared/reader_state.dart';
+import '../memorization/memorization_controller.dart';
 import '../onboarding/onboarding_controller.dart';
 import '../recitation/recitation_controller.dart';
 import 'surah_header_painter.dart';
@@ -315,12 +317,51 @@ class _FlowingPageState extends State<_FlowingPage> {
     _recognizers.clear();
   }
 
+  /// An ayah of the memorization range, word by word: hidden words are transparent, so the line
+  /// breaks stay those of the visible text (specs/006 research R13).
+  TextSpan _memorizationSpan(BuildContext context, MemorizationController m, AyahRef ref,
+      List<Word> words, String font, Color? background) {
+    final colors = MathaniColors.of(context);
+    final hidden = m.isAyahHidden(ref);
+    return TextSpan(
+      style: background == null ? null : TextStyle(backgroundColor: background),
+      children: [
+        for (final w in words)
+          if (w.isAyahEnd)
+            TextSpan(
+              text: '${ayahEndGlyphs(w.text, font)} ',
+              style: TextStyle(
+                color: m.hasMistake(ref)
+                    ? colors.mistake
+                    : ref == m.expected
+                        ? colors.accentInk
+                        : null,
+              ),
+              semanticsLabel: hidden
+                  ? AppLocalizations.of(context).memorizeHiddenAyah(toEasternArabic(ref.ayah))
+                  : null,
+            )
+          else
+            TextSpan(
+              text: '${w.text} ',
+              style: m.isHidden(w.id)
+                  ? const TextStyle(color: Color(0x00000000))
+                  : m.isHinted(w.id)
+                      ? TextStyle(color: colors.hint)
+                      : null,
+              semanticsLabel: m.isHidden(w.id) ? '' : null,
+            ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final ayahs = _ayahs;
     if (ayahs == null) return SizedBox(height: widget.fontSize * 2 * 15);
     final reader = ReaderScope.of(context);
     final recited = RecitationScope.maybeOf(context)?.recited;
+    final memorization = MemorizationScope.maybeOf(context);
     final colors = MathaniColors.of(context);
     final quran = reader.quran;
     final style = flowingTextStyle(colors, widget.fontSize);
@@ -346,18 +387,25 @@ class _FlowingPageState extends State<_FlowingPage> {
                 : recited != null && !recited.isBasmala && ayah.ref == recited.ref
                     ? colors.recited
                     : null;
+        // Memorization (specs/006): the range's words are hidden in place, and their ayah actions
+        // are off so the text can't be copied.
+        final inSession = memorization != null &&
+            memorization.active &&
+            (memorization.range?.contains(ayah.ref) ?? false);
         LongPressGestureRecognizer? recognizer;
-        if (widget.onAyahLongPress != null) {
+        if (widget.onAyahLongPress != null && !inSession) {
           recognizer = LongPressGestureRecognizer()
             ..onLongPress = () => widget.onAyahLongPress!(ayah.ref);
           _recognizers.add(recognizer);
         }
         final s = flowingAyahText(words, quran.font);
-        spans.add(TextSpan(
-          text: s,
-          recognizer: recognizer,
-          style: background == null ? null : TextStyle(backgroundColor: background),
-        ));
+        spans.add(inSession
+            ? _memorizationSpan(context, memorization, ayah.ref, words, quran.font, background)
+            : TextSpan(
+                text: s,
+                recognizer: recognizer,
+                style: background == null ? null : TextStyle(backgroundColor: background),
+              ));
         length += s.length;
       }
       paragraphs.add(_Paragraph(key, starts));

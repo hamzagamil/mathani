@@ -37,6 +37,11 @@ abstract final class MathaniIcons {
   static const hint = IconData(0xe1c2, fontFamily: _family); // lightbulb
   static const reveal = IconData(0xe0ba, fontFamily: _family); // eye
   static const mic = IconData(0xe118, fontFamily: _family);
+  static const endSession = IconData(0xe083, fontFamily: _family); // circle-stop
+  static const tryAgain = IconData(0xe148, fontFamily: _family); // rotate-ccw
+  static const locate = IconData(0xe1da, fontFamily: _family);
+  static const minus = IconData(0xe11c, fontFamily: _family);
+  static const plus = IconData(0xe13d, fontFamily: _family);
 
   // Media controls (specs/004). They keep their left-to-right form in Arabic, as media players
   // do everywhere: play points right, and previous/next follow the timeline, not the text.

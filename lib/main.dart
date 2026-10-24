@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'app/app.dart';
 import 'data/quran_repository.dart';
 import 'data/user_repository.dart';
+import 'features/memorization/memorization_controller.dart';
 import 'features/onboarding/onboarding_controller.dart';
 import 'features/recitation/ayah_fetcher.dart';
 import 'features/recitation/media_handler.dart';
@@ -46,6 +47,14 @@ Future<void> runMathani() async {
   // Lock screen and notification controls start with the first recitation, not at launch.
   recitation.onFirstPlay = () => RecitationMediaHandler.start(recitation);
   // First run, or the first launch after updating from 1.3.0: the onboarding (specs/005).
-  final onboarding = OnboardingController(reader: controller, recitation: recitation);
-  runApp(MathaniApp(controller: controller, recitation: recitation, onboarding: onboarding));
+  final onboarding =
+      OnboardingController(reader: controller, recitation: recitation, hasMemorize: true);
+  // Memorization (specs/006): nothing is loaded until a session starts.
+  final memorization = MemorizationController(reader: controller, recitation: recitation);
+  runApp(MathaniApp(
+    controller: controller,
+    recitation: recitation,
+    onboarding: onboarding,
+    memorization: memorization,
+  ));
 }

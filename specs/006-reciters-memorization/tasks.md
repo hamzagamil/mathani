@@ -186,7 +186,7 @@ recording and Bandar Baleela (quickstart Q-1 to Q-8).
   - **Short names**: `short_ar`/`short_en` is the common short name (for example «العفاسي» / "Alafasy"), with « · » plus the style label only when the reciter has more than one entry (research R3).
   - **Names**: use the draft names exactly, marking the file for owner review in T024.
 - [X] T017 [US1] Download the 7 QUL timing JSONs (QUL ids 314, 346, 368, 388, 420, 421, 572) from each recitation's page ("Download json"; a free QUL account) into `tool/sources/qul-recitations/<qul_id>.json`, and add their SHA-256 values to `tool/sources.lock.json`. For each JSON, note in `research.md` › R18 whether ayah 1's first word starts ≥ 2,000 ms after the file start in surahs 2–114. If it does for all 7 reciters, raise splitting the basmala into its own clip as a follow-up. *(Manual step for the maintainer.)*
-- [ ] T018 [US1] Run `dart run tool/build_recitation_manifest.dart --skip-existing` (about 3 h; resumable). For every reciter that fails, remove its row from `tool/recitations.json` and record the reason in `research.md` › R0 or R1. Then run `dart run tool/add_recitations.dart` and `dart run tool/verify_quran.dart`. Confirm the output `quran.db: 51 reciters, 5814 surah rows` (or the reduced count) and that T009 still passes.
+- [X] T018 [US1] Run `dart run tool/build_recitation_manifest.dart --skip-existing` (about 3 h; resumable). For every reciter that fails, remove its row from `tool/recitations.json` and record the reason in `research.md` › R0 or R1. Then run `dart run tool/add_recitations.dart` and `dart run tool/verify_quran.dart`. Confirm the output `quran.db: 51 reciters, 5814 surah rows` (or the reduced count) and that T009 still passes.
 - [X] T019 [US1] Add the byte-range path to `lib/features/recitation/ayah_fetcher.dart` (contracts/reciter-catalogue.md › Fetching QUL surah clips):
   - When `reciter.source == qulSurah`, `_get` sends `Range: bytes=<start>-<endExclusive−1>` from `quran.clipRange(...)`.
   - It accepts only a `206` whose `Content-Range` is `bytes <start>-<endExclusive−1>/<total>` and whose body length is `endExclusive − start`. Anything else is a failure that goes through the existing retry path.
@@ -272,7 +272,7 @@ ayah 3. Then deny the microphone.
   Add the **property test** over all 6,236 ayat, using `ayahs.search_text` from the test reader:
   - an ayah's own words complete it with 0 mistakes;
   - dropping, swapping or inserting one word yields exactly one mistake of the right kind and position.
-- [ ] T032 [P] [US2] Write `test/unit/memorization_controller_test.dart` with `FakeSpeechRecogniser` (scripted `Segment`s) and a fake device channel:
+- [X] T032 [P] [US2] Write `test/unit/memorization_controller_test.dart` with `FakeSpeechRecogniser` (scripted `Segment`s) and a fake device channel:
   - the start sequence and each `StartOutcome` (`unsupportedDevice`, `needsModel`, `micDenied`, `micPermanentlyDenied`);
   - state changes notified before awaits;
   - pause reasons (`user`, `silence` after `silencePause`, `interruption`, `background`, `routeLost`), with the mic stopped on each;
@@ -289,7 +289,7 @@ ayah 3. Then deny the microphone.
   - a version folder change makes `ready` false.
 
   Write `test/unit/memorization_privacy_test.dart`, which reads every file in `lib/features/memorization/` except `asr_model.dart` and fails on `HttpClient`, `path_provider`, `writeAsBytes`, `writeAsString`, `openWrite` or `File(` (R16).
-- [ ] T034 [P] [US2] Write `test/widget/hidden_page_test.dart`:
+- [X] T034 [P] [US2] Write `test/widget/hidden_page_test.dart`:
   - on page 50, with ayat 3–5 of the range hidden, their words are not painted (golden), and the ayah-end markers, surah headers and text outside the range are painted;
   - revealing ayah 3 does not change any word's position (compare `LineReport` placements before and after);
   - a hinted word paints in `hint`, and a mistake marker in `mistake`;
@@ -345,7 +345,7 @@ ayah 3. Then deny the microphone.
   - **Recogniser**: a long-lived isolate holding sherpa-onnx `VoiceActivityDetector` (Silero; `vadThreshold`, `vadMinSilence`, `vadMinSpeech`, `vadMaxSpeech`, keeping `forcedSplitOverlap`) and `OfflineRecognizer` (Whisper int8; language `ar`; task `transcribe`; **no initial prompt**; threads 2 on ≤ 4 cores, else 4).
   - **API**: `load(modelDir)`, `accept`, `segments`, `flush`, `reset`, `dispose`.
   - **Fake**: add `FakeSpeechRecogniser` in `test/support/fake_memorization.dart`.
-- [ ] T041 [US2] Write `lib/features/memorization/memorization_controller.dart` and `MemorizationScope` (contracts/memorization-engine.md › MemorizationController):
+- [X] T041 [US2] Write `lib/features/memorization/memorization_controller.dart` and `MemorizationScope` (contracts/memorization-engine.md › MemorizationController):
   - **Start sequence** (steps 1–8): stop the recitation via `RecitationScope`; check the gate, the model and the mic permission (after the explainer, T044); configure `AudioSession` (`playAndRecord`, mode `measurement`, `defaultToSpeaker`, `allowBluetooth`); load the recogniser; start the mic; set `listening`.
   - **Segments**: normalise segments with `normalizeArabic`, split them, and pass them to the matcher.
   - **On mistakes**: mark, then signal by `preferences.mistakeSignal`, gating the mic for `toneGate` when sound.
@@ -356,7 +356,7 @@ ayah 3. Then deny the microphone.
   - **Scope**: create `MemorizationScope` lazily in `lib/app/app.dart`, beside `RecitationScope`.
 
   Make T032 pass.
-- [ ] T042 [US2] Hide words in `lib/features/reader/mushaf_page_renderer.dart` (research R13):
+- [X] T042 [US2] Hide words in `lib/features/reader/mushaf_page_renderer.dart` (research R13):
   - new config fields `hidden`/`hinted` (`bool Function(int wordId)?`) and `mistakeAyat` (`Set<AyahRef>`);
   - skip painting hidden non-ayah-end words while keeping their placement;
   - paint hinted words in `palette.hint` and ayah-end glyphs of mistake ayat in `palette.mistake`;
@@ -364,13 +364,13 @@ ayah 3. Then deny the microphone.
   - add these fields to the repaint comparison, so repainting happens only when they change.
 
   Pass the controller's predicates through `lib/features/reader/mushaf_view.dart`. Add `hint` and `mistake` to `MushafPalette`, and add tokens in `lib/app/theme/tokens.dart` and `app_theme.dart` for day and night per contracts/memorization-ui.md › Theme tokens, with ≥ 3:1 contrast checked in a test.
-- [ ] T043 [US2] Hide words in `lib/features/reader/flowing_view.dart`: hidden words use a transparent colour in their `TextSpan` (identical line breaks), hinted words `colors.hint`, and mistake ayah numbers `colors.mistake`. Exclude hidden text from semantics with a `semanticsLabel` of «الآية N، مخفية» per hidden ayah. Keep the expected ayah in view on follow, as for the recitation. Make T034 pass for both layouts.
-- [ ] T044 [P] [US2] Write `lib/features/memorization/range_sheet.dart` and `lib/features/memorization/mic_explainer.dart` (contracts/memorization-ui.md › Range sheet, Microphone explainer):
+- [X] T043 [US2] Hide words in `lib/features/reader/flowing_view.dart`: hidden words use a transparent colour in their `TextSpan` (identical line breaks), hinted words `colors.hint`, and mistake ayah numbers `colors.mistake`. Exclude hidden text from semantics with a `semanticsLabel` of «الآية N، مخفية» per hidden ayah. Keep the expected ayah in view on follow, as for the recitation. Make T034 pass for both layouts.
+- [X] T044 [P] [US2] Write `lib/features/memorization/range_sheet.dart` and `lib/features/memorization/mic_explainer.dart` (contracts/memorization-ui.md › Range sheet, Microphone explainer):
   - **Range sheet**: a surah picker reusing the go-to sheet's surah list from `lib/features/index/goto_sheet.dart`; From/To steppers clamped to 1..ayahCount, with From > To moving To; the summary line; the model row with Download and progress (T038); the unsupported-device message (T039); Start enabled only when ready.
   - **Explainer**: shown once, before the first system prompt; a «فتح الإعدادات» button calls `openAppSettings` when permanently denied.
 
   Make the range-sheet part of T034 pass.
-- [ ] T045 [P] [US2] Write `lib/features/memorization/memorization_bar.dart` (contracts/memorization-ui.md › Memorization bar):
+- [X] T045 [P] [US2] Write `lib/features/memorization/memorization_bar.dart` (contracts/memorization-ui.md › Memorization bar):
   - mic indicator («يستمع» with a red dot, semantics "Microphone on");
   - «الآية ٣ من ٧»;
   - Pause/Resume, «الكلمة التالية», «أظهر الآية», «إنهاء» at 48 dp;
@@ -379,15 +379,15 @@ ayah 3. Then deny the microphone.
   - «عُد إلى الآية» when the expected ayah is off-screen.
 
   Make the bar part of T034 pass.
-- [ ] T046 [US2] Wire the reading screen in `lib/features/reader/reader_screen.dart` and `lib/features/reader/ayah_actions.dart` (contracts/memorization-ui.md › Entry points and Reading screen during a session):
+- [X] T046 [US2] Wire the reading screen in `lib/features/reader/reader_screen.dart` and `lib/features/reader/ayah_actions.dart` (contracts/memorization-ui.md › Entry points and Reading screen during a session):
   - add the Memorize toolbar button beside Listen, and «احفظ من هذه الآية» in ayah actions;
   - while a session exists: dock `MemorizationBar` in place of the recitation bar, hide Listen, and disable ayah actions for range ayat;
   - announce reveals («ظهرت الآية ٥») with `SemanticsService.announce`.
-- [ ] T047 [P] [US2] Add every memorization string in contracts/memorization-ui.md (entry points, range sheet, model row with size, explainer, denial, bar, paused reasons, unsupported device, Settings and Downloads rows, the tour hint) to `lib/app/l10n/app_ar.arb` and `app_en.arb`, with Arabic as source text. Run `flutter gen-l10n`.
-- [ ] T048 [P] [US2] Settings and Downloads:
+- [X] T047 [P] [US2] Add every memorization string in contracts/memorization-ui.md (entry points, range sheet, model row with size, explainer, denial, bar, paused reasons, unsupported device, Settings and Downloads rows, the tour hint) to `lib/app/l10n/app_ar.arb` and `app_en.arb`, with Arabic as source text. Run `flutter gen-l10n`.
+- [X] T048 [P] [US2] Settings and Downloads:
   - in `lib/features/settings/settings_screen.dart`, add the «التنبيه عند الخطأ» row with Vibrate (default), Sound and None, saved through T008;
   - in `lib/features/recitation/downloads_screen.dart`, add the «نموذج الحفظ» row with size and delete (disabled while a session exists), freeing storage within 1 s. Extend `test/widget/downloads_screen_test.dart`.
-- [ ] T049 [P] [US2] Add the Memorize hint to the button tour in `lib/features/onboarding/button_tour.dart` («اختبر حفظك: تلُ من ذاكرتك وتظهر الآيات كلما أتممتها»), and update `test/widget/button_tour_test.dart` and `tour_replay_test.dart`.
+- [X] T049 [P] [US2] Add the Memorize hint to the button tour in `lib/features/onboarding/button_tour.dart` («اختبر حفظك: تلُ من ذاكرتك وتظهر الآيات كلما أتممتها»), and update `test/widget/button_tour_test.dart` and `tour_replay_test.dart`.
 
 **Checkpoint**: US2 works offline on both phones (quickstart Q-10 to Q-23, except result-specific checks).
 
@@ -409,7 +409,7 @@ ayah 3. Then deny the microphone.
   - an ayah ended mid-recitation counts as `notReached`;
   - `score == null` when `reached == 0`;
   - rounding is half away from zero (`.round()`).
-- [ ] T051 [P] [US3] Write `test/widget/result_screen_test.dart`:
+- [X] T051 [P] [US3] Write `test/widget/result_screen_test.dart`:
   - score «٧٢» with «من ١٠٠», or «—»;
   - the counts line and «بلغت ٨ من ١٠ آيات»;
   - review marks: missed/wrong underlined in `mistake`, added caret, hinted words in `hint`, «أُظهرت» and «لم تُبلغ» tags;
@@ -420,7 +420,7 @@ ayah 3. Then deny the microphone.
 ### Implementation for User Story 3
 
 - [X] T052 [US3] Write `lib/features/memorization/memorization_score.dart` (pure Dart): `SessionResult.from(Map<AyahRef, AyahProgress>)` per data-model › Session Result, with `score = round(100 × (1·noMistake + 0.5·corrected + 0.25·hinted + 0·revealed) / reached)` and `null` when `reached == 0`. Use it from `MemorizationController.end()`. Make T050 pass.
-- [ ] T053 [US3] Write `lib/features/memorization/result_screen.dart` (contracts/memorization-ui.md › Result screen):
+- [X] T053 [US3] Write `lib/features/memorization/result_screen.dart` (contracts/memorization-ui.md › Result screen):
   - a full-screen route pushed on `phase == ended`;
   - score, counts, reached;
   - the review list in flowing style using `AyahProgress.mistakes` and `hints` (the heard form of a wrong word only in semantics);
@@ -689,3 +689,53 @@ after T041: T044 range sheet  ∥  T045 bar  ∥  T047 strings  ∥  T048 settin
   `sherpa_onnx` (Apache-2.0) and `record` (MIT) are not added again: Flutter already collects
   their package `LICENSE` files into the licences page. Test:
   `test/widget/asset_licences_test.dart`.
+- **T018**: the build ran about 3 h (resumed with `--skip-existing`). Five reciters failed, were
+  removed from `tool/recitations.json` and are recorded in research R0: `ayyoub`,
+  `minshawy_children`, `mostafa_ismail`, `husary_ijazah`, `salimi`. `add_recitations.dart`:
+  `quran.db: 46 reciters, 5244 surah rows`. `verify_quran.dart`: PASS. The tests follow the
+  real catalogue:
+  - `reciter_preference_test`: the 004 reciters first, 46 in all.
+  - `reciter_list_test`: Husary has 3 recordings; the scroll test uses Al-Dosari.
+  - The onboarding tests find reciters through the search field. The list builds only the rows
+    in view, and a reciter's recordings share one name.
+
+  Fixed while doing this:
+  - `ReciterList` dropped `prototypeItem`. At double text size, wrapped names overflowed rows
+    fixed to the prototype's height (onboarding_a11y_test). The list now jumps near the chosen
+    row, then `Scrollable.ensureVisible` brings it into view.
+  - A sample button's name includes its style unless it is Murattal, so screen readers can tell
+    «الحصري · مجوّد» from «الحصري».
+
+  `version_test` fails because `pubspec.yaml` is at `1.4.0+7` and `lib/app/version.dart` at
+  `+6`. That change was not part of this work.
+- **US2/US3 UI built before S1 (owner decision, 2026-10-24)**: the owner chose to build and show
+  memorization now, without waiting for the S1 accuracy gate. T035 (S1) stays open, and its
+  results may still change thresholds and the variant list.
+  - **Controller** (`memorization_controller.dart`): the contract's start sequence, with segments
+    normalised into the matcher. Mistakes signal by preference (vibrate, sound with mic gating,
+    or none). Reveals follow the next ayah's page. The session pauses on silence (30 s), on
+    leaving the app, on audio interruptions and when the headset is unplugged. `end()` flushes
+    for 1.5 s and builds the `SessionResult`; `close()` clears it after Done.
+  - **Hiding**: the Mushaf renderer skips painting hidden words and tints hinted words and the
+    expected/mistake ayah-end marks with a `srcIn` colour filter, without relayout.
+    `WordMarks` repaints only when the controller's revision changes. The flowing view draws
+    hidden words transparent, so line breaks are identical, and reads hidden ayat as
+    «الآية N، مخفية». Range ayat have no long-press actions during a session. The expected
+    ayah's marker is accent-coloured **without the pulse** (not done).
+  - **UI**: Memorize toolbar button, «احفظ من هذه الآية», range sheet (surah, From/To steppers
+    with direct entry, summary, model download row, unsupported message), microphone explainer
+    and denial with Open Settings, bar, result screen with review, Settings «التنبيه عند الخطأ»,
+    the Downloads model row with delete, and the tour hint (the tour now has 8 stops).
+  - **Explainer**: shown whenever the microphone is not yet allowed, before asking. The contract's
+    "first time only" is not tracked, so a denied reader sees it again.
+  - **Tests**: `test/widget/memorization_session_test.dart` (3): a full Al-Ikhlas session (hidden
+    words, reveals, an added word, a hint, score 69, Done back to page 604), End mid-range
+    (unfinished and not-reached tags), and microphone refusal.
+  - **Emulator (API 36, x86_64)**: the 2 GB default AVD shows «الحفظ غير متاح على هذا الجهاز —
+    يحتاج ذاكرة ٣ غيغابايت على الأقل» (gate works). With 4 GB, the model downloaded from the
+    release (all four files verified), and a session started and listened. The input lag of the
+    software-rendered emulator made scripted recitation impractical, so the voice path still
+    needs a real phone.
+  - **Matcher behaviour seen in the tests**: a stray word at the end of a segment, followed by the
+    right word in the next segment, is not a mistake (boundary noise). After a mistake, the rest
+    of that segment is not matched; the reader repeats from the word, as Q1 says.

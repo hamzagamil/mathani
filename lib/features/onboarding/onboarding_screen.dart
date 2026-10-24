@@ -146,6 +146,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         OnboardingStep.surahIndex => l10n.tourIndexTitle,
         OnboardingStep.search => l10n.tourSearchTitle,
         OnboardingStep.player => l10n.tourPlayerTitle,
+        OnboardingStep.memorize => l10n.memorize,
         OnboardingStep.settings => l10n.tourSettingsTitle,
       };
 

@@ -82,6 +82,13 @@ void main() {
     await settle(tester, 4);
   }
 
+  /// The first of the reciter rows named [text] (a reciter's Murattal recording), found by search.
+  Future<void> tapFirst(WidgetTester tester, String text) async {
+    await searchReciters(tester, text);
+    await tester.tap(find.descendant(of: find.byType(ListView), matching: find.text(text)).first);
+    await settle(tester, 4);
+  }
+
   Future<void> next(WidgetTester tester) => tapText(tester, 'التالي');
 
   group('frame', () {
@@ -206,7 +213,7 @@ void main() {
       await finish(tester);
     });
 
-    testWidgets('reciter: both listed, the current one selected; choosing saves it',
+    testWidgets('reciter: listed, the current one selected; choosing saves it',
         (tester) async {
       await pumpApp(tester);
       final semantics = tester.ensureSemantics();
@@ -214,8 +221,9 @@ void main() {
         await next(tester);
       }
       expect(onboarding.step, OnboardingStep.reciter);
-      expect(tester.getSemantics(find.text('محمود خليل الحصري')), isSemantics(isChecked: true));
-      await tapText(tester, 'محمد صديق المنشاوي');
+      // A reciter's other recordings share the name; Murattal, first in the catalogue, comes first.
+      expect(tester.getSemantics(find.text('محمود خليل الحصري').first), isSemantics(isChecked: true));
+      await tapFirst(tester, 'محمد صديق المنشاوي');
       expect(reader.preferences.reciter, 'minshawy');
       expect(find.text('تحتاج المقاطع إلى اتصال بالإنترنت، ويمكنك الاختيار دونها.'), findsNothing);
       semantics.dispose();
@@ -246,9 +254,9 @@ void main() {
       expect(find.text('تحتاج المقاطع إلى اتصال بالإنترنت، ويمكنك الاختيار دونها.'), findsOneWidget);
       final buttons = tester.widgetList<IconButton>(find.byWidgetPredicate(
           (w) => w is IconButton && (w.tooltip ?? '').startsWith('استمع إلى مقطع')));
-      expect(buttons, hasLength(2));
+      expect(buttons, isNotEmpty); // the rows in view of the long list
       expect(buttons.every((b) => b.onPressed == null), isTrue);
-      await tapText(tester, 'محمد صديق المنشاوي');
+      await tapFirst(tester, 'محمد صديق المنشاوي');
       expect(reader.preferences.reciter, 'minshawy');
       await finish(tester);
     });

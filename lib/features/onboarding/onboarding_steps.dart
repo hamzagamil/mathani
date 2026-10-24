@@ -14,12 +14,13 @@ enum OnboardingStep {
   surahIndex,
   search,
   player,
+  memorize,
   settings;
 
   StepKind get kind => switch (this) {
         language || theme || layout || textSize || reciter => StepKind.setup,
         turnPages || controls || ayahActions => StepKind.gesture,
-        surahIndex || search || player || settings => StepKind.button,
+        surahIndex || search || player || memorize || settings => StepKind.button,
       };
 }
 
@@ -28,12 +29,13 @@ enum OnboardingStep {
 enum StepKind { setup, gesture, button }
 
 /// The steps to show, in order. Text size only for the flowing layout, the reciter only with a
-/// catalogue, the player hint only with recitations, and no setup steps in a replay (FR-006,
-/// FR-014, FR-022).
+/// catalogue, the player hint only with recitations, the memorization hint only with it
+/// (specs/006 T049), and no setup steps in a replay (FR-006, FR-014, FR-022).
 List<OnboardingStep> onboardingSteps({
   required bool flowing,
   required bool hasReciters,
   required bool hasPlayer,
+  bool hasMemorize = false,
   required bool replay,
 }) =>
     [
@@ -50,6 +52,7 @@ List<OnboardingStep> onboardingSteps({
       OnboardingStep.surahIndex,
       OnboardingStep.search,
       if (hasPlayer) OnboardingStep.player,
+      if (hasMemorize) OnboardingStep.memorize,
       OnboardingStep.settings,
     ];
 

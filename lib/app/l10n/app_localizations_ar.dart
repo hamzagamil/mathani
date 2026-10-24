@@ -611,4 +611,219 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get qulRecitationsCredit =>
       'توقيت الآيات وبعض التلاوات: مكتبة القرآن الشاملة (QUL)';
+
+  @override
+  String get memorize => 'الحفظ';
+
+  @override
+  String get memorizeFromAyah => 'احفظ من هذه الآية';
+
+  @override
+  String get memorizeTitle => 'اختبر حفظك';
+
+  @override
+  String get memorizeFrom => 'من الآية';
+
+  @override
+  String get memorizeTo => 'إلى الآية';
+
+  @override
+  String memorizeSummary(String ayat, String pages) {
+    return '$ayat · $pages';
+  }
+
+  @override
+  String memorizePage(String page) {
+    return 'الصفحة $page';
+  }
+
+  @override
+  String memorizePages(String from, String to) {
+    return 'الصفحات $from–$to';
+  }
+
+  @override
+  String memorizeModelNeeded(String size) {
+    return 'يحتاج الحفظ إلى تنزيل نموذج التعرّف على التلاوة مرة واحدة ($size). بعدها يعمل دون اتصال.';
+  }
+
+  @override
+  String memorizeModelDownloading(String percent) {
+    return 'يُنزَّل النموذج… $percent٪';
+  }
+
+  @override
+  String get memorizeModelFailed => 'تعذّر تنزيل النموذج. حاول مرة أخرى.';
+
+  @override
+  String get memorizeStart => 'ابدأ';
+
+  @override
+  String get memorizeUnsupported => 'الحفظ غير متاح على هذا الجهاز';
+
+  @override
+  String get memorizeUnsupported64 => 'يحتاج معالجًا بنظام ٦٤ بت.';
+
+  @override
+  String get memorizeUnsupportedMemory => 'يحتاج ذاكرة ٣ غيغابايت على الأقل.';
+
+  @override
+  String get micExplainerTitle => 'الميكروفون للمتابعة فقط';
+
+  @override
+  String get micExplainerBody =>
+      'يستمع مثاني إلى تلاوتك ليُظهر كل آية حين تتمها. يجري ذلك على جهازك فقط، ولا يُسجَّل صوتك ولا يُرسل.';
+
+  @override
+  String get micExplainerContinue => 'متابعة';
+
+  @override
+  String get micDenied => 'لا يمكن بدء الحفظ دون الميكروفون.';
+
+  @override
+  String get memorizeListening => 'يستمع';
+
+  @override
+  String get memorizeMicOn => 'الميكروفون يعمل';
+
+  @override
+  String get memorizePreparing => 'يجهّز…';
+
+  @override
+  String get memorizePaused => 'متوقف';
+
+  @override
+  String get memorizePausedSilence => 'توقّف الاستماع بعد ٣٠ ثانية من الصمت';
+
+  @override
+  String get memorizePausedInterruption => 'توقّف بسبب مكالمة أو صوت آخر';
+
+  @override
+  String get memorizePausedBackground => 'توقّف حين غادرت التطبيق';
+
+  @override
+  String get memorizePausedRoute => 'انقطع الميكروفون';
+
+  @override
+  String memorizeProgress(String n, String total) {
+    return 'الآية $n من $total';
+  }
+
+  @override
+  String get memorizePause => 'إيقاف مؤقت';
+
+  @override
+  String get memorizeResume => 'استئناف';
+
+  @override
+  String get memorizeNextWord => 'الكلمة التالية';
+
+  @override
+  String get memorizeShowAyah => 'أظهر الآية';
+
+  @override
+  String get memorizeEnd => 'إنهاء';
+
+  @override
+  String get memorizeMistake => 'خطأ — تابع من الكلمة';
+
+  @override
+  String get memorizeBackToAyah => 'عُد إلى الآية';
+
+  @override
+  String memorizeHiddenAyah(String n) {
+    return 'الآية $n، مخفية';
+  }
+
+  @override
+  String memorizeRevealed(String n) {
+    return 'ظهرت الآية $n';
+  }
+
+  @override
+  String get resultTitle => 'نتيجة الحفظ';
+
+  @override
+  String get resultOutOf => 'من ١٠٠';
+
+  @override
+  String resultNoMistake(String n) {
+    return 'دون خطأ $n';
+  }
+
+  @override
+  String resultCorrected(String n) {
+    return 'صُحّحت $n';
+  }
+
+  @override
+  String resultHinted(String n) {
+    return 'بتلميح $n';
+  }
+
+  @override
+  String resultRevealedCount(String n) {
+    return 'أُظهرت $n';
+  }
+
+  @override
+  String resultNotReachedCount(String n) {
+    return 'لم تُبلغ $n';
+  }
+
+  @override
+  String resultReached(String reached, String total) {
+    return 'بلغت $reached من $total';
+  }
+
+  @override
+  String get resultRevealed => 'أُظهرت';
+
+  @override
+  String get resultNotReached => 'لم تُبلغ';
+
+  @override
+  String get resultNotFinished => 'لم تكتمل';
+
+  @override
+  String get resultMissed => 'فاتتك';
+
+  @override
+  String resultWrong(String heard) {
+    return 'سُمعت «$heard»';
+  }
+
+  @override
+  String get resultAdded => 'زيادة';
+
+  @override
+  String get resultTryAgain => 'أعد المحاولة';
+
+  @override
+  String get resultDone => 'تم';
+
+  @override
+  String get mistakeSignal => 'التنبيه عند الخطأ';
+
+  @override
+  String get mistakeSignalVibrate => 'اهتزاز';
+
+  @override
+  String get mistakeSignalSound => 'صوت';
+
+  @override
+  String get mistakeSignalNone => 'بدون';
+
+  @override
+  String get memorizationModel => 'نموذج الحفظ';
+
+  @override
+  String get deleteMemorizationModel => 'حذف نموذج الحفظ';
+
+  @override
+  String get tourMemorize =>
+      'اختبر حفظك: تلُ من ذاكرتك وتظهر الآيات كلما أتممتها';
+
+  @override
+  String get openSystemSettings => 'فتح الإعدادات';
 }

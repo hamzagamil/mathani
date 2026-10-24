@@ -8,6 +8,8 @@ import '../../app/theme/tokens.dart';
 import '../../shared/mathani_icons.dart';
 import '../../shared/numerals.dart';
 import '../../shared/reader_state.dart';
+import '../memorization/asr_model.dart';
+import '../memorization/memorization_controller.dart';
 import 'download_queue.dart';
 import 'recitation_controller.dart';
 
@@ -25,6 +27,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
   void initState() {
     super.initState();
     _queue.ensureScanned(); // never awaited: the screen renders at once (Principle III)
+    MemorizationScope.read(context)?.model.refresh();
   }
 
   @override
@@ -44,7 +47,9 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
         ),
         title: Text(l10n.downloads),
       ),
-      body: ValueListenableBuilder<bool>(
+      body: Column(children: [
+        const _MemorizationModelRow(),
+        Expanded(child: ValueListenableBuilder<bool>(
         valueListenable: _queue.scanned,
         builder: (context, scanned, _) {
           if (!scanned) return _Skeleton(reciters: quran.reciters.length);
@@ -88,7 +93,8 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
             },
           );
         },
-      ),
+      )),
+      ]),
     );
   }
 
@@ -271,6 +277,39 @@ class _Skeleton extends StatelessWidget {
           const SizedBox(height: Space.s4),
         ],
       ],
+    );
+  }
+}
+
+/// The memorization model (specs/006 contracts/memorization-ui.md › Settings), when any of it is
+/// on the device: its size, and delete. Not offered while a session exists.
+class _MemorizationModelRow extends StatelessWidget {
+  const _MemorizationModelRow();
+
+  @override
+  Widget build(BuildContext context) {
+    final memorization = MemorizationScope.maybeOf(context);
+    if (memorization == null) return const SizedBox.shrink();
+    final model = memorization.model;
+    final l10n = AppLocalizations.of(context);
+    final colors = MathaniColors.of(context);
+    final locale = Localizations.localeOf(context);
+    return ListenableBuilder(
+      listenable: model,
+      builder: (context, _) {
+        if (model.state == AsrModelState.absent) return const SizedBox.shrink();
+        return ListTile(
+          leading: const Icon(MathaniIcons.memorize),
+          title: Text(l10n.memorizationModel),
+          subtitle: Text(formatSize(l10n, locale, model.downloadedBytes),
+              style: TypeScale.caption.copyWith(color: colors.inkMuted)),
+          trailing: IconButton(
+            icon: const Icon(MathaniIcons.delete),
+            tooltip: l10n.deleteMemorizationModel,
+            onPressed: memorization.active ? null : model.delete,
+          ),
+        );
+      },
     );
   }
 }

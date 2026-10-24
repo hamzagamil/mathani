@@ -43,9 +43,9 @@ void main() {
     expect(ids('العفاسي'), ['alafasy']);
     expect(ids('alafasy'), ['alafasy']);
     expect(ids('ALAFASY'), ['alafasy']);
-    expect(ids('الحصري'), unorderedEquals(['husary', 'husary_mujawwad', 'husary_muallim', 'husary_ijazah']));
-    expect(ids('حصري'), unorderedEquals(['husary', 'husary_mujawwad', 'husary_muallim', 'husary_ijazah']));
-    expect(ids('husary'), hasLength(4));
+    expect(ids('الحصري'), unorderedEquals(['husary', 'husary_mujawwad', 'husary_muallim']));
+    expect(ids('حصري'), unorderedEquals(['husary', 'husary_mujawwad', 'husary_muallim']));
+    expect(ids('husary'), hasLength(3));
     expect(ids('ابو بكر'), ['shatri'], reason: 'أ and ا match');
     expect(ids('عبد الباسط'), unorderedEquals(['abdulbasit_murattal', 'abdulbasit_mujawwad']));
     expect(ids('zzz'), isEmpty);
@@ -110,8 +110,8 @@ void main() {
 
   testWidgets('opens with the chosen reciter in view; rows are at least 48 dp high',
       (tester) async {
-    await pumpList(tester, locale: const Locale('en'), selected: 'salimi');
-    final chosen = find.ancestor(of: find.text('Mansour Al-Salimi'), matching: find.byType(ListTile));
+    await pumpList(tester, locale: const Locale('en'), selected: 'dossari');
+    final chosen = find.ancestor(of: find.text('Yasser Al-Dosari'), matching: find.byType(ListTile));
     expect(chosen, findsOneWidget, reason: 'built, so scrolled into view');
     expect(tester.widget<ListTile>(chosen).selected, isTrue);
     for (final tile in tester.elementList(find.byType(ListTile))) {

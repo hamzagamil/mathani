@@ -158,6 +158,7 @@ class _ReciterListState extends State<ReciterList> {
   final _query = TextEditingController();
   ScrollController? _own;
   bool _scrolledToSelected = false;
+  final _selectedRow = GlobalKey();
 
   ScrollController get _controller => widget.controller ?? (_own ??= ScrollController());
 
@@ -174,8 +175,8 @@ class _ReciterListState extends State<ReciterList> {
     super.dispose();
   }
 
-  /// Every row has the prototype's height, so the chosen row's offset is its index times the
-  /// average extent once the list is laid out.
+  /// Rows differ in height (names wrap at large text sizes), so the list jumps near the chosen
+  /// row by the average extent, then brings the row itself into view once it is built.
   void _scrollToSelected(List<Reciter> rows) {
     if (_scrolledToSelected) return;
     _scrolledToSelected = true;
@@ -185,8 +186,11 @@ class _ReciterListState extends State<ReciterList> {
       if (!mounted || !_controller.hasClients) return;
       final p = _controller.position;
       final extent = (p.maxScrollExtent + p.viewportDimension) / rows.length;
-      final target = (index * extent - p.viewportDimension / 3).clamp(0.0, p.maxScrollExtent);
-      _controller.jumpTo(target);
+      _controller.jumpTo((index * extent - p.viewportDimension / 3).clamp(0.0, p.maxScrollExtent));
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final row = _selectedRow.currentContext;
+        if (mounted && row != null) Scrollable.ensureVisible(row, alignment: 1 / 3);
+      });
     });
   }
 
@@ -232,9 +236,11 @@ class _ReciterListState extends State<ReciterList> {
               : ListView.builder(
                   controller: _controller,
                   itemCount: rows.length,
-                  prototypeItem: widget.rowBuilder(context, rows.first, false),
-                  itemBuilder: (context, i) =>
-                      widget.rowBuilder(context, rows[i], rows[i].id == widget.selectedId),
+                  itemBuilder: (context, i) {
+                    final selected = rows[i].id == widget.selectedId;
+                    final row = widget.rowBuilder(context, rows[i], selected);
+                    return selected ? KeyedSubtree(key: _selectedRow, child: row) : row;
+                  },
                 ),
         ),
       ],

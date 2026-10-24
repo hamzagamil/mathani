@@ -45,6 +45,11 @@ void main() {
         MathaniIcons.hint,
         MathaniIcons.reveal,
         MathaniIcons.mic,
+        MathaniIcons.endSession,
+        MathaniIcons.tryAgain,
+        MathaniIcons.locate,
+        MathaniIcons.minus,
+        MathaniIcons.plus,
         MathaniIcons.search,
       ]) {
         final drawn = await draw(icon.codePoint);

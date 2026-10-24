@@ -20,6 +20,8 @@ class MushafPalette {
     required this.highlight,
     required this.selection,
     this.recited = const Color(0x00000000),
+    this.hint = const Color(0x00000000),
+    this.mistake = const Color(0x00000000),
   });
 
   final Color ink;
@@ -27,6 +29,8 @@ class MushafPalette {
   final Color highlight; // jump target: secondary-soft
   final Color selection; // long-press selection: selected
   final Color recited; // the ayah being recited (specs/004)
+  final Color hint; // a hinted word in memorization (specs/006)
+  final Color mistake; // the ayah-end mark of an ayah with a mistake (specs/006)
 
   @override
   bool operator ==(Object other) =>
@@ -35,10 +39,41 @@ class MushafPalette {
       other.accentInk == accentInk &&
       other.highlight == highlight &&
       other.selection == selection &&
-      other.recited == recited;
+      other.recited == recited &&
+      other.hint == hint &&
+      other.mistake == mistake;
 
   @override
-  int get hashCode => Object.hash(ink, accentInk, highlight, selection, recited);
+  int get hashCode => Object.hash(ink, accentInk, highlight, selection, recited, hint, mistake);
+}
+
+/// What a memorization session hides and marks on the page (specs/006 research R13). Words keep
+/// their place; only their painting changes. Equal when [revision] and [expected] are, so the page
+/// repaints only when a mark changes.
+@immutable
+class WordMarks {
+  const WordMarks({
+    required this.hidden,
+    required this.hinted,
+    required this.mistake,
+    required this.expected,
+    required this.revision,
+  });
+
+  final bool Function(int wordId) hidden;
+  final bool Function(int wordId) hinted;
+  final bool Function(AyahRef ref) mistake;
+
+  /// The ayah the reader is expected to recite: its ayah-end mark is drawn in the accent.
+  final AyahRef? expected;
+  final int revision;
+
+  @override
+  bool operator ==(Object other) =>
+      other is WordMarks && other.revision == revision && other.expected == expected;
+
+  @override
+  int get hashCode => Object.hash(revision, expected);
 }
 
 /// The page details printed around the text, as in the printed Mushaf: the surah and juz at the
@@ -83,6 +118,7 @@ class MushafPageRenderer extends LeafRenderObjectWidget {
     this.highlighted,
     this.recited,
     this.recitedBasmala,
+    this.marks,
     this.details,
     this.printedGlyphs,
     this.printedFamily,
@@ -104,6 +140,9 @@ class MushafPageRenderer extends LeafRenderObjectWidget {
 
   /// The surah whose basmala is being recited: its basmala line is highlighted.
   final int? recitedBasmala;
+
+  /// Memorization marks while a session exists (specs/006).
+  final WordMarks? marks;
 
   /// Surah and juz printed at the top of the page, with the page number at the bottom (FR-009).
   final MushafPageDetails? details;
@@ -176,7 +215,8 @@ class RenderMushafPage extends RenderBox {
     } else if (old.selected != next.selected ||
         old.highlighted != next.highlighted ||
         old.recited != next.recited ||
-        old.recitedBasmala != next.recitedBasmala) {
+        old.recitedBasmala != next.recitedBasmala ||
+        old.marks != next.marks) {
       markNeedsPaint();
     }
   }
@@ -425,9 +465,33 @@ class RenderMushafPage extends RenderBox {
         Paint()..color = color,
       );
     }
+    final marks = _config.marks;
     for (final w in line.words) {
       final y = line.top + (line.height - w.painter.height * line.scale) / 2;
-      if (line.scale == 1) {
+      // Memorization: hidden words leave their place empty; hinted words and the marks of the
+      // expected ayah or an ayah with a mistake are tinted.
+      Color? tint;
+      var hidden = false;
+      if (marks != null) {
+        if (w.word.isAyahEnd) {
+          tint = marks.mistake(w.word.ref)
+              ? palette.mistake
+              : w.word.ref == marks.expected
+                  ? palette.accentInk
+                  : null;
+        } else if (marks.hidden(w.word.id)) {
+          hidden = true;
+        } else if (marks.hinted(w.word.id)) {
+          tint = palette.hint;
+        }
+      }
+      if (tint != null) {
+        canvas.saveLayer(line.wordRect(w).inflate(geometry.fontSize * 0.2),
+            Paint()..colorFilter = ColorFilter.mode(tint, BlendMode.srcIn));
+      }
+      if (hidden) {
+        // Nothing drawn.
+      } else if (line.scale == 1) {
         w.painter.paint(canvas, Offset(w.x, y));
       } else {
         canvas.save();
@@ -436,6 +500,7 @@ class RenderMushafPage extends RenderBox {
         w.painter.paint(canvas, Offset.zero);
         canvas.restore();
       }
+      if (tint != null) canvas.restore();
       // Margin marks (FR-007): rub' al-hizb at a quarter start, sajdah at a sajdah ayah.
       final mark = _config.quarterStartWords.contains(w.word.id)
           ? rubAlHizbMark

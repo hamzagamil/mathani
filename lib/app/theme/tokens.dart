@@ -40,6 +40,11 @@ abstract final class SemanticColors {
   // Derived for specs/004 (not yet in the brand guide): the ayah being recited. A stronger
   // secondarySoft, so it reads apart from the 1.5 s jump highlight and from selection.
   static const recited = ThemedColor(Color(0xFFC9DCD7), Color(0xFF23484A));
+  // Derived for specs/006 (not yet in the brand guide), memorization marks; both at least 3:1
+  // against the page (test/widget/theme_tokens_test.dart). Hinted words: the secondary teal.
+  static const hint = ThemedColor(Color(0xFF456967), Color(0xFF86AFAB));
+  // A mistake: a darker terracotta, so it reads on cream as well as on the night page.
+  static const mistake = ThemedColor(Color(0xFFA4482B), Color(0xFFE89A7C));
   static const line = ThemedColor(Color(0xFFD9CCB5), Color(0xFF2B3D59));
   static const focusRing = ThemedColor(Color(0xFF183159), Color(0xFFD9BD82));
   static const focusRingOnBar = ThemedColor(Color(0xFFBA9757), Color(0xFFD9BD82));

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import '../data/models.dart';
+import '../features/memorization/memorization_controller.dart';
 import '../features/onboarding/onboarding_controller.dart';
 import '../features/onboarding/onboarding_screen.dart';
 import '../features/recitation/recitation_controller.dart';
@@ -11,7 +12,13 @@ import 'l10n/app_localizations.dart';
 import 'theme/app_theme.dart';
 
 class MathaniApp extends StatelessWidget {
-  const MathaniApp({super.key, required this.controller, this.recitation, this.onboarding});
+  const MathaniApp({
+    super.key,
+    required this.controller,
+    this.recitation,
+    this.onboarding,
+    this.memorization,
+  });
 
   final ReaderController controller;
 
@@ -20,6 +27,9 @@ class MathaniApp extends StatelessWidget {
 
   /// The onboarding (specs/005). Null in tests that open straight on the reader.
   final OnboardingController? onboarding;
+
+  /// Memorization (specs/006). Null in tests that do not need it: no Memorize button then.
+  final MemorizationController? memorization;
 
   static const supportedLocales = [Locale('ar'), Locale('en')];
 
@@ -67,7 +77,12 @@ class MathaniApp extends StatelessWidget {
     );
     final recitation = this.recitation;
     final onboarding = this.onboarding;
-    final scoped = onboarding == null ? app : OnboardingScope(controller: onboarding, child: app);
+    final memorization = this.memorization;
+    final withMemorization =
+        memorization == null ? app : MemorizationScope(controller: memorization, child: app);
+    final scoped = onboarding == null
+        ? withMemorization
+        : OnboardingScope(controller: onboarding, child: withMemorization);
     return ReaderScope(
       controller: controller,
       child: recitation == null ? scoped : RecitationScope(controller: recitation, child: scoped),
