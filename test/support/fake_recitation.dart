@@ -16,6 +16,22 @@ class FakeAudioEngine implements AudioEngine {
   bool playing = false;
   int stops = 0;
 
+  /// Loading a window takes this long, like just_audio preparing a file. While it loads, a change
+  /// to the playlist aborts the load (just_audio throws PlayerInterruptedException).
+  Duration loadTime = Duration.zero;
+  bool _loading = false;
+  bool _aborted = false;
+
+  /// Set when the playlist was changed during a load.
+  bool interrupted = false;
+
+  void _change() {
+    if (_loading) {
+      interrupted = true;
+      _aborted = true;
+    }
+  }
+
   RecitedItem? get currentItem => window.isEmpty ? null : window[current];
 
   @override
@@ -23,18 +39,29 @@ class FakeAudioEngine implements AudioEngine {
 
   @override
   Future<void> setWindow(List<(RecitedItem, File)> items, {int currentIndex = 0}) async {
+    _change();
     window
       ..clear()
       ..addAll([for (final (i, _) in items) i]);
     current = currentIndex;
     _events.add(ItemStarted(window[current]));
+    if (loadTime == Duration.zero) return;
+    _loading = true;
+    _aborted = false;
+    await Future<void>.delayed(loadTime);
+    _loading = false;
+    if (_aborted) throw StateError('Loading interrupted');
   }
 
   @override
-  Future<void> append(RecitedItem item, File file) async => window.add(item);
+  Future<void> append(RecitedItem item, File file) async {
+    _change();
+    window.add(item);
+  }
 
   @override
   Future<void> removeFirst() async {
+    _change();
     if (window.isEmpty) return;
     window.removeAt(0);
     current = current > 0 ? current - 1 : 0;

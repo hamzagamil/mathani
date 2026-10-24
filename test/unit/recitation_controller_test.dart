@@ -187,6 +187,28 @@ void main() {
   });
 
   group('controls', () {
+    recitationTest('next plays the next ayah on the first press, even with the ayat ahead cached',
+        (tester) async {
+      engine.loadTime = const Duration(milliseconds: 120); // a real file takes time to prepare
+      c.playFrom(const AyahRef(67, 10));
+      await tester.pump(const Duration(milliseconds: 200));
+      await settle(tester);
+      expect(session().status, RecitationStatus.playing);
+      for (final target in [11, 12]) {
+        c.next(); // one press
+        await tester.pump(skipMergeWindow + const Duration(milliseconds: 10));
+        await tester.pump(const Duration(milliseconds: 200));
+        await settle(tester);
+        expect(session().item, ayah(67, target));
+        expect(session().status, RecitationStatus.playing, reason: 'press for 67:$target');
+        expect(engine.playing, isTrue);
+        expect(engine.currentItem, ayah(67, target));
+        expect(engine.interrupted, isFalse, reason: 'no playlist change during a load');
+      }
+      // The lookahead is filled again after the load.
+      expect(engine.window.length, greaterThan(1));
+    });
+
     recitationTest('next ×3 within 300 ms loads only the last', (tester) async {
       c.playFrom(const AyahRef(67, 10));
       await settle(tester);

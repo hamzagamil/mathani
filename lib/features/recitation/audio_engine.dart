@@ -79,6 +79,15 @@ class JustAudioEngine implements AudioEngine {
   bool _sessionConfigured = false;
   bool _wantPlaying = false;
 
+  /// Playlist changes run one at a time: just_audio aborts a load when the playlist changes under it.
+  Future<void> _tail = Future<void>.value();
+
+  Future<void> _serial(Future<void> Function() op) {
+    final result = _tail.then((_) => op());
+    _tail = result.catchError((Object _) {});
+    return result;
+  }
+
   @override
   Stream<EngineEvent> get events => _events.stream;
 
@@ -96,29 +105,30 @@ class JustAudioEngine implements AudioEngine {
   }
 
   @override
-  Future<void> setWindow(List<(RecitedItem, File)> items, {int currentIndex = 0}) async {
-    _items
-      ..clear()
-      ..addAll([for (final (item, _) in items) item]);
-    await _player.setAudioSources(
-      [for (final (item, file) in items) AudioSource.file(file.path, tag: item)],
-      initialIndex: currentIndex,
-      preload: true,
-    );
-  }
+  Future<void> setWindow(List<(RecitedItem, File)> items, {int currentIndex = 0}) =>
+      _serial(() async {
+        _items
+          ..clear()
+          ..addAll([for (final (item, _) in items) item]);
+        await _player.setAudioSources(
+          [for (final (item, file) in items) AudioSource.file(file.path, tag: item)],
+          initialIndex: currentIndex,
+          preload: true,
+        );
+      });
 
   @override
-  Future<void> append(RecitedItem item, File file) async {
-    _items.add(item);
-    await _player.addAudioSource(AudioSource.file(file.path, tag: item));
-  }
+  Future<void> append(RecitedItem item, File file) => _serial(() async {
+        _items.add(item);
+        await _player.addAudioSource(AudioSource.file(file.path, tag: item));
+      });
 
   @override
-  Future<void> removeFirst() async {
-    if (_items.isEmpty) return;
-    _items.removeAt(0);
-    await _player.removeAudioSourceAt(0);
-  }
+  Future<void> removeFirst() => _serial(() async {
+        if (_items.isEmpty) return;
+        _items.removeAt(0);
+        await _player.removeAudioSourceAt(0);
+      });
 
   @override
   Future<void> play() async {

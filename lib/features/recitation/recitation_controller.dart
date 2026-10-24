@@ -69,7 +69,14 @@ class RecitationController extends ChangeNotifier with WidgetsBindingObserver {
 
   /// Items in the engine's window, in order, mirroring it.
   final _window = <RecitedItem>[];
-  bool _filling = false;
+  /// The window generation whose lookahead is being filled (-1: none). A fill for an older window
+  /// never blocks the current one.
+  int _fillingGeneration = -1;
+
+  /// The generation whose window has finished loading in the player. The lookahead is appended only
+  /// then: changing the playlist while it loads aborts the load (just_audio), which left the
+  /// session stuck in loading until a second press.
+  int _readyGeneration = -1;
   bool _windowEnded = false;
 
   int _followSerial = -1;
@@ -175,13 +182,25 @@ class RecitationController extends ChangeNotifier with WidgetsBindingObserver {
     }
     if (generation != _generation) return;
     _window.add(item);
-    await _player.setWindow([(item, file)]);
-    if (generation != _generation) return;
-    if (play) {
-      s.status = RecitationStatus.playing;
-      await _player.play();
-    } else {
-      s.status = RecitationStatus.paused;
+    try {
+      await _player.setWindow([(item, file)]);
+      if (generation != _generation) return;
+      _readyGeneration = generation;
+      if (play) {
+        s.status = RecitationStatus.playing;
+        await _player.play();
+      } else {
+        s.status = RecitationStatus.paused;
+      }
+    } on Object {
+      // The player could not load or start the file. Never stay in loading: show the error, with
+      // Retry on the same ayah (FR-020).
+      if (generation != _generation) return;
+      s
+        ..status = RecitationStatus.error
+        ..error = FetchError.fetchFailed;
+      notifyListeners();
+      return;
     }
     s.error = null;
     notifyListeners();
@@ -190,8 +209,8 @@ class RecitationController extends ChangeNotifier with WidgetsBindingObserver {
 
   /// Appends up to [prefetchAhead] resolved items after the current one.
   Future<void> _fillAhead(int generation) async {
-    if (_filling) return;
-    _filling = true;
+    if (generation != _readyGeneration || _fillingGeneration == generation) return;
+    _fillingGeneration = generation;
     try {
       while (generation == _generation) {
         final s = _session;
@@ -224,7 +243,7 @@ class RecitationController extends ChangeNotifier with WidgetsBindingObserver {
         }
       }
     } finally {
-      _filling = false;
+      if (_fillingGeneration == generation) _fillingGeneration = -1;
     }
   }
 
@@ -300,7 +319,7 @@ class RecitationController extends ChangeNotifier with WidgetsBindingObserver {
         _windowEnded = true;
         notifyListeners();
         unawaited(_followJump(next));
-        if (!_filling) unawaited(_load(next, play: true));
+        if (_fillingGeneration != _generation) unawaited(_load(next, play: true));
       case EngineFailed():
         s
           ..status = RecitationStatus.error
