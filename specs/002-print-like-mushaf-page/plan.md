@@ -166,4 +166,4 @@ only in the gated phase.
 
 | Principle | Violation | Why | Status |
 | --- | --- | --- | --- |
-| IV. Lean by Default: "Initial store download size MUST stay ≤ 30 MB per platform" | The bundled page fonts add **128.4 MB** (604 gzip-compressed TTF files) | Owner decision to bundle the exact printed lettering rather than download it. The Flutter engine cannot load WOFF2 (the 93 MB form), so TTF is required | **Needs a constitution amendment** (`/speckit-constitution`) before release; CI's size check fails until then |
+| IV. Lean by Default: "Initial store download size MUST stay ≤ 30 MB per platform" (removed by constitution v2.0.0, 2026-10-24; no longer a violation) | The bundled page fonts add **128.4 MB** (604 gzip-compressed TTF files) | Owner decision to bundle the exact printed lettering rather than download it. The Flutter engine cannot load WOFF2 (the 93 MB form), so TTF is required | **Needs a constitution amendment** (`/speckit-constitution`) before release; CI's size check fails until then |

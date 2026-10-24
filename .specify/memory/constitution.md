@@ -1,23 +1,20 @@
 <!--
 Sync Impact Report
-- Version change: (unversioned template) → 1.0.0
-- Modified principles (template placeholder → new title):
-  - [PRINCIPLE_1_NAME] → I. Cross-Platform Parity (iOS & Android)
-  - [PRINCIPLE_2_NAME] → II. Mobile-First Design
-  - [PRINCIPLE_3_NAME] → III. Performance Is a Feature (NON-NEGOTIABLE)
-  - [PRINCIPLE_4_NAME] → IV. Lean by Default
-  - [PRINCIPLE_5_NAME] → V. Simplicity
-- Added sections:
-  - Platform & Store Requirements (was [SECTION_2_NAME])
-  - Development Workflow & Quality Gates (was [SECTION_3_NAME])
-  - Governance (filled)
+- Version change: 1.0.0 → 2.0.0 (MAJOR: a MUST rule is removed from Principle IV)
+- Modified principles:
+  - IV. Lean by Default: removed "Initial store download size MUST stay ≤ 30 MB per
+    platform". Kept, reworded: growth over 1 MB in one change MUST be called out in review,
+    with what it adds and why.
+- Added sections: none
 - Removed sections: none
 - Templates reviewed (read at runtime, not modified by this command):
-  - .specify/templates/plan-template.md (Constitution Check gate reads this file) ✅ no edit needed
+  - .specify/templates/plan-template.md ✅ no edit needed (Constitution Check reads this file)
   - .specify/templates/spec-template.md ✅ no edit needed
   - .specify/templates/tasks-template.md ✅ no edit needed
-- Deferred TODOs: none. Numeric performance/size budgets in Principles III–IV are initial
-  defaults chosen at ratification and may be tuned by PATCH/MINOR amendment.
+- Follow-up outside this file (done 2026-10-24): tool/size_check.dart no longer has a 30 MB
+  budget and only fails growth over 1 MB without the size-approved label; docs/size_baseline.json
+  reset to the 1.3.0 sizes; docs/release.md, specs/001 SC-008, the specs/002 plan and the
+  specs/004 plan and tasks note the change.
 -->
 
 # Mathani Constitution
@@ -84,8 +81,8 @@ The app MUST stay small and carry only what it needs.
   focused libraries over large frameworks.
 - Unused code, assets, dependencies, and feature flags MUST be removed, not left dormant.
 - Release builds MUST enable code shrinking/minification and asset optimisation.
-- Initial store download size MUST stay ≤ 30 MB per platform; any increase over 1 MB in a
-  single change MUST be called out in review.
+- Any change that grows the store download by more than 1 MB MUST be called out in review,
+  with what it adds and why.
 - Assets MUST use efficient formats (vector where possible; compressed, appropriately
   sized raster images otherwise). Large or rarely used content SHOULD be loaded on demand.
 - Background work, battery use, and data usage MUST be minimised; nothing runs in the
@@ -142,4 +139,4 @@ Principles III and IV.
 - Compliance is reviewed at every plan (Constitution Check) and every code review.
   Unjustified complexity, size growth, or performance regressions block merge.
 
-**Version**: 1.0.0 | **Ratified**: 2026-10-10 | **Last Amended**: 2026-10-10
+**Version**: 2.0.0 | **Ratified**: 2026-10-10 | **Last Amended**: 2026-10-23

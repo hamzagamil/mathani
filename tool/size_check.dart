@@ -1,5 +1,6 @@
-// Fails when a platform's download size exceeds the 30 MB budget, or grows by more than 1 MB
-// over docs/size_baseline.json without approval (constitution IV).
+// Fails when a platform's download size grows by more than 1 MB over docs/size_baseline.json
+// without approval (constitution IV, v2.0.0: growth over 1 MB in one change must be called out in
+// review, with what it adds and why). There is no absolute size budget since v2.0.0.
 //
 // Usage: dart run tool/size_check.dart <platform> <analyze-size.json> [--approved] [--update]
 //   platform: android | ios
@@ -10,7 +11,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-const _budgetBytes = 30 * 1024 * 1024;
 const _maxGrowthBytes = 1024 * 1024;
 const _baselinePath = 'docs/size_baseline.json';
 
@@ -32,14 +32,10 @@ void main(List<String> args) {
   final previous = (baseline[platform] as num?)?.toInt();
 
   String mb(int bytes) => '${(bytes / (1024 * 1024)).toStringAsFixed(2)} MB';
-  stdout.writeln('$platform download size: ${mb(size)} (budget ${mb(_budgetBytes)}'
-      '${previous == null ? '' : ', baseline ${mb(previous)}'})');
+  stdout.writeln('$platform download size: ${mb(size)}'
+      '${previous == null ? ' (no baseline yet)' : ' (baseline ${mb(previous)})'}');
 
   var failed = false;
-  if (size > _budgetBytes) {
-    stderr.writeln('FAIL: over the 30 MB budget.');
-    failed = true;
-  }
   if (previous != null && size - previous > _maxGrowthBytes) {
     final message = 'grew by ${mb(size - previous)} (> 1 MB).';
     if (args.contains('--approved')) {

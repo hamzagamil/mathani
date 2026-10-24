@@ -334,7 +334,9 @@ expected ayat, then open one in the Mushaf.
   the system force-quits the app.
 - **SC-006**: Search results for any query appear within 1 second on the reference phone.
 - **SC-007**: With network disabled from first launch, 100% of features in this release work.
-- **SC-008**: The store download is 30 MB or less on each platform.
+- **SC-008**: The store download is 30 MB or less on each platform. *(Superseded 2026-10-24 by
+  constitution v2.0.0, which removed the 30 MB budget: growth over 1 MB in one change is called
+  out in review instead.)*
 - **SC-009**: In a test with at least 10 readers, at least 9 can find a named ayah and bookmark it
   on their first try, with no help.
 - **SC-010**: Switching between the Mushaf and flowing layouts, or between Arabic and English,

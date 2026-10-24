@@ -89,8 +89,8 @@ for audio).
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-Constitution v2.0.0. The working tree has the uncommitted amendment that removes the 30 MB
-budget; `tool/size_check.dart` still enforces 30 MB, which is a follow-up noted in that amendment.
+Constitution v2.0.0, which removed the 30 MB budget; `tool/size_check.dart` checks only growth
+over 1 MB against `docs/size_baseline.json` (updated 2026-10-24).
 
 | Principle | Gate | Pre-research | Post-design |
 | --- | --- | --- | --- |

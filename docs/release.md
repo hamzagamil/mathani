@@ -76,7 +76,9 @@ cannot be combined with `--split-debug-info`: measure size with a separate build
 
 - [ ] `dart run tool/verify_quran.dart` prints PASS; record the `quran.db` SHA-256 below.
 - [ ] D1 (KFGQPC font) and D2 (QUL data) resolved in `docs/licences.md`.
-- [ ] Download size ≤ 30 MB on each platform (`tool/size_check.dart`).
+- [ ] Download size grows by no more than 1 MB over `docs/size_baseline.json` on each platform, or
+      the growth is explained and approved (`size-approved` label); then update the baseline with
+      `tool/size_check.dart --update` (constitution IV, v2.0.0: no absolute budget).
 - [ ] Every quickstart scenario passes on both reference devices; numbers recorded below.
 - [ ] About screen shows Tanzil (with link), QUL and KFGQPC attributions.
 - [ ] Store privacy answers match `docs/store/privacy.md`.
