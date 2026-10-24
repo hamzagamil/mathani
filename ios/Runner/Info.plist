@@ -61,6 +61,9 @@
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
 	<!-- Recitations keep playing with the screen locked or the app in the background (specs/004). -->
+	<!-- Memorization (specs/006 research R16); localised in InfoPlist.strings. -->
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Mathani uses the microphone only during a memorization session, to follow your recitation on your device. Your voice is not recorded and never leaves the device.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>audio</string>

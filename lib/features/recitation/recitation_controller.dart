@@ -60,7 +60,11 @@ class RecitationController extends ChangeNotifier with WidgetsBindingObserver {
     required this.fetcher,
     AudioEngine Function()? engine,
   }) : _engineFactory = engine ?? JustAudioEngine.new {
-    _order = RecitedOrder(ayahCount: (s) => quran.surahList[s - 1].ayahCount);
+    _order = RecitedOrder(
+      ayahCount: (s) => quran.surahList[s - 1].ayahCount,
+      // Reciters recorded one surah per file recite the basmala inside ayah 1 (specs/006 R18).
+      basmalaItems: () => !((_session?.reciter ?? _preferredReciter)?.basmalaInAyah1 ?? false),
+    );
     _lastSeenSerial = reader.jumpSerial;
     _lastLayout = reader.layout;
     reader.addListener(_onReaderChanged);
@@ -545,7 +549,9 @@ class RecitationController extends ChangeNotifier with WidgetsBindingObserver {
     final s = _session;
     if (s == null || s.reciter == next) return;
     final previousReciter = s.reciter;
-    final item = s.item;
+    // A basmala item becomes ayah 1 for a reciter whose basmala is part of it (specs/006 R18).
+    final item = s.item.isBasmala && next.basmalaInAyah1 ? RecitedItem.ayah(s.item.surah, 1) : s.item;
+    if (item != s.item) s.item = item;
     final wasPlaying = s.status == RecitationStatus.playing || s.status == RecitationStatus.loading;
     s
       ..reciter = next

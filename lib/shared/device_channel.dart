@@ -5,8 +5,10 @@ import 'package:flutter/services.dart';
 enum NetworkState { none, unmetered, metered }
 
 /// Network type, free storage and backup exclusion, from a small platform channel implemented
-/// in MainActivity.kt and AppDelegate.swift (research R8). Where the channel is missing (tests,
-/// the browser preview) it reports an unmetered connection and ample storage.
+/// in MainActivity.kt and AppDelegate.swift (research R8), plus what memorization needs (specs/006
+/// contracts/memorization-engine.md › Device channel additions). Where the channel is missing
+/// (tests, the browser preview) it reports an unmetered connection, ample storage and a supported
+/// device, and the actions do nothing.
 class DeviceChannel {
   const DeviceChannel();
 
@@ -44,6 +46,34 @@ class DeviceChannel {
       // Not available: nothing to exclude from.
     } on PlatformException {
       // Best effort: the files stay in the backup.
+    }
+  }
+
+  /// Whether the processor is 64-bit (always on iOS 15) and the device's total memory.
+  Future<({bool arm64, int ramBytes})> deviceSupport() async {
+    try {
+      final r = await _channel.invokeMapMethod<String, Object?>('deviceSupport');
+      return (arm64: r?['arm64'] as bool? ?? true, ramBytes: r?['ramBytes'] as int? ?? 1 << 40);
+    } on MissingPluginException {
+      return (arm64: true, ramBytes: 1 << 40);
+    } on PlatformException {
+      return (arm64: true, ramBytes: 1 << 40);
+    }
+  }
+
+  /// Opens the app's page in the system Settings, where the microphone can be allowed.
+  Future<void> openAppSettings() => _invoke('openAppSettings');
+
+  /// A short tone that the silent switch or ringer mode mutes (research R12).
+  Future<void> playMistakeTone() => _invoke('playMistakeTone');
+
+  Future<void> _invoke(String method) async {
+    try {
+      await _channel.invokeMethod<void>(method);
+    } on MissingPluginException {
+      // Not available: nothing to do.
+    } on PlatformException {
+      // Best effort.
     }
   }
 }

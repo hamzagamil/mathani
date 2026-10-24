@@ -1,7 +1,7 @@
 name: mathani
 description: "Mathani (مثاني): read the Quran in Uthmani script."
 publish_to: 'none'
-version: 1.4.0+6
+version: 1.4.0+7
 
 environment:
   sdk: ^3.13.5
@@ -11,6 +11,7 @@ environment:
 dependencies:
   audio_service: ^0.18.19
   audio_session: ^0.2.4
+  crypto: ^3.0.7
   flutter:
     sdk: flutter
   flutter_localizations:
@@ -18,7 +19,10 @@ dependencies:
   intl: ^0.20.3
   just_audio: ^0.10.6
   path_provider: ^2.1.6
+  # On-device recognition for memorization (specs/006 research R6, R7, R10): exact versions.
+  record: 7.1.2
   share_plus: ^13.3.1
+  sherpa_onnx: 1.13.8
   sqflite: ^2.4.4+1
   url_launcher: ^6.3.3
   wakelock_plus: ^1.8.1
@@ -29,7 +33,6 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   sqlite3: ^3.7.0
   xml: ^7.1.0
-  crypto: ^3.0.7
   sqflite_common_ffi: ^2.4.3
   integration_test:
     sdk: flutter
@@ -48,6 +51,9 @@ flutter:
     - assets/fonts/OFL-IBMPlexSansArabic.txt
     - assets/fonts/OFL-AmiriQuran.txt
     - assets/fonts/LICENSE-Lucide.txt
+    # Memorization (specs/006): onnxruntime inside sherpa-onnx, and the downloaded model and VAD.
+    # sherpa_onnx and record ship their own LICENSE files, which Flutter collects itself.
+    - assets/licences/
 
   fonts:
     - family: PlexArabic

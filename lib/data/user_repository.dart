@@ -139,6 +139,7 @@ class UserRepository extends ChangeNotifier {
       // Missing for readers updating from 1.3.0 or earlier: they see the onboarding once
       // (specs/005 research R2). A stale `controls_hint_shown` row from 1.3.0 is ignored.
       onboardingDone: switch (p['onboarding_done']) { 'true' => true, _ => d.onboardingDone },
+      mistakeSignal: pick(MistakeSignal.values, p['mistake_signal'], d.mistakeSignal),
     );
   }
 
@@ -164,6 +165,7 @@ class UserRepository extends ChangeNotifier {
       'lettering': p.lettering.name,
       'reciter': p.reciter,
       'onboarding_done': '${p.onboardingDone}',
+      'mistake_signal': p.mistakeSignal.name,
     }.entries) {
       batch.insert('preferences', {'key': entry.key, 'value': entry.value},
           conflictAlgorithm: ConflictAlgorithm.replace);

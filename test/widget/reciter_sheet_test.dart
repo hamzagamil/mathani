@@ -59,18 +59,28 @@ void main() {
     await settle(tester, 3);
   }
 
-  testWidgets('Arabic: both reciters in order, Murattal, a check on the current one; picking '
-      'one saves it', (tester) async {
+  Future<void> search(WidgetTester tester, String query) async {
+    await tester.enterText(find.byType(TextField), query);
+    await tester.pump();
+  }
+
+  testWidgets('Arabic: sorted by name, the current one checked and in view; picking one saves '
+      'it (specs/006: every reciter, searchable)', (tester) async {
     await pumpApp(tester, LanguagePref.ar);
     await openSheet(tester);
-    final tiles = tester.widgetList<ListTile>(find.byType(ListTile)).toList();
-    expect([for (final t in tiles) (t.title! as Text).data],
-        ['محمود خليل الحصري', 'محمد صديق المنشاوي']);
-    expect(find.text('مرتّل'), findsNWidgets(2));
-    expect(find.byIcon(MathaniIcons.check), findsOneWidget);
-    expect(tiles.first.selected, isTrue);
+    final titles = [
+      for (final t in tester.widgetList<ListTile>(find.byType(ListTile))) (t.title! as Text).data!,
+    ];
+    final sorted = [for (final r in sortedReciters(reader.quran.reciters, arabic: true)) r.nameAr];
+    final at = sorted.indexOf(titles.first);
+    expect(titles, sorted.sublist(at, at + titles.length), reason: 'rows in name order');
+    final current = tester.widget<ListTile>(
+        find.ancestor(of: find.byIcon(MathaniIcons.check), matching: find.byType(ListTile)));
+    expect(current.selected, isTrue);
+    expect((current.title! as Text).data, 'محمود خليل الحصري');
 
-    await tester.tap(find.text('محمد صديق المنشاوي'));
+    await search(tester, 'المنشاوي');
+    await tester.tap(find.ancestor(of: find.text('مرتّل'), matching: find.byType(ListTile)));
     await settle(tester);
     expect(find.byType(ListTile), findsNothing, reason: 'the sheet closes');
     expect(reader.preferences.reciter, 'minshawy');
@@ -80,15 +90,17 @@ void main() {
   testWidgets('English: English names, with the Arabic name always shown', (tester) async {
     await pumpApp(tester, LanguagePref.en);
     await openSheet(tester);
-    expect(find.text('Mahmoud Khalil Al-Husary'), findsOneWidget);
+    expect(find.text('Mahmoud Khalil Al-Husary'), findsWidgets);
     expect(find.text('محمود خليل الحصري · Murattal'), findsOneWidget);
-    expect(find.text('Mohamed Siddiq El-Minshawi'), findsOneWidget);
+    await search(tester, 'minshawi');
+    expect(find.text('Mohamed Siddiq El-Minshawi'), findsWidgets);
     await finish(tester);
   });
 
   testWidgets('a reciter whose current surah is downloaded is marked', (tester) async {
     await pumpApp(tester, LanguagePref.ar);
     await openSheet(tester, downloaded: (r, s) => r == 'minshawy');
+    await search(tester, 'المنشاوي');
     expect(find.byIcon(MathaniIcons.downloaded), findsOneWidget);
     await finish(tester);
   });

@@ -820,7 +820,7 @@ abstract class AppLocalizations {
   /// No description provided for @recitationAttribution.
   ///
   /// In en, this message translates to:
-  /// **'Recitations: Sheikh Mahmoud Khalil Al-Husary and Sheikh Mohamed Siddiq El-Minshawi (Murattal), via EveryAyah.com'**
+  /// **'Recitations: the reciters in the reciter list, via EveryAyah.com and quranicaudio.com'**
   String get recitationAttribution;
 
   /// Onboarding: greeting on the language step, shown in both languages.
@@ -1044,6 +1044,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'How to turn pages and use the ayah actions, index, search and player.'**
   String get tourAgainHint;
+
+  /// No description provided for @mujawwad.
+  ///
+  /// In en, this message translates to:
+  /// **'Mujawwad'**
+  String get mujawwad;
+
+  /// Recording style: each ayah recited with repetitions for learners (specs/006 research R3).
+  ///
+  /// In en, this message translates to:
+  /// **'Teaching'**
+  String get muallim;
+
+  /// No description provided for @searchReciters.
+  ///
+  /// In en, this message translates to:
+  /// **'Search reciters'**
+  String get searchReciters;
+
+  /// No description provided for @noReciterFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No reciter with this name'**
+  String get noReciterFound;
+
+  /// No description provided for @qulRecitationsCredit.
+  ///
+  /// In en, this message translates to:
+  /// **'Ayah timings and some recitations: Quranic Universal Library (QUL)'**
+  String get qulRecitationsCredit;
 }
 
 class _AppLocalizationsDelegate

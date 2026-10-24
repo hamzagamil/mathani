@@ -19,6 +19,10 @@ import '../recitation/recitation_controller.dart';
 import '../recitation/reciter_sheet.dart';
 import 'tour_illustration.dart';
 
+/// Height of the reciter list in the reciter step: about four cards, with room for the search
+/// field (specs/006 T022).
+const _reciterListHeight = 380.0;
+
 /// A large choice, read by screen readers as one of a group of radio buttons.
 class _ChoiceCard extends StatelessWidget {
   const _ChoiceCard({
@@ -364,15 +368,24 @@ class _ReciterStepState extends State<ReciterStep> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        for (final r in reader.quran.reciters)
-          _ChoiceCard(
-            title: r.name(arabic: arabic),
-            // The Arabic name is always shown, as in the reciter sheet.
-            subtitle: arabic ? l10n.murattal : '${r.nameAr} · ${l10n.murattal}',
-            selected: r.id == selected,
-            trailing: sampleButton(r),
-            onTap: () => chooseReciter(reader, recitation, r),
+        // Every reciter, searchable (specs/006 T022); a bounded box keeps the list lazy.
+        SizedBox(
+          height: _reciterListHeight,
+          child: ReciterList(
+            reciters: reader.quran.reciters,
+            selectedId: selected,
+            rowBuilder: (context, r, isSelected) => _ChoiceCard(
+              title: r.name(arabic: arabic),
+              // The Arabic name is always shown, as in the reciter sheet.
+              subtitle: arabic
+                  ? styleLabel(l10n, r.style)
+                  : '${r.nameAr} · ${styleLabel(l10n, r.style)}',
+              selected: isSelected,
+              trailing: sampleButton(r),
+              onTap: () => chooseReciter(reader, recitation, r),
+            ),
           ),
+        ),
         const SizedBox(height: Space.s2),
         Text(l10n.onboardingReciterHint, style: TypeScale.caption.copyWith(color: colors.inkMuted)),
         if (unavailable) ...[

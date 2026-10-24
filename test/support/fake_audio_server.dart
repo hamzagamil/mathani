@@ -50,12 +50,42 @@ class FakeAudioServer {
         nameEn: 'Reciter',
         shortAr: 'قارئ',
         shortEn: 'Reciter',
-        style: 'murattal',
+        style: RecitationStyle.murattal,
         baseUrl: 'http://127.0.0.1:$port/primary',
         mirrorUrl: 'http://127.0.0.1:$port/mirror',
         bitrateKbps: 64,
         sort: 1,
       );
+
+  /// A reciter recorded one surah per file (specs/006 research R18), served at `/surah/<SSS>.mp3`.
+  Reciter surahReciter({String id = 'surahs'}) => Reciter(
+        id: id,
+        nameAr: 'قارئ',
+        nameEn: 'Reciter',
+        shortAr: 'قارئ',
+        shortEn: 'Reciter',
+        style: RecitationStyle.murattal,
+        baseUrl: 'http://127.0.0.1:$port/surah',
+        mirrorUrl: null,
+        bitrateKbps: 128,
+        sort: 2,
+        source: RecitationSource.qulSurah,
+        filePattern: '{sss}.mp3',
+        basmalaInAyah1: true,
+      );
+
+  /// Length of each surah file at `/surah/<SSS>.mp3`. Its byte at offset i is `i % 251`, so a
+  /// test can tell which part of the file a clip came from.
+  int Function(int surah) surahFileBytes = (s) => 20000 + s * 11;
+
+  /// Surah files ignore `Range` and answer 200 with the whole file.
+  bool ignoreRange = false;
+
+  /// Surah files answer the requested range shifted by this many bytes.
+  int shiftRange = 0;
+
+  /// Surah files report this total length in `Content-Range` instead of the real one.
+  int? wrongTotal;
 
   /// Requests being answered now, and the most at once.
   int inFlight = 0;
@@ -77,6 +107,11 @@ class FakeAudioServer {
   Future<void> _answer(HttpRequest request, String path) async {
     await hold?.future;
     await Future<void>.delayed(delay);
+    final surah = RegExp(r'/surah/(\d{3})\.mp3$').firstMatch(path);
+    if (surah != null && !failAll && !failPaths.contains(path)) {
+      await _answerSurah(request, int.parse(surah.group(1)!));
+      return;
+    }
     final match = RegExp(r'/(primary|mirror)/(\d{3})(\d{3})\.mp3$').firstMatch(path);
     if (failAll || match == null || failPaths.contains(path)) {
       request.response.statusCode = HttpStatus.notFound;
@@ -91,6 +126,30 @@ class FakeAudioServer {
       ..contentLength = size
       ..add(Uint8List(size));
     await request.response.close();
+  }
+
+  Future<void> _answerSurah(HttpRequest request, int surah) async {
+    final total = surahFileBytes(surah);
+    Uint8List bytesOf(int start, int end) =>
+        Uint8List.fromList([for (var i = start; i < end; i++) i % 251]);
+    final range = RegExp(r'^bytes=(\d+)-(\d+)$')
+        .firstMatch(request.headers.value(HttpHeaders.rangeHeader) ?? '');
+    final response = request.response..headers.contentType = ContentType('audio', 'mpeg');
+    if (range == null || ignoreRange) {
+      response
+        ..statusCode = HttpStatus.ok
+        ..contentLength = total
+        ..add(bytesOf(0, total));
+    } else {
+      final start = int.parse(range.group(1)!) + shiftRange;
+      final end = int.parse(range.group(2)!) + 1 + shiftRange;
+      response
+        ..statusCode = HttpStatus.partialContent
+        ..headers.set(HttpHeaders.contentRangeHeader, 'bytes $start-${end - 1}/${wrongTotal ?? total}')
+        ..contentLength = end - start
+        ..add(bytesOf(start, end));
+    }
+    await response.close();
   }
 
   Future<void> close() => _server.close(force: true);

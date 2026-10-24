@@ -9,6 +9,9 @@
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
+    <!-- Memorization (specs/006): the microphone, asked at runtime after the explanation sheet,
+         used only while a session listens. The audio stays on the device. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
     <application
         android:label="@string/app_name"
         android:name="${applicationName}"

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart' show rootBundle;
@@ -55,6 +56,7 @@ class QuranRepository {
   List<Division>? _divisions;
   List<Reciter> _reciters = const [];
   final Map<(String, int), List<int>> _recordingBytes = {};
+  final Map<(String, int), int?> _rangeStarts = {};
   final Map<bool, List<int>> _basmalaPages = {};
 
   /// Copies the bundled database on first launch (or when the bundled build changed), then
@@ -252,6 +254,47 @@ class QuranRepository {
     return _words(a.firstWordId, a.lastWordId);
   }
 
+  /// The reference words of ayat [from]..[to] of [surah] for memorization (specs/006 research
+  /// R11): per ayah, each Uthmani word (ayah-end markers excluded) with its position and its
+  /// normalised imla'i form from `ayahs.search_text`, cut at the next word's offset. One Uthmani
+  /// word can be two imla'i words (يَٰٓأَيُّهَا: «يا ايها»).
+  Future<List<List<({int wordId, int position, String form})>>> memorizationWords(
+      int surah, int from, int to) async {
+    final ayahs = await _db.rawQuery(
+        'SELECT ayah, first_word_id, last_word_id, search_text FROM ayahs '
+        'WHERE surah = ? AND ayah BETWEEN ? AND ? ORDER BY ayah',
+        [surah, from, to]);
+    if (ayahs.isEmpty) return const [];
+    final words = await _db.rawQuery(
+        'SELECT id, position, is_ayah_end, search_offset FROM words WHERE id BETWEEN ? AND ? '
+        'ORDER BY id',
+        [ayahs.first['first_word_id'], ayahs.last['last_word_id']]);
+    final byId = {for (final w in words) w['id'] as int: w};
+    return [
+      for (final a in ayahs)
+        () {
+          final text = a['search_text'] as String;
+          final ids = [
+            for (var id = a['first_word_id'] as int; id <= (a['last_word_id'] as int); id++)
+              if (byId[id]!['is_ayah_end'] != 1) id,
+          ];
+          return [
+            for (var k = 0; k < ids.length; k++)
+              (
+                wordId: ids[k],
+                position: byId[ids[k]]!['position'] as int,
+                form: text
+                    .substring(
+                      byId[ids[k]]!['search_offset'] as int,
+                      k + 1 < ids.length ? byId[ids[k + 1]]!['search_offset'] as int : text.length,
+                    )
+                    .trim(),
+              ),
+          ];
+        }(),
+    ];
+  }
+
   /// All surahs, after [open] (preloaded).
   List<Surah> get surahList => _surahs!;
 
@@ -310,11 +353,14 @@ class QuranRepository {
           nameEn: r['name_en'] as String,
           shortAr: r['short_ar'] as String,
           shortEn: r['short_en'] as String,
-          style: r['style'] as String,
+          style: RecitationStyle.parse(r['style'] as String),
           baseUrl: r['base_url'] as String,
-          mirrorUrl: r['mirror_url'] as String,
+          mirrorUrl: r['mirror_url'] as String?,
           bitrateKbps: r['bitrate_kbps'] as int,
           sort: r['sort'] as int,
+          source: RecitationSource.parse(r['source'] as String),
+          filePattern: r['file_pattern'] as String,
+          basmalaInAyah1: r['basmala_in_ayah1'] == 1,
         ),
     ];
   }
@@ -323,25 +369,50 @@ class QuranRepository {
   /// basmala) and not in At-Tawbah.
   static bool hasBasmalaItem(int surah) => surah != 1 && surah != 9;
 
-  /// File sizes of [reciter]'s recordings of ayat 1..n of [surah]. Loaded on first use per
-  /// surah, never on the startup path.
+  /// Sizes of [reciter]'s recordings of ayat 1..n of [surah]: file sizes, or for surah files the
+  /// exact length of each ayah's clip. Loaded on first use per surah, never on the startup path.
   Future<List<int>> recordingBytes(String reciter, int surah) async {
     final key = (reciter, surah);
     final cached = _recordingBytes[key];
     if (cached != null) return cached;
-    final rows = await _db.query('recitation_files',
-        columns: ['bytes'],
+    final rows = await _db.query('recitation_sizes',
+        columns: ['sizes', 'range_start'],
         where: 'reciter = ? AND surah = ?',
-        whereArgs: [reciter, surah],
-        orderBy: 'ayah');
-    return _recordingBytes[key] = [for (final r in rows) r['bytes'] as int];
+        whereArgs: [reciter, surah]);
+    if (rows.isEmpty) return _recordingBytes[key] = const [];
+    _rangeStarts[key] = rows.first['range_start'] as int?;
+    return _recordingBytes[key] = unpackSizes(rows.first['sizes'] as Uint8List);
+  }
+
+  /// The byte range `[start, end)` of [ayah]'s clip in [surah]'s file, for a reciter recorded one
+  /// surah per file (specs/006 research R18); null for one file per ayah.
+  Future<(int, int)?> clipRange(String reciter, int surah, int ayah) async {
+    final sizes = await recordingBytes(reciter, surah);
+    final start = _rangeStarts[(reciter, surah)];
+    if (start == null || ayah < 1 || ayah > sizes.length) return null;
+    var offset = start;
+    for (var a = 1; a < ayah; a++) {
+      offset += sizes[a - 1];
+    }
+    return (offset, offset + sizes[ayah - 1]);
+  }
+
+  /// Length of [surah]'s file for a reciter recorded one surah per file (its first frame offset
+  /// plus every clip); null for one file per ayah.
+  Future<int?> surahFileBytes(String reciter, int surah) async {
+    final sizes = await recordingBytes(reciter, surah);
+    final start = _rangeStarts[(reciter, surah)];
+    return start == null ? null : start + sizes.fold<int>(0, (a, b) => a + b);
   }
 
   /// Bytes to download [surah] for [reciter]: every ayah, plus 1:1 as the basmala when the surah
-  /// has one (FR-028).
+  /// has one and the reciter's basmala is a separate recording (FR-028).
   Future<int> surahDownloadBytes(String reciter, int surah) async {
     var total = (await recordingBytes(reciter, surah)).fold(0, (a, b) => a + b);
-    if (hasBasmalaItem(surah)) total += (await recordingBytes(reciter, 1)).first;
+    final basmalaSeparate = !(this.reciter(reciter)?.basmalaInAyah1 ?? false);
+    if (hasBasmalaItem(surah) && basmalaSeparate) {
+      total += (await recordingBytes(reciter, 1)).first;
+    }
     return total;
   }
 
@@ -412,3 +483,9 @@ class SearchCorpus {
 
   int offsetOfWord(int wordId) => wordOffsets[wordId - firstWordId];
 }
+
+/// Reads sizes packed as 3-byte little-endian integers (specs/006 research R4).
+List<int> unpackSizes(Uint8List packed) => [
+      for (var i = 0; i + 2 < packed.length; i += 3)
+        packed[i] | (packed[i + 1] << 8) | (packed[i + 2] << 16),
+    ];

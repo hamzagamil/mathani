@@ -156,7 +156,7 @@ class DownloadQueue with WidgetsBindingObserver {
     }
     var basmalaOk = true;
     var basmalaBytes = 0;
-    if (QuranRepository.hasBasmalaItem(surah)) {
+    if (_separateBasmala(reciter, surah)) {
       final bytes = (await quran.recordingBytes(reciter, 1)).first;
       basmalaOk = await AyahFetcher.isValid(await fetcher.basmalaFile(reciter), bytes);
       if (basmalaOk && valid > 0) {
@@ -182,6 +182,11 @@ class DownloadQueue with WidgetsBindingObserver {
     _set(d.savedBytes == 0 && d.state == DownloadState.absent ? null : d, (reciter, surah));
   }
 
+  /// Whether [surah]'s download includes the reciter's separate basmala (1:1): not for surahs
+  /// without one, nor for reciters whose basmala is part of ayah 1 (specs/006 R18).
+  bool _separateBasmala(String reciter, int surah) =>
+      QuranRepository.hasBasmalaItem(surah) && !(quran.reciter(reciter)?.basmalaInAyah1 ?? false);
+
   // --- Sizes ---------------------------------------------------------------------------------
 
   /// Bytes still to download for [surah] (FR-028). No network.
@@ -190,7 +195,7 @@ class DownloadQueue with WidgetsBindingObserver {
     if (d.state == DownloadState.complete) return 0;
     var remaining = d.totalBytes - d.savedBytes;
     // A saved basmala counts only alongside saved ayat in _measure; subtract it here too.
-    if (d.savedBytes == 0 && QuranRepository.hasBasmalaItem(surah)) {
+    if (d.savedBytes == 0 && _separateBasmala(reciter, surah)) {
       final bytes = (await quran.recordingBytes(reciter, 1)).first;
       if (await AyahFetcher.isValid(await fetcher.basmalaFile(reciter), bytes)) remaining -= bytes;
     }
@@ -274,7 +279,7 @@ class DownloadQueue with WidgetsBindingObserver {
 
     // Basmala first, then the ayat in order (contract › Downloads › Order).
     final tasks = <(int, int, File, int)>[]; // (surah, ayah, target, bytes)
-    if (QuranRepository.hasBasmalaItem(surah)) {
+    if (_separateBasmala(reciterId, surah)) {
       final bytes = (await quran.recordingBytes(reciterId, 1)).first;
       final f = await fetcher.basmalaFile(reciterId);
       if (!await AyahFetcher.isValid(f, bytes)) tasks.add((1, 1, f, bytes));
@@ -399,10 +404,20 @@ String formatSize(AppLocalizations l10n, Locale locale, int bytes) {
   return bytes >= mb ? l10n.sizeMb(number(bytes / mb)) : l10n.sizeKb(number(bytes / 1024));
 }
 
-/// Starts downloading [surah] for [reciter] after the checks in contracts/audio-storage.md ›
-/// Preconditions: no connection, not enough storage, then confirmation on mobile data.
+/// Starts downloading [surah] for [reciter] after the checks of [confirmDownload].
 Future<void> startSurahDownload(
     BuildContext context, DownloadQueue queue, String reciter, int surah) async {
+  if (await confirmDownload(context, queue.device, () => queue.sizeOf(reciter, surah))) {
+    await queue.enqueue(reciter, surah); // when already complete, this just records it
+  }
+}
+
+/// The checks before a download, in contracts/audio-storage.md › Preconditions: no connection,
+/// not enough storage, then confirmation on mobile data. True when the download may start; a
+/// [size] of 0 (nothing left to fetch) needs only the connection. Shared by surah downloads and
+/// the memorization model (specs/006 T038).
+Future<bool> confirmDownload(
+    BuildContext context, DeviceChannel device, Future<int> Function() size) async {
   final l10n = AppLocalizations.of(context);
   final locale = Localizations.localeOf(context);
   final messenger = ScaffoldMessenger.of(context);
@@ -410,24 +425,21 @@ Future<void> startSurahDownload(
     ..hideCurrentSnackBar()
     ..showSnackBar(SnackBar(content: Text(text)));
 
-  final network = await queue.device.networkState();
+  final network = await device.networkState();
   if (network == NetworkState.none) {
     say(l10n.noInternet);
-    return;
+    return false;
   }
-  final size = await queue.sizeOf(reciter, surah);
-  if (size == 0) {
-    await queue.enqueue(reciter, surah); // already complete: just records it
-    return;
-  }
-  final free = await queue.device.freeBytes();
-  final sizeText = formatSize(l10n, locale, size);
-  if (free < size + storageHeadroomBytes) {
-    say(l10n.notEnoughStorage(formatSize(l10n, locale, size + storageHeadroomBytes)));
-    return;
+  final bytes = await size();
+  if (bytes == 0) return true;
+  final free = await device.freeBytes();
+  final sizeText = formatSize(l10n, locale, bytes);
+  if (free < bytes + storageHeadroomBytes) {
+    say(l10n.notEnoughStorage(formatSize(l10n, locale, bytes + storageHeadroomBytes)));
+    return false;
   }
   if (network == NetworkState.metered) {
-    if (!context.mounted) return;
+    if (!context.mounted) return false;
     final ok = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -444,7 +456,7 @@ Future<void> startSurahDownload(
         ],
       ),
     );
-    if (ok != true) return;
+    if (ok != true) return false;
   }
-  await queue.enqueue(reciter, surah);
+  return true;
 }

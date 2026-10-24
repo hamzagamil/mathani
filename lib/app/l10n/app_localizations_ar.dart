@@ -466,7 +466,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get recitationAttribution =>
-      'التلاوات: الشيخ محمود خليل الحصري والشيخ محمد صديق المنشاوي (مرتّل)، عن EveryAyah.com';
+      'التلاوات: القرّاء المذكورون في قائمة القرّاء، عن EveryAyah.com وquranicaudio.com';
 
   @override
   String get onboardingWelcome => 'أهلاً بك في مثاني';
@@ -595,4 +595,20 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get tourAgainHint =>
       'كيف تقلّب الصفحات وتستخدم خيارات الآية والفهرس والبحث والمشغّل.';
+
+  @override
+  String get mujawwad => 'مجوّد';
+
+  @override
+  String get muallim => 'معلّم';
+
+  @override
+  String get searchReciters => 'ابحث عن قارئ';
+
+  @override
+  String get noReciterFound => 'لا يوجد قارئ بهذا الاسم';
+
+  @override
+  String get qulRecitationsCredit =>
+      'توقيت الآيات وبعض التلاوات: مكتبة القرآن الشاملة (QUL)';
 }
