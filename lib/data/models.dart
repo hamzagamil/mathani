@@ -16,6 +16,9 @@ enum ThemePref { system, day, night }
 
 enum LanguagePref { system, ar, en }
 
+/// How a mistake is signalled during memorization, besides the mark on screen (specs/006 FR-015).
+enum MistakeSignal { vibrate, sound, none }
+
 /// A surah:ayah reference. Value type used for anchors, selection and navigation.
 class AyahRef implements Comparable<AyahRef> {
   const AyahRef(this.surah, this.ayah);
@@ -162,9 +165,40 @@ class Bookmark {
   final DateTime createdAt;
 }
 
+/// Where a reciter's recordings come from (specs/006 data-model › Reciter).
+enum RecitationSource {
+  /// One file per ayah on EveryAyah.
+  everyayah,
+
+  /// One file per ayah on a QUL host.
+  qulAyah,
+
+  /// One file per surah on a QUL host; each ayah is a byte range of it (specs/006 research R18).
+  qulSurah;
+
+  static RecitationSource parse(String value) => switch (value) {
+        'qul_ayah' => qulAyah,
+        'qul_surah' => qulSurah,
+        _ => everyayah,
+      };
+}
+
+/// The recording style shown after the reciter's name (specs/006 research R3).
+enum RecitationStyle {
+  murattal,
+  mujawwad,
+
+  /// Teaching recordings: each ayah recited with repetitions for learners.
+  muallim;
+
+  static RecitationStyle parse(String value) =>
+      values.firstWhere((s) => s.name == value, orElse: () => murattal);
+}
+
 /// A reciter offered in the app, from the `reciters` table of quran.db
-/// (specs/004-ayah-recitations/contracts/recitation-catalogue.md). Every reciter has a
-/// recording of all 6,236 ayat; Al-Fatiha 1:1 doubles as the basmala.
+/// (specs/004-ayah-recitations/contracts/recitation-catalogue.md, changed by specs/006). Every
+/// reciter has a recording of all 6,236 ayat. Al-Fatiha 1:1 doubles as the basmala, except for
+/// reciters whose basmala is part of ayah 1 ([basmalaInAyah1]).
 class Reciter {
   const Reciter({
     required this.id,
@@ -177,6 +211,9 @@ class Reciter {
     required this.mirrorUrl,
     required this.bitrateKbps,
     required this.sort,
+    this.source = RecitationSource.everyayah,
+    this.filePattern = '{sss}{aaa}.mp3',
+    this.basmalaInAyah1 = false,
   });
 
   static const defaultId = 'husary';
@@ -186,18 +223,29 @@ class Reciter {
   final String nameEn;
   final String shortAr; // bar chip
   final String shortEn;
-  final String style; // 'murattal'
-  final String baseUrl; // no trailing slash
-  final String mirrorUrl;
+  final RecitationStyle style;
+  final String baseUrl; // ends in `/` only where the host's path has a double slash
+  final String? mirrorUrl; // null for QUL hosts
   final int bitrateKbps;
   final int sort;
+  final RecitationSource source;
+  final String filePattern; // `{sss}{aaa}.mp3`, or `{sss}.mp3` / `{s}.mp3` for surah files
+  final bool basmalaInAyah1; // surah files: the basmala is inside ayah 1's clip
 
   String name({required bool arabic}) => arabic ? nameAr : nameEn;
   String shortName({required bool arabic}) => arabic ? shortAr : shortEn;
 
-  /// `<base>/<SSS><AAA>.mp3`, zero-padded.
-  String urlFor(int surah, int ayah, {bool mirror = false}) =>
-      '${mirror ? mirrorUrl : baseUrl}/${pad3(surah)}${pad3(ayah)}.mp3';
+  /// The file holding [surah]:[ayah]: `<base>/<SSS><AAA>.mp3` for ayah sources, or the surah's
+  /// file for [RecitationSource.qulSurah] (the ayah is then a byte range of it,
+  /// [QuranRepository.clipRange]). Throws if [mirror] is asked of a reciter without one.
+  String urlFor(int surah, int ayah, {bool mirror = false}) {
+    final base = mirror ? mirrorUrl! : baseUrl;
+    final file = filePattern
+        .replaceAll('{sss}', pad3(surah))
+        .replaceAll('{s}', '$surah')
+        .replaceAll('{aaa}', pad3(ayah));
+    return '$base/$file';
+  }
 
   @override
   bool operator ==(Object other) => other is Reciter && other.id == id;
@@ -218,6 +266,7 @@ class ReaderPreferences {
     this.lettering = Lettering.printed,
     this.reciter = Reciter.defaultId,
     this.onboardingDone = false,
+    this.mistakeSignal = MistakeSignal.vibrate,
   });
 
   static const minFlowFontSize = 18;
@@ -239,6 +288,9 @@ class ReaderPreferences {
   /// The first-run onboarding was finished or skipped (specs/005, FR-002).
   final bool onboardingDone;
 
+  /// Vibration, sound or neither when memorization detects a mistake (specs/006 FR-015).
+  final MistakeSignal mistakeSignal;
+
   ReaderPreferences copyWith({
     ReadingLayout? layout,
     ThemePref? theme,
@@ -248,6 +300,7 @@ class ReaderPreferences {
     Lettering? lettering,
     String? reciter,
     bool? onboardingDone,
+    MistakeSignal? mistakeSignal,
   }) =>
       ReaderPreferences(
         layout: layout ?? this.layout,
@@ -258,5 +311,6 @@ class ReaderPreferences {
         lettering: lettering ?? this.lettering,
         reciter: reciter ?? this.reciter,
         onboardingDone: onboardingDone ?? this.onboardingDone,
+        mistakeSignal: mistakeSignal ?? this.mistakeSignal,
       );
 }

@@ -65,7 +65,7 @@ sizes offline and reject damaged files. Contract:
 
 ```powershell
 dart run tool/build_recitation_manifest.dart   # HEAD every ayah file of each reciter in tool/recitations.json
-dart run tool/add_recitations.dart             # write the reciters and recitation_files tables into quran.db
+dart run tool/add_recitations.dart             # write the reciters and recitation_sizes tables into quran.db
 ```
 
 - `tool/recitations.json` (committed) defines the reciters: names, short names, style, base and
@@ -76,3 +76,25 @@ dart run tool/add_recitations.dart             # write the reciters and recitati
   (FR-002, SC-003). It asks EveryAyah's CDN 4 files at a time; more gets throttled.
 - `add_recitations.dart` patches the existing `quran.db` in place, like the line-width and
   printed-lettering steps; `build_quran_db.dart` writes the same tables in a full rebuild.
+
+## Memorization model (specs/006)
+
+Memorization recognises the reader's voice on the device with a Tarteel Whisper fine-tune
+(Apache-2.0), run by sherpa-onnx. The app downloads the model once from a GitHub release; it is
+not bundled. Research: [R8](../specs/006-reciters-memorization/research.md).
+
+```powershell
+py -3.12 -m venv build/asr/venv
+build/asr/venv/Scripts/python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+build/asr/venv/Scripts/python -m pip install openai-whisper onnx onnxruntime
+build/asr/venv/Scripts/python tool/export_asr_model.py --model tarteel-ai/whisper-tiny-ar-quran --out build/asr/tarteel-tiny-v1
+```
+
+- The tool runs sherpa-onnx's own Whisper export (pinned to the app's sherpa-onnx version) on the
+  Hugging Face checkpoint and quantises it to int8. It writes `encoder.int8.onnx`,
+  `decoder.int8.onnx`, `tokens.txt` and `silero_vad.onnx`, with a `SHA256SUMS` file.
+- Every download is checked against a SHA-256 pinned in the tool, so `--hf-endpoint` (or
+  `HF_ENDPOINT`) can point to a mirror when huggingface.co is unreachable.
+- Upload the four files to a release named after the model version (`asr-tarteel-tiny-v1`), and
+  pin their sizes and SHA-256 in `lib/features/memorization/asr_model.dart`. A new export is a
+  new release and a new version; never replace files in a published release.

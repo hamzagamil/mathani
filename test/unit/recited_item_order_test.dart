@@ -69,4 +69,15 @@ void main() {
     expect(ayah(67, 1).isBasmala, isFalse);
     expect(const RecitedItem.basmala(67), isNot(ayah(67, 1)));
   });
+
+  test('without basmala items, every ayah once and no basmala (specs/006 R18)', () {
+    final surahFiles = RecitedOrder(ayahCount: order.ayahCount, basmalaItems: () => false);
+    expect(surahFiles.startItem(const AyahRef(2, 1)), ayah(2, 1));
+    var ayat = 0;
+    for (RecitedItem? i = surahFiles.startItem(const AyahRef(1, 1)); i != null; i = surahFiles.next(i)) {
+      expect(i.isBasmala, isFalse, reason: '$i');
+      ayat++;
+    }
+    expect(ayat, 6236);
+  });
 }

@@ -31,18 +31,25 @@ class RecitedItem {
 
 /// Mushaf order of recited items.
 class RecitedOrder {
-  const RecitedOrder({required this.ayahCount});
+  const RecitedOrder({required this.ayahCount, this.basmalaItems = _always});
 
   /// Number of ayat in a surah (1..114).
   final int Function(int surah) ayahCount;
 
+  /// Whether the current reciter's basmala is a separate item. False for reciters recorded one
+  /// surah per file, whose basmala is part of ayah 1 (specs/006 FR-005, research R18).
+  final bool Function() basmalaItems;
+
+  static bool _always() => true;
+
   static bool hasBasmalaItem(int surah) => surah != 1 && surah != 9;
 
   /// Where a recitation that starts at [ref] begins: its basmala when [ref] is ayah 1 of a surah
-  /// that has one (FR-008).
-  RecitedItem startItem(AyahRef ref) => ref.ayah == 1 && hasBasmalaItem(ref.surah)
-      ? RecitedItem.basmala(ref.surah)
-      : RecitedItem.ayah(ref.surah, ref.ayah);
+  /// that has one (FR-008) and the reciter's basmala is a separate item.
+  RecitedItem startItem(AyahRef ref) =>
+      ref.ayah == 1 && hasBasmalaItem(ref.surah) && basmalaItems()
+          ? RecitedItem.basmala(ref.surah)
+          : RecitedItem.ayah(ref.surah, ref.ayah);
 
   /// The item after [item], or null after 114:6 (the end of the Quran).
   RecitedItem? next(RecitedItem item) {

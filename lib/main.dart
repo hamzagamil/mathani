@@ -35,6 +35,12 @@ Future<void> runMathani() async {
     reader: controller,
     fetcher: AyahFetcher(
       recordingSize: (r, s, a) async => (await quran.recordingBytes(r, s))[a - 1],
+      // Reciters recorded one surah per file: each ayah is a byte range of it (specs/006 R18).
+      clipRange: (r, s, a) async {
+        final clip = await quran.clipRange(r, s, a);
+        final total = await quran.surahFileBytes(r, s);
+        return clip == null || total == null ? null : (start: clip.$1, end: clip.$2, total: total);
+      },
     ),
   );
   // Lock screen and notification controls start with the first recitation, not at launch.

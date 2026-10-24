@@ -13,9 +13,9 @@ import 'src/sources.dart';
 void main() {
   final db = sqlite3.open(outputDb);
   writeRecitationTables(db);
-  final count = db.select('SELECT COUNT(*) AS n FROM recitation_files').first['n'];
+  final count = db.select('SELECT COUNT(*) AS n FROM recitation_sizes').first['n'];
   db.execute('VACUUM');
   db.close();
   File(outputVersion).writeAsStringSync('${sha256Of(outputDb)}\n');
-  stdout.writeln('quran.db: ${loadReciterDefinitions().length} reciters, $count recordings.');
+  stdout.writeln('quran.db: ${loadReciterDefinitions().length} reciters, $count surah rows.');
 }

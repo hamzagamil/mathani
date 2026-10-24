@@ -40,6 +40,12 @@ void main() {
         MathaniIcons.downloaded,
         MathaniIcons.more,
         MathaniIcons.recitation,
+        // Memorization (specs/006 T002).
+        MathaniIcons.memorize,
+        MathaniIcons.hint,
+        MathaniIcons.reveal,
+        MathaniIcons.mic,
+        MathaniIcons.search,
       ]) {
         final drawn = await draw(icon.codePoint);
         expect(listEquals(drawn, missing), isFalse,

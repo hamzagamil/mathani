@@ -9,13 +9,17 @@ import '../../app/theme/tokens.dart';
 import '../../app/version.dart';
 import '../../shared/mathani_icons.dart';
 
-/// Registers the bundled font and icon licences so the licences page lists them.
+/// Registers the bundled font and icon licences, and those of the memorization runtime and model
+/// (specs/006), so the licences page lists them.
 void registerAssetLicences() {
   LicenseRegistry.addLicense(() async* {
     for (final (packages, asset) in const [
       (['IBM Plex Sans Arabic'], 'assets/fonts/OFL-IBMPlexSansArabic.txt'),
       (['Amiri Quran'], 'assets/fonts/OFL-AmiriQuran.txt'),
       (['Lucide icons'], 'assets/fonts/LICENSE-Lucide.txt'),
+      (['ONNX Runtime'], 'assets/licences/LICENSE-onnxruntime.txt'),
+      (['Tarteel Whisper tiny (Quran)'], 'assets/licences/LICENSE-tarteel-whisper.txt'),
+      (['Silero VAD'], 'assets/licences/LICENSE-silero-vad.txt'),
     ]) {
       yield LicenseEntryWithLineBreaks(packages, await rootBundle.loadString(asset));
     }
@@ -31,6 +35,7 @@ class AboutSection extends StatelessWidget {
 
   static final _tanzil = Uri.parse('https://tanzil.net');
   static final _everyAyah = Uri.parse('https://everyayah.com');
+  static final _qul = Uri.parse('https://qul.tarteel.ai/resources/recitation');
 
   @override
   Widget build(BuildContext context) {
@@ -60,12 +65,19 @@ class AboutSection extends StatelessWidget {
         ),
         ListTile(title: Text(l10n.qulCredit)),
         ListTile(title: Text(l10n.kfgqpcCredit)),
-        // Recitations (specs/004): the reciters and EveryAyah, until D4 sets the wording.
+        // Recitations (specs/004, specs/006 FR-007): the reciters, QUL and EveryAyah, until D2
+        // and D4 set the wording.
         ListTile(
           title: Text(l10n.recitationAttribution),
           subtitle: Text('https://everyayah.com', style: caption.copyWith(color: colors.secondary)),
           trailing: const Icon(MathaniIcons.externalLink),
           onTap: () => launchUrl(_everyAyah, mode: LaunchMode.externalApplication),
+        ),
+        ListTile(
+          title: Text(l10n.qulRecitationsCredit),
+          subtitle: Text('https://qul.tarteel.ai', style: caption.copyWith(color: colors.secondary)),
+          trailing: const Icon(MathaniIcons.externalLink),
+          onTap: () => launchUrl(_qul, mode: LaunchMode.externalApplication),
         ),
         ListTile(
           title: Text(l10n.licencesButton),

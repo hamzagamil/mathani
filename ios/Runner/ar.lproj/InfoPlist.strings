@@ -1,2 +1,3 @@
 "CFBundleDisplayName" = "مثاني";
 "CFBundleName" = "مثاني";
+"NSMicrophoneUsageDescription" = "يستخدم مثاني الميكروفون أثناء جلسة الحفظ فقط ليتابع تلاوتك على جهازك. لا يُسجَّل صوتك ولا يغادر الجهاز.";

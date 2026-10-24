@@ -1,2 +1,3 @@
 "CFBundleDisplayName" = "Mathani";
 "CFBundleName" = "Mathani";
+"NSMicrophoneUsageDescription" = "Mathani uses the microphone only during a memorization session, to follow your recitation on your device. Your voice is not recorded and never leaves the device.";

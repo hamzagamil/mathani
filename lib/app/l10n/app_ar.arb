@@ -119,7 +119,7 @@
   "sizeMb": "{n} م.ب",
   "sizeKb": "{n} ك.ب",
   "recitationChannel": "التلاوة",
-  "recitationAttribution": "التلاوات: الشيخ محمود خليل الحصري والشيخ محمد صديق المنشاوي (مرتّل)، عن EveryAyah.com",
+  "recitationAttribution": "التلاوات: القرّاء المذكورون في قائمة القرّاء، عن EveryAyah.com وquranicaudio.com",
   "onboardingWelcome": "أهلاً بك في مثاني",
   "onboardingLanguageTitle": "اختر لغة التطبيق",
   "onboardingSystemLanguage": "حسب الجهاز ({language})",
@@ -156,5 +156,10 @@
   "tourSettingsTitle": "الإعدادات",
   "tourSettingsBody": "غيّر اختياراتك متى شئت، وستجد المزيد: إبقاء الشاشة مضاءة، وخط المصحف المطبوع، والتنزيلات، وهذه الجولة.",
   "tourAgainSetting": "شاهد الجولة التعريفية مرة أخرى",
-  "tourAgainHint": "كيف تقلّب الصفحات وتستخدم خيارات الآية والفهرس والبحث والمشغّل."
+  "tourAgainHint": "كيف تقلّب الصفحات وتستخدم خيارات الآية والفهرس والبحث والمشغّل.",
+  "mujawwad": "مجوّد",
+  "muallim": "معلّم",
+  "searchReciters": "ابحث عن قارئ",
+  "noReciterFound": "لا يوجد قارئ بهذا الاسم",
+  "qulRecitationsCredit": "توقيت الآيات وبعض التلاوات: مكتبة القرآن الشاملة (QUL)"
 }

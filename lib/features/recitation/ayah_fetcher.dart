@@ -39,9 +39,18 @@ class FetchException implements Exception {
 /// Size of a recording in the catalogue: `quran.recordingBytes(reciter, surah)[ayah - 1]`.
 typedef RecordingSize = Future<int> Function(String reciter, int surah, int ayah);
 
+/// Where an ayah's clip sits in its surah file, `[start, end)` of a file of `total` bytes, for
+/// reciters recorded one surah per file (specs/006 research R18); null for one file per ayah.
+typedef ClipRange = Future<({int start, int end, int total})?> Function(
+    String reciter, int surah, int ayah);
+
+Future<({int start, int end, int total})?> _noClips(String reciter, int surah, int ayah) async =>
+    null;
+
 class AyahFetcher {
   AyahFetcher({
     required this.recordingSize,
+    this.clipRange = _noClips,
     this.device = const DeviceChannel(),
     Future<Directory> Function()? cacheRoot,
     Future<Directory> Function()? supportRoot,
@@ -51,6 +60,7 @@ class AyahFetcher {
         _newClient = httpClient ?? HttpClient.new;
 
   final RecordingSize recordingSize;
+  final ClipRange clipRange;
   final DeviceChannel device;
   final Future<Directory> Function() _cacheRoot;
   final Future<Directory> Function() _supportRoot;
@@ -160,7 +170,9 @@ class AyahFetcher {
   }
 
   /// Downloads `<SSS><AAA>.mp3` of [r] into [target] (via `.part`), checked against [bytes].
-  /// Tries the primary host, then the mirror once. Shares one request per target path.
+  /// Tries the primary host, then the mirror once if [r] has one. For a reciter recorded one
+  /// surah per file, the ayah is its byte range of the surah file. Shares one request per target
+  /// path.
   Future<File> fetch(Reciter r, int surah, int ayah, File target,
       {required int bytes, bool priority = false}) {
     return _inFlight[target.path] ??= () async {
@@ -168,9 +180,16 @@ class AyahFetcher {
         if (await device.networkState() == NetworkState.none) {
           throw const FetchException(FetchError.offline);
         }
-        for (final mirror in [false, true]) {
+        final clip = r.source == RecitationSource.qulSurah
+            ? await clipRange(r.id, surah, ayah)
+            : null;
+        if (r.source == RecitationSource.qulSurah && clip == null) {
+          throw const FetchException(FetchError.fetchFailed);
+        }
+        for (final mirror in [false, if (r.mirrorUrl != null) true]) {
           final ok = await _gate.run(
-            () => _get(Uri.parse(r.urlFor(surah, ayah, mirror: mirror)), target, bytes),
+            () => _get(Uri.parse(r.urlFor(surah, ayah, mirror: mirror)), target, bytes,
+                clip: clip),
             priority: priority,
           );
           if (ok) return target;
@@ -182,14 +201,27 @@ class AyahFetcher {
     }();
   }
 
-  Future<bool> _get(Uri url, File target, int bytes) async {
+  Future<bool> _get(Uri url, File target, int bytes,
+      {({int start, int end, int total})? clip}) async {
     final part = File('${target.path}.part');
     try {
       await target.parent.create(recursive: true);
       _clientUsed = true;
       final request = await _client.getUrl(url);
+      if (clip != null) {
+        request.headers.set(HttpHeaders.rangeHeader, 'bytes=${clip.start}-${clip.end - 1}');
+      }
       final response = await request.close().timeout(fetchTimeout);
-      if (response.statusCode != HttpStatus.ok) {
+      // A clip needs exactly its range of the file the catalogue measured: a whole file (range
+      // ignored), another range or a replaced file is a failure, never a partial accept.
+      final expected = clip == null
+          ? null
+          : 'bytes ${clip.start}-${clip.end - 1}/${clip.total}';
+      final accepted = clip == null
+          ? response.statusCode == HttpStatus.ok
+          : response.statusCode == HttpStatus.partialContent &&
+              response.headers.value(HttpHeaders.contentRangeHeader) == expected;
+      if (!accepted) {
         await response.drain<void>();
         return false;
       }

@@ -458,7 +458,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recitationAttribution =>
-      'Recitations: Sheikh Mahmoud Khalil Al-Husary and Sheikh Mohamed Siddiq El-Minshawi (Murattal), via EveryAyah.com';
+      'Recitations: the reciters in the reciter list, via EveryAyah.com and quranicaudio.com';
 
   @override
   String get onboardingWelcome => 'Welcome to Mathani';
@@ -588,4 +588,20 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get tourAgainHint =>
       'How to turn pages and use the ayah actions, index, search and player.';
+
+  @override
+  String get mujawwad => 'Mujawwad';
+
+  @override
+  String get muallim => 'Teaching';
+
+  @override
+  String get searchReciters => 'Search reciters';
+
+  @override
+  String get noReciterFound => 'No reciter with this name';
+
+  @override
+  String get qulRecitationsCredit =>
+      'Ayah timings and some recitations: Quranic Universal Library (QUL)';
 }

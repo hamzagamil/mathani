@@ -340,7 +340,7 @@
   "@recitationChannel": {
     "description": "Android notification channel name for the recitation player."
   },
-  "recitationAttribution": "Recitations: Sheikh Mahmoud Khalil Al-Husary and Sheikh Mohamed Siddiq El-Minshawi (Murattal), via EveryAyah.com",
+  "recitationAttribution": "Recitations: the reciters in the reciter list, via EveryAyah.com and quranicaudio.com",
   "onboardingWelcome": "Welcome to Mathani",
   "@onboardingWelcome": {
     "description": "Onboarding: greeting on the language step, shown in both languages."
@@ -406,5 +406,11 @@
   "tourSettingsTitle": "Settings",
   "tourSettingsBody": "Change your choices any time, and find more: keep screen on, printed lettering, downloads, and this tour.",
   "tourAgainSetting": "See the tour again",
-  "tourAgainHint": "How to turn pages and use the ayah actions, index, search and player."
+  "tourAgainHint": "How to turn pages and use the ayah actions, index, search and player.",
+  "mujawwad": "Mujawwad",
+  "muallim": "Teaching",
+  "@muallim": {"description":"Recording style: each ayah recited with repetitions for learners (specs/006 research R3)."},
+  "searchReciters": "Search reciters",
+  "noReciterFound": "No reciter with this name",
+  "qulRecitationsCredit": "Ayah timings and some recitations: Quranic Universal Library (QUL)"
 }
