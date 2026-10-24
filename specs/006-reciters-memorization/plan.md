@@ -128,7 +128,8 @@ Constitution v2.0.0.
 
 **Result**: **PASS**, with the items in Complexity Tracking. The **size growth needs the owner's
 explicit approval** (Principle IV): approved on 2026-10-24 for the measured +9.59 MB per Android
-phone (S2, T027). Release stays **gated on D4** (Quran.com Foundation: 43
+phone (S2, T027). Release measurement (T058): +10.52 MB per arm64 phone and +10.8 MB for the iOS
+.ipa, everything in 006 included. Release stays **gated on D4** (Quran.com Foundation: 43
 EveryAyah recordings and 5 quranicaudio surah recordings) **and D2** (QUL / Tarteel: timings for 7
 recordings, 3 Tarteel-hosted recordings).
 
