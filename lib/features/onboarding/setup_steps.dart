@@ -346,7 +346,10 @@ class _ReciterStepState extends State<ReciterStep> {
     Widget sampleButton(Reciter r) {
       final mine = preview?.reciterId == r.id ? preview : null;
       final active = mine != null && mine.status != PreviewStatus.unavailable;
-      final name = r.name(arabic: arabic);
+      // A reciter can have several recordings (specs/006): name the style unless it is Murattal.
+      final name = r.style == RecitationStyle.murattal
+          ? r.name(arabic: arabic)
+          : '${r.name(arabic: arabic)} · ${styleLabel(l10n, r.style)}';
       return Padding(
         padding: const EdgeInsetsDirectional.only(end: Space.s2),
         child: IconButton(

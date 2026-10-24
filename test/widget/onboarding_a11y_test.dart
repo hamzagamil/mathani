@@ -87,7 +87,8 @@ void main() {
     }
     await settle(tester);
     // Screen readers read an icon button's tooltip as its name.
-    for (final name in ['محمود خليل الحصري', 'محمد صديق المنشاوي']) {
+    for (final (search, name) in [('الحصري', 'محمود خليل الحصري'), ('المنشاوي', 'محمد صديق المنشاوي')]) {
+      await searchReciters(tester, search);
       final tooltip = 'استمع إلى مقطع, $name';
       expect(tester.getSemantics(find.byTooltip(tooltip)),
           isSemantics(tooltip: tooltip, isButton: true, hasTapAction: true));

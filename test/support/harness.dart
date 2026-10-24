@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mathani/data/quran_repository.dart';
 import 'package:mathani/data/user_repository.dart';
 import 'package:mathani/features/reader/printed_fonts.dart';
+import 'package:mathani/features/recitation/reciter_sheet.dart';
 import 'package:mathani/shared/reader_state.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
@@ -54,4 +55,14 @@ Future<void> tapToolbar(WidgetTester tester, IconData icon) async {
     }
   }
   await tester.tap(button);
+}
+
+/// Types [query] into the reciter list's search field. The list holds every reciter and builds
+/// only the rows in view (specs/006), so a test finds a reciter the way a reader would.
+Future<void> searchReciters(WidgetTester tester, String query) async {
+  await tester.enterText(
+      find.descendant(of: find.byType(ReciterList), matching: find.byType(TextField)), query);
+  for (var i = 0; i < 3; i++) {
+    await tester.pump(const Duration(milliseconds: 100));
+  }
 }

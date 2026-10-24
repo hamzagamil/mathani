@@ -270,21 +270,6 @@
     "sort": 18
   },
   {
-    "id": "ayyoub",
-    "name_ar": "محمد أيوب",
-    "name_en": "Muhammad Ayyoub",
-    "short_ar": "محمد أيوب",
-    "short_en": "Ayyoub",
-    "style": "murattal",
-    "source": "everyayah",
-    "base_url": "https://everyayah.com/data/Muhammad_Ayyoub_64kbps",
-    "mirror_url": "https://mirrors.quranicaudio.com/everyayah/Muhammad_Ayyoub_64kbps",
-    "file_pattern": "{sss}{aaa}.mp3",
-    "basmala_in_ayah1": 0,
-    "bitrate_kbps": 64,
-    "sort": 19
-  },
-  {
     "id": "jibreel",
     "name_ar": "محمد جبريل",
     "name_en": "Muhammad Jibreel",
@@ -661,54 +646,6 @@
     "sort": 44
   },
   {
-    "id": "minshawy_children",
-    "name_ar": "محمد صديق المنشاوي (مع الأطفال)",
-    "name_en": "Mohamed Siddiq El-Minshawi (with children)",
-    "short_ar": "المنشاوي · مع الأطفال",
-    "short_en": "El-Minshawi · with children",
-    "style": "muallim",
-    "source": "qul_surah",
-    "base_url": "https://audio-cdn.tarteel.ai/quran/surah/minshawy/kids_repeat/mp3",
-    "mirror_url": null,
-    "file_pattern": "{sss}.mp3",
-    "basmala_in_ayah1": 1,
-    "qul_id": 314,
-    "bitrate_kbps": 128,
-    "sort": 45
-  },
-  {
-    "id": "mostafa_ismail",
-    "name_ar": "مصطفى إسماعيل",
-    "name_en": "Mustafa Ismail",
-    "short_ar": "مصطفى إسماعيل",
-    "short_en": "Mustafa Ismail",
-    "style": "murattal",
-    "source": "qul_surah",
-    "base_url": "https://download.quranicaudio.com/quran/mostafa_ismaeel/",
-    "mirror_url": null,
-    "file_pattern": "{sss}.mp3",
-    "basmala_in_ayah1": 1,
-    "qul_id": 346,
-    "bitrate_kbps": 128,
-    "sort": 46
-  },
-  {
-    "id": "husary_ijazah",
-    "name_ar": "محمود خليل الحصري (إجازة)",
-    "name_en": "Mahmoud Khalil Al-Husary (Ijazah)",
-    "short_ar": "الحصري · إجازة",
-    "short_en": "Al-Husary · Ijazah",
-    "style": "murattal",
-    "source": "qul_surah",
-    "base_url": "https://download.quranicaudio.com/quran/mahmood_khaleel_al-husaree_iza3a/",
-    "mirror_url": null,
-    "file_pattern": "{sss}.mp3",
-    "basmala_in_ayah1": 1,
-    "qul_id": 368,
-    "bitrate_kbps": 128,
-    "sort": 47
-  },
-  {
     "id": "bandar_baleela",
     "name_ar": "بندر بليلة",
     "name_en": "Bandar Baleela",
@@ -755,21 +692,5 @@
     "qul_id": 421,
     "bitrate_kbps": 96,
     "sort": 50
-  },
-  {
-    "id": "salimi",
-    "name_ar": "منصور السالمي",
-    "name_en": "Mansour Al-Salimi",
-    "short_ar": "السالمي",
-    "short_en": "Al-Salimi",
-    "style": "murattal",
-    "source": "qul_surah",
-    "base_url": "https://audio-cdn.tarteel.ai/quran/surah/mansourAlSalimi/murattal/mp3",
-    "mirror_url": null,
-    "file_pattern": "{sss}.mp3",
-    "basmala_in_ayah1": 1,
-    "qul_id": 572,
-    "bitrate_kbps": 128,
-    "sort": 51
   }
 ]
