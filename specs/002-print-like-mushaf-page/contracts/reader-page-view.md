@@ -25,6 +25,8 @@ for the Mushaf layout. The flowing layout is unchanged.
 
 First time ever only: when the controls first hide, show the snackbar «اضغط على الصفحة لإظهار
 الأدوات» / "Tap the page to show controls" for 4 s, then set `controls_hint_shown = true`.
+*(Removed 2026-10-24 by [specs/005](../../005-app-onboarding/research.md) research R2: the
+onboarding teaches the tap, so the hint and `controls_hint_shown` are gone.)*
 
 ## Controls
 
