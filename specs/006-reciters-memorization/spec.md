@@ -276,19 +276,22 @@ marked in ayat 5, 6 and 7 against the scoring rule of FR-024.
 **During a session**
 
 - **FR-012**: The page MUST keep the layout of the reader's chosen lettering and layout, with the
-  text of the session's unrevealed ayat hidden and each ayah number visible in its place. Text
+  session's words hidden until they are recited and each ayah number visible in its place. Text
   outside the session, surah headers and basmala lines MUST stay visible.
 - **FR-013**: The app MUST listen to the reader and compare what they recite with the expected
   ayah, word by word, in order.
-- **FR-014**: An ayah MUST be revealed only when every one of its words was recited in order, with
-  no missing, wrong or added words. Diacritics and tajweed rules are not judged (see Assumptions).
+- **FR-014**: Each word MUST be revealed as soon as it is recited in order, so the first word
+  still hidden is the one to recite (or recite again); with a recogniser of medium accuracy, this
+  shows the reader which word needs rehearsal (owner request, 2026-10-25). An ayah is complete only
+  when every one of its words was recited in order, with no missing, wrong or added words. Diacritics and tajweed rules are not judged (see Assumptions).
   Repeating words, restarting a phrase, pausing, and an opening isti'adha or basmala MUST NOT count
   as mistakes.
-- **FR-015**: When a mistake is detected, the app MUST signal it at once without showing any of the
-  ayah's text: always by marking the ayah number on screen, and also by a short vibration, a short
+- **FR-015**: When a mistake is detected, the app MUST signal it at once without showing the word
+  to recite: always by marking the ayah number on screen, and also by a short vibration, a short
   sound, or neither, as the reader chooses in Settings (vibration by default; the choice persists
   across restarts). It MUST then keep the words recited correctly before the mistake and listen
-  again from the wrong word. The ayah is revealed when the reader completes it from that word. Going back further, or
+  again from the wrong word, which stays hidden. The ayah is complete when the reader finishes it
+  from that word. Going back further, or
   restarting the ayah, MUST also be accepted. An ayah with one or more mistakes counts as corrected
   (FR-024).
 - **FR-016**: Users MUST be able to ask for the next word of the expected ayah at any time ("Next

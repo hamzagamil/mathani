@@ -133,8 +133,7 @@ class MemorizationController extends ChangeNotifier with WidgetsBindingObserver 
       active && _rangeWords.contains(wordId) && !_revealedWords.contains(wordId) &&
       !_hintedWords.contains(wordId);
 
-  bool isHinted(int wordId) =>
-      active && _hintedWords.contains(wordId) && !_revealedWords.contains(wordId);
+  bool isHinted(int wordId) => active && _hintedWords.contains(wordId);
 
   bool hasMistake(AyahRef ref) => active && _mistakeAyat.contains(ref);
 
@@ -228,22 +227,10 @@ class MemorizationController extends ChangeNotifier with WidgetsBindingObserver 
       changed = true;
       _signal();
     }
-    for (final (ayah, position) in e.matched) {
-      // Hinted words are shown in the hint colour until their ayah is revealed.
-      if (m.tallies[ayah].hints.contains(position)) {
-        _hintedWords.addAll([
-          for (final w in _ayatWords[ayah])
-            if (w.position == position) w.wordId,
-        ]);
-        changed = true;
-      }
-    }
     for (final ayah in e.completed) {
-      _revealedWords.addAll([for (final w in _ayatWords[ayah]) w.wordId]);
       _lastRevealed = r.refAt(ayah);
-      changed = true;
     }
-    if (changed) _bump();
+    if (_syncWords() || changed) _bump();
     if (e.ayahCompleted) {
       if (m.done) {
         unawaited(end());
@@ -254,6 +241,24 @@ class MemorizationController extends ChangeNotifier with WidgetsBindingObserver 
       if (reader.quran.pageOf(next) != reader.page) reader.jumpTo(next, highlight: false);
     }
     notifyListeners();
+  }
+
+  /// Reveals each word as soon as it is recited, so the first hidden word of the expected ayah is
+  /// the one to say (again); hinted words keep the hint colour. Words once shown stay shown, also
+  /// when the reader goes back to repeat. True when something changed.
+  bool _syncWords() {
+    final m = _matcher!;
+    final revealed = _revealedWords.length, hinted = _hintedWords.length;
+    for (var a = 0; a < m.ayat.length; a++) {
+      final tally = m.tallies[a];
+      final parts = m.ayat[a];
+      final recited = tally.complete ? parts.length : (a == m.ayahIndex ? m.cursor - 1 : 0);
+      for (var k = 0; k < recited; k++) {
+        final w = parts[k];
+        (tally.hints.contains(w.position) ? _hintedWords : _revealedWords).add(w.wordId);
+      }
+    }
+    return _revealedWords.length != revealed || _hintedWords.length != hinted;
   }
 
   void _signal() {
