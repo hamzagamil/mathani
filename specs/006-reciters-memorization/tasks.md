@@ -437,14 +437,14 @@ ayah 3. Then deny the microphone.
 ## Phase 6: Polish & Cross-Cutting Concerns
 
 - [X] T055 [P] Licences: add `assets/licences/` texts for sherpa-onnx (Apache-2.0), the Tarteel models (Apache-2.0, with notice), onnxruntime (MIT) and `record` (MIT). Register them in `registerAssetLicences()` in `lib/features/settings/about_section.dart`, list them in `pubspec.yaml` assets, and add rows to `docs/licences.md`.
-- [ ] T056 [P] Privacy: update `docs/store/privacy.md` and the privacy policy:
+- [X] T056 [P] Privacy: update `docs/store/privacy.md` and the privacy policy:
   - microphone used during memorization only;
   - audio processed on device, not collected (Apple and Google definitions);
   - new hosts `download.quranicaudio.com`, `audio-cdn.tarteel.ai` and GitHub Releases, with no identifiers.
 
   Note the App Privacy and Data safety answers to change before release.
 - [ ] T057 Add a `WITH_MEMORIZATION` variant to `integration_test/paging_perf_test.dart` that starts a session with `FakeSpeechRecogniser` and pages 20 times. Confirm 60 fps on both phones (SC-010) and that cold start is unchanged (≤ 2 s).
-- [ ] T058 Size report: run `flutter build appbundle --release --analyze-size` and `dart run tool/size_check.dart android <json>`, plus the iOS archive. Write the growth by part (sherpa-onnx/onnxruntime, catalogue, `record`, code) into `plan.md` › Complexity Tracking and the PR description (Principle IV).
+- [X] T058 Size report: run `flutter build appbundle --release --analyze-size` and `dart run tool/size_check.dart android <json>`, plus the iOS archive. Write the growth by part (sherpa-onnx/onnxruntime, catalogue, `record`, code) into `plan.md` › Complexity Tracking and the PR description (Principle IV).
 - [ ] T059 Run the full quickstart on both reference phones and the API 24 emulator (Q-1 to Q-23, including Q-19 unsupported device, Q-20 screen readers, Q-21 largest font and night, and Q-23 0 bytes sent during a session), plus the SC-009 usability test with 10 readers. Record results in `specs/006-reciters-memorization/tasks.md` › Notes.
 - [ ] T060 Delete the S1 test-set recordings (T030) and confirm in `specs/006-reciters-memorization/tasks.md` › Notes. Record the chosen model and tuned thresholds in `research.md` › R8 and R11.
 - [ ] T061 Run `flutter analyze` and `flutter test` from the repository root (`analysis_options.yaml`, `test/`); both must pass. Run `/speckit-analyze` over `specs/006-reciters-memorization/` for spec, plan and tasks consistency.
@@ -739,3 +739,33 @@ after T041: T044 range sheet  ∥  T045 bar  ∥  T047 strings  ∥  T048 settin
   - **Matcher behaviour seen in the tests**: a stray word at the end of a segment, followed by the
     right word in the next segment, is not a mistake (boundary noise). After a mistake, the rest
     of that segment is not matched; the reader repeats from the word, as Q1 says.
+- **Word-by-word reveal (owner request, 2026-10-25)**: with a recogniser of medium accuracy, the
+  reader needs to see which word was not recognised. Each word is now revealed as soon as it is
+  recited, not when its ayah is complete; after a mistake, the first hidden word is the one to say
+  again. Spec FR-012, FR-014 and FR-015 are updated. The controller reads revealed and hinted
+  words from the matcher's state (cursor and tallies), not from `MatchEvents.matched`, whose
+  second field is a part index from `accept()` but a word position from `hintNextWord()`.
+  Scoring is unchanged. Test: the Al-Ikhlas session checks that «قل هو» shows exactly those two
+  words, and that after a mistake the word to repeat stays hidden.
+- **T056**: `docs/store/privacy.md` covers the new hosts (`download.quranicaudio.com`,
+  `audio-cdn.tarteel.ai`, GitHub Releases), the model on the device, the microphone (on-device
+  only, not collected under Apple's or Google's definition), `RECORD_AUDIO` and
+  `NSMicrophoneUsageDescription`. The App Privacy ("Data Not Collected") and Data safety ("No data
+  collected") answers stay, to be checked before the 1.4 release. The policy page
+  (`Mathani-landing/privacypolicy.html`, Arabic and English) is updated locally: internet use,
+  downloads on the device, and the microphone. It had still said the app never goes online,
+  which was wrong since 004. **Publishing it to mthani.app/privacypolicy is the owner's step.**
+- **T057 (code only)**: `--dart-define=WITH_MEMORIZATION=true` starts a session on Al-Baqarah 1–25
+  with a silent recogniser and no microphone, then pages 20 times (`mushaf_paging_with_memorization`).
+  Profile mode does not run on emulators, so the 60 fps check needs the reference phones.
+- **T058**: release bundle, arm64, `--analyze-size`, against the pre-006 tree from S2:
+
+  | Part | Growth |
+  | --- | --- |
+  | arm64-v8a native (sherpa-onnx, onnxruntime, record) | +9.88 MB |
+  | Common (catalogue in quran.db, code, licences, mistake tone) | +0.64 MB |
+  | **One arm64 phone** | **+10.52 MB** (154.83 MB) |
+  | `size_check` (all ABIs in base) | +29.73 MB, 169.94 MB against 140.21 MB |
+
+  iOS: the CI `.ipa` artifact grew from 160.18 MB (1.4.0+6) to 170.99 MB (1.4.0+8), so +10.8 MB.
+  Both are within the plan's ≈ +11 MB, which the owner approved.

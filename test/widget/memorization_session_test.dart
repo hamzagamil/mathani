@@ -82,8 +82,15 @@ void main() {
     final all = [for (final a in words) for (final w in a) w.wordId];
     expect(hiddenOnPage(tester, all), all.toSet(), reason: 'every word of the range is hidden');
 
-    // Ayah 1 recited: revealed, and ayah 2 is expected.
-    recogniser.say('قل هو الله احد');
+    // Words appear as they are recited: after «قل هو», only those two are shown.
+    final ayah1 = [for (final w in words[0]) w.wordId];
+    recogniser.say('قل هو');
+    await settle(tester, 3);
+    expect(hiddenOnPage(tester, ayah1), ayah1.skip(2).toSet());
+    expect(memorization.expected, const AyahRef(112, 1));
+
+    // The rest of ayah 1: revealed, and ayah 2 is expected.
+    recogniser.say('الله احد');
     await settle(tester, 3);
     expect(memorization.expected, const AyahRef(112, 2));
     expect(hiddenOnPage(tester, [for (final w in words[0]) w.wordId]), isEmpty);
@@ -94,8 +101,10 @@ void main() {
     await settle(tester, 3);
     expect(memorization.hasMistake(const AyahRef(112, 2)), isTrue);
     expect(find.text('خطأ — تابع من الكلمة'), findsOneWidget);
-    // Matching stops at a mistake; the reader carries on from the word (Q1).
+    // Matching stops at a mistake; the reader carries on from the word (Q1). The words before it
+    // are shown and the word to say again is the first one still hidden.
     expect(memorization.expected, const AyahRef(112, 2));
+    expect(hiddenOnPage(tester, [for (final w in words[1]) w.wordId]), {words[1][1].wordId});
     recogniser.say('الصمد');
     await settle(tester, 3);
     expect(memorization.expected, const AyahRef(112, 3));
