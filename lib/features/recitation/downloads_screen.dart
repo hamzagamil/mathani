@@ -301,7 +301,10 @@ class _MemorizationModelRow extends StatelessWidget {
         return ListTile(
           leading: const Icon(MathaniIcons.memorize),
           title: Text(l10n.memorizationModel),
-          subtitle: Text(formatSize(l10n, locale, model.downloadedBytes),
+          // Once ready, the space it takes, which is more than the download (specs/007 R4).
+          subtitle: Text(
+              formatSize(l10n, locale,
+                  model.state == AsrModelState.ready ? model.diskBytes : model.downloadedBytes),
               style: TypeScale.caption.copyWith(color: colors.inkMuted)),
           trailing: IconButton(
             icon: const Icon(MathaniIcons.delete),

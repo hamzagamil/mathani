@@ -29,19 +29,21 @@ const _withMemorization = bool.fromEnvironment('WITH_MEMORIZATION');
 
 /// A recogniser that hears nothing: the session only hides words while the pages turn.
 class _SilentRecogniser implements SpeechRecogniser {
-  final _segments = StreamController<Segment>.broadcast();
+  final _heard = StreamController<Heard>.broadcast();
   @override
-  Stream<Segment> get segments => _segments.stream;
+  Stream<Heard> get heard => _heard.stream;
   @override
   Future<void> load(String modelDir) async {}
   @override
   void accept(Float32List samples) {}
   @override
+  void commit(int pass, int fromSample) {}
+  @override
   void flush() {}
   @override
   void reset() {}
   @override
-  Future<void> dispose() => _segments.close();
+  Future<void> dispose() => _heard.close();
 }
 
 class _NoMic implements MicSource {

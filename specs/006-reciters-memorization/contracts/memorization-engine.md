@@ -1,5 +1,9 @@
 # Contract: Memorization Engine
 
+> **Superseded in part** by [specs/007 contracts/live-recognition.md](../../007-khatma-live-recognition/contracts/live-recognition.md):
+> the model (Khatma FastConformer), the recogniser API (`Heard`, live and pause passes,
+> `commit`), and the matcher rules 4–7, 10–12.
+
 How a reader's voice becomes revealed ayat, a score and a review. Research: R6–R16. Everything
 in this contract runs on the device. No audio leaves the device, and none is written to storage
 (FR-019).

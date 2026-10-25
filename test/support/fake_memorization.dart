@@ -5,9 +5,10 @@ import 'package:mathani/features/memorization/asr_model.dart';
 import 'package:mathani/features/memorization/mic_source.dart';
 import 'package:mathani/features/memorization/speech_recogniser.dart';
 
-/// A recogniser that emits scripted segments (specs/006 T040), for controller and widget tests.
+/// A recogniser that emits scripted passes (specs/006 T040, specs/007 T013), for controller and
+/// widget tests. Words are 8000 samples apart; each pass starts where the last commit left it.
 class FakeSpeechRecogniser implements SpeechRecogniser {
-  final _segments = StreamController<Segment>.broadcast();
+  final _heard = StreamController<Heard>.broadcast();
 
   String? loadedFrom;
   int acceptedSamples = 0;
@@ -15,18 +16,50 @@ class FakeSpeechRecogniser implements SpeechRecogniser {
   int resets = 0;
   bool disposed = false;
 
+  /// Every commit, as (pass, fromSample).
+  final commits = <(int, int)>[];
+  int _pass = 0;
+  int _anchor = 0;
+
   /// When set, [load] waits for it, so a test can hold the session in "loading".
   Completer<void>? holdLoad;
 
   /// When set, [load] fails with it.
   Object? loadError;
 
-  /// Emits what the reader "said" as one segment.
-  void say(String text, {bool forcedSplit = false}) =>
-      _segments.add(Segment(text, forcedSplit: forcedSplit));
+  /// The pass [say] last emitted.
+  late Heard last;
+
+  /// Emits what the reader "said" as one pass, starting at [start] (the current anchor by
+  /// default). A pause pass moves the anchor past its words, as the recogniser does.
+  Heard say(String text, {Hearing hearing = Hearing.pause, int? start}) {
+    final from = start ?? _anchor;
+    final words = [
+      for (final (i, w) in text.split(' ').where((w) => w.isNotEmpty).indexed)
+        HeardWord(w, from + i * 8000, from + i * 8000 + 7000), // each word lasts most of its slot
+    ];
+    final end = from + words.length * 8000;
+    last = Heard(++_pass, hearing, words, from, end);
+    if (hearing == Hearing.pause) _anchor = end;
+    _heard.add(last);
+    return last;
+  }
+
+  /// Emits a hand-made pass, for words timed as [say] does not time them.
+  void emit(Heard heard) {
+    _pass = heard.pass;
+    last = heard;
+    _heard.add(heard);
+  }
 
   @override
-  Stream<Segment> get segments => _segments.stream;
+  Stream<Heard> get heard => _heard.stream;
+
+  @override
+  void commit(int pass, int fromSample) {
+    commits.add((pass, fromSample));
+    if (pass == _pass && fromSample > _anchor) _anchor = fromSample;
+  }
 
   @override
   Future<void> load(String modelDir) async {

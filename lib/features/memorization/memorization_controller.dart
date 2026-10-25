@@ -1,7 +1,9 @@
-// A memorization session (specs/006 contracts/memorization-engine.md › MemorizationController):
-// the reader recites a range from memory, each ayah is revealed once recited, and the session
-// ends with a score. The voice stays on the device (FR-019).
+// A memorization session (specs/006 contracts/memorization-engine.md › MemorizationController;
+// specs/007 contracts/live-recognition.md › MemorizationController): the reader recites a range
+// from memory, each word is revealed as it is recited, also while the reader keeps going, and the
+// session ends with a score. The voice stays on the device (FR-019).
 import 'dart:async';
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:audio_session/audio_session.dart';
@@ -12,7 +14,6 @@ import '../../data/models.dart';
 import '../../shared/device_channel.dart';
 import '../../shared/reader_state.dart';
 import '../recitation/recitation_controller.dart';
-import '../search/arabic_normalizer.dart';
 import 'asr_model.dart';
 import 'device_support.dart';
 import 'memorization_score.dart';
@@ -28,6 +29,20 @@ const endFlushWait = Duration(milliseconds: 1500);
 
 /// The mistake tone, during which the microphone is gated (R12).
 const toneLength = Duration(milliseconds: 120);
+
+/// The last words of a live pass are not used: their audio may be cut (specs/007 research R5)...
+const liveHoldBack = 1;
+
+/// ...unless nothing was heard after the last word for this long: it was finished, and the last
+/// word of an ayah then shows before the pause is detected, about 1.3 s later (SC-002).
+const wordEndGap = 0.4; // s
+
+/// Live passes that must hear a word the same before it is used; 2 if spike S2 finds words
+/// revealed that were not said (research R5).
+const livePassesToAgree = 1;
+
+/// Recent word anchors kept to recognise a pass that starts on the last word matched.
+const _wordAnchorsKept = 4;
 
 enum MemorizationPhase { preparing, listening, paused, ended }
 
@@ -63,6 +78,7 @@ class MemorizationController extends ChangeNotifier with WidgetsBindingObserver 
     SpeechRecogniser Function()? recogniser,
     MicSource Function()? mic,
     this.device = const DeviceChannel(),
+    this.passesToAgree = livePassesToAgree,
   })  : model = model ?? AsrModel(device: device),
         _newRecogniser = recogniser ?? SherpaSpeechRecogniser.new,
         _newMic = mic ?? MicSource.new;
@@ -71,12 +87,22 @@ class MemorizationController extends ChangeNotifier with WidgetsBindingObserver 
   final RecitationController? recitation;
   final AsrModel model;
   final DeviceChannel device;
+
+  /// [livePassesToAgree]; set by tests.
+  final int passesToAgree;
   final SpeechRecogniser Function() _newRecogniser;
   final MicSource Function() _newMic;
 
   SpeechRecogniser? _recogniser;
   MicSource? _mic;
-  StreamSubscription<Segment>? _segments;
+  StreamSubscription<Heard>? _heard;
+
+  /// Where the recogniser decodes from after the last commit, and the starts of the last words
+  /// it was moved to (matcher rule 12).
+  final _wordAnchors = <int>[];
+
+  /// The words of the previous live pass, for [passesToAgree].
+  List<String> _previousLive = const [];
   StreamSubscription<Float32List>? _samples;
   Timer? _silence;
   StreamSubscription<AudioInterruptionEvent>? _interruptions;
@@ -176,7 +202,8 @@ class MemorizationController extends ChangeNotifier with WidgetsBindingObserver 
 
     final recogniser = _recogniser ??= _newRecogniser();
     await recogniser.load(model.modelDir);
-    _segments = recogniser.segments.listen(_onSegment);
+    _heard = recogniser.heard.listen(_onHeard);
+    recogniser.reset(); // the recogniser outlives sessions: start from now
     if (!_observing) {
       WidgetsBinding.instance.addObserver(this);
       _observing = true;
@@ -210,12 +237,52 @@ class MemorizationController extends ChangeNotifier with WidgetsBindingObserver 
     _silence = Timer(silencePause, () => pause(PauseReason.silence));
   }
 
-  void _onSegment(Segment segment) {
+  void _onHeard(Heard heard) {
     final m = _matcher;
     if (m == null || !active) return;
-    if (_phase == MemorizationPhase.listening) _armSilence();
-    final tokens = normalizeArabic(segment.text).split(' ').where((t) => t.isNotEmpty).toList();
-    _apply(m.accept(tokens, finalSegment: !segment.forcedSplit));
+    if (heard.words.isNotEmpty && _phase == MemorizationPhase.listening) _armSilence();
+    final onWord = _wordAnchors.contains(heard.windowStart);
+    if (heard.hearing == Hearing.pause) {
+      _previousLive = const [];
+      _apply(m.accept([for (final w in heard.words) w.text],
+          hearing: Hearing.pause, startsOnMatched: onWord));
+      return;
+    }
+    // A live pass after pause or end: its audio is decoded again by the closing pause pass.
+    if (_phase != MemorizationPhase.listening) return;
+    final used = _agreed(heard.words, heard.endSample);
+    final e = m.accept([for (final w in used) w.text], hearing: Hearing.live, startsOnMatched: onWord);
+    // Move the recogniser on (contract › MemorizationController): past everything after a
+    // mistake, to the last word matched, or nowhere.
+    var from = heard.windowStart;
+    if (e.mistakes.isNotEmpty || e.droppedRest) {
+      from = heard.endSample;
+    } else if (e.lastMatchedToken >= 0) {
+      from = math.max(heard.windowStart, used[e.lastMatchedToken].startSample);
+      _wordAnchors
+        ..remove(from)
+        ..add(from);
+      if (_wordAnchors.length > _wordAnchorsKept) _wordAnchors.removeAt(0);
+    }
+    _recogniser?.commit(heard.pass, from);
+    _apply(e);
+  }
+
+  /// The words of a live pass that may be used: without the last [liveHoldBack] unless it was
+  /// finished [wordEndGap] before [end], and, with [passesToAgree] 2, only as far as the previous
+  /// pass heard the same.
+  List<HeardWord> _agreed(List<HeardWord> words, int end) {
+    final finished = words.isNotEmpty && end - words.last.endSample >= wordEndGap * micSampleRate;
+    final held = finished ? 0 : liveHoldBack;
+    final used = words.length > held ? words.sublist(0, words.length - held) : <HeardWord>[];
+    if (passesToAgree < 2) return used;
+    final previous = _previousLive;
+    _previousLive = [for (final w in words) w.text];
+    var n = 0;
+    while (n < used.length && n < previous.length && previous[n] == used[n].text) {
+      n++;
+    }
+    return used.sublist(0, n);
   }
 
   void _apply(MatchEvents e) {
@@ -245,7 +312,8 @@ class MemorizationController extends ChangeNotifier with WidgetsBindingObserver 
 
   /// Reveals each word as soon as it is recited, so the first hidden word of the expected ayah is
   /// the one to say (again); hinted words keep the hint colour. Words once shown stay shown, also
-  /// when the reader goes back to repeat. True when something changed.
+  /// when the reader goes back to repeat: the sets only grow (specs/007 FR-007). True when
+  /// something changed.
   bool _syncWords() {
     final m = _matcher!;
     final revealed = _revealedWords.length, hinted = _hintedWords.length;
@@ -285,7 +353,13 @@ class MemorizationController extends ChangeNotifier with WidgetsBindingObserver 
     final m = _matcher;
     if (m == null || !active || m.done) return;
     _recogniser?.reset();
+    _forgetAnchors();
     _apply(m.revealRest());
+  }
+
+  void _forgetAnchors() {
+    _wordAnchors.clear();
+    _previousLive = const [];
   }
 
   /// Stops listening at once; the matcher keeps its state (FR-020).
@@ -302,6 +376,7 @@ class MemorizationController extends ChangeNotifier with WidgetsBindingObserver 
   Future<void> resume() async {
     if (_phase != MemorizationPhase.paused) return;
     _recogniser?.reset();
+    _forgetAnchors();
     await _listen();
   }
 
@@ -318,8 +393,8 @@ class MemorizationController extends ChangeNotifier with WidgetsBindingObserver 
       _recogniser?.flush();
       await Future<void>.delayed(endFlushWait);
     }
-    await _segments?.cancel();
-    _segments = null;
+    await _heard?.cancel();
+    _heard = null;
     final m = _matcher;
     _result = m == null ? null : SessionResult.fromTallies(m.tallies);
     _bump();
@@ -334,8 +409,9 @@ class MemorizationController extends ChangeNotifier with WidgetsBindingObserver 
 
   void _reset() {
     _silence?.cancel();
-    unawaited(_segments?.cancel());
-    _segments = null;
+    unawaited(_heard?.cancel());
+    _heard = null;
+    _forgetAnchors();
     _phase = null;
     _pauseReason = null;
     _range = null;
@@ -363,7 +439,7 @@ class MemorizationController extends ChangeNotifier with WidgetsBindingObserver 
   @override
   void dispose() {
     _silence?.cancel();
-    unawaited(_segments?.cancel());
+    unawaited(_heard?.cancel());
     unawaited(_samples?.cancel());
     unawaited(_interruptions?.cancel());
     unawaited(_noisy?.cancel());

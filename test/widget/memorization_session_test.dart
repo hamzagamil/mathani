@@ -1,11 +1,13 @@
 // A memorization session through the real reading screen (specs/006 T032, T034, T051): the range
-// sheet, hidden words, reveals, a hint, a mistake, the score and Done. The recogniser is scripted.
+// sheet, hidden words, reveals, a hint, a mistake, the score and Done; and live passes (specs/007
+// T018, T023). The recogniser is scripted.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mathani/app/app.dart';
 import 'package:mathani/data/models.dart';
 import 'package:mathani/features/memorization/memorization_controller.dart';
 import 'package:mathani/features/memorization/result_screen.dart';
+import 'package:mathani/features/memorization/speech_recogniser.dart';
 import 'package:mathani/features/reader/mushaf_page_renderer.dart';
 import 'package:mathani/shared/mathani_icons.dart';
 import 'package:mathani/shared/reader_state.dart';
@@ -26,7 +28,7 @@ void main() {
     }
   }
 
-  Future<void> pumpApp(WidgetTester tester) async {
+  Future<void> pumpApp(WidgetTester tester, {int passesToAgree = livePassesToAgree}) async {
     await tester.runAsync(() async {
       await loadAppFonts();
       reader = await openTestReader();
@@ -39,6 +41,7 @@ void main() {
       model: ReadyAsrModel(),
       recogniser: () => recogniser,
       mic: () => mic,
+      passesToAgree: passesToAgree,
     );
     tester.view.physicalSize = const Size(720, 1560);
     tester.view.devicePixelRatio = 2;
@@ -178,5 +181,144 @@ void main() {
     expect(memorization.phase, isNull);
     expect(find.text('لا يمكن بدء الحفظ دون الميكروفون.'), findsOneWidget);
     expect(mic.starts, 0);
+  });
+
+  group('live passes', () {
+    late List<List<int>> ids; // word ids of Al-Ikhlas, ayah by ayah
+
+    Future<void> start(WidgetTester tester, {int passesToAgree = livePassesToAgree}) async {
+      await pumpApp(tester, passesToAgree: passesToAgree);
+      reader.jumpToPage(604);
+      await settle(tester);
+      await tapToolbar(tester, MathaniIcons.memorize);
+      await settle(tester);
+      await tester.tap(find.text('ابدأ'));
+      await settle(tester, 10);
+      final words = (await tester.runAsync(() => reader.quran.memorizationWords(112, 1, 4)))!;
+      ids = [for (final a in words) [for (final w in a) w.wordId]];
+    }
+
+    /// Stops listening, so no silence timer is left behind.
+    Future<void> stop(WidgetTester tester) async {
+      memorization.pause();
+      await settle(tester, 2);
+    }
+
+    testWidgets('words appear while reciting, the last one held back, and the anchor follows',
+        (tester) async {
+      await start(tester);
+      final h = recogniser.say('قل هو الله', hearing: Hearing.live);
+      await settle(tester, 2);
+      expect([for (final id in ids[0]) memorization.isHidden(id)], [false, false, true, true]);
+      expect(recogniser.commits.last, (h.pass, h.words[1].startSample), reason: 'start of هو');
+
+      // The next pass starts on «هو», heard again, and completes the ayah.
+      final next = recogniser.say('هو الله احد الله', hearing: Hearing.live);
+      await settle(tester, 2);
+      expect(next.windowStart, h.words[1].startSample);
+      expect(memorization.expected, const AyahRef(112, 2));
+      expect(ids[0].where(memorization.isHidden), isEmpty);
+      expect(memorization.hasMistake(const AyahRef(112, 1)), isFalse);
+      expect(recogniser.commits.last, (next.pass, next.words[2].startSample), reason: 'start of احد');
+      await stop(tester);
+    });
+
+    testWidgets('a mistake two passes find is signalled once, and nothing after it shows',
+        (tester) async {
+      await start(tester);
+      recogniser.say('قل هو الله احد الله الصمد');
+      await settle(tester, 2);
+      final serial = memorization.mistakeSerial;
+      // One pass only suspects it; the next pass, hearing it again, confirms it.
+      var h = recogniser.say('لم ينم ولم يولد ولم', hearing: Hearing.live);
+      await settle(tester, 2);
+      expect(memorization.hasMistake(const AyahRef(112, 3)), isFalse);
+      h = recogniser.say('لم ينم ولم يولد ولم يكن', hearing: Hearing.live, start: h.windowStart);
+      await settle(tester, 2);
+      expect(memorization.hasMistake(const AyahRef(112, 3)), isTrue);
+      expect(memorization.mistakeSerial, serial + 1);
+      expect(recogniser.commits.last, (h.pass, h.endSample), reason: 'everything heard is used');
+      expect([for (final id in ids[2]) memorization.isHidden(id)], [false, true, true, true]);
+
+      // The closing pause pass hears the same words: no second signal.
+      recogniser.say('لم ينم ولم يولد', start: h.windowStart);
+      await settle(tester, 2);
+      expect(memorization.mistakeSerial, serial + 1);
+      expect([for (final id in ids[2]) memorization.isHidden(id)], [false, true, true, true]);
+      await stop(tester);
+    });
+
+    testWidgets('the last word is used when nothing was heard after it for a while', (tester) async {
+      await start(tester);
+      // «احد» ended 0.5 s before the end of the pass: finished, so not held back.
+      final h = recogniser.say('قل هو الله احد', hearing: Hearing.live);
+      final finished = Heard(h.pass + 1, Hearing.live,
+          [...h.words.take(3), HeardWord('احد', h.words[3].startSample, h.words[3].startSample)],
+          h.windowStart, h.words[3].startSample + 8000);
+      expect(finished.endSample - finished.words.last.endSample, greaterThanOrEqualTo(wordEndGap * micSampleRate));
+      await settle(tester, 2);
+      expect(memorization.isHidden(ids[0][3]), isTrue, reason: 'still speaking: held back');
+      recogniser.emit(finished);
+      await settle(tester, 2);
+      expect(memorization.expected, const AyahRef(112, 2), reason: 'ayah 1 complete before a pause');
+      await stop(tester);
+    });
+
+    testWidgets('a pass that matches nothing leaves the anchor where it was', (tester) async {
+      await start(tester);
+      final h = recogniser.say('ققق ققق', hearing: Hearing.live);
+      await settle(tester, 2);
+      expect(recogniser.commits.last, (h.pass, h.windowStart));
+      expect(ids[0].where(memorization.isHidden), hasLength(4));
+      await stop(tester);
+    });
+
+    testWidgets('a word shown stays shown when the reader goes back', (tester) async {
+      await start(tester);
+      recogniser.say('قل هو الله', hearing: Hearing.live);
+      await settle(tester, 2);
+      recogniser.say('قل هو قل هو', hearing: Hearing.live, start: 0);
+      await settle(tester, 2);
+      expect([for (final id in ids[0]) memorization.isHidden(id)], [false, false, true, true]);
+      await stop(tester);
+    });
+
+    testWidgets('Next word during a pass: the hinted word counts once, the next stays expected',
+        (tester) async {
+      await start(tester);
+      final h = recogniser.say('قل هو الله', hearing: Hearing.live);
+      await settle(tester, 2);
+      await tester.tap(find.byTooltip('الكلمة التالية'));
+      await settle(tester, 2);
+      expect(memorization.isHinted(ids[0][2]), isTrue);
+      recogniser.say('هو الله احد', hearing: Hearing.live, start: h.words[1].startSample);
+      await settle(tester, 2);
+      expect(memorization.isHinted(ids[0][2]), isTrue);
+      expect(memorization.isHidden(ids[0][3]), isTrue, reason: 'احد was the held-back word');
+      expect(memorization.expected, const AyahRef(112, 1));
+      await stop(tester);
+    });
+
+    testWidgets('pause changes state at once, and a late live pass reveals nothing', (tester) async {
+      await start(tester);
+      memorization.pause();
+      expect(memorization.phase, MemorizationPhase.paused, reason: 'synchronously');
+      recogniser.say('قل هو الله احد', hearing: Hearing.live);
+      await settle(tester, 2);
+      expect(ids[0].where(memorization.isHidden), hasLength(4));
+      await stop(tester);
+    });
+
+    testWidgets('with two passes to agree, a word is used once two passes heard it', (tester) async {
+      await start(tester, passesToAgree: 2);
+      recogniser.say('قل هو الله', hearing: Hearing.live);
+      await settle(tester, 2);
+      expect(ids[0].where(memorization.isHidden), hasLength(4), reason: 'nothing to agree with yet');
+      recogniser.say('قل هو الله احد', hearing: Hearing.live, start: 0);
+      await settle(tester, 2);
+      expect([for (final id in ids[0]) memorization.isHidden(id)], [false, false, false, true],
+          reason: 'both passes heard قل هو الله; احد is held back and heard once');
+      await stop(tester);
+    });
   });
 }

@@ -35,17 +35,17 @@ these servers; the clip offsets of surah recordings come from QUL's ayah timings
 | Mustafa Ismail; Mahmoud Khalil Al-Husary (Ijazah); Bandar Baleela; Khalid Al-Jalil; Hady Toure: surah recordings on `download.quranicaudio.com`, played as per-ayah byte ranges | Ayah-by-ayah recitation (specs/006 research R18) | **Unconfirmed** | **Dependency D4** (audio) and **D2** (QUL ayah timings) |
 | Ahmad Al-Nufais (ayah files); Mohamed Siddiq El-Minshawi with children and Mansour Al-Salimi (surah files) on `audio-cdn.tarteel.ai` | Ayah-by-ayah recitation | **Unconfirmed** (QUL: "We don't have copyright information for this resource") | **Dependency D2**. The About screen credits QUL |
 
-## Memorization (specs/006)
+## Memorization (specs/006, specs/007)
 
 On-device recognition of the reader's voice. The libraries are bundled. The model is downloaded
-once from the project's GitHub release `asr-tarteel-tiny-v1` and is never bundled.
+once from the project's GitHub release `asr-khatma-v1` and is never bundled.
 
 | Component | Used for | Licence | Requirements |
 | --- | --- | --- | --- |
 | sherpa-onnx 1.13.8 (`sherpa_onnx` and its platform packages) | Voice activity detection and recognition | Apache-2.0 | Ship the licence: the package's `LICENSE`, collected by Flutter into the licences page |
 | ONNX Runtime (inside sherpa-onnx's native libraries) | Running the models | MIT | Ship the licence: `assets/licences/LICENSE-onnxruntime.txt` |
 | `record` 7.1.2 | Microphone stream | MIT | Ship the licence: the package's `LICENSE`, collected by Flutter |
-| Tarteel `whisper-tiny-ar-quran` (https://huggingface.co/tarteel-ai/whisper-tiny-ar-quran), converted to int8 ONNX | Recognition model (downloaded) | Apache-2.0 | Ship the licence and **state the changes**: `assets/licences/LICENSE-tarteel-whisper.txt`, and `NOTICE.txt` in the release |
+| Khatma FastConformer (https://huggingface.co/adnanfet/khatma-model): NVIDIA FastConformer-Hybrid PCD Large (ar) (https://huggingface.co/nvidia/stt_ar_fastconformer_hybrid_large_pcd_v1.0), from Tilawa's ONNX export (https://github.com/yazinsai/tilawa), unpacked to one int8 ONNX file | Recognition model (downloaded) | CC BY 4.0 (NVIDIA, the model); MIT (Tilawa, the export) | Credit NVIDIA, link the licence and **state the changes** (Khatma's and ours), and ship Tilawa's MIT text: `assets/licences/LICENSE-khatma-model.txt`, and `NOTICE.txt` in the release |
 | Silero VAD (https://github.com/snakers4/silero-vad), via sherpa-onnx's model release | Voice activity model (downloaded) | MIT | Ship the licence: `assets/licences/LICENSE-silero-vad.txt`, and in the release |
 
 ## Icons and images

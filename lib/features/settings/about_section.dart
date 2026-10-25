@@ -10,7 +10,7 @@ import '../../app/version.dart';
 import '../../shared/mathani_icons.dart';
 
 /// Registers the bundled font and icon licences, and those of the memorization runtime and model
-/// (specs/006), so the licences page lists them.
+/// (specs/006, specs/007), so the licences page lists them.
 void registerAssetLicences() {
   LicenseRegistry.addLicense(() async* {
     for (final (packages, asset) in const [
@@ -18,7 +18,8 @@ void registerAssetLicences() {
       (['Amiri Quran'], 'assets/fonts/OFL-AmiriQuran.txt'),
       (['Lucide icons'], 'assets/fonts/LICENSE-Lucide.txt'),
       (['ONNX Runtime'], 'assets/licences/LICENSE-onnxruntime.txt'),
-      (['Tarteel Whisper tiny (Quran)'], 'assets/licences/LICENSE-tarteel-whisper.txt'),
+      (['Khatma FastConformer (NVIDIA FastConformer-Hybrid PCD Large, ar)'],
+          'assets/licences/LICENSE-khatma-model.txt'),
       (['Silero VAD'], 'assets/licences/LICENSE-silero-vad.txt'),
     ]) {
       yield LicenseEntryWithLineBreaks(packages, await rootBundle.loadString(asset));

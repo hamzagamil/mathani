@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 import 'app/app.dart';
 import 'data/quran_repository.dart';
 import 'data/user_repository.dart';
+import 'features/memorization/asr_model.dart';
 import 'features/memorization/memorization_controller.dart';
 import 'features/onboarding/onboarding_controller.dart';
 import 'features/recitation/ayah_fetcher.dart';
@@ -57,4 +60,9 @@ Future<void> runMathani() async {
     onboarding: onboarding,
     memorization: memorization,
   ));
+  // After updating, the previous recognition model's files are freed without waiting for
+  // memorization to open; after the first frame, so cold start is unchanged (specs/007 FR-004).
+  if (!kIsWeb) {
+    WidgetsBinding.instance.addPostFrameCallback((_) => unawaited(AsrModel.removeOtherVersions()));
+  }
 }

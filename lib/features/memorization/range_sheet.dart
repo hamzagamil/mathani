@@ -112,7 +112,8 @@ class _RangeSheetState extends State<_RangeSheet> {
   Future<void> _download() async {
     setState(() => _failed = false);
     final ok = await confirmDownload(
-        context, widget.controller.device, () async => _model.totalBytes - _model.downloadedBytes);
+        // Room to download and unpack (specs/007 research R4); the size shown is the download.
+        context, widget.controller.device, () async => _model.requiredBytes - _model.downloadedBytes);
     if (!ok) return;
     try {
       await _model.download();

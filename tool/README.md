@@ -77,24 +77,30 @@ dart run tool/add_recitations.dart             # write the reciters and recitati
 - `add_recitations.dart` patches the existing `quran.db` in place, like the line-width and
   printed-lettering steps; `build_quran_db.dart` writes the same tables in a full rebuild.
 
-## Memorization model (specs/006)
+## Memorization model (specs/006, specs/007)
 
-Memorization recognises the reader's voice on the device with a Tarteel Whisper fine-tune
-(Apache-2.0), run by sherpa-onnx. The app downloads the model once from a GitHub release; it is
-not bundled. Research: [R8](../specs/006-reciters-memorization/research.md).
+Memorization recognises the reader's voice on the device with Khatma FastConformer (NVIDIA's
+Arabic FastConformer, CC BY 4.0; Tilawa's ONNX export, MIT), run by sherpa-onnx as a raw-audio
+CTC model. The app downloads the model once from a GitHub release; it is not bundled. Research:
+[007 R1–R4](../specs/007-khatma-live-recognition/research.md).
 
 ```powershell
 py -3.12 -m venv build/asr/venv
-build/asr/venv/Scripts/python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
-build/asr/venv/Scripts/python -m pip install openai-whisper onnx onnxruntime
-build/asr/venv/Scripts/python tool/export_asr_model.py --model tarteel-ai/whisper-tiny-ar-quran --out build/asr/tarteel-tiny-v1
+build/asr/venv/Scripts/python -m pip install onnx onnxruntime numpy sherpa-onnx==1.13.8
+build/asr/venv/Scripts/python tool/export_khatma_model.py --out build/asr/khatma-v1 --check build/asr/check
 ```
 
-- The tool runs sherpa-onnx's own Whisper export (pinned to the app's sherpa-onnx version) on the
-  Hugging Face checkpoint and quantises it to int8. It writes `encoder.int8.onnx`,
-  `decoder.int8.onnx`, `tokens.txt` and `silero_vad.onnx`, with a `SHA256SUMS` file.
+- The tool unpacks Khatma's package (its int4 weights rebuilt as int8, embedded in one ONNX
+  file) and computes the graph's audio-length input from the audio, so sherpa-onnx can feed it
+  raw samples; Khatma's own features stay in the graph. It writes `model.int8.onnx`, its gzip
+  `model.int8.onnx.gz` (the file the app downloads), `tokens.txt`, `silero_vad.onnx`,
+  `NOTICE.txt` and `SHA256SUMS`. The same inputs always give the same bytes.
+- `--check DIR` decodes every 16 kHz mono float32 clip in DIR with the original graph and with
+  the converted model through sherpa-onnx, and fails below 97% agreement (spike S1).
+  `tool/wav_to_f32.py` converts WAV recordings into such clips.
 - Every download is checked against a SHA-256 pinned in the tool, so `--hf-endpoint` (or
   `HF_ENDPOINT`) can point to a mirror when huggingface.co is unreachable.
-- Upload the four files to a release named after the model version (`asr-tarteel-tiny-v1`), and
-  pin their sizes and SHA-256 in `lib/features/memorization/asr_model.dart`. A new export is a
-  new release and a new version; never replace files in a published release.
+- Upload `model.int8.onnx.gz`, `tokens.txt`, `silero_vad.onnx` and `NOTICE.txt` to a release
+  named after the model version (`asr-khatma-v1`), and pin the download and unpacked sizes and
+  SHA-256 in `lib/features/memorization/asr_model.dart`. A new export is a new release and a new
+  version; never replace files in a published release.

@@ -1,8 +1,10 @@
 // The recognition model on the device (specs/006 contracts/memorization-engine.md › AsrModel,
-// research R9). The only memorization file that uses the network or writes files: it downloads
-// the model and never sees audio (memorization_privacy_test).
+// research R9; specs/007 contracts/live-recognition.md › AsrModel, research R4, R7). The only
+// memorization file that uses the network or writes files: it downloads the model and never sees
+// audio (memorization_privacy_test).
 import 'dart:async';
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
@@ -11,34 +13,49 @@ import 'package:path_provider/path_provider.dart';
 import '../../shared/device_channel.dart';
 
 /// The GitHub release the files come from; a new export is a new version (tool/README.md).
-const asrModelVersion = 'asr-tarteel-tiny-v1';
+const asrModelVersion = 'asr-khatma-v1';
 
 const asrModelBase =
     'https://github.com/hamzagamil/mathani/releases/download/$asrModelVersion/';
 
-typedef AsrFile = ({String name, int bytes, String sha256});
+/// One file of the release. A name ending in `.gz` is unpacked on the device and kept without
+/// the suffix; [unpackedBytes] and [unpackedSha256] pin what is kept.
+class AsrFile {
+  const AsrFile(this.name, this.bytes, this.sha256, {this.unpackedBytes, this.unpackedSha256})
+      : assert((unpackedBytes == null) == (unpackedSha256 == null));
 
-/// The release's files, pinned (tasks.md › Notes › T029).
+  final String name;
+  final int bytes;
+  final String sha256;
+  final int? unpackedBytes;
+  final String? unpackedSha256;
+
+  bool get packed => unpackedBytes != null;
+
+  /// The name of the file kept on the device.
+  String get kept => packed ? name.substring(0, name.length - '.gz'.length) : name;
+
+  int get keptBytes => unpackedBytes ?? bytes;
+}
+
+/// The release's files, pinned from tool/export_khatma_model.py (specs/007 T001, research R4).
 const asrModelFiles = <AsrFile>[
-  (
-    name: 'encoder.int8.onnx',
-    bytes: 12926471,
-    sha256: '30c1c6f988f395cc212c92795c2c9d7589a65b4909a70c72515667af73501b17',
+  AsrFile(
+    'model.int8.onnx.gz',
+    107497463,
+    '40c4f1730d8d94df0fd6076eb1922686125d29cbc982d35e868c3c00136a9c27',
+    unpackedBytes: 133342218,
+    unpackedSha256: '2f7be8307d3921cf05ad0bb3635222ad057fbe9bde77d1c907d23f83b488bc88',
   ),
-  (
-    name: 'decoder.int8.onnx',
-    bytes: 50015755,
-    sha256: '7cbd0e65cd3348c3577280d85d80383798300ce8c0c3dd7953cdab69bbee5538',
+  AsrFile(
+    'tokens.txt',
+    12858,
+    '9b938381a19a69bb279cdcfc299419f25a049ea1de192e0d10317274a0f20074',
   ),
-  (
-    name: 'tokens.txt',
-    bytes: 866987,
-    sha256: 'febeed8e568f92d9ca984580bc2e6b605b867dc5ba4486f9646de381b44a8226',
-  ),
-  (
-    name: 'silero_vad.onnx',
-    bytes: 643854,
-    sha256: '9e2449e1087496d8d4caba907f23e0bd3f78d91fa552479bb9c23ac09cbb1fd6',
+  AsrFile(
+    'silero_vad.onnx',
+    643854,
+    '9e2449e1087496d8d4caba907f23e0bd3f78d91fa552479bb9c23ac09cbb1fd6',
   ),
 ];
 
@@ -83,7 +100,16 @@ class AsrModel extends ChangeNotifier {
 
   int _downloadedBytes = 0;
   int get downloadedBytes => _downloadedBytes;
+
+  /// The download size, shown before downloading.
   int get totalBytes => files.fold(0, (sum, f) => sum + f.bytes);
+
+  /// The space the model takes once ready (Settings › Downloads).
+  int get diskBytes => files.fold(0, (sum, f) => sum + f.keptBytes);
+
+  /// Free space needed to download and unpack: a packed file and what it unpacks to are both on
+  /// disk until the unpack is checked.
+  int get requiredBytes => totalBytes + files.fold(0, (sum, f) => sum + (f.unpackedBytes ?? 0));
 
   Directory? _dir;
 
@@ -98,8 +124,8 @@ class AsrModel extends ChangeNotifier {
 
   Future<Directory> _folder() async => _dir ??= Directory('${(await _root()).path}/$version');
 
-  /// Reads the state from the files: ready when every file is complete; partial when some bytes
-  /// are there. Hashes are checked when a file is downloaded, not here.
+  /// Reads the state from the files: ready when every kept file is complete; partial when some
+  /// bytes are there. Hashes are checked when a file is downloaded or unpacked, not here.
   Future<void> refresh() async {
     if (_download == null) await _readState();
   }
@@ -108,11 +134,14 @@ class AsrModel extends ChangeNotifier {
     final dir = await _folder();
     var bytes = 0, complete = 0;
     for (final f in files) {
-      final file = File('${dir.path}/${f.name}');
-      final part = File('${file.path}.part');
-      if (await file.exists() && await file.length() == f.bytes) {
-        bytes += f.bytes;
+      final kept = File('${dir.path}/${f.kept}');
+      final download = File('${dir.path}/${f.name}');
+      final part = File('${download.path}.part');
+      if (await kept.exists() && await kept.length() == f.keptBytes) {
+        bytes += f.bytes; // progress counts downloads, so it stays within totalBytes
         complete++;
+      } else if (f.packed && await download.exists() && await download.length() == f.bytes) {
+        bytes += f.bytes; // downloaded, not yet unpacked
       } else if (await part.exists()) {
         bytes += await part.length();
       }
@@ -140,9 +169,12 @@ class AsrModel extends ChangeNotifier {
     try {
       for (final f in files) {
         if (_cancelled) break;
+        final kept = File('${dir.path}/${f.kept}');
+        if (await kept.exists() && await kept.length() == f.keptBytes) continue;
         final file = File('${dir.path}/${f.name}');
-        if (await file.exists() && await file.length() == f.bytes) continue;
-        await _fetch(f, file);
+        if (!(await file.exists() && await file.length() == f.bytes)) await _fetch(f, file);
+        if (_cancelled) break;
+        if (f.packed) await _unpack(f, file, kept);
       }
     } finally {
       _client?.close(force: true);
@@ -215,6 +247,27 @@ class AsrModel extends ChangeNotifier {
     }
   }
 
+  /// Decompresses a checked `.gz` on a background isolate into [kept], checking the result
+  /// against its pinned size and SHA-256, then deletes the `.gz` (research R4). A `.gz` left from
+  /// a closed app is checked again first, so it is never fetched twice.
+  Future<void> _unpack(AsrFile f, File packed, File kept) async {
+    final packedPath = packed.path, keptPath = kept.path;
+    final packedSha = f.sha256, keptBytes = f.unpackedBytes!, keptSha = f.unpackedSha256!;
+    final outcome =
+        await Isolate.run(() => _unpackFile(packedPath, keptPath, packedSha, keptBytes, keptSha));
+    switch (outcome) {
+      case _Unpack.done:
+        await packed.delete();
+      case _Unpack.badDownload:
+        if (await packed.exists()) await packed.delete();
+        throw const AsrModelException(AsrModelError.damaged);
+      case _Unpack.badResult:
+        throw const AsrModelException(AsrModelError.damaged);
+      case _Unpack.noSpace:
+        throw const AsrModelException(AsrModelError.noSpace);
+    }
+  }
+
   /// Stops the download; what was saved is kept for the next [download].
   void cancel() {
     if (_download == null) return;
@@ -233,12 +286,31 @@ class AsrModel extends ChangeNotifier {
   }
 
   /// A new model version replaces the old one: its folder is deleted when the new one starts.
-  Future<void> _deleteOtherVersions() async {
-    final root = await _root();
-    await for (final entry in root.list()) {
-      // Compared by name: list() joins paths with the platform's separator.
-      final name = entry.path.substring(root.path.length + 1);
-      if (entry is Directory && name != version) await entry.delete(recursive: true);
+  Future<void> _deleteOtherVersions() =>
+      removeOtherVersions(supportRoot: _supportRoot, version: version);
+
+  /// Deletes every model version but [version] (specs/007 FR-004, research R7). Called after the
+  /// first frame of each launch, so updating frees the previous model's space without opening
+  /// memorization. Never throws: what fails is tried again on the next launch.
+  static Future<void> removeOtherVersions(
+      {Future<Directory> Function()? supportRoot, String version = asrModelVersion}) async {
+    try {
+      final root =
+          Directory('${(await (supportRoot ?? getApplicationSupportDirectory)()).path}/asr');
+      if (!await root.exists()) return;
+      await for (final entry in root.list()) {
+        // Compared by name: list() joins paths with the platform's separator.
+        final name = entry.path.substring(root.path.length + 1);
+        if (entry is Directory && name != version) {
+          try {
+            await entry.delete(recursive: true);
+          } on FileSystemException {
+            // Kept for the next launch.
+          }
+        }
+      }
+    } on Object {
+      // No support directory, or it cannot be listed: nothing to free now.
     }
   }
 
@@ -246,4 +318,59 @@ class AsrModel extends ChangeNotifier {
     _state = s;
     notifyListeners();
   }
+}
+
+enum _Unpack { done, badDownload, badResult, noSpace }
+
+/// Runs on a background isolate: checks [packedPath] against [packedSha256], then streams it
+/// through gzip into `<keptPath>.part` while hashing, and renames it once it matches.
+Future<_Unpack> _unpackFile(
+    String packedPath, String keptPath, String packedSha256, int keptBytes, String keptSha256) async {
+  final packed = File(packedPath);
+  if ((await sha256.bind(packed.openRead()).first).toString() != packedSha256) {
+    return _Unpack.badDownload;
+  }
+  final part = File('$keptPath.part');
+  final digest = _DigestSink();
+  final hash = sha256.startChunkedConversion(digest);
+  final sink = part.openWrite();
+  var written = 0;
+  try {
+    await for (final chunk in packed.openRead().transform(gzip.decoder)) {
+      sink.add(chunk);
+      hash.add(chunk);
+      written += chunk.length;
+    }
+    await sink.close();
+  } on FileSystemException catch (e) {
+    await sink.close().catchError((Object _) {});
+    if (await part.exists()) await part.delete();
+    final code = e.osError?.errorCode;
+    return code == 28 /* ENOSPC */ || code == 112 /* ERROR_DISK_FULL */
+        ? _Unpack.noSpace
+        : _Unpack.badResult;
+  } on FormatException {
+    // Not gzip after all: the download is wrong, not the unpack.
+    await sink.close().catchError((Object _) {});
+    if (await part.exists()) await part.delete();
+    return _Unpack.badDownload;
+  }
+  hash.close();
+  if (written != keptBytes || digest.value.toString() != keptSha256) {
+    await part.delete();
+    return _Unpack.badResult;
+  }
+  await part.rename(keptPath);
+  return _Unpack.done;
+}
+
+/// Receives the digest of a chunked SHA-256.
+class _DigestSink implements Sink<Digest> {
+  late Digest value;
+
+  @override
+  void add(Digest data) => value = data;
+
+  @override
+  void close() {}
 }

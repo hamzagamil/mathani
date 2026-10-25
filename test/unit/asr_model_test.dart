@@ -14,8 +14,9 @@ class _FakeDevice extends DeviceChannel {
   Future<void> excludeFromBackup(String path) async => excluded.add(path);
 }
 
-/// The model download (specs/006 T033, contracts/memorization-engine.md › AsrModel) against a
-/// localhost server: states, `Range` resume, hash checks, delete and version change.
+/// The model download (specs/006 T033, contracts/memorization-engine.md › AsrModel; specs/007
+/// T010, T034) against a localhost server: states, `Range` resume, hash checks, the packed model
+/// and its unpack, delete, version change and the clean-up after updating.
 void main() {
   late HttpServer server;
   late Directory support;
@@ -27,15 +28,27 @@ void main() {
   Uint8List bytes(int n, int seed) => Uint8List.fromList([for (var i = 0; i < n; i++) (i * seed) & 0xFF]);
 
   final contents = {'a.onnx': bytes(70000, 7), 'b.onnx': bytes(30000, 13), 'tokens.txt': bytes(500, 3)};
-  final files = [
+  final plainFiles = [
     for (final MapEntry(key: name, value: b) in contents.entries)
-      (name: name, bytes: b.length, sha256: sha256.convert(b).toString()),
+      AsrFile(name, b.length, sha256.convert(b).toString()),
   ];
+
+  // A packed file, as the Khatma model is shipped: model.onnx.gz unpacks to model.onnx.
+  final unpacked = bytes(40000, 11);
+  final packedBytes = Uint8List.fromList(gzip.encode(unpacked));
+  AsrFile packedFile({String? unpackedSha}) => AsrFile(
+        'model.onnx.gz',
+        packedBytes.length,
+        sha256.convert(packedBytes).toString(),
+        unpackedBytes: unpacked.length,
+        unpackedSha256: unpackedSha ?? sha256.convert(unpacked).toString(),
+      );
 
   setUp(() async {
     served
       ..clear()
-      ..addAll(contents);
+      ..addAll(contents)
+      ..['model.onnx.gz'] = packedBytes;
     ranges.clear();
     ignoreRange = false;
     device = _FakeDevice();
@@ -66,10 +79,10 @@ void main() {
     support.deleteSync(recursive: true);
   });
 
-  AsrModel model({String version = 'v1'}) => AsrModel(
+  AsrModel model({String version = 'v1', List<AsrFile>? files}) => AsrModel(
         device: device,
         version: version,
-        files: files,
+        files: files ?? plainFiles,
         base: Uri.parse('http://127.0.0.1:${server.port}/release/'),
         supportRoot: () async => support,
       );
@@ -86,7 +99,7 @@ void main() {
     expect(m.state, AsrModelState.ready);
     expect(m.downloadedBytes, m.totalBytes);
     expect(m.modelDir, '${support.path}/asr/v1');
-    for (final f in files) {
+    for (final f in plainFiles) {
       expect(File('${m.modelDir}/${f.name}').readAsBytesSync(), contents[f.name]);
     }
     expect(ranges, [null, null, null]);
@@ -153,5 +166,79 @@ void main() {
     await next.download();
     expect(next.state, AsrModelState.ready);
     expect(Directory('${support.path}/asr/v1').existsSync(), isFalse);
+  });
+
+  group('packed file', () {
+    test('downloads, unpacks, checks and keeps only the unpacked file', () async {
+      final f = packedFile();
+      final m = model(files: [f, plainFiles.last]);
+      expect(m.totalBytes, packedBytes.length + 500);
+      expect(m.diskBytes, unpacked.length + 500);
+      expect(m.requiredBytes, packedBytes.length + 500 + unpacked.length);
+      await m.download();
+      expect(m.state, AsrModelState.ready);
+      expect(m.downloadedBytes, m.totalBytes);
+      expect(File('${m.modelDir}/model.onnx').readAsBytesSync(), unpacked);
+      expect(File('${m.modelDir}/model.onnx.gz').existsSync(), isFalse);
+      expect(File('${m.modelDir}/model.onnx.part').existsSync(), isFalse);
+    });
+
+    test('an unpack that does not match is deleted and reported damaged', () async {
+      final m = model(files: [packedFile(unpackedSha: '0' * 64)]);
+      await expectLater(m.download(), throwsA(isA<AsrModelException>()
+          .having((e) => e.error, 'error', AsrModelError.damaged)));
+      expect(File('${support.path}/asr/v1/model.onnx').existsSync(), isFalse);
+      expect(File('${support.path}/asr/v1/model.onnx.part').existsSync(), isFalse);
+      expect(m.state, isNot(AsrModelState.ready));
+    });
+
+    test('a downloaded .gz left by a closed app is unpacked without fetching it again', () async {
+      final dir = Directory('${support.path}/asr/v1')..createSync(recursive: true);
+      File('${dir.path}/model.onnx.gz').writeAsBytesSync(packedBytes);
+      final m = model(files: [packedFile()]);
+      await m.refresh();
+      expect(m.state, AsrModelState.partial);
+      expect(m.downloadedBytes, packedBytes.length);
+      await m.download();
+      expect(m.state, AsrModelState.ready);
+      expect(ranges, isEmpty);
+      expect(File('${dir.path}/model.onnx').readAsBytesSync(), unpacked);
+    });
+
+    test('a .gz that is not gzip is deleted and reported damaged', () async {
+      final dir = Directory('${support.path}/asr/v1')..createSync(recursive: true);
+      final junk = bytes(packedBytes.length, 5);
+      File('${dir.path}/model.onnx.gz').writeAsBytesSync(junk);
+      final m = model(files: [
+        AsrFile('model.onnx.gz', junk.length, sha256.convert(junk).toString(),
+            unpackedBytes: unpacked.length, unpackedSha256: sha256.convert(unpacked).toString()),
+      ]);
+      await expectLater(m.download(), throwsA(isA<AsrModelException>()
+          .having((e) => e.error, 'error', AsrModelError.damaged)));
+      expect(File('${dir.path}/model.onnx.gz').existsSync(), isFalse);
+    });
+  });
+
+  group('removeOtherVersions', () {
+    test('deletes every other version and keeps the current one', () async {
+      File('${support.path}/asr/asr-tarteel-tiny-v1/encoder.int8.onnx')
+        ..createSync(recursive: true)
+        ..writeAsBytesSync([1, 2, 3]);
+      File('${support.path}/asr/asr-khatma-v1/tokens.txt')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('t');
+      await AsrModel.removeOtherVersions(supportRoot: () async => support);
+      expect(Directory('${support.path}/asr/asr-tarteel-tiny-v1').existsSync(), isFalse);
+      expect(File('${support.path}/asr/asr-khatma-v1/tokens.txt').existsSync(), isTrue);
+    });
+
+    test('completes when there is no model folder', () async {
+      await AsrModel.removeOtherVersions(supportRoot: () async => support);
+      expect(Directory('${support.path}/asr').existsSync(), isFalse);
+    });
+
+    test('never throws, even without a support directory', () async {
+      await AsrModel.removeOtherVersions(supportRoot: () async => throw const FileSystemException('none'));
+    });
   });
 }
