@@ -59,10 +59,12 @@ class OpfsFileStore implements FileStore {
   @override
   Future<void> append(StoreFile file, Stream<List<int>> chunks) async {
     final h = await _file(file, create: true);
-    final writable = await _guard(() => h!.createWritable(_keep()).toDart);
+    // Safari before 26 (all of iOS 18 and earlier) cannot write from the page: a worker does.
+    if (forceWorkerWrites || !h!.has('createWritable')) return _workerAppend(file, chunks);
+    final writable = await _guard(() => h.createWritable(_keep()).toDart);
     try {
       await _guard(() async {
-        await writable.seek((await h!.getFile().toDart).size).toDart;
+        await writable.seek((await h.getFile().toDart).size).toDart;
         await for (final chunk in chunks) {
           final bytes = chunk is Uint8List ? chunk : Uint8List.fromList(chunk);
           await writable.write(bytes.toJS).toDart;
@@ -71,6 +73,63 @@ class OpfsFileStore implements FileStore {
     } finally {
       try {
         await writable.close().toDart;
+      } on Object {
+        // Already closed by a failed write.
+      }
+    }
+  }
+
+  /// Builds that test the worker path in Chrome: `--dart-define=MATHANI_OPFS_WORKER=true`.
+  static const forceWorkerWrites = bool.fromEnvironment('MATHANI_OPFS_WORKER');
+
+  _Worker? _writer;
+  int _seq = 0;
+  int _writes = 0;
+  final _replies = <int, Completer<void>>{};
+
+  /// Sends one message to web/opfs_writer.js and waits for its answer, so a failed write stops
+  /// the append and memory stays bounded to one chunk in flight.
+  Future<void> _ask(Map<String, Object?> message, [JSArrayBuffer? transfer]) {
+    final writer = _writer ??= _Worker('opfs_writer.js'.toJS)
+      ..onmessage = ((_MessageEvent e) {
+        final reply = e.data as JSObject;
+        final done = _replies.remove((reply['seq'] as JSNumber).toDartInt);
+        if (done == null) return;
+        if ((reply['ok'] as JSBoolean).toDart) {
+          done.complete();
+        } else {
+          final error = (reply['error'] as JSString?)?.toDart ?? 'write failed';
+          done.completeError(error.contains('Quota') ? const NoSpaceException() : StateError(error));
+        }
+      }).toJS;
+    final seq = ++_seq;
+    final done = _replies[seq] = Completer<void>();
+    final js = message.jsify()! as JSObject..['seq'] = seq.toJS;
+    if (transfer == null) {
+      writer.postMessage(js);
+    } else {
+      js['buffer'] = transfer;
+      writer.postMessage(js, [transfer].toJS);
+    }
+    return done.future;
+  }
+
+  Future<void> _workerAppend(StoreFile file, Stream<List<int>> chunks) async {
+    final id = ++_writes;
+    final dirs = [
+      file.root.name,
+      ...file.dir.split('/').where((s) => s.isNotEmpty),
+    ];
+    await _ask({'type': 'open', 'id': id, 'dirs': dirs, 'name': _name(file.path)});
+    try {
+      await for (final chunk in chunks) {
+        // A copy the worker can own: transferring detaches the buffer it came from.
+        final bytes = Uint8List.fromList(chunk);
+        await _ask({'type': 'write', 'id': id}, bytes.buffer.toJS);
+      }
+    } finally {
+      try {
+        await _ask({'type': 'close', 'id': id});
       } on Object {
         // Already closed by a failed write.
       }
@@ -262,6 +321,17 @@ extension type _AsyncIterator._(JSObject _) implements JSObject {
 extension type _IteratorStep._(JSObject _) implements JSObject {
   external bool get done;
   external _Handle get value;
+}
+
+@JS('Worker')
+extension type _Worker._(JSObject _) implements JSObject {
+  external factory _Worker(JSString url);
+  external set onmessage(JSFunction handler);
+  external void postMessage(JSAny? message, [JSArray<JSAny?> transfer]);
+}
+
+extension type _MessageEvent._(JSObject _) implements JSObject {
+  external JSAny? get data;
 }
 
 @JS('URL')
