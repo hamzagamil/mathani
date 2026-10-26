@@ -61,6 +61,12 @@ class FakeAudioEngine implements AudioEngine {
     window.add(item);
   }
 
+  /// Times the player was primed inside a tap.
+  int primes = 0;
+
+  @override
+  void prime() => primes++;
+
   @override
   Future<void> removeFirst() async {
     _change();

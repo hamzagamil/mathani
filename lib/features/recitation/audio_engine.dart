@@ -48,6 +48,10 @@ abstract interface class AudioEngine {
   /// Removes the first item of the window (it has already played).
   Future<void> removeFirst();
 
+  /// Called synchronously inside the tap that starts playback, before anything is fetched: lets
+  /// a browser that only plays audio started by a tap (iOS Safari) play this player later.
+  void prime();
+
   Future<void> play();
   Future<void> pause();
   Future<void> stop();
@@ -135,6 +139,10 @@ class JustAudioEngine implements AudioEngine {
         await _player.addAudioSource(AudioSource.uri(uri, tag: item));
         _uris.add(uri);
       });
+
+  /// Phones play without a tap.
+  @override
+  void prime() {}
 
   @override
   Future<void> removeFirst() => _serial(() async {

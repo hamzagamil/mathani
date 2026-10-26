@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../data/models.dart';
 import '../../data/quran_repository.dart';
+import '../../platform/audio_engine.dart';
 import '../../platform/file_store.dart';
 import '../../shared/reader_state.dart';
 import 'audio_engine.dart';
@@ -59,7 +60,7 @@ class RecitationController extends ChangeNotifier with WidgetsBindingObserver {
     required this.reader,
     required this.fetcher,
     AudioEngine Function()? engine,
-  }) : _engineFactory = engine ?? JustAudioEngine.new {
+  }) : _engineFactory = engine ?? newAudioEngine {
     _order = RecitedOrder(
       ayahCount: (s) => quran.surahList[s - 1].ayahCount,
       // Reciters recorded one surah per file recite the basmala inside ayah 1 (specs/006 R18).
@@ -159,6 +160,7 @@ class RecitationController extends ChangeNotifier with WidgetsBindingObserver {
   Future<void> playFrom(AyahRef ref) async {
     final reciter = _session?.reciter ?? _preferredReciter;
     if (reciter == null) return; // no catalogue
+    _player.prime(); // still inside the tap (specs/008: iOS Safari)
     _clearPreview(); // the recitation's window replaces the sample's
     _endedTimer?.cancel();
     _skipTimer?.cancel();
@@ -471,6 +473,7 @@ class RecitationController extends ChangeNotifier with WidgetsBindingObserver {
   /// recitation is on.
   Future<void> previewReciter(Reciter r) async {
     if (_session != null) return;
+    _player.prime(); // still inside the tap (specs/008: iOS Safari)
     if (_preview != null) {
       _clearPreview();
       await _engine?.stop();
