@@ -9,6 +9,9 @@ import 'device.dart' show NetworkState, WebSupport;
 /// storage, and actions that do nothing.
 bool _keepAsked = false;
 
+/// "Plenty" where the browser cannot say: 1 TB, written out (a shift would wrap in JavaScript).
+const _unknownFree = 1000000000000;
+
 /// The mistake tone (research R11).
 const mistakeToneHz = 880.0;
 const mistakeToneMs = 120;
@@ -34,13 +37,24 @@ class DeviceChannel {
     return NetworkState.unmetered;
   }
 
-  Future<int> freeBytes() async => 1 << 40;
+  /// What this site may still store: the browser's quota less what it uses (research R7). Never
+  /// a shifted constant: in the JavaScript build (Safari, Firefox) `1 << 40` is `1 << 8`.
+  Future<int> freeBytes() async {
+    try {
+      final e = await _navigator.storage.estimate().toDart;
+      final free = (e.quota ?? 0) - (e.usage ?? 0);
+      return free < 0 ? 0 : free.toInt();
+    } on Object {
+      return _unknownFree; // no estimate: let the download try, and report a full quota if hit
+    }
+  }
 
   /// Browsers have no backups to keep files out of.
   Future<void> excludeFromBackup(String path) async {}
 
   /// Phones only: browsers answer through [webSupport].
-  Future<({bool arm64, int ramBytes})> deviceSupport() async => (arm64: true, ramBytes: 1 << 40);
+  Future<({bool arm64, int ramBytes})> deviceSupport() async =>
+      (arm64: true, ramBytes: _unknownFree);
 
   /// What memorization needs from the browser (research R10): WebAssembly SIMD, AudioWorklet
   /// for the microphone, the private file system for the model, and the memory where reported.
@@ -143,7 +157,13 @@ extension type _Gain._(JSObject _) implements JSObject {
   external void connect(JSObject node);
 }
 
+extension type _Estimate._(JSObject _) implements JSObject {
+  external double? get quota;
+  external double? get usage;
+}
+
 extension type _Storage._(JSObject _) implements JSObject {
+  external JSPromise<_Estimate> estimate();
   external JSPromise<JSBoolean> persisted();
   external JSPromise<JSBoolean> persist();
 }
