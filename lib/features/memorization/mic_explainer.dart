@@ -1,11 +1,12 @@
 // Why memorization needs the microphone, before the system asks (specs/006 FR-010,
 // contracts/memorization-ui.md › Microphone explainer).
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 import '../../app/l10n/app_localizations.dart';
 import '../../app/theme/app_theme.dart';
 import '../../app/theme/tokens.dart';
-import '../../shared/device_channel.dart';
+import '../../platform/device.dart';
 import '../../shared/mathani_icons.dart';
 
 /// True when the reader chose Continue: the system prompt comes next.
@@ -43,14 +44,17 @@ Future<bool> showMicExplainer(BuildContext context) async {
 }
 
 /// «لا يمكن بدء الحفظ دون الميكروفون.», with a way to the system settings where the
-/// microphone can be allowed again.
+/// microphone can be allowed again. A page cannot open the browser's settings, so in a browser
+/// it says where to allow it instead (specs/008 FR-023).
 void showMicDenied(BuildContext context, {DeviceChannel device = const DeviceChannel()}) {
   final l10n = AppLocalizations.of(context);
   ScaffoldMessenger.of(context)
     ..hideCurrentSnackBar()
     ..showSnackBar(SnackBar(
-      content: Text(l10n.micDenied),
-      duration: const Duration(seconds: 6),
-      action: SnackBarAction(label: l10n.openSystemSettings, onPressed: device.openAppSettings),
+      content: Text(kIsWeb ? l10n.micDeniedBrowser : l10n.micDenied),
+      duration: const Duration(seconds: kIsWeb ? 10 : 6),
+      action: kIsWeb
+          ? null
+          : SnackBarAction(label: l10n.openSystemSettings, onPressed: device.openAppSettings),
     ));
 }

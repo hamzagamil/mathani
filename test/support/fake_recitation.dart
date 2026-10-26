@@ -1,12 +1,14 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:mathani/data/models.dart';
 import 'package:mathani/features/recitation/audio_engine.dart';
 import 'package:mathani/features/recitation/ayah_fetcher.dart';
 import 'package:mathani/features/recitation/recitation_controller.dart';
 import 'package:mathani/features/recitation/recited_item.dart';
+import 'package:mathani/platform/file_store.dart';
 import 'package:mathani/shared/reader_state.dart';
+
+import 'memory_file_store.dart';
 
 /// A player that only records what it is told and lets tests end items (specs/004 tests).
 class FakeAudioEngine implements AudioEngine {
@@ -38,7 +40,7 @@ class FakeAudioEngine implements AudioEngine {
   Stream<EngineEvent> get events => _events.stream;
 
   @override
-  Future<void> setWindow(List<(RecitedItem, File)> items, {int currentIndex = 0}) async {
+  Future<void> setWindow(List<(RecitedItem, StoreFile)> items, {int currentIndex = 0}) async {
     _change();
     window
       ..clear()
@@ -54,7 +56,7 @@ class FakeAudioEngine implements AudioEngine {
   }
 
   @override
-  Future<void> append(RecitedItem item, File file) async {
+  Future<void> append(RecitedItem item, StoreFile file) async {
     _change();
     window.add(item);
   }
@@ -108,8 +110,7 @@ class FakeFetcher extends AyahFetcher {
   FakeFetcher()
       : super(
           recordingSize: (_, _, _) async => 1,
-          cacheRoot: () async => Directory.systemTemp,
-          supportRoot: () async => Directory.systemTemp,
+          store: MemoryFileStore(),
         );
 
   /// Every resolve, in call order: (reciter id, item).
@@ -117,7 +118,7 @@ class FakeFetcher extends AyahFetcher {
   final failing = <RecitedItem, FetchError>{};
   final holding = <RecitedItem>{};
   bool holdAll = false;
-  final _held = <RecitedItem, Completer<File>>{};
+  final _held = <RecitedItem, Completer<StoreFile>>{};
 
   /// Reciters whose files are "not downloaded" while offline.
   final offlineReciters = <String>{};
@@ -125,7 +126,7 @@ class FakeFetcher extends AyahFetcher {
   List<RecitedItem> get resolvedItems => [for (final (_, i) in resolved) i];
 
   @override
-  Future<File> resolve(Reciter r, RecitedItem item, {bool priority = true}) {
+  Future<StoreFile> resolve(Reciter r, RecitedItem item, {bool priority = true}) {
     resolved.add((r.id, item));
     if (offlineReciters.contains(r.id)) {
       return Future.error(const FetchException(FetchError.offline));
@@ -133,15 +134,15 @@ class FakeFetcher extends AyahFetcher {
     final error = failing[item];
     if (error != null) return Future.error(FetchException(error));
     if (holdAll || holding.contains(item)) {
-      return (_held[item] ??= Completer<File>()).future;
+      return (_held[item] ??= Completer<StoreFile>()).future;
     }
-    return Future.value(File('${r.id}-$item.mp3'));
+    return Future.value(StoreFile(StoreRoot.cache, '${r.id}-$item.mp3'));
   }
 
   /// Answers a held resolve.
   void release(RecitedItem item) {
     holding.remove(item);
-    _held.remove(item)?.complete(File('$item.mp3'));
+    _held.remove(item)?.complete(StoreFile(StoreRoot.cache, '$item.mp3'));
   }
 
   /// Fails a held resolve.
@@ -154,10 +155,11 @@ class FakeFetcher extends AyahFetcher {
   void cancelPrefetch() {}
 
   @override
-  void protect(Iterable<String> paths) {}
+  void protect(Iterable<StoreFile> files) {}
 
   @override
-  Future<File> cacheFile(String reciter, int surah, int ayah) async => File('$reciter-$surah-$ayah');
+  Future<StoreFile> cacheFile(String reciter, int surah, int ayah) async =>
+      StoreFile(StoreRoot.cache, '$reciter-$surah-$ayah');
 }
 
 /// A recitation controller over [reader] with a fake engine and fetcher.

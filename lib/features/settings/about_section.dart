@@ -53,6 +53,13 @@ class AboutSection extends StatelessWidget {
           // Isolated left-to-right so + and dots keep their order in Arabic.
           subtitle: Text(l10n.versionLabel(_ltr(appVersion)), style: caption),
         ),
+        // There is no account: in a browser, the reader's data lives in that browser only
+        // (specs/008 FR-015).
+        if (kIsWeb)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(Space.s4, 0, Space.s4, Space.s2),
+            child: Text(l10n.webDataKeptHere, style: caption),
+          ),
         Padding(
           padding: const EdgeInsets.fromLTRB(Space.s4, Space.s2, Space.s4, 0),
           child: Text(l10n.sourcesTitle, style: TypeScale.titleSm.copyWith(color: colors.accentInk)),

@@ -1,3 +1,6 @@
 tags:
   # Pixel goldens depend on the platform's font rasteriser; CI runs `--exclude-tags golden`.
   golden:
+  # Browser-only tests in test/web (specs/008): `flutter test --platform chrome --tags web`.
+  # VM runs use `--exclude-tags web`.
+  web:

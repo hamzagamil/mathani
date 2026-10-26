@@ -1,13 +1,11 @@
 import 'package:flutter/services.dart';
 
-/// Whether the device is online, and whether its connection is metered
-/// (specs/004-ayah-recitations/contracts/audio-storage.md › Platform channel).
-enum NetworkState { none, unmetered, metered }
+import 'device.dart' show NetworkState, WebSupport;
 
 /// Network type, free storage and backup exclusion, from a small platform channel implemented
 /// in MainActivity.kt and AppDelegate.swift (research R8), plus what memorization needs (specs/006
 /// contracts/memorization-engine.md › Device channel additions). Where the channel is missing
-/// (tests, the browser preview) it reports an unmetered connection, ample storage and a supported
+/// (tests) it reports an unmetered connection, ample storage and a supported
 /// device, and the actions do nothing.
 class DeviceChannel {
   const DeviceChannel();
@@ -60,6 +58,12 @@ class DeviceChannel {
       return (arm64: true, ramBytes: 1 << 40);
     }
   }
+
+  /// Browsers only: app data on phones is the app's own (specs/008 FR-014).
+  Future<void> keepBrowserData() async {}
+
+  /// Null on phones: browsers only (specs/008 research R10).
+  Future<WebSupport?> webSupport() async => null;
 
   /// Opens the app's page in the system Settings, where the microphone can be allowed.
   Future<void> openAppSettings() => _invoke('openAppSettings');

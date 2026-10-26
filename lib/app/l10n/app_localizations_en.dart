@@ -822,4 +822,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get openSystemSettings => 'Open Settings';
+
+  @override
+  String get webDataKeptHere =>
+      'Your bookmarks, settings and downloads are kept only in this browser.';
+
+  @override
+  String memorizationBrowserUnsupported(String browsers) {
+    return 'Memorization isn\'t available in this browser. It works in $browsers.';
+  }
+
+  @override
+  String get micDeniedBrowser =>
+      'Allow the microphone for get.mthani.app in your browser\'s site settings, then try again.';
+
+  @override
+  String get pageNeedsConnection =>
+      'This page needs a connection the first time you open it.';
 }

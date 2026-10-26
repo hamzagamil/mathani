@@ -1,14 +1,16 @@
 // Gets ayah recordings onto the device (specs/004-ayah-recitations/contracts/audio-storage.md).
 // The player only ever plays a local file this class has checked against the catalogue size;
-// that is how "never skip an ayah" holds the same on both platforms (research R5).
+// that is how "never skip an ayah" holds the same on both platforms (research R5). Files go
+// through FileStore and requests through package:http, so the same rules hold in browsers
+// (specs/008 research R7, R18a).
 import 'dart:async';
 import 'dart:collection';
-import 'dart:io';
 
-import 'package:path_provider/path_provider.dart';
+import 'package:http/http.dart' as http;
 
 import '../../data/models.dart';
-import '../../shared/device_channel.dart';
+import '../../platform/device.dart';
+import '../../platform/file_store.dart';
 import 'recited_item.dart';
 
 /// Ayat kept ready ahead of the one playing.
@@ -52,28 +54,23 @@ class AyahFetcher {
     required this.recordingSize,
     this.clipRange = _noClips,
     this.device = const DeviceChannel(),
-    Future<Directory> Function()? cacheRoot,
-    Future<Directory> Function()? supportRoot,
-    HttpClient Function()? httpClient,
-  })  : _cacheRoot = cacheRoot ?? getApplicationCacheDirectory,
-        _supportRoot = supportRoot ?? getApplicationSupportDirectory,
-        _newClient = httpClient ?? HttpClient.new;
+    FileStore? store,
+    http.Client Function()? httpClient,
+  })  : store = store ?? fileStore(),
+        _newClient = httpClient ?? http.Client.new;
 
   final RecordingSize recordingSize;
   final ClipRange clipRange;
   final DeviceChannel device;
-  final Future<Directory> Function() _cacheRoot;
-  final Future<Directory> Function() _supportRoot;
-  final HttpClient Function() _newClient;
+  final FileStore store;
+  final http.Client Function() _newClient;
 
-  /// Created on first use: none exists before the first play (and none in the web preview).
-  late final HttpClient _client = _newClient()
-    ..connectionTimeout = fetchTimeout
-    ..idleTimeout = fetchTimeout;
+  /// Created on first use: none exists before the first play.
+  late final http.Client _client = _newClient();
   bool _clientUsed = false;
 
-  final _inFlight = <String, Future<File>>{};
-  final _protected = <String>{};
+  final _inFlight = <StoreFile, Future<StoreFile>>{};
+  final _protected = <StoreFile>{};
   final _gate = _RequestGate(maxConcurrentRequests);
   final _damaged = StreamController<(String, int)>.broadcast();
   int _prefetchGeneration = 0;
@@ -82,63 +79,47 @@ class AyahFetcher {
   /// A downloaded file failed its size check and was deleted: (reciter, surah).
   Stream<(String, int)> get onDamaged => _damaged.stream;
 
-  /// Creates the directories and deletes stale `.part` files. Runs on first use.
+  /// Deletes stale `.part` files. Runs on first use.
   Future<void> init() => _ready ??= () async {
-        final support = await _dir(_supportRoot, create: true);
-        await device.excludeFromBackup(support.path);
-        for (final root in [await _dir(_cacheRoot, create: true), support]) {
-          await for (final f in root.list(recursive: true)) {
-            if (f is File && f.path.endsWith('.part')) {
-              try {
-                await f.delete();
-              } on FileSystemException {
-                // In use by another isolate: it is cleaned up next launch.
-              }
-            }
+        for (final root in StoreRoot.values) {
+          for (final e in await store.list(root, _dirName, recursive: true)) {
+            // One still being written by another isolate fails to delete: it goes next launch.
+            if (!e.isDir && e.path.endsWith('.part')) await store.delete(StoreFile(root, e.path));
           }
         }
       }();
 
   // --- Paths ---------------------------------------------------------------------------------
 
-  Future<Directory> _dir(Future<Directory> Function() root, {bool create = false}) async {
-    final d = Directory('${(await root()).path}${Platform.pathSeparator}recitations');
-    if (create) await d.create(recursive: true);
-    return d;
-  }
+  static const _dirName = 'recitations';
 
-  Future<File> cacheFile(String reciter, int surah, int ayah) async => File(
-      '${(await _dir(_cacheRoot)).path}/$reciter/${pad3(surah)}${pad3(ayah)}.mp3');
+  Future<StoreFile> cacheFile(String reciter, int surah, int ayah) async =>
+      StoreFile(StoreRoot.cache, '$_dirName/$reciter/${pad3(surah)}${pad3(ayah)}.mp3');
 
-  Future<File> downloadFile(String reciter, int surah, int ayah) async =>
-      File('${await downloadDir(reciter, surah)}/${pad3(ayah)}.mp3');
+  Future<StoreFile> downloadFile(String reciter, int surah, int ayah) async =>
+      StoreFile(StoreRoot.support, '${await downloadDir(reciter, surah)}/${pad3(ayah)}.mp3');
 
+  /// A surah's downloads, relative to the support root.
   Future<String> downloadDir(String reciter, int surah) async =>
-      '${(await _dir(_supportRoot)).path}/$reciter/${pad3(surah)}';
+      '${await reciterDownloads(reciter)}/${pad3(surah)}';
 
-  Future<File> basmalaFile(String reciter) async =>
-      File('${(await _dir(_supportRoot)).path}/$reciter/basmala.mp3');
+  Future<StoreFile> basmalaFile(String reciter) async =>
+      StoreFile(StoreRoot.support, '${await reciterDownloads(reciter)}/basmala.mp3');
 
-  Future<Directory> reciterDownloads(String reciter) async =>
-      Directory('${(await _dir(_supportRoot)).path}/$reciter');
+  /// A reciter's downloads, relative to the support root.
+  Future<String> reciterDownloads(String reciter) async => '$_dirName/$reciter';
 
-  /// Root of all downloads, for the downloads scan.
-  Future<Directory> downloadsRoot() => _dir(_supportRoot, create: true);
+  /// Root of all downloads, relative to the support root, for the downloads scan.
+  String get downloadsRoot => _dirName;
 
   /// Whether [file] exists with exactly [bytes] bytes.
-  static Future<bool> isValid(File file, int bytes) async {
-    try {
-      return await file.length() == bytes;
-    } on FileSystemException {
-      return false;
-    }
-  }
+  Future<bool> isValid(StoreFile file, int bytes) async => await store.length(file) == bytes;
 
   // --- Resolve -------------------------------------------------------------------------------
 
   /// A checked local file for [item]: the download, else the recent cache, else the network
   /// (primary, then mirror). Throws [FetchException].
-  Future<File> resolve(Reciter r, RecitedItem item, {bool priority = true}) async {
+  Future<StoreFile> resolve(Reciter r, RecitedItem item, {bool priority = true}) async {
     await init();
     final (s, a) = item.isBasmala ? (1, 1) : (item.surah, item.ayah);
     final bytes = await recordingSize(r.id, s, a);
@@ -148,20 +129,22 @@ class AyahFetcher {
       await downloadFile(r.id, s, a),
     ];
     for (final f in downloaded) {
-      if (await f.exists()) {
-        if (await isValid(f, bytes)) return f;
-        await _deleteQuietly(f);
+      final length = await store.length(f);
+      if (length != null) {
+        if (length == bytes) return f;
+        await store.delete(f);
         _damaged.add((r.id, item.isBasmala ? item.surah : s));
       }
     }
 
     final cached = await cacheFile(r.id, s, a);
-    if (await cached.exists()) {
-      if (await isValid(cached, bytes)) {
-        await _touch(cached);
+    final length = await store.length(cached);
+    if (length != null) {
+      if (length == bytes) {
+        await store.touch(cached);
         return cached;
       }
-      await _deleteQuietly(cached);
+      await store.delete(cached);
     }
 
     final file = await fetch(r, s, a, cached, bytes: bytes, priority: priority);
@@ -171,11 +154,11 @@ class AyahFetcher {
 
   /// Downloads `<SSS><AAA>.mp3` of [r] into [target] (via `.part`), checked against [bytes].
   /// Tries the primary host, then the mirror once if [r] has one. For a reciter recorded one
-  /// surah per file, the ayah is its byte range of the surah file. Shares one request per target
-  /// path.
-  Future<File> fetch(Reciter r, int surah, int ayah, File target,
+  /// surah per file, the ayah is its byte range of the surah file. Shares one request per target.
+  /// Throws [FetchException], or [NoSpaceException] when storage is full.
+  Future<StoreFile> fetch(Reciter r, int surah, int ayah, StoreFile target,
       {required int bytes, bool priority = false}) {
-    return _inFlight[target.path] ??= () async {
+    return _inFlight[target] ??= () async {
       try {
         if (await device.networkState() == NetworkState.none) {
           throw const FetchException(FetchError.offline);
@@ -196,60 +179,50 @@ class AyahFetcher {
         }
         throw const FetchException(FetchError.fetchFailed);
       } finally {
-        unawaited(_inFlight.remove(target.path));
+        unawaited(_inFlight.remove(target));
       }
     }();
   }
 
-  Future<bool> _get(Uri url, File target, int bytes,
+  Future<bool> _get(Uri url, StoreFile target, int bytes,
       {({int start, int end, int total})? clip}) async {
-    final part = File('${target.path}.part');
+    final part = target.part;
     try {
-      await target.parent.create(recursive: true);
+      await store.delete(part);
       _clientUsed = true;
-      final request = await _client.getUrl(url);
-      if (clip != null) {
-        request.headers.set(HttpHeaders.rangeHeader, 'bytes=${clip.start}-${clip.end - 1}');
-      }
-      final response = await request.close().timeout(fetchTimeout);
-      // A clip needs exactly its range of the file the catalogue measured: a whole file (range
-      // ignored), another range or a replaced file is a failure, never a partial accept.
-      final expected = clip == null
-          ? null
-          : 'bytes ${clip.start}-${clip.end - 1}/${clip.total}';
-      final accepted = clip == null
-          ? response.statusCode == HttpStatus.ok
-          : response.statusCode == HttpStatus.partialContent &&
-              response.headers.value(HttpHeaders.contentRangeHeader) == expected;
-      if (!accepted) {
-        await response.drain<void>();
+      final request = http.Request('GET', url);
+      if (clip != null) request.headers['range'] = 'bytes=${clip.start}-${clip.end - 1}';
+      final response = await _client.send(request).timeout(fetchTimeout);
+      if (!_accepted(response, clip)) {
+        await response.stream.drain<void>();
         return false;
       }
-      final sink = part.openWrite();
-      try {
-        await sink.addStream(response.timeout(fetchTimeout));
-      } finally {
-        await sink.close();
-      }
+      await store.append(part, response.stream.timeout(fetchTimeout));
       if (!await isValid(part, bytes)) {
-        await _deleteQuietly(part);
+        await store.delete(part);
         return false;
       }
-      await part.rename(target.path);
+      await store.rename(part, target);
       return true;
-    } on FileSystemException catch (e) {
-      await _deleteQuietly(part);
-      if (_isNoSpace(e)) rethrow;
-      return false;
+    } on NoSpaceException {
+      await store.delete(part);
+      rethrow;
     } on Object {
-      await _deleteQuietly(part);
+      await store.delete(part);
       return false;
     }
   }
 
-  static bool _isNoSpace(FileSystemException e) {
-    final code = e.osError?.errorCode;
-    return code == 28 /* ENOSPC */ || code == 112 /* ERROR_DISK_FULL */;
+  /// A clip needs exactly its range of the file the catalogue measured: a whole file (range
+  /// ignored), another range or a replaced file is a failure, never a partial accept. Browsers
+  /// hide Content-Range from hosts that do not expose it (everyayah.com, quranicaudio.com); then
+  /// the range's length must match (specs/008 research R18a).
+  static bool _accepted(http.StreamedResponse response, ({int start, int end, int total})? clip) {
+    if (clip == null) return response.statusCode == 200;
+    if (response.statusCode != 206) return false;
+    final range = response.headers['content-range'];
+    if (range != null) return range == 'bytes ${clip.start}-${clip.end - 1}/${clip.total}';
+    return response.contentLength == clip.end - clip.start;
   }
 
   // --- Prefetch ------------------------------------------------------------------------------
@@ -272,101 +245,50 @@ class AyahFetcher {
 
   void cancelPrefetch() => _prefetchGeneration++;
 
-  /// Paths the cache trim must keep: the current and next items.
-  void protect(Iterable<String> paths) {
+  /// Files the cache trim must keep: the current and next items.
+  void protect(Iterable<StoreFile> files) {
     _protected
       ..clear()
-      ..addAll(paths.map(_key));
+      ..addAll(files);
   }
-
-  /// One spelling per path, so paths built here match those listed from disk on Windows.
-  static String _key(String path) => Platform.isWindows ? path.replaceAll('/', r'\') : path;
 
   // --- Cache ---------------------------------------------------------------------------------
 
-  Future<List<File>> _cacheFiles() async {
-    final root = await _dir(_cacheRoot);
-    final files = <File>[];
-    try {
-      if (!await root.exists()) return files;
-      await for (final f in root.list(recursive: true)) {
-        if (f is File && f.path.endsWith('.mp3')) files.add(f);
-      }
-    } on FileSystemException {
-      // The cache was cleared (by the reader or the OS) while listing: use what was found.
-    }
-    return files;
-  }
+  Future<List<StoreEntry>> _cacheFiles() async => [
+        for (final e in await store.list(StoreRoot.cache, _dirName, recursive: true))
+          if (!e.isDir && e.path.endsWith('.mp3')) e,
+      ];
 
-  Future<int> cacheBytes() async {
-    var total = 0;
-    for (final f in await _cacheFiles()) {
-      total += await _lengthOrZero(f);
-    }
-    return total;
-  }
+  Future<int> cacheBytes() async =>
+      (await _cacheFiles()).fold<int>(0, (total, e) => total + e.bytes);
 
   /// Deletes the cache except protected files; returns the bytes freed. Never touches downloads.
   Future<int> clearCache() async {
     var freed = 0;
-    for (final f in await _cacheFiles()) {
-      if (_protected.contains(_key(f.path))) continue;
-      final length = await _lengthOrZero(f);
-      if (await _deleteQuietly(f)) freed += length;
+    for (final e in await _cacheFiles()) {
+      final f = StoreFile(StoreRoot.cache, e.path);
+      if (_protected.contains(f)) continue;
+      if (await store.delete(f)) freed += e.bytes;
     }
     return freed;
   }
 
   Future<void> _trimCache() async {
     final files = await _cacheFiles();
-    final stats = <(File, int, DateTime)>[];
-    var total = 0;
-    for (final f in files) {
-      try {
-        final s = await f.stat();
-        stats.add((f, s.size, s.modified));
-        total += s.size;
-      } on FileSystemException {
-        // Deleted meanwhile.
-      }
-    }
+    var total = files.fold<int>(0, (t, e) => t + e.bytes);
     if (total <= cacheLimitBytes) return;
-    stats.sort((a, b) => a.$3.compareTo(b.$3));
-    for (final (f, size, _) in stats) {
+    files.sort((a, b) => a.modified.compareTo(b.modified));
+    for (final e in files) {
       if (total <= cacheTrimToBytes) break;
-      if (_protected.contains(_key(f.path))) continue;
-      if (await _deleteQuietly(f)) total -= size;
-    }
-  }
-
-  static Future<void> _touch(File f) async {
-    try {
-      await f.setLastModified(DateTime.now());
-    } on FileSystemException {
-      // Best effort: LRU order only.
-    }
-  }
-
-  static Future<int> _lengthOrZero(File f) async {
-    try {
-      return await f.length();
-    } on FileSystemException {
-      return 0;
-    }
-  }
-
-  static Future<bool> _deleteQuietly(File f) async {
-    try {
-      await f.delete();
-      return true;
-    } on FileSystemException {
-      return false;
+      final f = StoreFile(StoreRoot.cache, e.path);
+      if (_protected.contains(f)) continue;
+      if (await store.delete(f)) total -= e.bytes;
     }
   }
 
   void dispose() {
     cancelPrefetch();
-    if (_clientUsed) _client.close(force: true);
+    if (_clientUsed) _client.close();
     unawaited(_damaged.close());
   }
 }

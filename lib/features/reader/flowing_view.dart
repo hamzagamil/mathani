@@ -409,13 +409,35 @@ class _FlowingPageState extends State<_FlowingPage> {
         length += s.length;
       }
       paragraphs.add(_Paragraph(key, starts));
-      children.add(RichText(
+      final text = RichText(
         key: key,
         textAlign: TextAlign.justify,
         textDirection: TextDirection.rtl,
         textScaler: TextScaler.noScaling, // size comes from the in-app setting (FR-017)
         text: TextSpan(style: style, children: spans),
-      ));
+      );
+      // A span takes one recognizer (the long press), so a right-click finds its ayah from the
+      // text position instead (specs/008 FR-009).
+      children.add(widget.onAyahLongPress == null
+          ? text
+          : GestureDetector(
+              onSecondaryTapUp: (d) {
+                final render = key.currentContext?.findRenderObject();
+                if (render is! RenderParagraph) return;
+                final at = render.getPositionForOffset(render.globalToLocal(d.globalPosition)).offset;
+                AyahRef? ref;
+                for (final (r, start) in starts) {
+                  if (start > at) break;
+                  ref = r;
+                }
+                final inSession = memorization != null &&
+                    memorization.active &&
+                    ref != null &&
+                    (memorization.range?.contains(ref) ?? false);
+                if (ref != null && !inSession) widget.onAyahLongPress!(ref);
+              },
+              child: text,
+            ));
       run = [];
     }
 

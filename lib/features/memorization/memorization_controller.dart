@@ -11,7 +11,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../data/models.dart';
-import '../../shared/device_channel.dart';
+import '../../platform/device.dart';
+import '../../platform/speech_host.dart';
 import '../../shared/reader_state.dart';
 import '../recitation/recitation_controller.dart';
 import 'asr_model.dart';
@@ -80,7 +81,7 @@ class MemorizationController extends ChangeNotifier with WidgetsBindingObserver 
     this.device = const DeviceChannel(),
     this.passesToAgree = livePassesToAgree,
   })  : model = model ?? AsrModel(device: device),
-        _newRecogniser = recogniser ?? SherpaSpeechRecogniser.new,
+        _newRecogniser = recogniser ?? newSpeechRecogniser,
         _newMic = mic ?? MicSource.new;
 
   final ReaderController reader;

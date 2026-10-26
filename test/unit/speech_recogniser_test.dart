@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mathani/features/memorization/mic_source.dart';
 import 'package:mathani/features/memorization/recitation_matcher.dart';
+import 'package:mathani/features/memorization/sherpa_recogniser.dart';
 import 'package:mathani/features/memorization/speech_recogniser.dart';
 
 import '../support/harness.dart';

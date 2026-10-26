@@ -73,3 +73,12 @@ for (const [suffix, scale] of [['', 1], ['@2x', 2], ['@3x', 3]]) {
   write(`ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage${suffix}.png`,
     render(svg('mathani-mark-gold'), 120 * scale));
 }
+
+// Web app (specs/008 T066): the full-bleed icon for tabs and installs, and maskable icons with
+// the gold mark inside the 80% safe zone on the logo green.
+write('web/favicon.png', render(svg('mathani-app-icon'), 32, { background: LOGO_GREEN }));
+for (const size of [192, 512]) {
+  write(`web/icons/Icon-${size}.png`, render(svg('mathani-app-icon'), size, { background: LOGO_GREEN }));
+  write(`web/icons/Icon-maskable-${size}.png`,
+    render(svg('mathani-mark-gold'), size, { fill: 0.56, background: LOGO_GREEN }));
+}

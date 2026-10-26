@@ -1,12 +1,12 @@
 // The recitation in progress: what is being recited, playing or paused, and whether the reader
 // follows it (specs/004-ayah-recitations/contracts/recitation-playback.md).
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/widgets.dart';
 
 import '../../data/models.dart';
 import '../../data/quran_repository.dart';
+import '../../platform/file_store.dart';
 import '../../shared/reader_state.dart';
 import 'audio_engine.dart';
 import 'ayah_fetcher.dart';
@@ -190,7 +190,7 @@ class RecitationController extends ChangeNotifier with WidgetsBindingObserver {
     fetcher.cancelPrefetch();
     _window.clear();
     _windowEnded = false;
-    final File file;
+    final StoreFile file;
     try {
       file = await _timed(fetcher.resolve(s.reciter, item));
     } on Object catch (e) {
@@ -240,7 +240,7 @@ class RecitationController extends ChangeNotifier with WidgetsBindingObserver {
         if (current < 0 || _window.length - 1 - current >= prefetchAhead) return;
         final next = _order.next(_window.last);
         if (next == null) return; // the end of the Quran
-        final File file;
+        final StoreFile file;
         try {
           file = await fetcher.resolve(s.reciter, next, priority: true);
         } on Object {
@@ -301,12 +301,12 @@ class RecitationController extends ChangeNotifier with WidgetsBindingObserver {
     final s = _session;
     if (s == null) return;
     unawaited(() async {
-      final paths = <String>[];
+      final files = <StoreFile>[];
       for (final item in List.of(_window)) {
         final (su, a) = item.isBasmala ? (1, 1) : (item.surah, item.ayah);
-        paths.add((await fetcher.cacheFile(s.reciter.id, su, a)).path);
+        files.add(await fetcher.cacheFile(s.reciter.id, su, a));
       }
-      fetcher.protect(paths);
+      fetcher.protect(files);
     }());
   }
 

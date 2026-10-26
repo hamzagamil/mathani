@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
@@ -10,6 +11,11 @@ import '../features/reader/reader_screen.dart';
 import '../shared/reader_state.dart';
 import 'l10n/app_localizations.dart';
 import 'theme/app_theme.dart';
+
+/// In a browser window wider than this, the app is shown in a centred phone-width column
+/// (specs/008 FR-012, research R13); a layout made for wide screens is a later feature.
+const wideWindowMin = 600.0;
+const phoneColumnWidth = 480.0;
 
 class MathaniApp extends StatelessWidget {
   const MathaniApp({
@@ -71,6 +77,8 @@ class MathaniApp extends StatelessWidget {
               : resolveLocale(prefs.language, null),
           localeListResolutionCallback: (deviceLocales, _) =>
               resolveLocale(prefs.language, deviceLocales),
+          // Around the Navigator, so sheets, dialogs and snack bars stay inside the column.
+          builder: kIsWeb ? (context, child) => PhoneColumn(child: child!) : null,
           home: const _Home(),
         );
       },
@@ -86,6 +94,36 @@ class MathaniApp extends StatelessWidget {
     return ReaderScope(
       controller: controller,
       child: recitation == null ? scoped : RecitationScope(controller: recitation, child: scoped),
+    );
+  }
+}
+
+/// The app in a centred column of [phoneColumnWidth] when the window is wider than
+/// [wideWindowMin], told through [MediaQuery] that its screen is that column, so every screen and
+/// the Mushaf page are laid out as on a phone. Narrower windows get the child as it is.
+class PhoneColumn extends StatelessWidget {
+  const PhoneColumn({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final media = MediaQuery.of(context);
+    if (media.size.width <= wideWindowMin) return child;
+    return ColoredBox(
+      color: Theme.of(context).scaffoldBackgroundColor,
+      child: Center(
+        child: SizedBox(
+          width: phoneColumnWidth,
+          height: media.size.height,
+          child: ClipRect(
+            child: MediaQuery(
+              data: media.copyWith(size: Size(phoneColumnWidth, media.size.height)),
+              child: child,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

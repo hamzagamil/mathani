@@ -1,23 +1,27 @@
 {
-    "name": "mathani",
-    "short_name": "mathani",
-    "start_url": ".",
+    "name": "Mathani · مثاني",
+    "short_name": "Mathani",
+    "description": "Read the Quran in the printed Madinah Mushaf, listen to recitations and test your memorization.",
+    "lang": "ar",
+    "dir": "auto",
+    "start_url": "/",
+    "scope": "/",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
-    "orientation": "portrait-primary",
+    "background_color": "#F2EADD",
+    "theme_color": "#183159",
     "prefer_related_applications": false,
     "icons": [
         {
             "src": "icons/Icon-192.png",
             "sizes": "192x192",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any"
         },
         {
             "src": "icons/Icon-512.png",
             "sizes": "512x512",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any"
         },
         {
             "src": "icons/Icon-maskable-192.png",

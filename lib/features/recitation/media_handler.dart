@@ -3,15 +3,14 @@
 // goes through RecitationController, so next/previous follow the ayah order, not the player's
 // short window.
 import 'dart:async';
-import 'dart:io';
 import 'dart:ui' show PlatformDispatcher;
 
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:path_provider/path_provider.dart';
 
 import '../../app/app.dart';
 import '../../app/l10n/app_localizations.dart';
+import '../../platform/file_store.dart';
 import 'recitation_bar.dart';
 import 'recitation_controller.dart';
 
@@ -94,12 +93,15 @@ class RecitationMediaHandler extends BaseAudioHandler {
   static Future<void> start(RecitationController recitation) async {
     Uri? art;
     try {
-      final file = File('${(await getApplicationCacheDirectory()).path}/recitation_art.png');
-      if (!await file.exists()) {
-        final data = await rootBundle.load('assets/images/mark_navy.png');
-        await file.writeAsBytes(data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes));
+      final store = fileStore();
+      const file = StoreFile(StoreRoot.cache, 'recitation_art.png');
+      final data = await rootBundle.load('assets/images/mark_navy.png');
+      if (await store.length(file) != data.lengthInBytes) {
+        await store.delete(file);
+        await store.append(
+            file, Stream.value(data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes)));
       }
-      art = file.uri;
+      art = await store.playableUri(file);
     } on Object {
       art = null; // no artwork: the notification still works
     }
@@ -116,7 +118,7 @@ class RecitationMediaHandler extends BaseAudioHandler {
         ),
       );
     } on Object {
-      // Tests, the browser preview, or a platform without the service: in-app playback only.
+      // Tests, or a platform without the service: in-app playback only.
     }
   }
 }

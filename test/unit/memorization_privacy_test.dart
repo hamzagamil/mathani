@@ -20,13 +20,32 @@ void main() {
     final files = Directory('lib/features/memorization')
         .listSync()
         .whereType<File>()
-        .where((f) => f.path.endsWith('.dart') && !f.path.endsWith('asr_model.dart'));
+        .where((f) => f.path.endsWith('.dart') && !f.path.endsWith('asr_model.dart'))
+        // The browser's speech worker reads the saved model; it has its own check below.
+        .where((f) => !f.path.endsWith('web_worker_main.dart'));
     expect(files, isNotEmpty);
     for (final f in files) {
       final source = f.readAsStringSync();
       for (final word in banned) {
         expect(source.contains(word), isFalse, reason: '${f.path} uses $word');
       }
+    }
+  });
+
+  // specs/008 T053, FR-024, SC-007: in browsers, recognition runs in a worker that only reads the
+  // model the app saved, keeps it in memory, and sends nothing but `loaded`, `error` and `heard`
+  // messages to the page.
+  test('the browser speech worker has no network, no saved writes, and only page messages', () {
+    final source = File('lib/features/memorization/web_worker_main.dart').readAsStringSync();
+    for (final word in ['fetch(', 'XMLHttpRequest', 'WebSocket', 'sendBeacon', 'http://', 'https://',
+        'createWritable', 'importScripts', 'package:http/']) {
+      expect(source.contains(word), isFalse, reason: 'the speech worker uses $word');
+    }
+    final types = RegExp(r"'type': '(\w+)'").allMatches(source).map((m) => m.group(1)).toSet();
+    expect(types, {'loaded', 'error', 'heard'});
+    final bootstrap = File('web/speech/speech_worker.js').readAsStringSync();
+    for (final word in ['fetch(', 'XMLHttpRequest', 'WebSocket', 'http://', 'https://']) {
+      expect(bootstrap.contains(word), isFalse, reason: 'speech_worker.js uses $word');
     }
   });
 }

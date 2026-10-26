@@ -1440,6 +1440,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open Settings'**
   String get openSystemSettings;
+
+  /// No description provided for @webDataKeptHere.
+  ///
+  /// In en, this message translates to:
+  /// **'Your bookmarks, settings and downloads are kept only in this browser.'**
+  String get webDataKeptHere;
+
+  /// No description provided for @memorizationBrowserUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Memorization isn\'t available in this browser. It works in {browsers}.'**
+  String memorizationBrowserUnsupported(String browsers);
+
+  /// No description provided for @micDeniedBrowser.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow the microphone for get.mthani.app in your browser\'s site settings, then try again.'**
+  String get micDeniedBrowser;
+
+  /// No description provided for @pageNeedsConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'This page needs a connection the first time you open it.'**
+  String get pageNeedsConnection;
 }
 
 class _AppLocalizationsDelegate

@@ -5,8 +5,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mathani/data/models.dart';
 import 'package:mathani/features/recitation/ayah_fetcher.dart';
 import 'package:mathani/features/recitation/recited_item.dart';
+import 'package:mathani/platform/file_store.dart';
 
 import '../support/fake_audio_server.dart';
+import '../support/temp_store.dart';
 
 /// AyahFetcher (specs/004 contracts/audio-storage.md › Resolve, Cache limit), against a
 /// localhost server. Never reaches EveryAyah.
@@ -15,6 +17,7 @@ void main() {
 
   late FakeAudioServer server;
   late Directory temp;
+  late TempStore files;
   late AyahFetcher fetcher;
   late Reciter reciter;
   var network = 'unmetered';
@@ -33,10 +36,10 @@ void main() {
         _ => null,
       },
     );
+    files = TempStore(temp);
     fetcher = AyahFetcher(
       recordingSize: (r, s, a) async => server.sizeOf(s, a),
-      cacheRoot: () async => Directory('${temp.path}/cache'),
-      supportRoot: () async => Directory('${temp.path}/support'),
+      store: files.store,
     );
   });
 
@@ -46,7 +49,8 @@ void main() {
     temp.deleteSync(recursive: true);
   });
 
-  Future<File> writeSized(File f, int bytes) async {
+  Future<File> writeSized(Object target, int bytes) async {
+    final f = target is StoreFile ? files.file(target) : target as File;
     await f.parent.create(recursive: true);
     await f.writeAsBytes(Uint8List(bytes));
     return f;
@@ -55,7 +59,7 @@ void main() {
   test('1. a valid downloaded file wins over the cache and the network', () async {
     final downloaded = await writeSized(await fetcher.downloadFile('test', 67, 1), server.sizeOf(67, 1));
     await writeSized(await fetcher.cacheFile('test', 67, 1), server.sizeOf(67, 1));
-    final f = await fetcher.resolve(reciter, const RecitedItem.ayah(67, 1));
+    final f = files.file(await fetcher.resolve(reciter, const RecitedItem.ayah(67, 1)));
     expect(f.path, downloaded.path);
     expect(server.requests, isEmpty);
   });
@@ -63,14 +67,14 @@ void main() {
   test('2. a valid cache hit touches its time and makes no request', () async {
     final cached = await writeSized(await fetcher.cacheFile('test', 67, 2), server.sizeOf(67, 2));
     await cached.setLastModified(DateTime(2020));
-    final f = await fetcher.resolve(reciter, const RecitedItem.ayah(67, 2));
+    final f = files.file(await fetcher.resolve(reciter, const RecitedItem.ayah(67, 2)));
     expect(f.path, cached.path);
     expect(server.requests, isEmpty);
     expect((await cached.lastModified()).year, greaterThan(2020));
   });
 
   test('3. a miss downloads through .part and renames', () async {
-    final f = await fetcher.resolve(reciter, const RecitedItem.ayah(67, 3));
+    final f = files.file(await fetcher.resolve(reciter, const RecitedItem.ayah(67, 3)));
     expect(await f.length(), server.sizeOf(67, 3));
     expect(f.path, endsWith('067003.mp3'));
     expect(File('${f.path}.part').existsSync(), isFalse);
@@ -79,7 +83,7 @@ void main() {
 
   test('4. a size mismatch from the primary falls back to the mirror', () async {
     server.truncatePrimary = true;
-    final f = await fetcher.resolve(reciter, const RecitedItem.ayah(67, 4));
+    final f = files.file(await fetcher.resolve(reciter, const RecitedItem.ayah(67, 4)));
     expect(await f.length(), server.sizeOf(67, 4));
     expect(server.requests, ['/primary/067004.mp3', '/mirror/067004.mp3']);
   });
@@ -115,7 +119,7 @@ void main() {
       await f.setLastModified(DateTime(2020, 1, 1 + i));
       old.add(f);
     }
-    fetcher.protect([old[0].path]); // the oldest, but in use
+    fetcher.protect([const StoreFile(StoreRoot.cache, 'recitations/test/900000.mp3')]); // the oldest, but in use
     await fetcher.resolve(reciter, const RecitedItem.ayah(67, 8)); // triggers the trim
     await Future<void>.delayed(const Duration(milliseconds: 200));
     expect(old[0].existsSync(), isTrue);
@@ -125,9 +129,10 @@ void main() {
   });
 
   test('9. clearCache keeps protected files and reports the bytes freed', () async {
-    final keep = await writeSized(await fetcher.cacheFile('test', 1, 1), 100);
+    final keepFile = await fetcher.cacheFile('test', 1, 1);
+    final keep = await writeSized(keepFile, 100);
     await writeSized(await fetcher.cacheFile('test', 1, 2), 300);
-    fetcher.protect([keep.path]);
+    fetcher.protect([keepFile]);
     expect(await fetcher.clearCache(), 300);
     expect(keep.existsSync(), isTrue);
     expect(await fetcher.cacheBytes(), 100);
@@ -142,7 +147,7 @@ void main() {
   test('11. a wrong-size downloaded file is deleted, reported, and not returned', () async {
     final bad = await writeSized(await fetcher.downloadFile('test', 67, 11), 3);
     final damaged = fetcher.onDamaged.first;
-    final f = await fetcher.resolve(reciter, const RecitedItem.ayah(67, 11));
+    final f = files.file(await fetcher.resolve(reciter, const RecitedItem.ayah(67, 11)));
     expect(f.path, isNot(bad.path));
     expect(bad.existsSync(), isFalse);
     expect(await damaged, ('test', 67));
@@ -160,7 +165,7 @@ void main() {
   });
 
   test('a basmala resolves the reciter\'s 1:1', () async {
-    final f = await fetcher.resolve(reciter, const RecitedItem.basmala(67));
+    final f = files.file(await fetcher.resolve(reciter, const RecitedItem.basmala(67)));
     expect(await f.length(), server.sizeOf(1, 1));
     expect(server.requests, ['/primary/001001.mp3']);
   });

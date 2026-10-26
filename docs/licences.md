@@ -38,7 +38,11 @@ these servers; the clip offsets of surah recordings come from QUL's ayah timings
 ## Memorization (specs/006, specs/007)
 
 On-device recognition of the reader's voice. The libraries are bundled. The model is downloaded
-once from the project's GitHub release `asr-khatma-v1` and is never bundled.
+once from the project's GitHub release `asr-khatma-v1` and is never bundled. The web app
+(specs/008) downloads the same files from a Hugging Face mirror, `hamzagamil/mathani-asr`
+(browsers cannot read GitHub release files), with the same NOTICE. It runs sherpa-onnx's own
+WebAssembly build from the `sherpa_onnx_web` package (Apache-2.0, as sherpa-onnx), which
+includes ONNX Runtime.
 
 | Component | Used for | Licence | Requirements |
 | --- | --- | --- | --- |
@@ -59,7 +63,7 @@ once from the project's GitHub release `asr-khatma-v1` and is never bundled.
 
 | ID | What | Asked | Status | Date | Notes |
 | --- | --- | --- | --- | --- | --- |
-| D1 | KFGQPC: embed the unmodified KFGQPC Uthmanic Script HAFS font in a free app on the App Store and Google Play | not yet | requested / granted / refused | — | Contact via https://fonts.qurancomplex.gov.sa. Draft: [permissions/kfgqpc-request.md](permissions/kfgqpc-request.md) (with D3) |
-| D2 | QUL / Tarteel: redistribute the KFGQPC layout and word-by-word data inside the app; and (specs/006) use the ayah timings of 7 surah recitations and stream/download the 3 Tarteel-hosted recordings | not yet | requested / granted / refused | — | Contact via https://qul.tarteel.ai. Draft: [permissions/qul-request.md](permissions/qul-request.md) |
-| D3 | KFGQPC: bundle the unmodified Madinah Mushaf page fonts (604) in the app (since 2026-10-23; previously planned as a hosted download) | not yet | granted | — | Same request as D1. Unblocks specs/002 task T026 |
-| D4 | Quran.com Foundation / EveryAyah: stream, cache and let readers download the Al-Husary and El-Minshawi Murattal recordings in a free app on the App Store and Google Play; widened (specs/006) to the 43 EveryAyah folders and 5 quranicaudio surah recordings in the draft | not yet | requested / granted / refused | — | Contact via https://quran.zendesk.com/hc/en-us. Draft: [permissions/everyayah-request.md](permissions/everyayah-request.md). **Blocks the store release** of specs/004 and specs/006 |
+| D1 | KFGQPC: embed the unmodified KFGQPC Uthmanic Script HAFS font in a free app on the App Store and Google Play, and (specs/008) in the free web app at get.mthani.app | not yet | requested / granted / refused | — | Contact via https://fonts.qurancomplex.gov.sa. Draft: [permissions/kfgqpc-request.md](permissions/kfgqpc-request.md) (with D3) |
+| D2 | QUL / Tarteel: redistribute the KFGQPC layout and word-by-word data inside the app (and, specs/008, the web app); and (specs/006) use the ayah timings of 7 surah recitations and stream/download the 3 Tarteel-hosted recordings | not yet | requested / granted / refused | — | Contact via https://qul.tarteel.ai. Draft: [permissions/qul-request.md](permissions/qul-request.md) |
+| D3 | KFGQPC: bundle the unmodified Madinah Mushaf page fonts (604) in the app (since 2026-10-23; previously planned as a hosted download); in the web app (specs/008), served only from get.mthani.app to draw each page | not yet | granted | — | Same request as D1. Unblocks specs/002 task T026 |
+| D4 | Quran.com Foundation / EveryAyah: stream, cache and let readers download the Al-Husary and El-Minshawi Murattal recordings in a free app on the App Store and Google Play (and, specs/008, the web app); widened (specs/006) to the 43 EveryAyah folders and 5 quranicaudio surah recordings in the draft | not yet | requested / granted / refused | — | Contact via https://quran.zendesk.com/hc/en-us. Draft: [permissions/everyayah-request.md](permissions/everyayah-request.md). **Blocks the store release** of specs/004 and specs/006 |

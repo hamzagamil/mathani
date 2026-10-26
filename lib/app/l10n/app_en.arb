@@ -552,5 +552,16 @@
   "memorizationModel": "Memorization model",
   "deleteMemorizationModel": "Delete the memorization model",
   "tourMemorize": "Test your memorization: recite from memory and each ayah appears as you complete it",
-  "openSystemSettings": "Open Settings"
+  "openSystemSettings": "Open Settings",
+  "webDataKeptHere": "Your bookmarks, settings and downloads are kept only in this browser.",
+  "memorizationBrowserUnsupported": "Memorization isn't available in this browser. It works in {browsers}.",
+  "@memorizationBrowserUnsupported": {
+    "placeholders": {
+      "browsers": {
+        "type": "String"
+      }
+    }
+  },
+  "micDeniedBrowser": "Allow the microphone for get.mthani.app in your browser's site settings, then try again.",
+  "pageNeedsConnection": "This page needs a connection the first time you open it."
 }

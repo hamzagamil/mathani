@@ -1,7 +1,7 @@
-import 'dart:io' show gzip;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+
+import '../../platform/gunzip.dart';
 
 /// The King Fahd Complex page fonts bundled with the app, one per Mushaf page
 /// (specs/002-print-like-mushaf-page, User Story 4). They ship gzip-compressed in `assets/qcf/`
@@ -11,11 +11,6 @@ import 'package:flutter/services.dart';
 /// the session once its page has been shown (about 0.35 MB each).
 class PrintedFonts {
   PrintedFonts._();
-
-  /// Inflates a gzip-compressed font. `dart:io` on phones; the web preview
-  /// (tool/web_preview.dart) swaps in the browser's decoder.
-  static Future<List<int>> Function(Uint8List gz) inflate = _gunzip;
-  static Future<List<int>> _gunzip(Uint8List gz) async => gzip.decode(gz);
 
   static final Map<int, Future<String>> _loading = {};
   static final Set<int> _loaded = {};
@@ -35,8 +30,8 @@ class PrintedFonts {
         try {
           final family = familyOf(page);
           final data = await (bundle ?? rootBundle).load(assetOf(page));
-          final bytes = await inflate(data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes));
-          final font = ByteData.sublistView(Uint8List.fromList(bytes));
+          final bytes = await gunzip(data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes));
+          final font = ByteData.sublistView(bytes);
           await (FontLoader(family)..addFont(Future.value(font))).load();
           _loaded.add(page);
           return family;

@@ -222,5 +222,9 @@
   "memorizationModel": "نموذج الحفظ",
   "deleteMemorizationModel": "حذف نموذج الحفظ",
   "tourMemorize": "اختبر حفظك: تلُ من ذاكرتك وتظهر الآيات كلما أتممتها",
-  "openSystemSettings": "فتح الإعدادات"
+  "openSystemSettings": "فتح الإعدادات",
+  "webDataKeptHere": "تُحفظ علاماتك وإعداداتك وتنزيلاتك في هذا المتصفح فقط.",
+  "memorizationBrowserUnsupported": "الحفظ غير متاح في هذا المتصفح. يعمل في {browsers}.",
+  "micDeniedBrowser": "اسمح باستخدام الميكروفون لموقع get.mthani.app من إعدادات الموقع في متصفحك، ثم حاول مرة أخرى.",
+  "pageNeedsConnection": "تحتاج هذه الصفحة إلى اتصال عند فتحها أول مرة."
 }

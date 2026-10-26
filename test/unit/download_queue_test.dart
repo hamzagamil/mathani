@@ -4,11 +4,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mathani/data/quran_repository.dart';
 import 'package:mathani/features/recitation/ayah_fetcher.dart';
+import 'package:mathani/platform/file_store.dart';
 import 'package:mathani/features/recitation/download_queue.dart';
 import 'package:mathani/features/recitation/recited_item.dart';
 
 import '../support/fake_audio_server.dart';
 import '../support/harness.dart';
+import '../support/memory_file_store.dart';
+import '../support/temp_store.dart';
 
 /// Per-surah downloads (specs/004 contracts/audio-storage.md › Downloads), against a local
 /// server serving the real catalogue sizes. Never reaches EveryAyah.
@@ -22,8 +25,7 @@ void main() {
 
   AyahFetcher newFetcher() => AyahFetcher(
         recordingSize: (r, s, a) async => (await quran.recordingBytes(r, s))[a - 1],
-        cacheRoot: () async => Directory('${temp.path}/cache'),
-        supportRoot: () async => Directory('${temp.path}/support'),
+        store: TempStore(temp).store,
       );
 
   DownloadQueue newQueue(AyahFetcher fetcher) => DownloadQueue(
@@ -61,7 +63,8 @@ void main() {
     temp.deleteSync(recursive: true);
   });
 
-  Future<void> writeValid(File f, int bytes) async {
+  Future<void> writeValid(StoreFile target, int bytes) async {
+    final f = TempStore(temp).file(target);
     await f.parent.create(recursive: true);
     await f.writeAsBytes(Uint8List(bytes));
   }
@@ -177,7 +180,7 @@ void main() {
     expect(queue.stateOf('husary', 67)!.state, DownloadState.stopped);
     final missing = [
       for (var a = 1; a <= mulk.length; a++)
-        if (!await AyahFetcher.isValid(await fetcher.downloadFile('husary', 67, a), mulk[a - 1])) a,
+        if (!await fetcher.isValid(await fetcher.downloadFile('husary', 67, a), mulk[a - 1])) a,
     ];
     server.failPaths.clear();
     server.requests.clear();
@@ -185,6 +188,27 @@ void main() {
     await idle(queue);
     expect(queue.isComplete('husary', 67), isTrue);
     expect(server.requests.length, lessThanOrEqualTo(missing.length + 1), reason: 'SC-011');
+    queue.dispose();
+    fetcher.dispose();
+  });
+
+  // Spec 008 US2 scenario 4: the browser (or the disk) has no room left.
+  test('storage full: stopped for no storage, with no partly written file', () async {
+    final store = MemoryFileStore()..failWithNoSpaceAfter = 0;
+    final fetcher = AyahFetcher(
+      recordingSize: (r, s, a) async => (await quran.recordingBytes(r, s))[a - 1],
+      store: store,
+    );
+    final queue = newQueue(fetcher);
+    await queue.enqueue('husary', 112);
+    await idle(queue);
+    final stopped = queue.stateOf('husary', 112);
+    expect(stopped?.state ?? DownloadState.absent,
+        anyOf(DownloadState.stopped, DownloadState.absent));
+    if (stopped != null) expect(stopped.stopReason, StopReason.noStorage);
+    final left = await store.list(StoreRoot.support, fetcher.downloadsRoot, recursive: true);
+    expect(left.where((e) => !e.isDir), isEmpty, reason: 'no .part or partial file kept');
+    expect(store.protected, ['support:recitations'], reason: 'asked to keep downloads (FR-014)');
     queue.dispose();
     fetcher.dispose();
   });
@@ -218,13 +242,14 @@ void main() {
     final delete = queue.delete('husary', 112);
     expect(queue.stateOf('husary', 112), isNull, reason: 'updates at once (SC-012)');
     await delete;
-    expect(Directory(await fetcher.downloadDir('husary', 112)).existsSync(), isFalse);
-    expect(await fetcher.basmalaFile('husary').then((f) => f.existsSync()), isTrue,
+    expect(Directory('${temp.path}/support/${await fetcher.downloadDir('husary', 112)}').existsSync(),
+        isFalse);
+    expect(await fetcher.basmalaFile('husary').then((f) => TempStore(temp).file(f).existsSync()), isTrue,
         reason: 'the basmala is shared with other surahs');
 
     await queue.deleteAll('husary');
     expect(queue.states.value, isEmpty);
-    expect(await fetcher.basmalaFile('husary').then((f) => f.existsSync()), isFalse);
+    expect(await fetcher.basmalaFile('husary').then((f) => TempStore(temp).file(f).existsSync()), isFalse);
     queue.dispose();
     fetcher.dispose();
   });
@@ -235,7 +260,7 @@ void main() {
     await queue.enqueue('husary', 112);
     await idle(queue);
     expect(queue.isComplete('husary', 112), isTrue);
-    await (await fetcher.downloadFile('husary', 112, 2)).writeAsBytes([1, 2, 3]);
+    await TempStore(temp).file(await fetcher.downloadFile('husary', 112, 2)).writeAsBytes([1, 2, 3]);
     final reciter = server.reciter(id: 'husary');
     await fetcher.resolve(reciter, const RecitedItem.ayah(112, 2)); // streams it instead
     await Future<void>.delayed(const Duration(milliseconds: 200));

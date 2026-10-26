@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:audio_session/audio_session.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:record/record.dart';
 
 import 'speech_recogniser.dart' show micSampleRate;
@@ -39,16 +40,21 @@ class MicSource {
   /// vibration and system sounds audible for the mistake signal (R10, R12).
   Future<void> start() async {
     if (_subscription != null) return;
-    await _recorder.ios?.manageAudioSession(false);
-    final session = await AudioSession.instance;
-    await session.configure(AudioSessionConfiguration(
-      avAudioSessionCategory: AVAudioSessionCategory.playAndRecord,
-      avAudioSessionCategoryOptions: AVAudioSessionCategoryOptions.defaultToSpeaker |
-          AVAudioSessionCategoryOptions.allowBluetooth,
-      avAudioSessionMode: AVAudioSessionMode.measurement,
-    ));
-    await session.setActive(true);
+    // Browsers have no audio session to configure (specs/008 research R11).
+    if (!kIsWeb) {
+      await _recorder.ios?.manageAudioSession(false);
+      final session = await AudioSession.instance;
+      await session.configure(AudioSessionConfiguration(
+        avAudioSessionCategory: AVAudioSessionCategory.playAndRecord,
+        avAudioSessionCategoryOptions: AVAudioSessionCategoryOptions.defaultToSpeaker |
+            AVAudioSessionCategoryOptions.allowBluetooth,
+        avAudioSessionMode: AVAudioSessionMode.measurement,
+      ));
+      await session.setActive(true);
+    }
     _pcm.reset();
+    // In browsers, echo cancellation, noise suppression and automatic gain stay off (the
+    // defaults), closest to Android's voice-recognition source; spike S3 confirms (research R11).
     final stream = await _recorder.startStream(const RecordConfig(
       encoder: AudioEncoder.pcm16bits,
       sampleRate: micSampleRate,
@@ -66,6 +72,7 @@ class MicSource {
     _subscription = null;
     await subscription.cancel();
     await _recorder.stop();
+    if (kIsWeb) return;
     final session = await AudioSession.instance;
     await session.configure(const AudioSessionConfiguration.music());
   }

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:share_plus/share_plus.dart';
 
 import '../../app/l10n/app_localizations.dart';
 import '../../app/theme/app_theme.dart';
 import '../../app/theme/tokens.dart';
 import '../../data/models.dart';
+import '../../platform/share.dart';
 import '../../shared/mathani_icons.dart';
 import '../../shared/numerals.dart';
 import '../../shared/reader_state.dart';
@@ -117,8 +117,14 @@ class _AyahActionsSheet extends StatelessWidget {
             title: Text(l10n.shareAyah),
             onTap: () async {
               final t = await text();
+              if (!canShareText) {
+                // A browser without a share sheet: copy instead (specs/008 US1 scenario 6).
+                await Clipboard.setData(ClipboardData(text: t));
+                done(l10n.ayahCopied);
+                return;
+              }
               if (context.mounted) Navigator.of(context).pop();
-              await SharePlus.instance.share(ShareParams(text: t));
+              await shareText(t);
             },
           ),
           ListTile(

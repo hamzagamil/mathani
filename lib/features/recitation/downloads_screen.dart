@@ -228,9 +228,9 @@ class _DownloadRow extends StatelessWidget {
                 await queue.delete(d.reciter, d.surah);
               case 'corrupt':
                 // Debug builds only: quickstart Q-20 (a damaged file is never played).
-                final dir = await queue.fetcher.downloadDir(d.reciter, d.surah);
                 final file = await queue.fetcher.downloadFile(d.reciter, d.surah, 1);
-                if (file.path.startsWith(dir)) await file.writeAsBytes(const [0, 0, 0]);
+                await queue.fetcher.store.delete(file);
+                await queue.fetcher.store.append(file, Stream.value(const [0, 0, 0]));
             }
           },
           itemBuilder: (_) => [

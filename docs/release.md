@@ -72,6 +72,45 @@ Keep `symbols/` from each release (gitignored) to symbolicate crash stack traces
 cannot be combined with `--split-debug-info`: measure size with a separate build, as CI does
 (`flutter build appbundle --release --target-platform android-arm64 --analyze-size`).
 
+## Web (specs/008)
+
+The web app is published to https://get.mthani.app from **Cloudflare Pages** (moved from Netlify
+on 2026-10-26).
+
+- **Project:** `mthani-web` in the Cloudflare account "Hamzagamil@gmail.com's Account". The
+  production branch is `main`; it is also served at https://mthani-web.pages.dev.
+- **Why Cloudflare:** static files on Pages carry no bandwidth charge. So, unlike on Netlify's
+  shared credit pool, heavy use can never pause mthani.app or its privacy policy, which stay on
+  Netlify. Cloudflare Web Analytics is off, and stays off (FR-027).
+- **DNS:** mthani.app's DNS is at Namecheap. `get` is a CNAME to `mthani-web.pages.dev`, and
+  get.mthani.app is a custom domain of the Pages project. The certificate comes from Google's CA
+  through Cloudflare.
+- **Sign-in:** run `npx wrangler@4 login` once per machine. The deploy script uses wrangler's
+  session. The development machine inspects HTTPS, so the script runs Node with
+  `--use-system-ca` (and IPv4 first, or the parallel uploads time out).
+
+Release from the same commit and version as the store builds (FR-029):
+
+```powershell
+flutter build web --wasm --release --no-web-resources-cdn
+node --use-system-ca tool/web_deploy.mjs --dry-run   # a preview: https://<hash>.mthani-web.pages.dev
+node --use-system-ca tool/web_deploy.mjs             # publish to get.mthani.app
+```
+
+The deploy script:
+- gzips the Quran database;
+- compiles the speech worker;
+- writes `asset-hashes.json`;
+- stamps the service worker;
+- fills in the inline-script hash in `_headers`;
+- refuses a build whose version, engine settings, browser list or placeholders are wrong.
+
+To roll back, open Cloudflare dashboard › Workers & Pages › mthani-web › Deployments, then use
+"Rollback to this deployment" on an earlier one. No upload is needed.
+
+Pages limits (free plan): 20,000 files per deployment and 25 MiB per file. The build has about
+680 files; the largest is sherpa-onnx's WebAssembly at about 15 MB.
+
 ## Release checklist
 
 - [ ] `dart run tool/verify_quran.dart` prints PASS; record the `quran.db` SHA-256 below.

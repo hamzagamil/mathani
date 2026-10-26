@@ -3,14 +3,14 @@
 // there is no download table. A surah is complete when every ayah, and its basmala when it has
 // one, is saved with its catalogue size (FR-031).
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 
 import '../../app/l10n/app_localizations.dart';
 import '../../data/models.dart';
 import '../../data/quran_repository.dart';
-import '../../shared/device_channel.dart';
+import '../../platform/device.dart';
+import '../../platform/file_store.dart';
 import '../../shared/numerals.dart';
 import 'ayah_fetcher.dart';
 
@@ -123,20 +123,18 @@ class DownloadQueue with WidgetsBindingObserver {
   /// Scans the downloads directory once; later calls return the same scan.
   Future<void> ensureScanned() => _scan ??= () async {
         await fetcher.init();
-        final root = await fetcher.downloadsRoot();
+        final store = fetcher.store;
         final found = <DownloadKey, SurahDownload>{};
-        if (await root.exists()) {
-          await for (final reciterDir in root.list()) {
-            if (reciterDir is! Directory) continue;
-            final reciter = reciterDir.uri.pathSegments.where((s) => s.isNotEmpty).last;
-            if (_reciter(reciter) == null) continue;
-            await for (final surahDir in reciterDir.list()) {
-              if (surahDir is! Directory) continue;
-              final surah = int.tryParse(surahDir.uri.pathSegments.where((s) => s.isNotEmpty).last);
-              if (surah == null || surah < 1 || surah > 114) continue;
-              final d = await _measure(reciter, surah);
-              if (d.savedBytes > 0) found[(reciter, surah)] = d;
-            }
+        for (final reciterDir in await store.list(StoreRoot.support, fetcher.downloadsRoot)) {
+          if (!reciterDir.isDir) continue;
+          final reciter = reciterDir.path.split('/').last;
+          if (_reciter(reciter) == null) continue;
+          for (final surahDir in await store.list(StoreRoot.support, reciterDir.path)) {
+            if (!surahDir.isDir) continue;
+            final surah = int.tryParse(surahDir.path.split('/').last);
+            if (surah == null || surah < 1 || surah > 114) continue;
+            final d = await _measure(reciter, surah);
+            if (d.savedBytes > 0) found[(reciter, surah)] = d;
           }
         }
         states.value = {...found, ...states.value}; // keep anything queued meanwhile
@@ -149,7 +147,7 @@ class DownloadQueue with WidgetsBindingObserver {
     var saved = 0, valid = 0;
     for (var a = 1; a <= sizes.length; a++) {
       final f = await fetcher.downloadFile(reciter, surah, a);
-      if (await AyahFetcher.isValid(f, sizes[a - 1])) {
+      if (await fetcher.isValid(f, sizes[a - 1])) {
         saved += sizes[a - 1];
         valid++;
       }
@@ -158,7 +156,7 @@ class DownloadQueue with WidgetsBindingObserver {
     var basmalaBytes = 0;
     if (_separateBasmala(reciter, surah)) {
       final bytes = (await quran.recordingBytes(reciter, 1)).first;
-      basmalaOk = await AyahFetcher.isValid(await fetcher.basmalaFile(reciter), bytes);
+      basmalaOk = await fetcher.isValid(await fetcher.basmalaFile(reciter), bytes);
       if (basmalaOk && valid > 0) {
         saved += bytes;
         basmalaBytes = bytes;
@@ -197,7 +195,7 @@ class DownloadQueue with WidgetsBindingObserver {
     // A saved basmala counts only alongside saved ayat in _measure; subtract it here too.
     if (d.savedBytes == 0 && _separateBasmala(reciter, surah)) {
       final bytes = (await quran.recordingBytes(reciter, 1)).first;
-      if (await AyahFetcher.isValid(await fetcher.basmalaFile(reciter), bytes)) remaining -= bytes;
+      if (await fetcher.isValid(await fetcher.basmalaFile(reciter), bytes)) remaining -= bytes;
     }
     return remaining;
   }
@@ -242,8 +240,7 @@ class DownloadQueue with WidgetsBindingObserver {
       _active = null;
     }
     _set(null, key);
-    final dir = Directory(await fetcher.downloadDir(reciter, surah));
-    if (await dir.exists()) await dir.delete(recursive: true);
+    await fetcher.store.deleteDir(StoreRoot.support, await fetcher.downloadDir(reciter, surah));
     unawaited(_pump());
   }
 
@@ -258,8 +255,7 @@ class DownloadQueue with WidgetsBindingObserver {
       for (final e in states.value.entries)
         if (e.key.$1 != reciter) e.key: e.value,
     };
-    final dir = await fetcher.reciterDownloads(reciter);
-    if (await dir.exists()) await dir.delete(recursive: true);
+    await fetcher.store.deleteDir(StoreRoot.support, await fetcher.reciterDownloads(reciter));
     unawaited(_pump());
   }
 
@@ -276,18 +272,20 @@ class DownloadQueue with WidgetsBindingObserver {
     }
     var d = await _measure(reciterId, surah);
     _set(d.copyWith(state: DownloadState.downloading), key);
+    // Out of iCloud backups on iOS; in browsers, asks once to keep downloads (specs/008 FR-014).
+    await fetcher.store.protect(StoreRoot.support, fetcher.downloadsRoot);
 
     // Basmala first, then the ayat in order (contract › Downloads › Order).
-    final tasks = <(int, int, File, int)>[]; // (surah, ayah, target, bytes)
+    final tasks = <(int, int, StoreFile, int)>[]; // (surah, ayah, target, bytes)
     if (_separateBasmala(reciterId, surah)) {
       final bytes = (await quran.recordingBytes(reciterId, 1)).first;
       final f = await fetcher.basmalaFile(reciterId);
-      if (!await AyahFetcher.isValid(f, bytes)) tasks.add((1, 1, f, bytes));
+      if (!await fetcher.isValid(f, bytes)) tasks.add((1, 1, f, bytes));
     }
     final sizes = await quran.recordingBytes(reciterId, surah);
     for (var a = 1; a <= sizes.length; a++) {
       final f = await fetcher.downloadFile(reciterId, surah, a);
-      if (!await AyahFetcher.isValid(f, sizes[a - 1])) tasks.add((surah, a, f, sizes[a - 1]));
+      if (!await fetcher.isValid(f, sizes[a - 1])) tasks.add((surah, a, f, sizes[a - 1]));
     }
 
     StopReason? stop;
@@ -297,19 +295,20 @@ class DownloadQueue with WidgetsBindingObserver {
         final (s, a, target, bytes) = tasks[next++];
         try {
           final cached = await fetcher.cacheFile(reciterId, s, a);
-          if (await AyahFetcher.isValid(cached, bytes)) {
-            await target.parent.create(recursive: true);
-            await cached.copy('${target.path}.part');
-            await File('${target.path}.part').rename(target.path);
+          if (await fetcher.isValid(cached, bytes)) {
+            await fetcher.store.copy(cached, target.part);
+            await fetcher.store.rename(target.part, target);
           } else {
             await fetcher.fetch(reciter, s, a, target, bytes: bytes);
           }
         } on FetchException catch (e) {
           stop ??= e.error == FetchError.offline ? StopReason.noConnection : StopReason.fetchFailed;
           return;
-        } on FileSystemException catch (e) {
-          final code = e.osError?.errorCode;
-          stop ??= code == 28 || code == 112 ? StopReason.noStorage : StopReason.fetchFailed;
+        } on NoSpaceException {
+          stop ??= StopReason.noStorage;
+          return;
+        } on Object {
+          stop ??= StopReason.fetchFailed;
           return;
         }
         if (generation != _generation) return;

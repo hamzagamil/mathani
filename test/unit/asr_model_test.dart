@@ -4,7 +4,8 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mathani/features/memorization/asr_model.dart';
-import 'package:mathani/shared/device_channel.dart';
+import 'package:mathani/platform/device.dart';
+import 'package:mathani/platform/file_store_io.dart';
 
 /// Records the folders kept out of backups.
 class _FakeDevice extends DeviceChannel {
@@ -84,7 +85,7 @@ void main() {
         version: version,
         files: files ?? plainFiles,
         base: Uri.parse('http://127.0.0.1:${server.port}/release/'),
-        supportRoot: () async => support,
+        store: IoFileStore(supportRoot: () async => support, device: device),
       );
 
   test('absent, then downloading, then ready with every file in place', () async {
@@ -227,18 +228,19 @@ void main() {
       File('${support.path}/asr/asr-khatma-v1/tokens.txt')
         ..createSync(recursive: true)
         ..writeAsStringSync('t');
-      await AsrModel.removeOtherVersions(supportRoot: () async => support);
+      await AsrModel.removeOtherVersions(store: IoFileStore(supportRoot: () async => support));
       expect(Directory('${support.path}/asr/asr-tarteel-tiny-v1').existsSync(), isFalse);
       expect(File('${support.path}/asr/asr-khatma-v1/tokens.txt').existsSync(), isTrue);
     });
 
     test('completes when there is no model folder', () async {
-      await AsrModel.removeOtherVersions(supportRoot: () async => support);
+      await AsrModel.removeOtherVersions(store: IoFileStore(supportRoot: () async => support));
       expect(Directory('${support.path}/asr').existsSync(), isFalse);
     });
 
     test('never throws, even without a support directory', () async {
-      await AsrModel.removeOtherVersions(supportRoot: () async => throw const FileSystemException('none'));
+      await AsrModel.removeOtherVersions(
+          store: IoFileStore(supportRoot: () async => throw const FileSystemException('none')));
     });
   });
 }

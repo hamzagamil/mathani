@@ -1,11 +1,11 @@
 // The audio player behind the recitation, as a small interface so the controller can be tested
 // with a fake (specs/004-ayah-recitations/contracts/recitation-playback.md, research R3).
 import 'dart:async';
-import 'dart:io';
 
 import 'package:audio_session/audio_session.dart';
 import 'package:just_audio/just_audio.dart';
 
+import '../../platform/file_store.dart';
 import 'recited_item.dart';
 
 sealed class EngineEvent {
@@ -40,10 +40,10 @@ abstract interface class AudioEngine {
   Stream<EngineEvent> get events;
 
   /// Replaces the window and positions the player at the start of [currentIndex].
-  Future<void> setWindow(List<(RecitedItem, File)> items, {int currentIndex = 0});
+  Future<void> setWindow(List<(RecitedItem, StoreFile)> items, {int currentIndex = 0});
 
   /// Adds an item after the last one; it plays without a gap.
-  Future<void> append(RecitedItem item, File file);
+  Future<void> append(RecitedItem item, StoreFile file);
 
   /// Removes the first item of the window (it has already played).
   Future<void> removeFirst();
@@ -58,7 +58,7 @@ abstract interface class AudioEngine {
 /// apps' audio and unplugged headphones pause it (handleInterruptions), and it never changes the
 /// system volume.
 class JustAudioEngine implements AudioEngine {
-  JustAudioEngine() {
+  JustAudioEngine({FileStore? store}) : _store = store ?? fileStore() {
     _subscriptions
       // The playing ayah is the tag of the source the player is on, not an index into a copy of
       // the playlist: just_audio reports the index on every playback event, and a copy runs ahead
@@ -75,7 +75,12 @@ class JustAudioEngine implements AudioEngine {
       }));
   }
 
+  final FileStore _store;
   final _player = AudioPlayer(handleInterruptions: true);
+
+  /// The URIs of the window, in order: `blob:` URLs in browsers are released when their item
+  /// leaves (specs/008 research R8).
+  final _uris = <Uri>[];
   final _events = StreamController<EngineEvent>.broadcast();
   final _subscriptions = <StreamSubscription<Object?>>[];
   RecitedItem? _started;
@@ -111,26 +116,37 @@ class JustAudioEngine implements AudioEngine {
   }
 
   @override
-  Future<void> setWindow(List<(RecitedItem, File)> items, {int currentIndex = 0}) =>
+  Future<void> setWindow(List<(RecitedItem, StoreFile)> items, {int currentIndex = 0}) =>
       _serial(() async {
         _started = null; // the new window's first item is reported even if it is the same ayah
+        final uris = [for (final (_, file) in items) await _store.playableUri(file)];
         await _player.setAudioSources(
-          [for (final (item, file) in items) AudioSource.file(file.path, tag: item)],
+          [for (var i = 0; i < items.length; i++) AudioSource.uri(uris[i], tag: items[i].$1)],
           initialIndex: currentIndex,
           preload: true,
         );
+        _releaseAll();
+        _uris.addAll(uris);
       });
 
   @override
-  Future<void> append(RecitedItem item, File file) => _serial(() async {
-        await _player.addAudioSource(AudioSource.file(file.path, tag: item));
+  Future<void> append(RecitedItem item, StoreFile file) => _serial(() async {
+        final uri = await _store.playableUri(file);
+        await _player.addAudioSource(AudioSource.uri(uri, tag: item));
+        _uris.add(uri);
       });
 
   @override
   Future<void> removeFirst() => _serial(() async {
         if (_player.sequence.isEmpty) return;
         await _player.removeAudioSourceAt(0);
+        if (_uris.isNotEmpty) _store.release(_uris.removeAt(0));
       });
+
+  void _releaseAll() {
+    _uris.forEach(_store.release);
+    _uris.clear();
+  }
 
   @override
   Future<void> play() async {
@@ -162,6 +178,7 @@ class JustAudioEngine implements AudioEngine {
       await s.cancel();
     }
     await _player.dispose();
+    _releaseAll();
     await _events.close();
   }
 }

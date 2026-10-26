@@ -13,7 +13,7 @@ sending, then record the date in `docs/licences.md` › Permissions.
 السلام عليكم ورحمة الله وبركاته،
 
 نتقدّم إليكم نحن شركة Mercury Engineering & Consultations LLC، ناشر تطبيق «مثاني: تلاوة وتدبر
-المتشابه» على متجري App Store و Google Play (المعرّف `com.mthani.app`)، بطلب إذنكم الكتابي في
+المتشابه» على متجري App Store و Google Play (المعرّف `com.mthani.app`) وتطبيق ويب مجاني على https://get.mthani.app، بطلب إذنكم الكتابي في
 استخدام خطوطكم في التطبيق.
 
 **عن التطبيق**
@@ -55,7 +55,7 @@ To the King Fahd Glorious Quran Printing Complex,
 Assalamu alaikum wa rahmatullahi wa barakatuh.
 
 Mercury Engineering & Consultations LLC publishes «مثاني: تلاوة وتدبر المتشابه» (Mathani) on the
-Apple App Store and Google Play (identifier `com.mthani.app`). We ask for your written permission
+Apple App Store and Google Play (identifier `com.mthani.app`) and as a free web app at https://get.mthani.app (specs/008). We ask for your written permission
 to use your fonts in the app.
 
 **About the app**
@@ -78,6 +78,8 @@ to use your fonts in the app.
 **Our commitments**
 
 - We will not modify or sell the fonts, or make them available apart from the app.
+- In the web app, the fonts are served only from the app's own site (get.mthani.app), each one
+  only to draw its page; they are not offered as downloads or from any other host.
 - We credit "King Fahd Glorious Quran Printing Complex" on the app's About screen, in any wording
   you prefer.
 - We will follow any other conditions you set, and are glad to send a build for review before

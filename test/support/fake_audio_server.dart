@@ -87,6 +87,13 @@ class FakeAudioServer {
   /// Surah files report this total length in `Content-Range` instead of the real one.
   int? wrongTotal;
 
+  /// Surah files send no `Content-Range`, as a browser shows a host that does not expose it
+  /// (specs/008 research R18a).
+  bool hideContentRange = false;
+
+  /// Surah files send this many bytes more than the range asked for.
+  int extraBytes = 0;
+
   /// Requests being answered now, and the most at once.
   int inFlight = 0;
   int maxInFlight = 0;
@@ -142,10 +149,13 @@ class FakeAudioServer {
         ..add(bytesOf(0, total));
     } else {
       final start = int.parse(range.group(1)!) + shiftRange;
-      final end = int.parse(range.group(2)!) + 1 + shiftRange;
+      final end = int.parse(range.group(2)!) + 1 + shiftRange + extraBytes;
+      response.statusCode = HttpStatus.partialContent;
+      if (!hideContentRange) {
+        response.headers
+            .set(HttpHeaders.contentRangeHeader, 'bytes $start-${end - 1}/${wrongTotal ?? total}');
+      }
       response
-        ..statusCode = HttpStatus.partialContent
-        ..headers.set(HttpHeaders.contentRangeHeader, 'bytes $start-${end - 1}/${wrongTotal ?? total}')
         ..contentLength = end - start
         ..add(bytesOf(start, end));
     }

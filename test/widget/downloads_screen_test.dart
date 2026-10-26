@@ -9,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mathani/app/app.dart';
 import 'package:mathani/data/models.dart';
 import 'package:mathani/features/recitation/ayah_fetcher.dart';
+import 'package:mathani/platform/file_store.dart';
 import 'package:mathani/features/recitation/download_queue.dart';
 import 'package:mathani/features/recitation/downloads_screen.dart';
 import 'package:mathani/features/recitation/recitation_controller.dart';
@@ -17,6 +18,7 @@ import 'package:mathani/shared/reader_state.dart';
 
 import '../support/fake_recitation.dart';
 import '../support/harness.dart';
+import '../support/temp_store.dart';
 
 void main() {
   late ReaderController reader;
@@ -33,7 +35,8 @@ void main() {
     }
   }
 
-  Future<void> writeValid(File f, int bytes) async {
+  Future<void> writeValid(StoreFile target, int bytes) async {
+    final f = TempStore(temp).file(target);
     await f.parent.create(recursive: true);
     await f.writeAsBytes(Uint8List(bytes));
   }
@@ -60,8 +63,7 @@ void main() {
       temp = Directory.systemTemp.createTempSync('mathani_dl_screen');
       fetcher = AyahFetcher(
         recordingSize: (r, s, a) async => (await reader.quran.recordingBytes(r, s))[a - 1],
-        cacheRoot: () async => Directory('${temp.path}/cache'),
-        supportRoot: () async => Directory('${temp.path}/support'),
+        store: TempStore(temp).store,
       );
       // Catalogue sizes come from the database: load them in real async (they are cached).
       for (final r in ['husary', 'minshawy']) {
@@ -252,7 +254,7 @@ void main() {
     expect(find.textContaining('تم تحرير'), findsOneWidget);
     expect(await tester.runAsync(() => fetcher.cacheBytes()), 0);
     expect(recitation.downloads.savedBytes(), downloadsBefore);
-    expect(await tester.runAsync(() async => (await fetcher.downloadFile('husary', 108, 1)).existsSync()),
+    expect(await tester.runAsync(() async => TempStore(temp).file(await fetcher.downloadFile('husary', 108, 1)).existsSync()),
         isTrue);
     await finish(tester);
   });

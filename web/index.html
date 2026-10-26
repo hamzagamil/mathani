@@ -1,46 +1,67 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" dir="ltr">
 <head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
-
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
+  <!-- Replaced by `flutter build web --base-href`; the app is served at the site root. -->
   <base href="$FLUTTER_BASE_HREF">
 
   <meta charset="UTF-8">
-  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
-
-  <!-- iOS meta tags & icons -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Mathani: read the Quran in the printed Madinah Mushaf, listen to recitations ayah by ayah, and test your memorization. مثاني: اقرأ القرآن الكريم بخط مصحف المدينة، واستمع إلى التلاوات، واختبر حفظك.">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#F2EADD">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0E1A2E">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="mathani">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Mathani">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
-
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
-
-  <title>mathani</title>
+  <link rel="icon" type="image/png" href="favicon.png">
   <link rel="manifest" href="manifest.json">
+
+  <title>Mathani · مثاني</title>
+  <style>
+    html, body { margin: 0; height: 100%; background: #F2EADD; color: #183159; }
+    @media (prefers-color-scheme: dark) { html, body { background: #0E1A2E; color: #EDE4D3; } }
+    #unsupported { box-sizing: border-box; max-width: 32rem; margin: 0 auto; padding: 3rem 1rem;
+      font: 1rem/1.6 system-ui, -apple-system, "Segoe UI", sans-serif; }
+    #unsupported h1 { font-size: 1.25rem; margin: 0 0 .5rem; }
+    #unsupported section + section { margin-top: 2rem; }
+    #unsupported a { color: inherit; }
+  </style>
 </head>
 <body>
-  <!--
-    You can customize the "flutter_bootstrap.js" script.
-    This is useful to provide a custom configuration to the Flutter loader
-    or to give the user feedback during the initialization process.
+  <!-- Keep in one inline script: web/_headers allows it by its SHA-256 (tool/web_deploy.mjs). -->
+  <script>
+    (function () {
+      // The page's language and direction follow the browser until the app takes over.
+      var ar = /^ar\b/i.test(navigator.language || '');
+      document.documentElement.lang = ar ? 'ar' : 'en';
+      document.documentElement.dir = ar ? 'rtl' : 'ltr';
 
-    For more details:
-    * https://docs.flutter.dev/platform-integration/web/initialization
-  -->
-  <script src="flutter_bootstrap.js" async></script>
+      // What the app needs (specs/008 research R14): checked by feature, not by browser version.
+      // Service workers are not required: Firefox's private windows have none, and the app still
+      // works there for the session, without offline use.
+      var supported = typeof WebAssembly === 'object' &&
+        typeof DecompressionStream === 'function' &&
+        typeof structuredClone === 'function' &&
+        !!(navigator.storage && navigator.storage.getDirectory);
+      if (supported) {
+        var s = document.createElement('script');
+        s.src = 'flutter_bootstrap.js';
+        s.async = true;
+        document.body.appendChild(s);
+        return;
+      }
+      // Browser names: keep in step with lib/platform/supported_browsers.dart.
+      var browsers = 'Chrome, Edge, Firefox, Safari';
+      var links = '<a href="https://play.google.com/store/apps/details?id=com.mthani.app">Google Play</a>' +
+        ' · <a href="https://mthani.app">mthani.app</a>';
+      document.body.innerHTML =
+        '<main id="unsupported">' +
+        '<section lang="ar" dir="rtl"><h1>مثاني لا يعمل في هذا المتصفح</h1>' +
+        '<p>افتح الموقع في إصدار حديث من ' + browsers + '، أو نزّل التطبيق.</p><p>' + links + '</p></section>' +
+        '<section lang="en" dir="ltr"><h1>Mathani doesn\'t work in this browser</h1>' +
+        '<p>Open this site in a current version of ' + browsers + ', or get the app.</p><p>' + links + '</p></section>' +
+        '</main>';
+    })();
+  </script>
 </body>
 </html>

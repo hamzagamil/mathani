@@ -16,6 +16,8 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
+  # Recordings over HTTP on phones and in browsers (specs/008 research R18a).
+  http: ^1.6.0
   intl: ^0.20.3
   just_audio: ^0.10.6
   path_provider: ^2.1.6
@@ -24,8 +26,12 @@ dependencies:
   share_plus: ^13.3.1
   sherpa_onnx: 1.13.8
   sqflite: ^2.4.4+1
+  # SQLite in the browser, imported only from lib/platform/database_web.dart (specs/008 R4).
+  sqflite_common_ffi_web: ^1.2.0
   url_launcher: ^6.3.3
   wakelock_plus: ^1.8.1
+  # Browser APIs, imported only from lib/platform/*_web.dart (specs/008 R3).
+  web: ^1.1.1
 
 dev_dependencies:
   flutter_test:
@@ -36,7 +42,6 @@ dev_dependencies:
   sqflite_common_ffi: ^2.4.3
   integration_test:
     sdk: flutter
-  sqflite_common_ffi_web: ^1.2.0
 
 flutter:
   uses-material-design: true

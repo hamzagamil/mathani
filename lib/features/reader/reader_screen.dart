@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
@@ -7,6 +8,7 @@ import '../../app/l10n/app_localizations.dart';
 import '../../app/theme/app_theme.dart';
 import '../../app/theme/tokens.dart';
 import '../../data/models.dart';
+import '../../data/quran_repository.dart';
 import '../../shared/mathani_icons.dart';
 import '../../shared/numerals.dart';
 import '../../shared/reader_state.dart';
@@ -53,7 +55,16 @@ class _ReaderScreenState extends State<ReaderScreen> {
   final _targets = TourTargets();
 
   @override
+  void initState() {
+    super.initState();
+    // Right-click opens the ayah actions over the Mushaf instead of the browser's menu
+    // (specs/008 research R12).
+    if (kIsWeb) BrowserContextMenu.disableContextMenu();
+  }
+
+  @override
   void dispose() {
+    if (kIsWeb) BrowserContextMenu.enableContextMenu();
     if (_wakelock == true) WakelockPlus.disable();
     if (_immersive) SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     super.dispose();
@@ -231,10 +242,51 @@ class _ReaderScreenState extends State<ReaderScreen> {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          ExcludeSemantics(excluding: touring, child: scaffold),
+          ExcludeSemantics(
+            excluding: touring,
+            child: touring ? scaffold : _withKeys(scaffold),
+          ),
           if (touring) ButtonTour(targets: _targets),
         ],
       ),
+    );
+  }
+
+  /// Keyboard use in browsers and on desktops (specs/008 FR-009, research R12): the arrow and
+  /// page keys turn pages in the Mushaf's direction (← is the next page, as in a printed Mushaf),
+  /// and space plays or pauses the recitation. Escape closes sheets through Flutter's own
+  /// dismiss shortcut.
+  Widget _withKeys(Widget scaffold) {
+    void turn(int delta) {
+      final reader = ReaderScope.read(context);
+      final page = (reader.page + delta).clamp(1, QuranRepository.pageCount);
+      if (page == reader.page) return;
+      if (reader.layout == ReadingLayout.flowing) {
+        reader.jumpTo(reader.quran.firstAyahOnPage(page).ref, highlight: false);
+      } else {
+        reader.jumpToPage(page);
+      }
+    }
+
+    void playOrPause() {
+      final recitation = RecitationScope.read(context);
+      final status = recitation?.session?.status;
+      if (status == RecitationStatus.playing || status == RecitationStatus.loading) {
+        recitation!.pause();
+      } else if (status == RecitationStatus.paused) {
+        recitation!.resume();
+      }
+    }
+
+    return CallbackShortcuts(
+      bindings: {
+        const SingleActivator(LogicalKeyboardKey.arrowLeft): () => turn(1),
+        const SingleActivator(LogicalKeyboardKey.pageDown): () => turn(1),
+        const SingleActivator(LogicalKeyboardKey.arrowRight): () => turn(-1),
+        const SingleActivator(LogicalKeyboardKey.pageUp): () => turn(-1),
+        const SingleActivator(LogicalKeyboardKey.space): playOrPause,
+      },
+      child: Focus(autofocus: true, child: scaffold),
     );
   }
 }

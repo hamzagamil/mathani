@@ -12,7 +12,7 @@ the date in `docs/licences.md` › Permissions.
 Hello,
 
 Assalamu alaikum. Mercury Engineering & Consultations LLC publishes «مثاني: تلاوة وتدبر المتشابه»
-(Mathani) on the Apple App Store and Google Play (identifier `com.mthani.app`). It is a free Quran
+(Mathani) on the Apple App Store and Google Play (identifier `com.mthani.app`) and as a free web app at https://get.mthani.app (specs/008). It is a free Quran
 reader with no ads, no accounts and no data collection.
 
 The app offers ayah-by-ayah recitation, with the recited ayah highlighted in the Mushaf. Version
@@ -99,7 +99,7 @@ permission for this use, and to know:
 
 - the attribution you would like (the About screen would credit EveryAyah.com and
   quranicaudio.com with links, and the reciters by name in the reciter list);
-- any conditions on use in a free app distributed through both stores, including request rates
+- any conditions on use in a free app distributed through both stores and on the web, including request rates
   (the app makes at most 2 requests at a time per device);
 - whether you prefer that the app use a particular host (everyayah.com, quranicaudio.com mirrors
   or another).

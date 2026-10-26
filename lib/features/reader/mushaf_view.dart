@@ -125,15 +125,23 @@ class _MushafPageItemState extends State<_MushafPageItem> {
   final _rendererKey = GlobalKey();
   _CachedPage? _page;
 
+  /// The page could not load: in a browser, its font has not been fetched yet and there is no
+  /// connection (specs/008 US4 scenario 2).
+  bool _failed = false;
+
   @override
   void initState() {
     super.initState();
     _page = widget.cache.peek(widget.page);
-    if (_page == null) {
-      widget.cache.load(widget.page).then((p) {
-        if (mounted) setState(() => _page = p);
-      });
-    }
+    if (_page == null) _load();
+  }
+
+  void _load() {
+    widget.cache.load(widget.page).then((p) {
+      if (mounted) setState(() => _page = p);
+    }, onError: (Object _) {
+      if (mounted) setState(() => _failed = true);
+    });
   }
 
   @override
@@ -142,10 +150,27 @@ class _MushafPageItemState extends State<_MushafPageItem> {
     final cached = _page;
     if (cached == null) {
       // Blank paper while the page (and its printed font) loads; taps still work.
+      final l10n = AppLocalizations.of(context);
       return GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: reader.selected != null ? () => reader.select(null) : widget.onTapPage,
-        child: PaperSheet(bindingOnRight: widget.page.isOdd, child: const SizedBox.expand()),
+        child: PaperSheet(
+          bindingOnRight: widget.page.isOdd,
+          child: !_failed
+              ? const SizedBox.expand()
+              : Center(
+                  child: Column(mainAxisSize: MainAxisSize.min, children: [
+                    Text(l10n.pageNeedsConnection, textAlign: TextAlign.center),
+                    TextButton(
+                      onPressed: () {
+                        setState(() => _failed = false);
+                        _load();
+                      },
+                      child: Text(l10n.retry),
+                    ),
+                  ]),
+                ),
+        ),
       );
     }
     final page = cached.page;
@@ -157,6 +182,18 @@ class _MushafPageItemState extends State<_MushafPageItem> {
     final memorization = MemorizationScope.maybeOf(context);
 
     final onTapPage = widget.onTapPage;
+    void pick(Offset globalPosition) {
+      final box = _rendererKey.currentContext?.findRenderObject();
+      if (box is! RenderMushafPage) return;
+      final ref = box.ayahAt(box.globalToLocal(globalPosition));
+      // During memorization the range's ayat have no actions (specs/006).
+      final inSession = memorization != null &&
+          memorization.active &&
+          ref != null &&
+          (memorization.range?.contains(ref) ?? false);
+      if (ref != null && !inSession) widget.onAyahLongPress!(ref);
+    }
+
     return Semantics(
       label: l10n.pageSemantics(
         toEasternArabic(page.number),
@@ -169,19 +206,11 @@ class _MushafPageItemState extends State<_MushafPageItem> {
         behavior: HitTestBehavior.opaque,
         // A tap clears a selection; otherwise it shows or hides the reader controls.
         onTap: reader.selected != null ? () => reader.select(null) : onTapPage,
-        onLongPressStart: widget.onAyahLongPress == null
-            ? null
-            : (d) {
-                final box = _rendererKey.currentContext?.findRenderObject();
-                if (box is! RenderMushafPage) return;
-                final ref = box.ayahAt(box.globalToLocal(d.globalPosition));
-                // During memorization the range's ayat have no actions (specs/006).
-                final inSession = memorization != null &&
-                    memorization.active &&
-                    ref != null &&
-                    (memorization.range?.contains(ref) ?? false);
-                if (ref != null && !inSession) widget.onAyahLongPress!(ref);
-              },
+        onLongPressStart:
+            widget.onAyahLongPress == null ? null : (d) => pick(d.globalPosition),
+        // A right-click does what a long press does (specs/008 FR-009).
+        onSecondaryTapUp:
+            widget.onAyahLongPress == null ? null : (d) => pick(d.globalPosition),
         child: PaperSheet(
           bindingOnRight: page.number.isOdd,
           child: MushafPageRenderer(
@@ -267,6 +296,9 @@ class _PageCache {
         _pages.remove(_pages.keys.first);
       }
       return p;
+    }, onError: (Object e, StackTrace s) {
+      _loading.remove(page); // the next load tries again
+      return Future<_CachedPage>.error(e, s);
     });
   }
 
@@ -278,7 +310,7 @@ class _PageCache {
 
   void prefetchAround(int page) {
     for (final p in [page, page + 1, page - 1, page + 2, page - 2]) {
-      if (p >= 1 && p <= QuranRepository.pageCount) load(p);
+      if (p >= 1 && p <= QuranRepository.pageCount) load(p).ignore(); // the page shows errors
     }
   }
 

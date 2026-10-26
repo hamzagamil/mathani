@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 
+import '../platform/database.dart';
+import '../platform/device.dart';
 import 'models.dart';
 
 /// On-device user data: reading position, preferences and bookmarks.
@@ -18,7 +22,7 @@ class UserRepository extends ChangeNotifier {
 
   static Future<UserRepository> open() async {
     final db = await openDatabase(
-      '${await getDatabasesPath()}/user.db',
+      await databasePath('user.db'),
       version: _schemaVersion,
       onCreate: (db, version) => _migrate(db, 0, version),
       onUpgrade: _migrate,
@@ -43,6 +47,8 @@ class UserRepository extends ChangeNotifier {
   /// Adds a bookmark for [ref] on [page]. Adding an ayah that is already bookmarked is a no-op
   /// (`UNIQUE (surah, ayah)` with INSERT OR IGNORE) that returns the existing bookmark.
   Future<Bookmark> addBookmark(AyahRef ref, int page) async {
+    // In a browser, a first bookmark is when to ask to keep the site's data (specs/008 FR-014).
+    unawaited(const DeviceChannel().keepBrowserData());
     await _db.insert(
       'bookmarks',
       {

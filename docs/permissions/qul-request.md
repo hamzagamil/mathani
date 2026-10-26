@@ -11,7 +11,7 @@ sending, then record the date in `docs/licences.md` › Permissions.
 Hello QUL team,
 
 Assalamu alaikum. Mercury Engineering & Consultations LLC publishes «مثاني: تلاوة وتدبر المتشابه»
-(Mathani) on the Apple App Store and Google Play (identifier `com.mthani.app`). It is a free Quran
+(Mathani) on the Apple App Store and Google Play (identifier `com.mthani.app`) and as a free web app at https://get.mthani.app (specs/008). It is a free Quran
 reader with no ads, no accounts and no data collection, and it works fully offline.
 
 The app is built from these QUL resources, which we found no licence for on the site:
@@ -41,7 +41,7 @@ We would like your written permission to redistribute this data inside the app, 
 
 - the attribution you would like (the About screen currently credits "Quranic Universal Library
   (QUL), https://qul.tarteel.ai");
-- any conditions on use in a free app distributed through both stores;
+- any conditions on use in a free app distributed through both stores and on the web;
 - for items 4 and 5, whether we may use the timings and the Tarteel-hosted audio as described,
   and the attribution you would like for them;
 - whether the KFGQPC V2 (1421 AH) layout and the matching per-word glyph codes may be used the

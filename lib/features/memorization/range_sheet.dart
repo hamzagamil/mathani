@@ -7,6 +7,7 @@ import '../../app/l10n/app_localizations.dart';
 import '../../app/theme/app_theme.dart';
 import '../../app/theme/tokens.dart';
 import '../../data/models.dart';
+import '../../platform/supported_browsers.dart';
 import '../../shared/mathani_icons.dart';
 import '../../shared/numerals.dart';
 import '../../shared/reader_state.dart';
@@ -143,9 +144,11 @@ class _RangeSheetState extends State<_RangeSheet> {
                 textAlign: TextAlign.center, style: TypeScale.titleSm.copyWith(color: colors.ink)),
             const SizedBox(height: Space.s2),
             Text(
-              _unsupported == Unsupported.not64Bit
-                  ? l10n.memorizeUnsupported64
-                  : l10n.memorizeUnsupportedMemory,
+              switch (_unsupported) {
+                Unsupported.not64Bit => l10n.memorizeUnsupported64,
+                Unsupported.browser => l10n.memorizationBrowserUnsupported(supportedBrowserNames),
+                _ => l10n.memorizeUnsupportedMemory,
+              },
               textAlign: TextAlign.center,
               style: TypeScale.body.copyWith(color: colors.inkMuted),
             ),

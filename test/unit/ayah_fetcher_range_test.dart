@@ -7,6 +7,7 @@ import 'package:mathani/features/recitation/ayah_fetcher.dart';
 import 'package:mathani/features/recitation/recited_item.dart';
 
 import '../support/fake_audio_server.dart';
+import '../support/temp_store.dart';
 
 /// Ayah clips of reciters recorded one surah per file (specs/006 T012, research R18): each ayah is
 /// fetched as an exact byte range of its surah file, and anything but that range is refused.
@@ -14,6 +15,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   late FakeAudioServer server;
   late Directory temp;
+  late TempStore files;
   late AyahFetcher fetcher;
   late Reciter reciter;
 
@@ -29,6 +31,7 @@ void main() {
     server = await FakeAudioServer.start();
     temp = Directory.systemTemp.createTempSync('mathani_fetcher_range');
     reciter = server.surahReciter();
+    files = TempStore(temp);
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       const MethodChannel('app.mathani/device'),
       (call) async => switch (call.method) {
@@ -48,8 +51,7 @@ void main() {
         }
         return (start: start, end: start + list[a - 1], total: total);
       },
-      cacheRoot: () async => Directory('${temp.path}/cache'),
-      supportRoot: () async => Directory('${temp.path}/support'),
+      store: files.store,
     );
   });
 
@@ -62,7 +64,7 @@ void main() {
   test('an ayah is the exact byte range of its surah file', () async {
     final total = server.surahFileBytes(112);
     final list = sizes(total);
-    final f = await fetcher.resolve(reciter, const RecitedItem.ayah(112, 3));
+    final f = files.file(await fetcher.resolve(reciter, const RecitedItem.ayah(112, 3)));
     final start = rangeStart + list[0] + list[1];
     expect(f.path, endsWith('surahs/112003.mp3'));
     final bytes = await f.readAsBytes();
@@ -78,7 +80,7 @@ void main() {
     server.ignoreRange = true;
     await expectLater(fetcher.resolve(reciter, const RecitedItem.ayah(112, 2)),
         throwsA(isA<FetchException>()));
-    expect(await (await fetcher.cacheFile(reciter.id, 112, 2)).exists(), isFalse);
+    expect(files.file(await fetcher.cacheFile(reciter.id, 112, 2)).existsSync(), isFalse);
     expect(server.requests.every((p) => p == '/surah/112.mp3'), isTrue,
         reason: 'no mirror is tried for a reciter without one');
   });
@@ -92,9 +94,25 @@ void main() {
       ..wrongTotal = 1;
     await expectLater(fetcher.resolve(reciter, const RecitedItem.ayah(112, 2)),
         throwsA(isA<FetchException>()));
-    expect(await (await fetcher.cacheFile(reciter.id, 112, 2)).exists(), isFalse);
+    expect(files.file(await fetcher.cacheFile(reciter.id, 112, 2)).existsSync(), isFalse);
     server.wrongTotal = null;
-    final f = await fetcher.resolve(reciter, const RecitedItem.ayah(112, 2));
+    final f = files.file(await fetcher.resolve(reciter, const RecitedItem.ayah(112, 2)));
     expect(await f.length(), sizes(server.surahFileBytes(112))[1]);
+  });
+
+  // Browsers hide Content-Range from everyayah.com and quranicaudio.com (specs/008 R18a).
+  test('without Content-Range, a clip of exactly the range length is accepted', () async {
+    server.hideContentRange = true;
+    final f = files.file(await fetcher.resolve(reciter, const RecitedItem.ayah(112, 1)));
+    expect(await f.length(), sizes(server.surahFileBytes(112))[0]);
+  });
+
+  test('without Content-Range, a clip of another length is refused', () async {
+    server
+      ..hideContentRange = true
+      ..extraBytes = 1;
+    await expectLater(fetcher.resolve(reciter, const RecitedItem.ayah(112, 1)),
+        throwsA(isA<FetchException>()));
+    expect(files.file(await fetcher.cacheFile(reciter.id, 112, 1)).existsSync(), isFalse);
   });
 }

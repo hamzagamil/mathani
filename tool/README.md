@@ -47,15 +47,38 @@ asserts that all three agree on the word count and on the surah:ayah of every wo
 Licences: see [docs/licences.md](../docs/licences.md). Tanzil files must stay byte-for-byte as
 downloaded, including their copyright block.
 
-## Browser preview (development only)
+## Web app (specs/008)
+
+The web app is the same `lib/main.dart`; the browser-only code is in `lib/platform/*_web.dart`.
+Build, check and deploy: [docs/release.md](../docs/release.md) › Web.
 
 ```powershell
-flutter run -d chrome -t tool/web_preview.dart
+flutter run -d chrome --wasm                                   # development
+flutter build web --wasm --release --no-web-resources-cdn
+node tool/web_deploy.mjs --prepare-only                        # what a deploy does to build/web, no upload
 ```
 
-Uses WebAssembly SQLite from `sqflite_common_ffi_web` (a dev dependency, so it never enters the
-Android or iOS app) and `web/sqlite3.wasm`, which must match the locked `sqlite3` version
-(currently 3.7.0). The browser is not a target platform; verify behaviour on a phone.
+- `web/sqlite3.wasm` is the sqlite3 3.7.0 release, matching the locked `sqlite3` package. Keep
+  them in step when `sqlite3` is upgraded.
+- `web/sqflite_sw.js` is the SQLite shared worker, compiled from `tool/web/sqflite_sw.dart` (see
+  that file). `dart run sqflite_common_ffi_web:setup` fails on Windows and would replace
+  `sqlite3.wasm` with an older release.
+- `web/font-fallback/` holds the fallback fonts the engine would otherwise fetch from Google (see
+  its README).
+- Memorization in browsers uses sherpa-onnx's own WebAssembly build from the `sherpa_onnx_web`
+  package (web-only assets), run by `web/speech/speech_worker.js`. It stays off until spike S2 on
+  the reference devices: build with `--dart-define=MATHANI_WEB_MEMORIZATION=true` to try it.
+
+### Recognition model mirror (Hugging Face)
+
+Browsers cannot read GitHub release files (no CORS), so the web app downloads the model from a
+Hugging Face mirror (specs/008 research R6). For each model version:
+
+1. Upload `model.int8.onnx.gz`, `tokens.txt` and `silero_vad.onnx`, byte-identical to the GitHub
+   release, to `hamzagamil/mathani-asr` under `<asrModelVersion>/`.
+2. Check each file's size and SHA-256 against `asrModelFiles` by downloading
+   `https://huggingface.co/hamzagamil/mathani-asr/resolve/<commit>/<asrModelVersion>/<file>`.
+3. Pin `<commit>` in `asrModelBaseWeb` (`lib/features/memorization/asr_model.dart`).
 
 ## Recitation catalogue (specs/004)
 

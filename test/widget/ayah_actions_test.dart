@@ -1,4 +1,5 @@
 // US5 (quickstart scenario 11): long-press an ayah in both layouts, copy it, bookmark it.
+import 'package:flutter/gestures.dart' show kSecondaryButton;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -90,6 +91,39 @@ void main() {
     await tester.tap(find.text('احفظ'));
     await settle(tester);
     expect(reader.user.bookmarks, hasLength(1));
+  });
+
+  // specs/008 FR-009: a right-click does what a long press does, in both layouts.
+  testWidgets('Mushaf and flowing: a right-click on an ayah opens its actions', (tester) async {
+    await pumpApp(tester);
+    reader.jumpTo(const AyahRef(1, 1), highlight: false);
+    await settle(tester);
+    final box = tester.renderObject<RenderMushafPage>(find.byType(MushafPageRenderer).first);
+    Offset? target;
+    for (var y = 0.0; y < box.size.height && target == null; y += 6) {
+      for (var x = box.size.width * 0.2; x < box.size.width * 0.8; x += 12) {
+        if (box.ayahAt(Offset(x, y)) == const AyahRef(1, 3)) {
+          target = box.localToGlobal(Offset(x, y));
+          break;
+        }
+      }
+    }
+    expect(target, isNotNull);
+    await tester.tapAt(target!, buttons: kSecondaryButton);
+    await settle(tester);
+    expect(reader.selected, const AyahRef(1, 3));
+    expect(find.text('انسخ'), findsOneWidget);
+    await tester.tap(find.text('انسخ'));
+    await settle(tester);
+
+    reader.updatePreferences(reader.preferences.copyWith(layout: ReadingLayout.flowing));
+    reader.jumpTo(const AyahRef(1, 1), highlight: false);
+    await settle(tester, 10);
+    final quranParagraph = find.byWidgetPredicate(
+        (w) => w is RichText && w.textAlign == TextAlign.justify);
+    await tester.tap(quranParagraph.first, buttons: kSecondaryButton);
+    await settle(tester);
+    expect(find.text('احفظ'), findsOneWidget);
   });
 
   testWidgets('Play from this ayah is the first action and starts the recitation there (specs/004)',

@@ -1,10 +1,9 @@
-import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:sqflite/sqflite.dart';
 
+import '../platform/database.dart';
 import 'models.dart';
 
 /// Read-only access to the bundled Quran database.
@@ -24,7 +23,6 @@ class QuranRepository {
 
   static const pageCount = 604;
   static const supportedSchemaMajor = '1';
-  static const _assetDb = 'assets/db/quran.db';
   static const _assetVersion = 'assets/db/quran.version';
 
   final Database _db;
@@ -59,34 +57,11 @@ class QuranRepository {
   final Map<(String, int), int?> _rangeStarts = {};
   final Map<bool, List<int>> _basmalaPages = {};
 
-  /// Copies the bundled database on first launch (or when the bundled build changed), then
+  /// Installs the bundled database on first launch (or when the bundled build changed), then
   /// opens it read-only and loads the small in-memory ayah index used for navigation.
   static Future<QuranRepository> open() async {
-    final dir = await getDatabasesPath();
-    final path = '$dir/quran.db';
-    if (kIsWeb) {
-      // Development preview in a browser only (tool/web_preview.dart): no files, so write the
-      // bundled bytes into the web SQLite store on every launch.
-      final data = await rootBundle.load(_assetDb);
-      await databaseFactory.writeDatabaseBytes(
-          path, data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes));
-      return _openAt(path);
-    }
     final bundledVersion = (await rootBundle.loadString(_assetVersion)).trim();
-    final versionFile = File('$dir/quran.version');
-    final installedVersion =
-        versionFile.existsSync() ? versionFile.readAsStringSync().trim() : null;
-
-    if (installedVersion != bundledVersion || !File(path).existsSync()) {
-      await Directory(dir).create(recursive: true);
-      final data = await rootBundle.load(_assetDb);
-      await File(path).writeAsBytes(
-        data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes),
-        flush: true,
-      );
-      await versionFile.writeAsString(bundledVersion, flush: true);
-    }
-    return _openAt(path);
+    return _openAt(await installQuranDb(bundledVersion));
   }
 
   static Future<QuranRepository> _openAt(String path) async {

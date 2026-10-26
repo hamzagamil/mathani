@@ -1,7 +1,16 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mathani/features/memorization/device_support.dart';
-import 'package:mathani/shared/device_channel.dart';
+import 'package:mathani/platform/device.dart';
+
+/// A browser answering [support] (specs/008 research R10).
+class _Browser extends DeviceChannel {
+  const _Browser(this.support);
+  final WebSupport support;
+
+  @override
+  Future<WebSupport?> webSupport() async => support;
+}
 
 /// The memorization device gate (specs/006 T039, research R15) and the channel's defaults.
 void main() {
@@ -28,6 +37,33 @@ void main() {
   test('32-bit is not supported, whatever the memory', () async {
     answer({'arm64': false, 'ramBytes': 8 * 1024 * 1024 * 1024});
     expect(await memorizationSupport(const DeviceChannel()), Unsupported.not64Bit);
+  });
+
+  group('in a browser (specs/008 T054)', () {
+    const all = (wasmSimd: true, audioWorklet: true, opfs: true, deviceMemoryGb: null);
+
+    test('everything present, memory not reported: supported', () async {
+      expect(await memorizationSupport(const _Browser(all)), isNull);
+    });
+
+    test('a missing feature: this browser cannot', () async {
+      for (final missing in [
+        (wasmSimd: false, audioWorklet: true, opfs: true, deviceMemoryGb: null),
+        (wasmSimd: true, audioWorklet: false, opfs: true, deviceMemoryGb: null),
+        (wasmSimd: true, audioWorklet: true, opfs: false, deviceMemoryGb: null),
+      ]) {
+        expect(await memorizationSupport(_Browser(missing)), Unsupported.browser, reason: '$missing');
+      }
+    });
+
+    test('reported memory below the minimum: low memory', () async {
+      expect(await memorizationSupport(const _Browser(
+              (wasmSimd: true, audioWorklet: true, opfs: true, deviceMemoryGb: 2))),
+          Unsupported.lowMemory);
+      expect(await memorizationSupport(const _Browser(
+              (wasmSimd: true, audioWorklet: true, opfs: true, deviceMemoryGb: webMinDeviceMemoryGb))),
+          isNull);
+    });
   });
 
   test('without the channel the device counts as supported and actions do nothing', () async {

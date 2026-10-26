@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 import 'app/app.dart';
@@ -13,19 +12,22 @@ import 'features/recitation/ayah_fetcher.dart';
 import 'features/recitation/media_handler.dart';
 import 'features/recitation/recitation_controller.dart';
 import 'features/settings/about_section.dart';
+import 'platform/database.dart';
 import 'shared/reader_state.dart';
 
 Future<void> main() => runMathani();
 
-/// Opens the databases and starts the app. Shared with the browser preview (tool/web_preview.dart).
+/// Opens the databases and starts the app, on phones and in browsers (specs/008).
 Future<void> runMathani() async {
   WidgetsFlutterBinding.ensureInitialized();
   registerAssetLicences(); // lazy: the files are read only when the licences page opens
-  // Both databases open in parallel; no network and no background work at startup. The browser
-  // preview shares one in-memory file system between them, so it opens them one at a time.
-  final (quran, user) = kIsWeb
-      ? (await QuranRepository.open(), await UserRepository.open())
-      : await (QuranRepository.open(), UserRepository.open()).wait;
+  await initDatabases();
+  // Both databases open in parallel on phones; no network and no background work at startup. In
+  // browsers they open one at a time, and the Quran database is fetched only on a first visit or
+  // a new version (specs/008 research R4).
+  final (quran, user) = parallelDatabaseOpen
+      ? await (QuranRepository.open(), UserRepository.open()).wait
+      : (await QuranRepository.open(), await UserRepository.open());
   final (anchor, preferences) = await user.loadStartup();
   final controller = ReaderController(
     quran: quran,
@@ -62,7 +64,5 @@ Future<void> runMathani() async {
   ));
   // After updating, the previous recognition model's files are freed without waiting for
   // memorization to open; after the first frame, so cold start is unchanged (specs/007 FR-004).
-  if (!kIsWeb) {
-    WidgetsBinding.instance.addPostFrameCallback((_) => unawaited(AsrModel.removeOtherVersions()));
-  }
+  WidgetsBinding.instance.addPostFrameCallback((_) => unawaited(AsrModel.removeOtherVersions()));
 }
