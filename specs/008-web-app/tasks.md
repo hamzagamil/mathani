@@ -51,16 +51,15 @@ laptop ([s2-results.md](./s2-results.md)).
 - **T051, T058**: `hamzagamil/mathani-asr` uploaded 2026-10-26 at commit `dd396c6`. The sizes and SHA-256 sums match `asrModelFiles`, and CORS and `Range` were checked; `asrModelBaseWeb` is pinned to that commit.
 - **T070**: no widget test. The font loader has no hook for a failing page font, so this is
   checked by hand in V9.
-- **T074, T075**: the drafts are in [landing-drafts.md](./landing-drafts.md) for review, not
-  written into `Mathani-landing`.
-- **Memorization on the web** stays off (`speechEngineAvailable`) until T052 passes on the
-  reference devices.
+- **T074, T075**: published on mthani.app on 2026-10-26, with Cloudflare named as the host; [landing-drafts.md](./landing-drafts.md) holds the reviewed text.
+- **Memorization on the web** was turned on 2026-10-26 by owner decision, before T052 on the
+  reference devices. A failed model load undoes the session and says the device can't.
 
 **Open, and why:**
 
 | Waiting for | Tasks |
 |-------------|-------|
-| The owner (outward-facing) | T005: hosting **moved to Cloudflare Pages** (project `mthani-web`, deployed and checked on mthani-web.pages.dev, offline start included). Still to do: switch the Namecheap CNAME `get` to `mthani-web.pages.dev`, then delete the Netlify `mthani-web` site; T078, T079 publishing; T077 the constitution amendment (optional) |
+| The owner (outward-facing) | T005: hosting **moved to Cloudflare Pages** (project `mthani-web`, deployed and checked on mthani-web.pages.dev, offline start included). get.mthani.app is active on Pages and the Netlify `mthani-web` site is deleted (2026-10-26). The landing link ("استخدمه على المتصفح" beside both store buttons) and the privacy policy's web section went live on mthani.app the same day (T074, T075, T078); T078, T079 publishing; T077 the constitution amendment (optional) |
 | Devices and browsers | T024 step 6 and T076 (phones); T040, T042, T049, T052, T063–T065, T071 (browser matrix, spikes) |
 | A draft deploy (needs T005) | T039 |
 | A Chrome test-runner fix | T013, T043: `flutter test --platform chrome` stays at "loading" on this machine |
@@ -132,7 +131,7 @@ browser loads directly are in `web/`.
   - Safari: macOS / iOS.
 
   Add a `supportedBrowserNames` getter ("Chrome, Edge, Firefox, Safari") for messages.
-- [ ] T005 **Outward-facing, confirm with the owner first**: create the hosting
+- [X] T005 **Outward-facing, confirm with the owner first**: create the hosting
   ([contracts/hosting.md](./contracts/hosting.md) › Sites).
   - Create a **new Netlify team** and, in it, a new site.
   - Add the custom domain `get.mthani.app`, with a CNAME at the mthani.app DNS provider pointing
@@ -816,7 +815,7 @@ installed app, and find the pages, bookmarks and downloads there.
   - add the web as a supported platform, with its budgets (first visit 5 s, return visit 2 s)
     and reference devices (research R17);
   - reword Principle II's "no desktop or web layout" to "no desktop layout".
-- [ ] T078 **Outward-facing, confirm with the owner first**: publish the privacy policy (T074) and
+- [X] T078 **Outward-facing, confirm with the owner first**: publish the privacy policy (T074) and
   the landing link (T075) with
   `node _deploy/netlify-deploy.mjs privacypolicy/index.html index.html` from `Mathani-landing`.
   Then run quickstart V17: mthani.app and `/privacypolicy` unchanged apart from these (SC-009).

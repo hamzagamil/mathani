@@ -79,11 +79,14 @@ on 2026-10-26).
 
 - **Project:** `mthani-web` in the Cloudflare account "Hamzagamil@gmail.com's Account". The
   production branch is `main`; it is also served at https://mthani-web.pages.dev.
-- **Why Cloudflare:** static files on Pages carry no bandwidth charge. So, unlike on Netlify's
-  shared credit pool, heavy use can never pause mthani.app or its privacy policy, which stay on
-  Netlify. Cloudflare Web Analytics is off, and stays off (FR-027).
-- **DNS:** mthani.app's DNS is at Namecheap. `get` is a CNAME to `mthani-web.pages.dev`, and
-  get.mthani.app is a custom domain of the Pages project. The certificate comes from Google's CA
+- **Why Cloudflare:** static files on Pages carry no bandwidth charge (Netlify's free plan is a
+  credit pool). Cloudflare Web Analytics is off, and stays off (FR-027).
+- **The landing site** (mthani.app, www, `/privacypolicy`) moved to Cloudflare Pages the same day:
+  project `mthani-landing`, deployed with `node _deploy/deploy.mjs` from the landing folder.
+  Email for @mthani.app goes through Cloudflare Email Routing (catch-all to the owner's Gmail).
+- **DNS:** mthani.app is registered at Namecheap with Cloudflare's nameservers, so records are
+  edited in the Cloudflare dashboard. `get` (and `read`) are CNAMEs to `mthani-web.pages.dev`,
+  and get.mthani.app is a custom domain of the Pages project. The certificate comes from Google's CA
   through Cloudflare.
 - **Sign-in:** run `npx wrangler@4 login` once per machine. The deploy script uses wrangler's
   session. The development machine inspects HTTPS, so the script runs Node with

@@ -47,11 +47,15 @@ class DeviceChannel {
   Future<WebSupport?> webSupport() async {
     bool has(String name) => globalContext.has(name);
     final storage = _navigator.storage as JSObject?;
+    // Downloads are written with FileSystemFileHandle.createWritable, which older Safari lacks.
+    final fileHandle = globalContext.getProperty<JSObject?>('FileSystemFileHandle'.toJS);
+    final writable = fileHandle != null &&
+        fileHandle.getProperty<JSObject>('prototype'.toJS).has('createWritable');
     final memory = (_navigator as JSObject).getProperty<JSNumber?>('deviceMemory'.toJS);
     return (
       wasmSimd: _webAssembly.validate(_simdProbe.toJS),
       audioWorklet: has('AudioWorkletNode'),
-      opfs: storage != null && storage.has('getDirectory'),
+      opfs: storage != null && storage.has('getDirectory') && writable,
       deviceMemoryGb: memory?.toDartDouble.floor(),
     );
   }

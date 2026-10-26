@@ -183,6 +183,24 @@ void main() {
     expect(mic.starts, 0);
   });
 
+  // specs/008: a browser that cannot load the model (too little memory) is told so, and nothing
+  // stays hidden.
+  testWidgets('a model that fails to load undoes the session and says the device cannot',
+      (tester) async {
+    await pumpApp(tester);
+    recogniser.loadError = StateError('speech worker: memory');
+    reader.jumpToPage(604);
+    await settle(tester);
+    await tapToolbar(tester, MathaniIcons.memorize);
+    await settle(tester);
+    await tester.tap(find.text('ابدأ'));
+    await settle(tester);
+    expect(memorization.phase, isNull);
+    expect(memorization.active, isFalse);
+    expect(mic.starts, 0);
+    expect(find.textContaining('الحفظ غير متاح'), findsOneWidget);
+  });
+
   group('live passes', () {
     late List<List<int>> ids; // word ids of Al-Ikhlas, ayah by ayah
 

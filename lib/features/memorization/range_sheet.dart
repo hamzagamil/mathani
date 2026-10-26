@@ -283,7 +283,9 @@ class _RangeSheetState extends State<_RangeSheet> {
               ] else
                 Align(
                   alignment: AlignmentDirectional.centerStart,
-                  child: OutlinedButton.icon(
+                  // Filled: it is the step to take; an outlined button here read as disabled
+                  // next to the disabled Start button.
+                  child: FilledButton.icon(
                     icon: const Icon(MathaniIcons.download),
                     label: Text(l10n.download),
                     onPressed: _download,

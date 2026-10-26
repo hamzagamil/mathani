@@ -562,6 +562,6 @@
       }
     }
   },
-  "micDeniedBrowser": "Allow the microphone for get.mthani.app in your browser's site settings, then try again.",
+  "micDeniedBrowser": "Allow the microphone for this site in your browser's site settings, then try again.",
   "pageNeedsConnection": "This page needs a connection the first time you open it."
 }

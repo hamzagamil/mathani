@@ -1456,7 +1456,7 @@ abstract class AppLocalizations {
   /// No description provided for @micDeniedBrowser.
   ///
   /// In en, this message translates to:
-  /// **'Allow the microphone for get.mthani.app in your browser\'s site settings, then try again.'**
+  /// **'Allow the microphone for this site in your browser\'s site settings, then try again.'**
   String get micDeniedBrowser;
 
   /// No description provided for @pageNeedsConnection.

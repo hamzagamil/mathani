@@ -838,7 +838,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get micDeniedBrowser =>
-      'اسمح باستخدام الميكروفون لموقع get.mthani.app من إعدادات الموقع في متصفحك، ثم حاول مرة أخرى.';
+      'اسمح باستخدام الميكروفون لهذا الموقع من إعدادات الموقع في متصفحك، ثم حاول مرة أخرى.';
 
   @override
   String get pageNeedsConnection =>

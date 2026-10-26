@@ -23,7 +23,7 @@ Mathani ships today on iOS and Android (version 1.5.0). Its features are the Mus
 page and flowing layouts (specs/001, 002), the index with surahs, ajza' and bookmarks, search
 (003), ayah-by-ayah recitations with downloads for offline listening (004, 006), the onboarding
 (005), and memorization with live word-by-word recognition of the reader's voice (006, 007). The
-landing site, mthani.app, is hosted on Netlify. A development-only browser preview already exists
+landing site, mthani.app, was hosted on Netlify (moved to Cloudflare Pages on 2026-10-26). A development-only browser preview already exists
 but is not a supported product.
 
 This feature makes the whole app a supported product in the browser, at get.mthani.app, with the same features and the same behaviour as the phone apps unless this spec says
@@ -182,7 +182,7 @@ the installed app, and confirm it starts and shows those pages.
 
 **Access and hosting**
 
-- **FR-001**: The web app MUST be served at get.mthani.app, hosted on Netlify, and published
+- **FR-001**: The web app MUST be served at get.mthani.app (hosted on Cloudflare Pages), and published
   separately from the landing site, so a web app release cannot change or break the landing pages.
 - **FR-002**: The landing site MUST link to the web app, and the existing landing pages,
   including /privacypolicy, MUST keep working at their current addresses.
@@ -319,13 +319,12 @@ the installed app, and confirm it starts and shows those pages.
   settings are kept per browser; syncing between the web and the phone app is out of scope.
 - **Shareable links to pages or ayat** (an address per page or ayah) are out of scope for this
   feature; sharing an ayah shares its text, as in the app.
-- **Domain**: get.mthani.app is a subdomain of the existing mthani.app domain, pointed at the new
-  Netlify site. The landing site stays at mthani.app, and the landing site and store listings link
+- **Domain**: get.mthani.app is a subdomain of the existing mthani.app domain, pointed at the
+  web app's Pages project. The landing site stays at mthani.app, and the landing site and store listings link
   to get.mthani.app.
 - **Hosting**: the web app is served from Cloudflare Pages (project `mthani-web`; owner decision,
-  2026-10-26). The landing site and privacy policy stay on Netlify. Static files on Pages carry no
-  bandwidth charge, so the web app can never use up the landing site's Netlify credits. The free plan covers roughly 15–30 GB a month (plan research R5); outgrowing
-  it means a paid plan, not a code change. Recordings keep coming from the same recitation
+  2026-10-26), and the landing site and privacy policy moved there too (project
+  `mthani-landing`). Static files on Pages carry no bandwidth charge. Recordings keep coming from the same recitation
   sources as the app, and all of them allow browser downloads. The recognition model is
   mirrored to Hugging Face, because browsers cannot download GitHub release files.
 - **Permissions**: the KFGQPC, QUL and EveryAyah permission requests (docs/licences.md D1–D4)
@@ -333,7 +332,7 @@ the installed app, and confirm it starts and shows those pages.
 - **Content sizes**: the Mushaf page fonts are about 130 MB in total and the recognition model
   about 108 MB, so both must load on demand (FR-016, FR-025); readers who never open memorization
   download nothing for it.
-- **Release process**: web releases are published with the existing Netlify deploy, which keeps
-  every deploy for rollback (FR-029).
+- **Release process**: web releases are published with `tool/web_deploy.mjs` (wrangler). Pages
+  keeps every deployment for rollback (FR-029).
 - **Store links**: the unsupported-browser page and the landing site keep linking to the App Store
   and Google Play apps.

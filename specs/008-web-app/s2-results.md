@@ -50,6 +50,7 @@ app commits after each accepted word, so its windows, and its passes, are shorte
 - [ ] Word-for-word comparison with desktop sherpa-onnx on all eight specs/007 clips (SC-006).
 - [ ] Set the gate: `webMinDeviceMemoryGb` in `device_support.dart`, and whether iOS Safari can
       hold the model (about 134 MB in the engine, plus the file read).
-- [ ] Then turn memorization on for the web: `speechEngineAvailable` in
-      `lib/platform/speech_host_web.dart` (now off unless built with
-      `--dart-define=MATHANI_WEB_MEMORIZATION=true`).
+- [x] Memorization turned on for the web on 2026-10-26 by owner decision, **before** the device
+      runs above (`speechEngineAvailable`, default true). A browser that cannot load the model
+      gets "not available on this device", and the session is undone
+      (`MemorizationController.start`, tested). These device runs are still owed.

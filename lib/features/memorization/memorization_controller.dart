@@ -202,7 +202,16 @@ class MemorizationController extends ChangeNotifier with WidgetsBindingObserver 
     reader.jumpTo(range.refAt(0), highlight: false);
 
     final recogniser = _recogniser ??= _newRecogniser();
-    await recogniser.load(model.modelDir);
+    try {
+      await recogniser.load(model.modelDir);
+    } on Object {
+      // The engine could not load the model; in a browser, usually too little memory for it
+      // (specs/008 research R10). The session is undone, and the reader told this device can't.
+      _recogniser = null;
+      _reset();
+      notifyListeners();
+      return StartOutcome.unsupportedDevice;
+    }
     _heard = recogniser.heard.listen(_onHeard);
     recogniser.reset(); // the recogniser outlives sessions: start from now
     if (!_observing) {

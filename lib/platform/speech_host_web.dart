@@ -10,10 +10,11 @@ import 'file_store.dart';
 import 'gunzip.dart';
 import 'speech_host.dart' show UnpackResult;
 
-/// Off until spike S2 has shown the browser engine on the reference devices (specs/008 T052):
-/// memorization then says it is not available in this browser rather than failing in a session.
-/// Builds for the spikes turn it on with `--dart-define=MATHANI_WEB_MEMORIZATION=true`.
-const speechEngineAvailable = bool.fromEnvironment('MATHANI_WEB_MEMORIZATION');
+/// On since 2026-10-26 (owner decision), before spike S2 on the phones (specs/008 T052). A
+/// browser that cannot load the model gets "not available on this device" (MemorizationController
+/// .start); one without WebAssembly SIMD, AudioWorklet or OPFS is turned away by the gate.
+/// `--dart-define=MATHANI_WEB_MEMORIZATION=false` switches it off again.
+const speechEngineAvailable = bool.fromEnvironment('MATHANI_WEB_MEMORIZATION', defaultValue: true);
 
 /// sherpa-onnx's WebAssembly build in a Web Worker.
 SpeechRecogniser newSpeechRecogniser() => WebSpeechRecogniser();
