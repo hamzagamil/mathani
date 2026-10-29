@@ -18,6 +18,9 @@ on:
 
 env:
   FLUTTER_VERSION: "3.47.7" # keep in sync with pubspec.yaml environment.flutter
+  # geolocator_apple's Swift Package manifest reads this when resolving/building.
+  # Mathani only uses explicit foreground detection; omit the Always API code.
+  BYPASS_PERMISSION_LOCATION_ALWAYS: "1"
 
 jobs:
   testflight:
@@ -65,6 +68,19 @@ jobs:
             args+=(--build-number="$BUILD_NUMBER")
           fi
           flutter build ipa "${args[@]}"
+
+      - name: Verify foreground-only location binary
+        run: |
+          python3 - <<'PY'
+          import pathlib, plistlib
+          app = pathlib.Path('build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app')
+          info = plistlib.loads((app / 'Info.plist').read_bytes())
+          assert info.get('NSLocationWhenInUseUsageDescription'), 'Missing foreground location purpose'
+          assert 'location' not in info.get('UIBackgroundModes', []), 'Background location must remain disabled'
+          binary = app / info['CFBundleExecutable']
+          assert b'requestAlwaysAuthorization' not in binary.read_bytes(), 'Always location API is still linked'
+          print('Verified foreground purpose, no background location mode, and no Always authorization selector')
+          PY
 
       - name: Upload to App Store Connect
         if: ${{ inputs.upload_to_testflight }}

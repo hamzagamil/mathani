@@ -47,6 +47,14 @@ keeps it as a downloadable Actions artifact. Enable the workflow's
 `upload_to_testflight` input explicitly to upload it to App Store Connect/TestFlight;
 the default is build-only.
 
+The app uses Swift Package Manager for iOS plugins. All iOS builds must set
+`BYPASS_PERMISSION_LOCATION_ALWAYS=1` before Flutter/Xcode resolves and builds the
+geolocator_apple package. The iOS workflow sets it globally and checks the archived
+Runner binary before upload. This excludes unused Always-authorization code that
+otherwise triggers Apple's ITMS-90683 warning. Keep the localized When In Use
+purpose strings; the app does not request background location. For manual macOS
+builds use `BYPASS_PERMISSION_LOCATION_ALWAYS=1 flutter build ipa ...`.
+
 - **Team**: Mercury Engineering & Consultations LLC (`YJBH85NYZU`), the seller shown on the store.
 - **Bundle ID**: `com.mthani.app`, the same as the Android package name, and permanent once the
   App Store Connect app exists.
