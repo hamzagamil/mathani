@@ -43,7 +43,9 @@ so they are not a backup: keep the offline copy too.
 
 iOS builds and signing run on macOS CI (`.github/workflows/ios-release.yml`, started by hand
 from the Actions tab), because the developer machine is Windows. It builds a signed `.ipa` and
-uploads it to App Store Connect, where it appears in TestFlight.
+keeps it as a downloadable Actions artifact. Enable the workflow's
+`upload_to_testflight` input explicitly to upload it to App Store Connect/TestFlight;
+the default is build-only.
 
 - **Team**: Mercury Engineering & Consultations LLC (`YJBH85NYZU`), the seller shown on the store.
 - **Bundle ID**: `com.mthani.app`, the same as the Android package name, and permanent once the

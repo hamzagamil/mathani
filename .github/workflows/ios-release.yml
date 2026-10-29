@@ -1,6 +1,6 @@
 name: iOS release
 
-# Builds a signed App Store .ipa on macOS and uploads it to App Store Connect (TestFlight).
+# Builds a signed App Store .ipa on macOS; TestFlight upload is explicitly opt-in.
 # Run it from the Actions tab. Signing and API secrets are listed in docs/release.md.
 on:
   workflow_dispatch:
@@ -9,13 +9,19 @@ on:
         description: "Build number (CFBundleVersion). Empty uses the +build in pubspec.yaml."
         required: false
         default: ""
+        type: string
+      upload_to_testflight:
+        description: "Upload this build to App Store Connect / TestFlight"
+        required: false
+        default: false
+        type: boolean
 
 env:
   FLUTTER_VERSION: "3.47.7" # keep in sync with pubspec.yaml environment.flutter
 
 jobs:
   testflight:
-    name: Build, sign and upload to App Store Connect
+    name: Build signed iOS package
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -49,12 +55,19 @@ jobs:
           rm "$RUNNER_TEMP/dist.p12"
 
       - name: Build signed .ipa
+        env:
+          BUILD_NUMBER: ${{ inputs.build_number }}
         run: |
-          flutter build ipa --release --obfuscate --split-debug-info=symbols/ios \
-            --export-options-plist=ios/ExportOptions.plist \
-            ${{ inputs.build_number != '' && format('--build-number={0}', inputs.build_number) || '' }}
+          args=(--release --obfuscate --split-debug-info=symbols/ios
+            --export-options-plist=ios/ExportOptions.plist)
+          if [[ -n "$BUILD_NUMBER" ]]; then
+            [[ "$BUILD_NUMBER" =~ ^[0-9]+$ ]] || { echo "build_number must contain only digits"; exit 1; }
+            args+=(--build-number="$BUILD_NUMBER")
+          fi
+          flutter build ipa "${args[@]}"
 
       - name: Upload to App Store Connect
+        if: ${{ inputs.upload_to_testflight }}
         env:
           KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
           ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
