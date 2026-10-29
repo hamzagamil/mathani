@@ -283,6 +283,7 @@ class PrayerState {
   PrayerState({
     this.schemaVersion = 1,
     this.revision = 0,
+    this.generation = 0,
     this.calculationVersion = 1,
     List<SavedLocation> locations = const [],
     this.activeLocationId,
@@ -291,6 +292,7 @@ class PrayerState {
        reminders = reminders ?? ReminderPreferences() {
     if (schemaVersion != 1 ||
         revision < 0 ||
+        generation < 0 ||
         calculationVersion != 1 ||
         locations.map((v) => v.id).toSet().length != locations.length ||
         (activeLocationId != null &&
@@ -299,7 +301,7 @@ class PrayerState {
       throw const FormatException('Invalid or unsupported prayer snapshot');
     }
   }
-  final int schemaVersion, revision, calculationVersion;
+  final int schemaVersion, revision, generation, calculationVersion;
   final List<SavedLocation> locations;
   final String? activeLocationId;
   final ReminderPreferences reminders;
@@ -309,6 +311,7 @@ class PrayerState {
   Map<String, Object?> toJson() => {
     'schemaVersion': schemaVersion,
     'revision': revision,
+    'generation': generation,
     'calculationVersion': calculationVersion,
     'locations': locations.map((v) => v.toJson()).toList(),
     'activeLocationId': activeLocationId,
@@ -317,6 +320,7 @@ class PrayerState {
   factory PrayerState.fromJson(Map<String, dynamic> j) => PrayerState(
     schemaVersion: j['schemaVersion'] as int,
     revision: j['revision'] as int,
+    generation: j['generation'] as int? ?? 0,
     calculationVersion: j['calculationVersion'] as int? ?? 1,
     locations: (j['locations'] as List)
         .map((v) => SavedLocation.fromJson(Map<String, dynamic>.from(v as Map)))

@@ -8,6 +8,8 @@ import '../../app/l10n/app_localizations.dart';
 import '../../platform/prayer_location.dart';
 import '../../shared/numerals.dart';
 import 'location_setup_sheet.dart';
+import 'locations_sheet.dart';
+import 'calculation_sheet.dart';
 import 'prayer_calculator.dart';
 import 'prayer_controller.dart';
 import 'prayer_copy.dart';
@@ -58,7 +60,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
       if (!mounted) return;
       _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
         if (!mounted) return;
-        final place = c.state.activeLocation;
+        final place = c.viewedLocation;
         final now = c.clock();
         final clockChanged =
             _lastTick != null &&
@@ -70,7 +72,19 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
             now,
             prayerTimeZone(place.timezoneId),
           );
-          final day = [local.year, local.month, local.day].join('-');
+          final active = c.state.activeLocation;
+          final activeDay = active == null
+              ? null
+              : tz.TZDateTime.from(now, prayerTimeZone(active.timezoneId));
+          final day = [
+            place.id,
+            local.year,
+            local.month,
+            local.day,
+            activeDay?.year,
+            activeDay?.month,
+            activeDay?.day,
+          ].join('-');
           if (_day != day || clockChanged) {
             _day = day;
             c.refresh();
@@ -105,9 +119,17 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
         actions: [
           if (c != null && c.initialized)
             IconButton(
+              tooltip: l.prayerSavedLocations,
+              icon: const Icon(Icons.location_city_outlined),
+              onPressed: c.busy ? null : () => showPrayerLocations(context, c),
+            ),
+          if (c != null && c.initialized)
+            IconButton(
               tooltip: l.prayerAddLocation,
               icon: const Icon(Icons.location_on_outlined),
-              onPressed: () => showPrayerLocationSetup(context, c),
+              onPressed: c.busy
+                  ? null
+                  : () => showPrayerLocationSetup(context, c),
             ),
         ],
       ),
@@ -131,7 +153,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
     PrayerController c,
     AppLocalizations l,
   ) {
-    final place = c.state.activeLocation, schedule = c.schedule;
+    final place = c.viewedLocation, schedule = c.schedule;
     final locale = Localizations.localeOf(context);
     final next = c.nextPrayer;
     String time(DateTime value) => DateFormat.jm(locale.languageCode)
@@ -168,6 +190,36 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
         ],
         if (place != null && schedule != null) ...[
           Text(place.label, style: Theme.of(context).textTheme.headlineSmall),
+          const SizedBox(height: 8),
+          Text(
+            c.state.activeLocationId == place.id
+                ? l.prayerActiveLocation
+                : l.prayerViewedLocation,
+            style: Theme.of(context).textTheme.labelLarge,
+          ),
+          if (c.state.activeLocationId != place.id) ...[
+            Text(
+              c.state.activeLocation == null
+                  ? l.prayerNoActiveLocation
+                  : '${l.prayerActiveLocation}: ${c.state.activeLocation!.label}',
+            ),
+            Text(l.prayerReminderLocationHint),
+            OutlinedButton(
+              onPressed: c.busy
+                  ? null
+                  : () async {
+                      if (await confirmPrayerAction(
+                        context,
+                        l.prayerUseForReminders,
+                        l.prayerActivateConfirm,
+                        l.prayerUseForReminders,
+                      )) {
+                        await c.activateLocation(place.id, confirmed: true);
+                      }
+                    },
+              child: Text(l.prayerUseForReminders),
+            ),
+          ],
           if (place.approximate) Text(l.prayerApproximate),
           Text(
             DateFormat.yMMMMEEEEd(locale.languageCode)
@@ -183,6 +235,11 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
           ),
           Text(
             '${l.prayerHighLatitude}: ${place.calculation.highLatitudeRule == HighLatitudeRule.middleOfNight ? l.prayerMiddleNight : l.prayerSeventhNight}',
+          ),
+          TextButton.icon(
+            onPressed: c.busy ? null : () => showPrayerCalculation(context, c),
+            icon: const Icon(Icons.tune),
+            label: Text(l.prayerCalculationSettings),
           ),
           const SizedBox(height: 16),
           if (next != null) ...[

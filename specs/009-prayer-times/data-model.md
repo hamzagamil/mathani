@@ -16,6 +16,7 @@ Browser storage is origin-local encryption with the P05 limitation. If persisten
 | --- | --- |
 | schemaVersion | Integer, initially 1; unknown future versions fail safely without overwrite |
 | revision | Monotonic integer for serialized user changes |
+| generation | Monotonic reminder invalidation counter; defaults to 0 when reading earlier schema-1 snapshots. Schedule-affecting changes advance it; renaming and transient viewing do not. |
 | locations | List of SavedLocation, unique IDs |
 | activeLocationId | Nullable ID referencing an existing confirmed location |
 | reminders | ReminderPreferences |

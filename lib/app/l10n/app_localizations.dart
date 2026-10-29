@@ -1758,6 +1758,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Place data: GeoNames'**
   String get prayerGeoNamesAttribution;
+
+  /// No description provided for @prayerSavedLocations.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved locations'**
+  String get prayerSavedLocations;
+
+  /// No description provided for @prayerNewLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a location'**
+  String get prayerNewLocation;
+
+  /// No description provided for @prayerLocationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Location name'**
+  String get prayerLocationLabel;
+
+  /// No description provided for @prayerLabelError.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter 1–80 characters without line breaks or control characters.'**
+  String get prayerLabelError;
+
+  /// No description provided for @prayerRename.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get prayerRename;
+
+  /// No description provided for @prayerViewLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'View times'**
+  String get prayerViewLocation;
+
+  /// No description provided for @prayerUseForReminders.
+  ///
+  /// In en, this message translates to:
+  /// **'Use for reminders'**
+  String get prayerUseForReminders;
+
+  /// No description provided for @prayerActiveLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Active reminder location'**
+  String get prayerActiveLocation;
+
+  /// No description provided for @prayerViewedLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Viewing another location'**
+  String get prayerViewedLocation;
+
+  /// No description provided for @prayerDeleteLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete location'**
+  String get prayerDeleteLocation;
+
+  /// No description provided for @prayerDeleteInactiveConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this saved location and its calculation settings?'**
+  String get prayerDeleteInactiveConfirm;
+
+  /// No description provided for @prayerDeleteActiveConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a replacement for reminders, or delete this location and turn off all prayer reminders.'**
+  String get prayerDeleteActiveConfirm;
+
+  /// No description provided for @prayerDeleteAndDisable.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete and turn off reminders'**
+  String get prayerDeleteAndDisable;
+
+  /// No description provided for @prayerReplaceAndDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace and delete'**
+  String get prayerReplaceAndDelete;
+
+  /// No description provided for @prayerReplacementLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Replacement location'**
+  String get prayerReplacementLocation;
+
+  /// No description provided for @prayerClearData.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear prayer data'**
+  String get prayerClearData;
+
+  /// No description provided for @prayerClearDataConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete all saved prayer locations and prayer settings, and cancel prayer reminders? Your Quran bookmarks and reading position will be kept.'**
+  String get prayerClearDataConfirm;
+
+  /// No description provided for @prayerActivateConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this location for reminders? Future prayer reminders will use its calculation settings.'**
+  String get prayerActivateConfirm;
+
+  /// No description provided for @prayerCalculationSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Calculation settings'**
+  String get prayerCalculationSettings;
+
+  /// No description provided for @prayerSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get prayerSave;
+
+  /// No description provided for @prayerSuggestedMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested for this country'**
+  String get prayerSuggestedMethod;
+
+  /// No description provided for @prayerAsrExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'These madhhab choices affect Asr only. Hanafi uses shadow factor 2; Shafi‘i, Maliki and Hanbali use factor 1. Your chosen label is saved.'**
+  String get prayerAsrExplanation;
+
+  /// No description provided for @prayerCalculationExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the convention you follow. High-latitude adjustments are labelled; unavailable times are never replaced with guessed times.'**
+  String get prayerCalculationExplanation;
+
+  /// No description provided for @prayerNoActiveLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'No active reminder location'**
+  String get prayerNoActiveLocation;
+
+  /// No description provided for @prayerReminderLocationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Viewing times here does not change the reminder location.'**
+  String get prayerReminderLocationHint;
+
+  /// No description provided for @prayerDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get prayerDelete;
 }
 
 class _AppLocalizationsDelegate

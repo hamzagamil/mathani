@@ -16,11 +16,22 @@ class PrayerController extends ChangeNotifier {
     required this.locationClient,
     required this.calculator,
     this.clock = prayerNow,
+    this.notifications = const NoPrayerNotifications(),
   });
   final PrayerRepository repository;
   final PrayerLocationClient locationClient;
   final PrayerCalculator calculator;
   final PrayerClock clock;
+  final PrayerNotificationAdapter notifications;
+  String? viewedLocationId;
+  SavedLocation? get viewedLocation {
+    for (final location in state.locations) {
+      if (location.id == viewedLocationId) return location;
+    }
+    return state.activeLocation ?? state.locations.firstOrNull;
+  }
+
+  DailyPrayerSchedule? activeSchedule;
   PrayerState state = PrayerState();
   Map<String, dynamic>? candidate;
   List<Map<String, dynamic>> results = [];
@@ -57,14 +68,17 @@ class PrayerController extends ChangeNotifier {
 
   Future<void> initialize() => _run(() async {
     state = await repository.load();
+    viewedLocationId =
+        state.activeLocationId ?? state.locations.firstOrNull?.id;
     initialized = true;
     refresh();
   });
   void refresh() {
-    final location = state.activeLocation;
+    final location = viewedLocation;
     if (location == null) {
       schedule = null;
       _next = null;
+      activeSchedule = null;
       _notify();
       return;
     }
@@ -77,13 +91,28 @@ class PrayerController extends ChangeNotifier {
       DateTime.utc(local.year, local.month, local.day),
     );
     _next = calculator.nextPrayer(location, clock());
+    final active = state.activeLocation;
+    if (active == null) {
+      activeSchedule = null;
+    } else if (active.id == location.id) {
+      activeSchedule = schedule;
+    } else {
+      final activeLocal = tz.TZDateTime.from(
+        clock(),
+        prayerTimeZone(active.timezoneId),
+      );
+      activeSchedule = calculator.schedule(
+        active,
+        DateTime.utc(activeLocal.year, activeLocal.month, activeLocal.day),
+      );
+    }
     _notify();
   }
 
   PrayerEvent? get nextPrayer {
-    if (state.activeLocation == null) return null;
+    if (viewedLocation == null) return null;
     if (_next?.dueAtUtc?.isAfter(clock()) != true) {
-      _next = calculator.nextPrayer(state.activeLocation!, clock());
+      _next = calculator.nextPrayer(viewedLocation!, clock());
     }
     return _next;
   }
@@ -190,19 +219,155 @@ class PrayerController extends ChangeNotifier {
     );
     final updated = PrayerState(
       revision: state.revision + 1,
+      generation: state.generation + (state.locations.isEmpty ? 1 : 0),
       locations: [...state.locations, location],
-      activeLocationId: id,
+      activeLocationId: state.locations.isEmpty ? id : state.activeLocationId,
       reminders: state.reminders,
     );
     await repository.save(updated);
     if (_disposed) return;
     state = updated;
+    viewedLocationId = id;
     candidate = null;
+    refresh();
+  });
+  SavedLocation _location(String id) => state.locations.firstWhere(
+    (p) => p.id == id,
+    orElse: () => throw const FormatException('Unknown saved location'),
+  );
+  PrayerState _updated({
+    List<SavedLocation>? locations,
+    String? activeId,
+    bool clearActive = false,
+    ReminderPreferences? reminders,
+    bool invalidate = false,
+  }) => PrayerState(
+    revision: state.revision + 1,
+    generation: state.generation + (invalidate ? 1 : 0),
+    calculationVersion: state.calculationVersion,
+    locations: locations ?? state.locations,
+    activeLocationId: clearActive ? null : activeId ?? state.activeLocationId,
+    reminders: reminders ?? state.reminders,
+  );
+  Future<void> _commit(PrayerState updated, {bool cancelQueue = false}) async {
+    if (!initialized) throw const PrayerException(PrayerFailure.needsAttention);
+    await repository.save(updated);
+    state = updated;
+    refresh();
+    if (cancelQueue) await notifications.cancelAll();
+  }
+
+  void viewLocation(String id) {
+    if (busy || _disposed) return;
+    try {
+      _location(id);
+      viewedLocationId = id;
+      failure = null;
+      refresh();
+    } on FormatException {
+      failure = PrayerFailure.needsAttention;
+      _notify();
+    }
+  }
+
+  Future<void> renameLocation(String id, String label) => _run(() async {
+    final renamed = _location(id).copyWith(label: label);
+    await _commit(
+      _updated(
+        locations: [for (final p in state.locations) p.id == id ? renamed : p],
+      ),
+    );
+  });
+  Future<void> activateLocation(String id, {bool confirmed = false}) =>
+      _run(() async {
+        _location(id);
+        if (id == state.activeLocationId) return;
+        if (state.reminders.anyEnabled && !confirmed) {
+          throw const PrayerException(PrayerFailure.needsAttention);
+        }
+        await _commit(
+          _updated(activeId: id, invalidate: true),
+          cancelQueue: true,
+        );
+      });
+  Future<void> updateCalculation(
+    String id,
+    CalculationPreferences preferences,
+  ) => _run(() async {
+    // Round-trip validates supported convention versions before writing.
+    final checked = CalculationPreferences.fromJson(preferences.toJson());
+    final place = _location(id).copyWith(calculation: checked);
+    if (jsonEncode(place.calculation.toJson()) ==
+        jsonEncode(_location(id).calculation.toJson())) {
+      return;
+    }
+    await _commit(
+      _updated(
+        locations: [for (final p in state.locations) p.id == id ? place : p],
+        invalidate: true,
+      ),
+      cancelQueue: true,
+    );
+  });
+  Future<void> deleteLocation(
+    String id, {
+    String? replacementId,
+    bool disableReminders = false,
+  }) => _run(() async {
+    _location(id);
+    final isActive = id == state.activeLocationId;
+    if (replacementId != null) {
+      _location(replacementId);
+      if (replacementId == id) {
+        throw const FormatException('Invalid replacement');
+      }
+    }
+    if (isActive && replacementId == null && !disableReminders) {
+      throw const PrayerException(PrayerFailure.needsAttention);
+    }
+    final updated = _updated(
+      locations: state.locations.where((p) => p.id != id).toList(),
+      activeId: isActive ? replacementId : null,
+      clearActive: isActive && replacementId == null,
+      reminders: isActive && replacementId == null
+          ? ReminderPreferences(
+              selectedAthanId: state.reminders.selectedAthanId,
+              requestedMode: state.reminders.requestedMode,
+              acknowledgedFallbacks: state.reminders.acknowledgedFallbacks,
+            )
+          : state.reminders,
+      invalidate: true,
+    );
+    // Do not erase a place while an obsolete alert may still contain it.
+    // A failed save after cancellation retains the source snapshot for retry.
+    await notifications.cancelAll();
+    await _commit(updated);
+    if (viewedLocationId == id) {
+      viewedLocationId =
+          updated.activeLocationId ?? updated.locations.firstOrNull?.id;
+    }
+    refresh();
+  });
+  Future<void> clearPrayerData({bool confirmed = false}) => _run(() async {
+    if (!confirmed || !initialized) {
+      throw const PrayerException(PrayerFailure.needsAttention);
+    }
+    // Never erase the source snapshot while obsolete alerts may remain queued.
+    await notifications.cancelAll();
+    await repository.delete();
+    state = PrayerState(generation: state.generation + 1);
+    viewedLocationId = null;
+    candidate = null;
+    results = [];
+    locationClient.cancelSearch();
+    _searchVersion++;
     refresh();
   });
   Future<void> useSessionOnly() => _run(() async {
     repository.useSessionOnly();
     state = await repository.load();
+    viewedLocationId =
+        state.activeLocationId ?? state.locations.firstOrNull?.id;
     initialized = true;
     refresh();
   });

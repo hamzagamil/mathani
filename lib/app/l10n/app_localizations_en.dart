@@ -997,4 +997,90 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get prayerGeoNamesAttribution => 'Place data: GeoNames';
+
+  @override
+  String get prayerSavedLocations => 'Saved locations';
+
+  @override
+  String get prayerNewLocation => 'Add a location';
+
+  @override
+  String get prayerLocationLabel => 'Location name';
+
+  @override
+  String get prayerLabelError =>
+      'Enter 1–80 characters without line breaks or control characters.';
+
+  @override
+  String get prayerRename => 'Rename';
+
+  @override
+  String get prayerViewLocation => 'View times';
+
+  @override
+  String get prayerUseForReminders => 'Use for reminders';
+
+  @override
+  String get prayerActiveLocation => 'Active reminder location';
+
+  @override
+  String get prayerViewedLocation => 'Viewing another location';
+
+  @override
+  String get prayerDeleteLocation => 'Delete location';
+
+  @override
+  String get prayerDeleteInactiveConfirm =>
+      'Delete this saved location and its calculation settings?';
+
+  @override
+  String get prayerDeleteActiveConfirm =>
+      'Choose a replacement for reminders, or delete this location and turn off all prayer reminders.';
+
+  @override
+  String get prayerDeleteAndDisable => 'Delete and turn off reminders';
+
+  @override
+  String get prayerReplaceAndDelete => 'Replace and delete';
+
+  @override
+  String get prayerReplacementLocation => 'Replacement location';
+
+  @override
+  String get prayerClearData => 'Clear prayer data';
+
+  @override
+  String get prayerClearDataConfirm =>
+      'Delete all saved prayer locations and prayer settings, and cancel prayer reminders? Your Quran bookmarks and reading position will be kept.';
+
+  @override
+  String get prayerActivateConfirm =>
+      'Use this location for reminders? Future prayer reminders will use its calculation settings.';
+
+  @override
+  String get prayerCalculationSettings => 'Calculation settings';
+
+  @override
+  String get prayerSave => 'Save';
+
+  @override
+  String get prayerSuggestedMethod => 'Suggested for this country';
+
+  @override
+  String get prayerAsrExplanation =>
+      'These madhhab choices affect Asr only. Hanafi uses shadow factor 2; Shafi‘i, Maliki and Hanbali use factor 1. Your chosen label is saved.';
+
+  @override
+  String get prayerCalculationExplanation =>
+      'Choose the convention you follow. High-latitude adjustments are labelled; unavailable times are never replaced with guessed times.';
+
+  @override
+  String get prayerNoActiveLocation => 'No active reminder location';
+
+  @override
+  String get prayerReminderLocationHint =>
+      'Viewing times here does not change the reminder location.';
+
+  @override
+  String get prayerDelete => 'Delete';
 }

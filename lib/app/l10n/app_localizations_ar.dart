@@ -1000,4 +1000,90 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get prayerGeoNamesAttribution => 'بيانات الأماكن: GeoNames';
+
+  @override
+  String get prayerSavedLocations => 'المواقع المحفوظة';
+
+  @override
+  String get prayerNewLocation => 'إضافة موقع';
+
+  @override
+  String get prayerLocationLabel => 'اسم الموقع';
+
+  @override
+  String get prayerLabelError =>
+      'أدخل من حرف واحد إلى ٨٠ حرفًا دون أسطر جديدة أو محارف تحكم.';
+
+  @override
+  String get prayerRename => 'إعادة التسمية';
+
+  @override
+  String get prayerViewLocation => 'عرض المواقيت';
+
+  @override
+  String get prayerUseForReminders => 'استخدام للتذكيرات';
+
+  @override
+  String get prayerActiveLocation => 'الموقع النشط للتذكيرات';
+
+  @override
+  String get prayerViewedLocation => 'تعرض موقعًا آخر';
+
+  @override
+  String get prayerDeleteLocation => 'حذف الموقع';
+
+  @override
+  String get prayerDeleteInactiveConfirm =>
+      'هل تريد حذف هذا الموقع المحفوظ وإعدادات حسابه؟';
+
+  @override
+  String get prayerDeleteActiveConfirm =>
+      'اختر موقعًا بديلًا للتذكيرات، أو احذف الموقع وأوقف جميع تذكيرات الصلاة.';
+
+  @override
+  String get prayerDeleteAndDisable => 'حذف وإيقاف التذكيرات';
+
+  @override
+  String get prayerReplaceAndDelete => 'استبدال وحذف';
+
+  @override
+  String get prayerReplacementLocation => 'الموقع البديل';
+
+  @override
+  String get prayerClearData => 'مسح بيانات الصلاة';
+
+  @override
+  String get prayerClearDataConfirm =>
+      'هل تريد حذف جميع مواقع الصلاة وإعداداتها وإلغاء تذكيرات الصلاة؟ ستبقى علامات القرآن وموضع القراءة محفوظة.';
+
+  @override
+  String get prayerActivateConfirm =>
+      'هل تريد استخدام هذا الموقع للتذكيرات؟ ستستخدم تذكيرات الصلاة القادمة إعدادات حسابه.';
+
+  @override
+  String get prayerCalculationSettings => 'إعدادات الحساب';
+
+  @override
+  String get prayerSave => 'حفظ';
+
+  @override
+  String get prayerSuggestedMethod => 'المقترح لهذا البلد';
+
+  @override
+  String get prayerAsrExplanation =>
+      'تؤثر هذه المذاهب في وقت العصر فقط. يستخدم الحنفي معامل ظل ٢، ويستخدم الشافعي والمالكي والحنبلي معامل ١. يُحفظ اسم المذهب الذي تختاره.';
+
+  @override
+  String get prayerCalculationExplanation =>
+      'اختر طريقة الحساب التي تتبعها. تُوضّح تعديلات خطوط العرض العليا، ولا تُستبدل المواقيت غير المتاحة بمواقيت تقديرية.';
+
+  @override
+  String get prayerNoActiveLocation => 'لا يوجد موقع نشط للتذكيرات';
+
+  @override
+  String get prayerReminderLocationHint =>
+      'عرض مواقيت هذا الموقع لا يغيّر موقع التذكيرات.';
+
+  @override
+  String get prayerDelete => 'حذف';
 }

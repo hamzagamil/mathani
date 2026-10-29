@@ -2,6 +2,15 @@ import '../../app/l10n/app_localizations.dart';
 import 'prayer_models.dart';
 import 'prayer_services.dart';
 
+String? prayerLabelError(AppLocalizations l, String? value) {
+  final text = value?.trim() ?? '';
+  return text.isEmpty ||
+          text.length > 80 ||
+          RegExp(r'[\x00-\x1F\x7F]').hasMatch(text)
+      ? l.prayerLabelError
+      : null;
+}
+
 String prayerName(AppLocalizations l, PrayerKind kind) => switch (kind) {
   PrayerKind.fajr => l.prayerFajr,
   PrayerKind.sunrise => l.prayerSunrise,

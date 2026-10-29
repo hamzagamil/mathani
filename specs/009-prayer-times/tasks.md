@@ -102,7 +102,7 @@ These focused tests implement the spec's explicit acceptance scenarios and accur
 
 - [X] T028 [US1] Add localized foreground-location declarations in `android/app/src/main/AndroidManifest.xml`, `ios/Runner/Info.plist`, `ios/Runner/ar.lproj/InfoPlist.strings` and `ios/Runner/en.lproj/InfoPlist.strings`; keep API24/iOS15 minimums and omit background/always location authorization.
 
-- [ ] T029 [US1] Validate GeoNames configuration, ten-city search/resolve, native requests and real cf metadata on an authorized HTTPS preview, recording sanitized G03 evidence in `specs/009-prayer-times/validation/location-services.md`; do not fabricate local cf success or mark the task complete if required account/deployment access is missing.
+- [X] T029 [US1] Validate GeoNames configuration, ten-city search/resolve, native requests and real cf metadata on an authorized HTTPS preview, recording sanitized G03 evidence in `specs/009-prayer-times/validation/location-services.md`; do not fabricate local cf success or mark the task complete if required account/deployment access is missing.
 
 - [ ] T030 [US1] Implement/run first-location end-to-end cases in `integration_test/prayer_times_test.dart` and record results in `specs/009-prayer-times/validation/us1.md`; run T012-T014 tests, prove GPS denial/manual/IP confirmation and offline restart paths on iOS/Android/web, and verify no unavailable time is displayed as midnight.
 
@@ -116,25 +116,25 @@ These focused tests implement the spec's explicit acceptance scenarios and accur
 
 **Independent Test**: Seed three confirmed places in different time zones, view versus activate each, change methods/madhahib, rename/delete and restart. Preferences persist and inspection never silently changes the active place; reminders may remain disabled.
 
-- [ ] T031 [P] [US2] Add saved-place state/repository tests in `test/features/prayer_times/prayer_locations_test.dart` for unique IDs, label bounds, three-place persistence, transient viewed location, replacement/disable confirmation and generation invalidation without losing bookmarks.
+- [X] T031 [P] [US2] Add saved-place state/repository tests in `test/features/prayer_times/prayer_locations_test.dart` for unique IDs, label bounds, three-place persistence, transient viewed location, replacement/disable confirmation and generation invalidation without losing bookmarks.
 
-- [ ] T032 [P] [US2] Add calculation/location sheet tests in `test/features/prayer_times/prayer_preferences_test.dart` for all named methods/four labels, two Asr conventions, overridable regional defaults, high-latitude choices and preservation of manual choices across restart/movement.
+- [X] T032 [P] [US2] Add calculation/location sheet tests in `test/features/prayer_times/prayer_preferences_test.dart` for all named methods/four labels, two Asr conventions, overridable regional defaults, high-latitude choices and preservation of manual choices across restart/movement.
 
-- [ ] T033 [US2] Extend saved-location CRUD/view/activate actions in `lib/features/prayer_times/prayer_controller.dart`; preserve each location's calculation record, allow at most one active location, distinguish viewed ID from persisted active ID, and prevent failed detection from replacing a manual choice.
+- [X] T033 [US2] Extend saved-location CRUD/view/activate actions in `lib/features/prayer_times/prayer_controller.dart`; preserve each location's calculation record, allow at most one active location, distinguish viewed ID from persisted active ID, and prevent failed detection from replacing a manual choice.
 
-- [ ] T034 [US2] Extend calculation preference updates in `lib/features/prayer_times/prayer_controller.dart`; apply the data model's explicit country suggestions and visible shafii/middle-of-night defaults, persist labels/convention versions, invalidate derived schedules and advance schedule-affecting revision/generation only after validation.
+- [X] T034 [US2] Extend calculation preference updates in `lib/features/prayer_times/prayer_controller.dart`; apply the data model's explicit country suggestions and visible shafii/middle-of-night defaults, persist labels/convention versions, invalidate derived schedules and advance schedule-affecting revision/generation only after validation.
 
-- [ ] T035 [US2] Add location-management/calculation strings and Asr-only explanations in `lib/app/l10n/app_ar.arb` and `lib/app/l10n/app_en.arb`, including active/viewed labels, adjusted rules and destructive-action confirmation; regenerate localization output.
+- [X] T035 [US2] Add location-management/calculation strings and Asr-only explanations in `lib/app/l10n/app_ar.arb` and `lib/app/l10n/app_en.arb`, including active/viewed labels, adjusted rules and destructive-action confirmation; regenerate localization output.
 
-- [ ] T036 [US2] Build save/name/rename/view/activate/delete controls and a virtualized location list in `lib/features/prayer_times/locations_sheet.dart`; permit the same city with distinct valid user labels/settings without silently merging identities, and require the defined label validation.
+- [X] T036 [US2] Build save/name/rename/view/activate/delete controls and a virtualized location list in `lib/features/prayer_times/locations_sheet.dart`; permit the same city with distinct valid user labels/settings without silently merging identities, and require the defined label validation.
 
-- [ ] T037 [US2] Build five-method, four-madhhab-label and middle/seventh-night controls in `lib/features/prayer_times/calculation_sheet.dart`; show current/suggested selections, explain Asr grouping and unavailable results, and preserve explicit user overrides.
+- [X] T037 [US2] Build five-method, four-madhhab-label and middle/seventh-night controls in `lib/features/prayer_times/calculation_sheet.dart`; show current/suggested selections, explain Asr grouping and unavailable results, and preserve explicit user overrides.
 
-- [ ] T038 [US2] Integrate active-location badge, picker and calculation sheets into `lib/features/prayer_times/prayer_times_screen.dart`; viewing another place must leave notification intent unchanged, and displayed dates/timezones must follow that viewed place.
+- [X] T038 [US2] Integrate active-location badge, picker and calculation sheets into `lib/features/prayer_times/prayer_times_screen.dart`; viewing another place must leave notification intent unchanged, and displayed dates/timezones must follow that viewed place.
 
-- [ ] T039 [US2] Implement transactional active/last-place deletion and clear-prayer-data handling in `lib/features/prayer_times/prayer_controller.dart` and `lib/features/prayer_times/prayer_repository.dart`; invalidate the future reminder generation through the injectable scheduler boundary, delete sensitive state and preserve unrelated reader data. The pre-US3 adapter must explicitly have no queued reminders.
+- [X] T039 [US2] Implement transactional active/last-place deletion and clear-prayer-data handling in `lib/features/prayer_times/prayer_controller.dart` and `lib/features/prayer_times/prayer_repository.dart`; invalidate the future reminder generation through the injectable scheduler boundary, delete sensitive state and preserve unrelated reader data. The pre-US3 adapter must explicitly have no queued reminders.
 
-- [ ] T040 [US2] Refresh viewed/active schedules after resume, midnight and device clock/timezone changes in `lib/features/prayer_times/prayer_controller.dart` and `lib/app/app.dart`; retain the location's IANA zone and never initiate location polling or silent travel updates.
+- [X] T040 [US2] Refresh viewed/active schedules after resume, midnight and device clock/timezone changes in `lib/features/prayer_times/prayer_controller.dart` and `lib/features/prayer_times/prayer_times_screen.dart`; extend the existing route-owned lifecycle observer instead of introducing prayer IO in `lib/app/app.dart`, retain the location's IANA zone and never initiate location polling or silent travel updates.
 
 - [ ] T041 [US2] Run three-location, five-method, four-label, delete/restart and DST acceptance flows in `integration_test/prayer_times_test.dart`, execute T031-T032 tests and record SC-003/G04 evidence in `specs/009-prayer-times/validation/us2.md`; notification delivery itself is validated in US3.
 

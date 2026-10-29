@@ -26,6 +26,8 @@ class PrayerLocationSetupSheet extends StatefulWidget {
 
 class _PrayerLocationSetupSheetState extends State<PrayerLocationSetupSheet> {
   final query = TextEditingController();
+  final nameForm = GlobalKey<FormState>();
+  String? label;
   @override
   void dispose() {
     query.dispose();
@@ -102,11 +104,37 @@ class _PrayerLocationSetupSheetState extends State<PrayerLocationSetupSheet> {
                             l.prayerUnavailable,
                       ),
                       const SizedBox(height: 12),
+                      Form(
+                        key: nameForm,
+                        child: TextFormField(
+                          key: ObjectKey(c.candidate),
+                          maxLength: 80,
+                          initialValue:
+                              (c.candidate!['city'] as String?)?.isNotEmpty ==
+                                  true
+                              ? c.candidate!['city'] as String
+                              : [
+                                  (c.candidate!['latitude'] as num)
+                                      .toStringAsFixed(3),
+                                  (c.candidate!['longitude'] as num)
+                                      .toStringAsFixed(3),
+                                ].join(', '),
+                          decoration: InputDecoration(
+                            labelText: l.prayerLocationLabel,
+                            border: const OutlineInputBorder(),
+                          ),
+                          validator: (value) => prayerLabelError(l, value),
+                          onSaved: (value) => label = value!.trim(),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
                       FilledButton(
                         onPressed: c.busy
                             ? null
                             : () async {
-                                await c.confirmCandidate();
+                                if (!nameForm.currentState!.validate()) return;
+                                nameForm.currentState!.save();
+                                await c.confirmCandidate(label: label);
                                 if (context.mounted &&
                                     c.failure == null &&
                                     c.candidate == null) {
