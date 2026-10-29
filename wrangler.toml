@@ -5,4 +5,4 @@ compatibility_date = "2026-10-29"
 [vars]
 # Public provider account identifier; no password or API secret is stored here.
 GEONAMES_USERNAME = "mthani"
-PRAYER_ALLOWED_ORIGINS = "https://get.mthani.app"
+PRAYER_ALLOWED_ORIGINS = "https://get.mthani.app,https://read.mthani.app"

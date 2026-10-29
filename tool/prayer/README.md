@@ -2,7 +2,9 @@
 
 Runtime: Flutter 3.47.7, Dart 3.13.5, Node 24.11.1; Python tools may run with `uv run --python 3.12 --with hijridate==2.6.0`.
 
-Web location calls use the current origin by default. Native defaults to https://get.mthani.app. For local/preview native runs use `--dart-define=PRAYER_API_BASE=https://your-preview.pages.dev`; native devices cannot use the workstation's localhost. Browser overrides must explicitly target an approved local/preview origin.
+Web location calls use the current origin by default. Both https://get.mthani.app and https://read.mthani.app are approved production origins on the same Pages project. Native defaults to https://get.mthani.app. For local/preview native runs use `--dart-define=PRAYER_API_BASE=https://your-preview.pages.dev`; native devices cannot use the workstation's localhost. Browser overrides must explicitly target an approved local/preview origin.
+
+`/api/prayer-resolve` accepts POST JSON, not a browser address-bar GET. A direct visit returns 405 methodNotAllowed with Allow: POST, OPTIONS; this is expected on both domains.
 
 Pages bindings: GEONAMES_USERNAME (real enabled account, never demo) and PRAYER_ALLOWED_ORIGINS (comma-separated exact origins). Configure account binding through Pages; for local development place it in ignored .dev.vars. No credentials belong in Flutter or wrangler.toml. Requests do not require a browser Origin header on native builds; CORS is not endpoint authentication.
 

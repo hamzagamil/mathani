@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { dispatch } from '../../functions/_lib/prayer-location.js';
 const base='https://get.mthani.app';
-const env={GEONAMES_USERNAME:'test-account',PRAYER_ALLOWED_ORIGINS:base};
+const env={GEONAMES_USERNAME:'test-account',PRAYER_ALLOWED_ORIGINS:base+',https://read.mthani.app'};
 const cf={city:'Cairo',region:'Cairo',country:'EG',latitude:'30.0444',longitude:'31.2357',timezone:'Africa/Cairo'};
 const request=(path,options={},geo=cf)=>{
   const value=new Request(base+path,options);Object.defineProperty(value,'cf',{value:geo});return value;
@@ -27,6 +27,26 @@ test('invalid parameters never contact provider',async()=>{
 test('forbidden browser origin rejected, native allowed',async()=>{
   assert.equal((await dispatch(request('/api/prayer-location',{headers:{Origin:'https://evil.example'}}),env)).status,403);
   assert.equal((await dispatch(request('/api/prayer-location'),env)).status,200);
+});
+
+test('both app domains support browser lookups and resolve preflight',async()=>{
+  for(const configuration of [env,{GEONAMES_USERNAME:'test-account'}]){
+    for(const origin of [base,'https://read.mthani.app']){
+      const ip=await dispatch(request('/api/prayer-location',{headers:{Origin:origin}}),configuration);
+      assert.equal(ip.status,200);
+      assert.equal(ip.headers.get('access-control-allow-origin'),origin);
+      const preflight=await dispatch(request('/api/prayer-resolve',{method:'OPTIONS',headers:{Origin:origin,'Access-Control-Request-Method':'POST','Access-Control-Request-Headers':'content-type'}}),configuration);
+      assert.equal(preflight.status,204);
+      assert.equal(preflight.headers.get('access-control-allow-origin'),origin);
+      assert.equal(preflight.headers.get('access-control-allow-methods'),'POST');
+      const resolved=await dispatch(request('/api/prayer-resolve',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:JSON.stringify({latitude:30.1,longitude:31.2})}),configuration,async(url)=>Response.json(String(url).includes('timezoneJSON')?{timezoneId:'Africa/Cairo'}:{geonames:[{name:'Cairo',countryCode:'EG',lat:'30',lng:'31'}]}));
+      assert.equal(resolved.status,200);
+      assert.equal(resolved.headers.get('access-control-allow-origin'),origin);
+      const get=await dispatch(request('/api/prayer-resolve',{headers:{Origin:origin}}),configuration);
+      assert.equal(get.status,405);
+      assert.equal(get.headers.get('allow'),'POST, OPTIONS');
+    }
+  }
 });
 test('missing timezone is resolvable and provider errors sanitized',async()=>{
   let calls=0;

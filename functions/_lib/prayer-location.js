@@ -57,7 +57,7 @@ export async function dispatch(request,env={},fetcher=fetch){
   const total=new AbortController();const totalTimer=setTimeout(()=>total.abort(),8000);
   try{
     const origin=request.headers.get('origin');
-    const allowed=new Set((env.PRAYER_ALLOWED_ORIGINS??'https://get.mthani.app').split(',').map(v=>v.trim()).filter(Boolean));
+    const allowed=new Set((env.PRAYER_ALLOWED_ORIGINS??'https://get.mthani.app,https://read.mthani.app').split(',').map(v=>v.trim()).filter(Boolean));
     if(origin&&!allowed.has(origin)) fail(403,'originNotAllowed');
     if(origin)headers.set('Access-Control-Allow-Origin',origin);
     const url=new URL(request.url);
