@@ -1,0 +1,11 @@
+{
+  "egypt-husary": {
+    "sourceSha256": "98bd35664e8cd84b884b197169d8b01948ea2b9e70e8f652ac2814865d4bc0e4",
+    "reviewedBy": "user",
+    "completeRecordingReviewed": true,
+    "fourTakbirsReviewed": true,
+    "openingStartMs": 0,
+    "openingEndMs": 12000,
+    "note": "User chose Al-Hussary and supplied 0:12 in response to the recording/opening review question. Interpreted as 0:00–0:12 and stated back to the user. Redistribution permission remains unverified."
+  }
+}

@@ -23,6 +23,7 @@ class MainActivity : AudioServiceActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         DeviceChannel.register(this, flutterEngine)
+        PrayerMediaBridge.register(flutterEngine, this)
     }
 }
 

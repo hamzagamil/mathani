@@ -350,6 +350,7 @@ class AthanRecording {
     required this.encoding,
     required this.openingAssetId,
     required this.openingEndMs,
+    this.openingStartMs = 0,
     required this.openingDurationMs,
     required this.platformClipHashes,
     required this.platformClipEncodings,
@@ -369,7 +370,11 @@ class AthanRecording {
       sha256,
       encoding,
       openingAssetId;
-  final int expectedBytes, durationMs, openingEndMs, openingDurationMs;
+  final int expectedBytes,
+      durationMs,
+      openingStartMs,
+      openingEndMs,
+      openingDurationMs;
   final Map<String, String> platformClipHashes, platformClipEncodings;
   final bool completeRecordingReviewed, fourTakbirsReviewed;
   bool get iosShortEligible =>

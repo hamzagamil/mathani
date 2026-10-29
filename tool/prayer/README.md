@@ -23,3 +23,11 @@ The calendar asset covers 2020-01-01 inclusive through 2038-01-01 exclusive. Ram
 PrayTimes.js2.5 is unmodified build-time-only LGPL3 reference code. Its copyright/terms are retained in tool/prayer/vendor/PrayTimes.js; it is not listed as a Flutter asset. The source SHA256 is pinned in the generator. Fixtures cover 1800 combinations across ten cities, five methods, two Asr conventions and two high-latitude choices, including summer twilight plus DST and first/last Ramadan evening dates; polar cases are explicit. Reference fixtures are not production-calculator output. Numerical comparison remains to be run in US1.
 
 Native encrypted preferences are excluded from Android backup/transfer because their Keystore keys are not portable; the existing SQLite reader data is unaffected. iOS storage is this-device-only after first unlock. Browser encrypted origin storage has the documented weaker threat model; failed persistent reads never overwrite ciphertext and session-only recovery is explicit.
+
+# Athan review preparation
+
+Source URLs and original SHA-256 hashes are pinned in `athan_sources.json`. Keep downloaded originals in ignored `build/prayer-audio-review/`; never commit source audio whose redistribution is unresolved.
+
+Run the command in `specs/009-prayer-times/validation/athan-assets.md`. FFmpeg is a pinned build-time tool, not a runtime dependency. Outputs stay in ignored build storage. Full recordings are transcoded without speed changes; opening variants are generated only from explicit source-hash-bound review decisions. Decoded duration and output hashes are recorded.
+
+Human suitability review and redistribution clearance are separate requirements. A prepared review clip is not permission to distribute it. `readyForShipping` requires two complete approved recordings, approved four-takbir cuts, eligible iOS clips and confirmed redistribution rights. Never copy this review catalogue directly into production assets.
