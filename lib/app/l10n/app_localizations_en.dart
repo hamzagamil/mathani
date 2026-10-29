@@ -839,4 +839,162 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get pageNeedsConnection =>
       'This page needs a connection the first time you open it.';
+
+  @override
+  String get prayerTimesTitle => 'Prayer times';
+
+  @override
+  String get prayerAddLocation => 'Choose location';
+
+  @override
+  String get prayerDetectLocation => 'Detect my location';
+
+  @override
+  String get prayerSearchCity => 'Search for a city';
+
+  @override
+  String get prayerApproximateLocation => 'Try approximate location';
+
+  @override
+  String get prayerLocationDisclosure =>
+      'Device location is used only to find prayer times. To resolve the place and time zone, coordinates are sent to Mathani/Cloudflare and GeoNames. You can choose a city instead.';
+
+  @override
+  String get prayerIpDisclosure =>
+      'Approximate lookup uses your connection\'s IP address at Cloudflare. It may be wrong with a VPN. Confirm or change the result before use.';
+
+  @override
+  String get prayerApproximate => 'Approximate location';
+
+  @override
+  String get prayerConfirmLocation => 'Use this location';
+
+  @override
+  String get prayerChangeLocation => 'Change location';
+
+  @override
+  String get prayerCancel => 'Cancel';
+
+  @override
+  String get prayerNoLocation => 'Choose a location to see its prayer times.';
+
+  @override
+  String get prayerNoResults => 'No matching cities. Try another name.';
+
+  @override
+  String get prayerUnavailable => 'Unavailable';
+
+  @override
+  String get prayerAdjusted => 'Adjusted for high latitude';
+
+  @override
+  String get prayerNext => 'Next prayer';
+
+  @override
+  String get prayerFajr => 'Fajr';
+
+  @override
+  String get prayerSunrise => 'Sunrise (information only)';
+
+  @override
+  String get prayerDhuhr => 'Dhuhr';
+
+  @override
+  String get prayerAsr => 'Asr';
+
+  @override
+  String get prayerMaghrib => 'Maghrib';
+
+  @override
+  String get prayerIsha => 'Isha';
+
+  @override
+  String get prayerQiyam => 'Qiyam';
+
+  @override
+  String get prayerMethod => 'Calculation method';
+
+  @override
+  String get prayerMadhhab => 'Asr madhhab';
+
+  @override
+  String get prayerMethodMwl => 'Muslim World League';
+
+  @override
+  String get prayerMethodEgypt => 'Egyptian General Authority of Survey';
+
+  @override
+  String get prayerMethodKarachi => 'University of Islamic Sciences, Karachi';
+
+  @override
+  String get prayerMethodMakkah => 'Umm al-Qura, Makkah';
+
+  @override
+  String get prayerMethodNorthAmerica => 'North America (ISNA)';
+
+  @override
+  String get prayerHanafi => 'Hanafi';
+
+  @override
+  String get prayerShafii => 'Shafi‘i';
+
+  @override
+  String get prayerMaliki => 'Maliki';
+
+  @override
+  String get prayerHanbali => 'Hanbali';
+
+  @override
+  String get prayerMiddleNight => 'Middle of the night';
+
+  @override
+  String get prayerSeventhNight => 'One seventh of the night';
+
+  @override
+  String get prayerHighLatitude => 'High-latitude rule';
+
+  @override
+  String get prayerLocationDenied =>
+      'Location access was denied. You can choose a city manually.';
+
+  @override
+  String get prayerLocationUnavailable =>
+      'Device location is unavailable. Choose a city or try approximate location.';
+
+  @override
+  String get prayerTimezoneUnavailable =>
+      'The time zone could not be resolved. Choose a city instead.';
+
+  @override
+  String get prayerOffline =>
+      'A connection is needed for this lookup. Saved places still work offline.';
+
+  @override
+  String get prayerStorageUnavailable =>
+      'Saved location data could not be read securely. Retry, or continue for this session without changing existing saved data.';
+
+  @override
+  String get prayerSessionOnly => 'Use for this session';
+
+  @override
+  String get prayerSessionNotice =>
+      'Changes are kept only until you close this session.';
+
+  @override
+  String get prayerServiceUnavailable =>
+      'Location lookup is unavailable. Try again later or keep using a saved place.';
+
+  @override
+  String get prayerCalculationUnavailable =>
+      'Times cannot be calculated for this date and convention. No reminder is scheduled for unavailable times.';
+
+  @override
+  String get prayerNeedsAttention =>
+      'Saved prayer settings need attention. Existing saved data has been preserved.';
+
+  @override
+  String get prayerRetry => 'Try again';
+
+  @override
+  String get prayerGeoNamesAttribution => 'Place data: GeoNames';
 }

@@ -9,6 +9,7 @@ environment:
   flutter: 3.47.7
 
 dependencies:
+  adhan_dart: 2.0.1
   audio_service: ^0.18.19
   audio_session: ^0.2.4
   crypto: ^3.0.7
@@ -16,6 +17,9 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
+  flutter_local_notifications: 22.3.3
+  flutter_secure_storage: 10.3.4
+  geolocator: 14.0.1
   # Recordings over HTTP on phones and in browsers (specs/008 research R18a).
   http: ^1.6.0
   intl: ^0.20.3
@@ -28,6 +32,7 @@ dependencies:
   sqflite: ^2.4.4+1
   # SQLite in the browser, imported only from lib/platform/database_web.dart (specs/008 R4).
   sqflite_common_ffi_web: ^1.2.0
+  timezone: 0.11.2
   url_launcher: ^6.3.3
   wakelock_plus: ^1.8.1
   # Browser APIs, imported only from lib/platform/*_web.dart (specs/008 R3).
@@ -42,12 +47,14 @@ dev_dependencies:
   sqflite_common_ffi: ^2.4.3
   integration_test:
     sdk: flutter
+  test: ^1.31.1
 
 flutter:
   uses-material-design: true
   generate: true
 
   assets:
+    - assets/prayer/
     - assets/db/
     - assets/images/
     # King Fahd Complex page fonts, one per page, gzip-compressed (specs/002, User Story 4).

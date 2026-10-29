@@ -1,3 +1,4 @@
 "CFBundleDisplayName" = "Mathani";
 "CFBundleName" = "Mathani";
+"NSLocationWhenInUseUsageDescription" = "Mathani uses location only when you choose detection for prayer times. Coordinates are sent to Mathani and GeoNames to resolve the place and time zone. You can select a city instead.";
 "NSMicrophoneUsageDescription" = "Mathani uses the microphone only during a memorization session, to follow your recitation on your device. Your voice is not recorded and never leaves the device.";

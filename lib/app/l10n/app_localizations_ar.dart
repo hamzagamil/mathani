@@ -843,4 +843,161 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get pageNeedsConnection =>
       'تحتاج هذه الصفحة إلى اتصال عند فتحها أول مرة.';
+
+  @override
+  String get prayerTimesTitle => 'مواقيت الصلاة';
+
+  @override
+  String get prayerAddLocation => 'اختيار الموقع';
+
+  @override
+  String get prayerDetectLocation => 'تحديد موقعي';
+
+  @override
+  String get prayerSearchCity => 'ابحث عن مدينة';
+
+  @override
+  String get prayerApproximateLocation => 'جرّب الموقع التقريبي';
+
+  @override
+  String get prayerLocationDisclosure =>
+      'يُستخدم موقع الجهاز لتحديد مواقيت الصلاة فقط. لتحديد المكان والمنطقة الزمنية تُرسل الإحداثيات إلى مثاني/Cloudflare وGeoNames. يمكنك اختيار مدينة بدلًا من ذلك.';
+
+  @override
+  String get prayerIpDisclosure =>
+      'يستخدم البحث التقريبي عنوان اتصالك لدى Cloudflare. قد تكون النتيجة غير دقيقة مع VPN. أكّد النتيجة أو غيّرها قبل الاستخدام.';
+
+  @override
+  String get prayerApproximate => 'موقع تقريبي';
+
+  @override
+  String get prayerConfirmLocation => 'استخدم هذا الموقع';
+
+  @override
+  String get prayerChangeLocation => 'تغيير الموقع';
+
+  @override
+  String get prayerCancel => 'إلغاء';
+
+  @override
+  String get prayerNoLocation => 'اختر موقعًا لعرض مواقيت الصلاة.';
+
+  @override
+  String get prayerNoResults => 'لا توجد مدن مطابقة. جرّب اسمًا آخر.';
+
+  @override
+  String get prayerUnavailable => 'غير متاح';
+
+  @override
+  String get prayerAdjusted => 'معدّل لخطوط العرض العليا';
+
+  @override
+  String get prayerNext => 'الصلاة القادمة';
+
+  @override
+  String get prayerFajr => 'الفجر';
+
+  @override
+  String get prayerSunrise => 'الشروق (للمعلومة فقط)';
+
+  @override
+  String get prayerDhuhr => 'الظهر';
+
+  @override
+  String get prayerAsr => 'العصر';
+
+  @override
+  String get prayerMaghrib => 'المغرب';
+
+  @override
+  String get prayerIsha => 'العشاء';
+
+  @override
+  String get prayerQiyam => 'قيام الليل';
+
+  @override
+  String get prayerMethod => 'طريقة الحساب';
+
+  @override
+  String get prayerMadhhab => 'مذهب حساب العصر';
+
+  @override
+  String get prayerMethodMwl => 'رابطة العالم الإسلامي';
+
+  @override
+  String get prayerMethodEgypt => 'الهيئة المصرية العامة للمساحة';
+
+  @override
+  String get prayerMethodKarachi => 'جامعة العلوم الإسلامية بكراتشي';
+
+  @override
+  String get prayerMethodMakkah => 'أم القرى، مكة';
+
+  @override
+  String get prayerMethodNorthAmerica => 'أمريكا الشمالية (ISNA)';
+
+  @override
+  String get prayerHanafi => 'حنفي';
+
+  @override
+  String get prayerShafii => 'شافعي';
+
+  @override
+  String get prayerMaliki => 'مالكي';
+
+  @override
+  String get prayerHanbali => 'حنبلي';
+
+  @override
+  String get prayerMiddleNight => 'منتصف الليل';
+
+  @override
+  String get prayerSeventhNight => 'سُبع الليل';
+
+  @override
+  String get prayerHighLatitude => 'قاعدة خطوط العرض العليا';
+
+  @override
+  String get prayerLocationDenied =>
+      'لم يُسمح بالوصول إلى الموقع. يمكنك اختيار مدينة يدويًا.';
+
+  @override
+  String get prayerLocationUnavailable =>
+      'موقع الجهاز غير متاح. اختر مدينة أو جرّب الموقع التقريبي.';
+
+  @override
+  String get prayerTimezoneUnavailable =>
+      'تعذّر تحديد المنطقة الزمنية. اختر مدينة بدلًا من ذلك.';
+
+  @override
+  String get prayerOffline =>
+      'يلزم اتصال لهذا البحث. تظل المواقع المحفوظة متاحة دون اتصال.';
+
+  @override
+  String get prayerStorageUnavailable =>
+      'تعذّرت قراءة المواقع المحفوظة بأمان. أعد المحاولة أو تابع لهذه الجلسة دون تغيير البيانات المحفوظة.';
+
+  @override
+  String get prayerSessionOnly => 'استخدم لهذه الجلسة';
+
+  @override
+  String get prayerSessionNotice => 'تُحفظ التغييرات حتى إغلاق هذه الجلسة فقط.';
+
+  @override
+  String get prayerServiceUnavailable =>
+      'البحث عن الموقع غير متاح. أعد المحاولة لاحقًا أو استخدم موقعًا محفوظًا.';
+
+  @override
+  String get prayerCalculationUnavailable =>
+      'لا يمكن حساب المواقيت لهذا التاريخ وطريقة الحساب. لن يُجدول تنبيه للأوقات غير المتاحة.';
+
+  @override
+  String get prayerNeedsAttention =>
+      'تحتاج إعدادات الصلاة المحفوظة إلى مراجعة. لم تتغير بياناتك المحفوظة.';
+
+  @override
+  String get prayerRetry => 'أعد المحاولة';
+
+  @override
+  String get prayerGeoNamesAttribution => 'بيانات الأماكن: GeoNames';
 }

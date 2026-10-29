@@ -4,6 +4,9 @@
          download. Install-time permissions; nothing is asked at runtime. -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <!-- Prayer setup: optional foreground one-shot detection. -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <!-- Background recitation (specs/004 US3): a media-playback foreground service, only while a
          recitation is on. Its media-session notification needs no POST_NOTIFICATIONS prompt. -->
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
@@ -16,6 +19,8 @@
         android:label="@string/app_name"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
+        android:fullBackupContent="@xml/prayer_backup_rules"
+        android:dataExtractionRules="@xml/prayer_data_extraction_rules"
         android:supportsRtl="true">
         <activity
             android:name=".MainActivity"

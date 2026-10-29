@@ -48,6 +48,7 @@ self.addEventListener('message', (event) => {
     const u = new URL(url);
     if (u.origin !== self.location.origin) return;
     const path = pathOf(url);
+    if (path.startsWith('api/prayer-')) return;
     const cacheName = isAsset(path) ? ASSETS : SHELL;
     if (await caches.match(url, { cacheName })) return;
     try {
@@ -61,6 +62,7 @@ self.addEventListener('message', (event) => {
 self.addEventListener('fetch', (event) => {
   const request = event.request;
   const url = new URL(request.url);
+  if (url.pathname.startsWith('/api/prayer-')) return;
   if (request.method !== 'GET' || url.origin !== self.location.origin) return;
   if (request.headers.has('range')) return;
   if (request.mode === 'navigate') {
@@ -87,6 +89,7 @@ async function cacheFirst(cacheName, request, path) {
 
 /** Stores a successful response; assets carry their build hash for the activate check. */
 async function keep(cacheName, request, path, response) {
+  if (path.startsWith('api/prayer-') || response.headers.get('cache-control')?.includes('no-store')) return;
   if (!response.ok || path === 'sw.js' || path === 'asset-hashes.json') return;
   const cache = await caches.open(cacheName);
   if (cacheName !== ASSETS) return cache.put(request, response);

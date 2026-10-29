@@ -1,0 +1,8 @@
+name = "mthani-web"
+pages_build_output_dir = "build/web"
+compatibility_date = "2026-10-29"
+
+[vars]
+# Public provider account identifier; no password or API secret is stored here.
+GEONAMES_USERNAME = "mthani"
+PRAYER_ALLOWED_ORIGINS = "https://get.mthani.app"

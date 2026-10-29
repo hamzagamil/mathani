@@ -45,6 +45,13 @@ const sha = (algorithm, bytes) => createHash(algorithm).update(bytes).digest('he
 
 function prepare() {
   if (!existsSync(join(web, 'index.html'))) fail('no build/web: run flutter build web first');
+  // Wrangler compiles repository-root Functions; static assets bypass them.
+  for (const endpoint of ['prayer-location', 'prayer-places', 'prayer-resolve']) {
+    if (!existsSync(join(repo, 'functions', 'api', endpoint + '.js'))) {
+      fail('missing prayer location Function: ' + endpoint);
+    }
+  }
+  writeFileSync(join(web, '_routes.json'), readFileSync(join(repo, 'web', '_routes.json')));
 
   // The version the build reports must be the one being released (FR-029).
   const pubspec = readFileSync(join(repo, 'pubspec.yaml'), 'utf8').match(/^version:\s*(\S+)/m)[1];

@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "conventionVersion": 1,
+  "source": "https://github.com/dralshehri/hijridate",
+  "sourceVersion": "2.6.0",
+  "coverageStart": "2020-01-01",
+  "coverageEndExclusive": "2038-01-01",
+  "intervals": [
+    {
+      "year": 1440,
+      "ramadanCivilStart": "2019-05-06",
+      "shawwalCivilStart": "2019-06-04"
+    },
+    {
+      "year": 1441,
+      "ramadanCivilStart": "2020-04-24",
+      "shawwalCivilStart": "2020-05-24"
+    },
+    {
+      "year": 1442,
+      "ramadanCivilStart": "2021-04-13",
+      "shawwalCivilStart": "2021-05-13"
+    },
+    {
+      "year": 1443,
+      "ramadanCivilStart": "2022-04-02",
+      "shawwalCivilStart": "2022-05-02"
+    },
+    {
+      "year": 1444,
+      "ramadanCivilStart": "2023-03-23",
+      "shawwalCivilStart": "2023-04-21"
+    },
+    {
+      "year": 1445,
+      "ramadanCivilStart": "2024-03-11",
+      "shawwalCivilStart": "2024-04-10"
+    },
+    {
+      "year": 1446,
+      "ramadanCivilStart": "2025-03-01",
+      "shawwalCivilStart": "2025-03-30"
+    },
+    {
+      "year": 1447,
+      "ramadanCivilStart": "2026-02-18",
+      "shawwalCivilStart": "2026-03-20"
+    },
+    {
+      "year": 1448,
+      "ramadanCivilStart": "2027-02-08",
+      "shawwalCivilStart": "2027-03-09"
+    },
+    {
+      "year": 1449,
+      "ramadanCivilStart": "2028-01-28",
+      "shawwalCivilStart": "2028-02-26"
+    },
+    {
+      "year": 1450,
+      "ramadanCivilStart": "2029-01-16",
+      "shawwalCivilStart": "2029-02-14"
+    },
+    {
+      "year": 1451,
+      "ramadanCivilStart": "2030-01-05",
+      "shawwalCivilStart": "2030-02-04"
+    },
+    {
+      "year": 1452,
+      "ramadanCivilStart": "2030-12-26",
+      "shawwalCivilStart": "2031-01-24"
+    },
+    {
+      "year": 1453,
+      "ramadanCivilStart": "2031-12-15",
+      "shawwalCivilStart": "2032-01-14"
+    },
+    {
+      "year": 1454,
+      "ramadanCivilStart": "2032-12-04",
+      "shawwalCivilStart": "2033-01-02"
+    },
+    {
+      "year": 1455,
+      "ramadanCivilStart": "2033-11-23",
+      "shawwalCivilStart": "2033-12-23"
+    },
+    {
+      "year": 1456,
+      "ramadanCivilStart": "2034-11-12",
+      "shawwalCivilStart": "2034-12-12"
+    },
+    {
+      "year": 1457,
+      "ramadanCivilStart": "2035-11-01",
+      "shawwalCivilStart": "2035-12-01"
+    },
+    {
+      "year": 1458,
+      "ramadanCivilStart": "2036-10-20",
+      "shawwalCivilStart": "2036-11-19"
+    },
+    {
+      "year": 1459,
+      "ramadanCivilStart": "2037-10-10",
+      "shawwalCivilStart": "2037-11-08"
+    }
+  ]
+}

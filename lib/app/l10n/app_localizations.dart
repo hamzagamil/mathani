@@ -1464,6 +1464,300 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This page needs a connection the first time you open it.'**
   String get pageNeedsConnection;
+
+  /// No description provided for @prayerTimesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Prayer times'**
+  String get prayerTimesTitle;
+
+  /// No description provided for @prayerAddLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose location'**
+  String get prayerAddLocation;
+
+  /// No description provided for @prayerDetectLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Detect my location'**
+  String get prayerDetectLocation;
+
+  /// No description provided for @prayerSearchCity.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for a city'**
+  String get prayerSearchCity;
+
+  /// No description provided for @prayerApproximateLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Try approximate location'**
+  String get prayerApproximateLocation;
+
+  /// No description provided for @prayerLocationDisclosure.
+  ///
+  /// In en, this message translates to:
+  /// **'Device location is used only to find prayer times. To resolve the place and time zone, coordinates are sent to Mathani/Cloudflare and GeoNames. You can choose a city instead.'**
+  String get prayerLocationDisclosure;
+
+  /// No description provided for @prayerIpDisclosure.
+  ///
+  /// In en, this message translates to:
+  /// **'Approximate lookup uses your connection\'s IP address at Cloudflare. It may be wrong with a VPN. Confirm or change the result before use.'**
+  String get prayerIpDisclosure;
+
+  /// No description provided for @prayerApproximate.
+  ///
+  /// In en, this message translates to:
+  /// **'Approximate location'**
+  String get prayerApproximate;
+
+  /// No description provided for @prayerConfirmLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this location'**
+  String get prayerConfirmLocation;
+
+  /// No description provided for @prayerChangeLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Change location'**
+  String get prayerChangeLocation;
+
+  /// No description provided for @prayerCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get prayerCancel;
+
+  /// No description provided for @prayerNoLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a location to see its prayer times.'**
+  String get prayerNoLocation;
+
+  /// No description provided for @prayerNoResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching cities. Try another name.'**
+  String get prayerNoResults;
+
+  /// No description provided for @prayerUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Unavailable'**
+  String get prayerUnavailable;
+
+  /// No description provided for @prayerAdjusted.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjusted for high latitude'**
+  String get prayerAdjusted;
+
+  /// No description provided for @prayerNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next prayer'**
+  String get prayerNext;
+
+  /// No description provided for @prayerFajr.
+  ///
+  /// In en, this message translates to:
+  /// **'Fajr'**
+  String get prayerFajr;
+
+  /// No description provided for @prayerSunrise.
+  ///
+  /// In en, this message translates to:
+  /// **'Sunrise (information only)'**
+  String get prayerSunrise;
+
+  /// No description provided for @prayerDhuhr.
+  ///
+  /// In en, this message translates to:
+  /// **'Dhuhr'**
+  String get prayerDhuhr;
+
+  /// No description provided for @prayerAsr.
+  ///
+  /// In en, this message translates to:
+  /// **'Asr'**
+  String get prayerAsr;
+
+  /// No description provided for @prayerMaghrib.
+  ///
+  /// In en, this message translates to:
+  /// **'Maghrib'**
+  String get prayerMaghrib;
+
+  /// No description provided for @prayerIsha.
+  ///
+  /// In en, this message translates to:
+  /// **'Isha'**
+  String get prayerIsha;
+
+  /// No description provided for @prayerQiyam.
+  ///
+  /// In en, this message translates to:
+  /// **'Qiyam'**
+  String get prayerQiyam;
+
+  /// No description provided for @prayerMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Calculation method'**
+  String get prayerMethod;
+
+  /// No description provided for @prayerMadhhab.
+  ///
+  /// In en, this message translates to:
+  /// **'Asr madhhab'**
+  String get prayerMadhhab;
+
+  /// No description provided for @prayerMethodMwl.
+  ///
+  /// In en, this message translates to:
+  /// **'Muslim World League'**
+  String get prayerMethodMwl;
+
+  /// No description provided for @prayerMethodEgypt.
+  ///
+  /// In en, this message translates to:
+  /// **'Egyptian General Authority of Survey'**
+  String get prayerMethodEgypt;
+
+  /// No description provided for @prayerMethodKarachi.
+  ///
+  /// In en, this message translates to:
+  /// **'University of Islamic Sciences, Karachi'**
+  String get prayerMethodKarachi;
+
+  /// No description provided for @prayerMethodMakkah.
+  ///
+  /// In en, this message translates to:
+  /// **'Umm al-Qura, Makkah'**
+  String get prayerMethodMakkah;
+
+  /// No description provided for @prayerMethodNorthAmerica.
+  ///
+  /// In en, this message translates to:
+  /// **'North America (ISNA)'**
+  String get prayerMethodNorthAmerica;
+
+  /// No description provided for @prayerHanafi.
+  ///
+  /// In en, this message translates to:
+  /// **'Hanafi'**
+  String get prayerHanafi;
+
+  /// No description provided for @prayerShafii.
+  ///
+  /// In en, this message translates to:
+  /// **'Shafi‘i'**
+  String get prayerShafii;
+
+  /// No description provided for @prayerMaliki.
+  ///
+  /// In en, this message translates to:
+  /// **'Maliki'**
+  String get prayerMaliki;
+
+  /// No description provided for @prayerHanbali.
+  ///
+  /// In en, this message translates to:
+  /// **'Hanbali'**
+  String get prayerHanbali;
+
+  /// No description provided for @prayerMiddleNight.
+  ///
+  /// In en, this message translates to:
+  /// **'Middle of the night'**
+  String get prayerMiddleNight;
+
+  /// No description provided for @prayerSeventhNight.
+  ///
+  /// In en, this message translates to:
+  /// **'One seventh of the night'**
+  String get prayerSeventhNight;
+
+  /// No description provided for @prayerHighLatitude.
+  ///
+  /// In en, this message translates to:
+  /// **'High-latitude rule'**
+  String get prayerHighLatitude;
+
+  /// No description provided for @prayerLocationDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Location access was denied. You can choose a city manually.'**
+  String get prayerLocationDenied;
+
+  /// No description provided for @prayerLocationUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Device location is unavailable. Choose a city or try approximate location.'**
+  String get prayerLocationUnavailable;
+
+  /// No description provided for @prayerTimezoneUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'The time zone could not be resolved. Choose a city instead.'**
+  String get prayerTimezoneUnavailable;
+
+  /// No description provided for @prayerOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'A connection is needed for this lookup. Saved places still work offline.'**
+  String get prayerOffline;
+
+  /// No description provided for @prayerStorageUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved location data could not be read securely. Retry, or continue for this session without changing existing saved data.'**
+  String get prayerStorageUnavailable;
+
+  /// No description provided for @prayerSessionOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Use for this session'**
+  String get prayerSessionOnly;
+
+  /// No description provided for @prayerSessionNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes are kept only until you close this session.'**
+  String get prayerSessionNotice;
+
+  /// No description provided for @prayerServiceUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Location lookup is unavailable. Try again later or keep using a saved place.'**
+  String get prayerServiceUnavailable;
+
+  /// No description provided for @prayerCalculationUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Times cannot be calculated for this date and convention. No reminder is scheduled for unavailable times.'**
+  String get prayerCalculationUnavailable;
+
+  /// No description provided for @prayerNeedsAttention.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved prayer settings need attention. Existing saved data has been preserved.'**
+  String get prayerNeedsAttention;
+
+  /// No description provided for @prayerRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get prayerRetry;
+
+  /// No description provided for @prayerGeoNamesAttribution.
+  ///
+  /// In en, this message translates to:
+  /// **'Place data: GeoNames'**
+  String get prayerGeoNamesAttribution;
 }
 
 class _AppLocalizationsDelegate

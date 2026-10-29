@@ -57,3 +57,14 @@ desktop.ini
 
 # Brand rendering tool dependencies (tool/brand/package.json)
 tool/brand/node_modules/
+
+# Prayer Functions/local tooling
+.dev.vars
+.dev.vars.*
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+*.log
+*.tmp
+*.swp

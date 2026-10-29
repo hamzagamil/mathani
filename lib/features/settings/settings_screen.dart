@@ -9,6 +9,7 @@ import '../../shared/numerals.dart';
 import '../../shared/reader_state.dart';
 import '../onboarding/onboarding_controller.dart';
 import '../recitation/recitation_settings.dart';
+import '../prayer_times/prayer_times_screen.dart';
 import 'about_section.dart';
 
 /// Reading layout, theme, flowing text size, keep-screen-on and language. Every change applies
@@ -191,6 +192,13 @@ class SettingsScreen extends StatelessWidget {
               ),
             ),
           const SizedBox(height: Space.s4),
+          ListTile(
+            leading: const Icon(Icons.schedule_outlined),
+            title: Text(l10n.prayerTimesTitle),
+            onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(
+              builder: (_) => const PrayerTimesScreen(),
+            )),
+          ),
           Divider(color: colors.line),
           Padding(
             padding: const EdgeInsets.fromLTRB(Space.s4, Space.s2, Space.s4, 0),
