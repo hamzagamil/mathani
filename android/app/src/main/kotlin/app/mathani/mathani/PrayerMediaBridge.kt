@@ -119,6 +119,7 @@ object PrayerMediaBridge {
         val key = AudioServicePlugin.getFlutterEngineId()
         FlutterEngineCache.getInstance().get(key)?.let { return it }
         val created = FlutterEngine(context.applicationContext)
+        PrayerNotificationsPlugin.register(created)
         register(created, context)
         FlutterEngineCache.getInstance().put(key, created)
         created.navigationChannel.setInitialRoute(ROUTE)

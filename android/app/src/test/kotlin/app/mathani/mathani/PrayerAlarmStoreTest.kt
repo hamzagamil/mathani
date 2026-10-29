@@ -40,6 +40,34 @@ class PrayerAlarmStoreTest {
         assertThrows(Exception::class.java) { reopened.replace(2, emptyList(), 0) }
         assertArrayEquals(damaged, backend.bytes)
     }
+    @Test fun savedLocationBase64PaddingRoundTripsWithoutChangingItsIdentity() {
+        val store = PrayerAlarmStore(Backend())
+        val existingId = "padded_location_id=="
+        store.replace(1, listOf(event().copy(locationId = existingId)), 0)
+        assertEquals(existingId, store.future(0).single().locationId)
+    }
+    @Test fun cancelPendingRejectsOldAlarmAndAllowsSameGenerationRefill() {
+        val store = PrayerAlarmStore(Backend())
+        store.replace(1, listOf(event()), 0)
+        store.clearPending()
+        assertTrue(store.future(0).isEmpty())
+        assertFalse(store.claimFallback("event_a", 1, 100_000))
+        assertEquals(1L, store.generation())
+        store.replace(1, listOf(event()), 0)
+        assertTrue(store.claimFallback("event_a", 1, 100_000))
+        assertFalse(store.claimFallback("event_a", 1, 100_000))
+    }
+    @Test fun systemPostIsOnceOnlyAndCancelledTokensNeverPost() {
+        val store = PrayerAlarmStore(Backend())
+        store.replace(1, listOf(event()), 0)
+        var posts = 0
+        assertTrue(store.deliverFallback("event_a", 1, 100_000) { posts++ })
+        assertFalse(store.deliverFallback("event_a", 1, 100_000) { posts++ })
+        assertEquals(1, posts)
+        store.clearPending()
+        assertFalse(store.deliverFallback("event_a", 1, 100_000) { posts++ })
+        assertEquals(1, posts)
+    }
 
     @Test fun concurrentAudioAndFallbackHaveOnlyOneFinalWinner() {
         val backend = Backend()

@@ -96,6 +96,14 @@ starts memorization (since specs/006). It requests nothing else.
 
 ## Privacy policy
 
+### Prayer notification increment
+
+Prayer times have optional foreground location and notification permissions. Android additionally offers user-granted Alarms & reminders access for precise local alerts and restores future alarms after reboot/unlock; it does not start media playback from boot. Saved prayer locations use a separate encrypted snapshot. Android derived alarm presentation is AES-GCM encrypted with a Keystore key; alarm intents contain only opaque event tokens/generations. Notification text is generic prayer/Qiyam text and contains no coordinates or saved-place label. iOS pending notifications are managed by the OS. These notifications add no push subscription, account, notification server or background location tracking.
+
+The generated Qiyam sound is original and bundled; unapproved third-party athan recordings are not included. Standard daily sounds require a separate explicit fallback choice and are not represented as an athan recording. Notification permission/channel/sound settings remain under user control. Native timing and system sound interruption limitations are disclosed in the app.
+
+The earlier "on-device storage only" description does not describe optional prayer location lookup: explicit city/device-place resolution contacts Mathani/Cloudflare and GeoNames as disclosed in setup, and optional approximate lookup uses connection metadata. Published policy and store form updates remain a separate release requirement; no store account answers or public policy were changed by this implementation.
+
 Both stores require a privacy-policy URL even when no data is collected. The page is
 https://mthani.app/privacypolicy (`privacypolicy.html` in the landing site). It states the above:
 no data collected, on-device storage only, recitation audio and the memorization model fetched

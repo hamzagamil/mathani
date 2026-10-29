@@ -1086,4 +1086,171 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get prayerDelete => 'حذف';
+
+  @override
+  String get prayerReminderSettings => 'تذكيرات الصلاة';
+
+  @override
+  String prayerReminderBody(String prayer) {
+    return 'حان وقت $prayer.';
+  }
+
+  @override
+  String get prayerAthanRecording => 'تسجيل الأذان';
+
+  @override
+  String get prayerAthanFull => 'الأذان كاملًا';
+
+  @override
+  String get prayerAthanOpening => 'التكبيرات الأربع الأولى';
+
+  @override
+  String get prayerAthanPreview => 'استماع تجريبي';
+
+  @override
+  String get prayerAthanStop => 'إيقاف الأذان';
+
+  @override
+  String get prayerAthanPlay => 'تشغيل الأذان';
+
+  @override
+  String get prayerAthanDownload => 'تنزيل للاستماع دون اتصال';
+
+  @override
+  String get prayerAudioAbsent => 'لم يُنزّل التسجيل الصوتي بعد.';
+
+  @override
+  String get prayerAudioDownloading => 'جارٍ تنزيل التسجيل والتحقق منه…';
+
+  @override
+  String get prayerAudioVerified => 'تم التحقق من التسجيل وهو جاهز دون اتصال';
+
+  @override
+  String get prayerAudioFailed => 'تعذّر التحقق من التسجيل. أعد تنزيله.';
+
+  @override
+  String prayerRecordingCredit(String credit) {
+    return 'نسبة التسجيل: $credit';
+  }
+
+  @override
+  String get prayerRecordingSource => 'مصدر التسجيل وترخيصه';
+
+  @override
+  String prayerRequestedMode(String mode) {
+    return 'اختيارك: $mode';
+  }
+
+  @override
+  String prayerEffectiveMode(String mode) {
+    return 'التنبيه المتاح: $mode';
+  }
+
+  @override
+  String get prayerNotificationsPermission => 'السماح بإشعارات الصلاة';
+
+  @override
+  String get prayerNotificationsDenied =>
+      'الإشعارات محظورة. اختيارات التذكير محفوظة؛ اسمح بالإشعارات من الإعدادات لاستخدامها.';
+
+  @override
+  String get prayerNotificationsOpenSettings => 'فتح إعدادات الإشعارات';
+
+  @override
+  String get prayerExactAlarmAccess => 'السماح بالمنبّهات والتذكيرات';
+
+  @override
+  String get prayerExactAlarmLimit =>
+      'تحتاج تذكيرات أندرويد الدقيقة إلى إذن المنبّهات. بدونه يمكنك قبول تنبيهات قصيرة بتوقيت تقريبي أو إبقاء التذكيرات متوقفة. تُتجاوز تنبيهات أندرويد المتأخرة، لذا قد تفوت تذكيرات عند استخدام التوقيت التقريبي.';
+
+  @override
+  String get prayerIosFullLimit =>
+      'لا يستطيع iOS تشغيل الأذان كاملًا تلقائيًا في الخلفية أو أثناء قفل الجهاز. يمكنك اختيار تنبيه التكبيرات القصير، ثم فتح مثاني والضغط على تشغيل للاستماع إلى التسجيل كاملًا.';
+
+  @override
+  String get prayerIosSystemSoundLimit =>
+      'يتحكم iOS في أصوات الإشعارات وتوقيت وصولها. لا يستطيع مثاني تصفية تنبيه متأخر قبل عرضه من النظام، ولا يضمن إيقاف تلاوة القرآن مؤقتًا أو إيقاف صوت إشعار بدأ بالفعل. تسري إعدادات الصوت والإشعارات في الجهاز.';
+
+  @override
+  String get prayerWebLimit =>
+      'تعمل تذكيرات المتصفح فقط ما دامت هذه الصفحة مفتوحة وظاهرة وقيد التشغيل. قد يمنع إغلاقها أو إخفاؤها أو تعليقها وصول التنبيه. قد يتطلب تشغيل الصوت الضغط على تشغيل. استخدم تطبيق الهاتف للتذكيرات المدعومة في الخلفية.';
+
+  @override
+  String get prayerMobileApps => 'الحصول على تطبيق الهاتف';
+
+  @override
+  String get prayerForegroundOnly => 'في الصفحة النشطة فقط';
+
+  @override
+  String get prayerRemindersBlocked =>
+      'تحتاج التذكيرات إلى معالجة قبل أن تعمل.';
+
+  @override
+  String get prayerRemindersPartial =>
+      'تعذّرت جدولة بعض التذكيرات. أعد المحاولة وتحقق من فترة التنبيه المتاحة.';
+
+  @override
+  String prayerScheduledThrough(String time) {
+    return 'تمت الجدولة حتى $time';
+  }
+
+  @override
+  String prayerReopenBy(String time) {
+    return 'افتح مواقيت الصلاة في مثاني مجددًا بحلول $time لتحديث التذكيرات القادمة. لا تستمر الجدولة إلى أجل غير محدد.';
+  }
+
+  @override
+  String get prayerReconcile => 'تحديث التذكيرات';
+
+  @override
+  String get prayerAcceptFallback => 'استخدام هذا البديل';
+
+  @override
+  String get prayerNoReminders => 'جميع تذكيرات الصلاة متوقفة.';
+
+  @override
+  String get prayerAutoplayBlocked =>
+      'لم يبدأ المتصفح تشغيل الأذان. اضغط على تشغيل ما دام هذا التذكير ساريًا.';
+
+  @override
+  String get prayerAthanNotCleared =>
+      'تسجيلات الأذان غير متاحة بعد. اختيارات التذكير محفوظة.';
+
+  @override
+  String get prayerSystemSound => 'صوت الإشعار المعتاد';
+
+  @override
+  String get prayerApproximateDelivery =>
+      'التنبيه بتوقيت تقريبي مفعّل. تُتجاوز التنبيهات المتأخرة أكثر من دقيقة.';
+
+  @override
+  String get prayerSystemSoundLimit =>
+      'يتحكم جهازك في أصوات الإشعارات القصيرة. لا يضمن مثاني إيقاف صوت النظام أو إيقاف تلاوة القرآن مؤقتًا بسببه. تسري إعدادات الإشعارات والصوت في الجهاز.';
+
+  @override
+  String get prayerUseSystemSound => 'استخدام صوت الإشعار المعتاد';
+
+  @override
+  String get prayerSystemSoundDisclosure =>
+      'تسجيل الأذان المختار غير متاح. يمكنك استخدام صوت إشعار الجهاز القصير بدلًا منه. لن يُشغّل هذا الأذان أو تكبيراته الأولى. قد تتداخل أصوات النظام مع تلاوة القرآن، ولا يُضمن إيقافها من مثاني. يبقى اختيار الأذان محفوظًا.';
+
+  @override
+  String get prayerQiyamExplanation =>
+      'تذكير اختياري عند بدء الثلث الأخير من الليل، محسوبًا من المغرب إلى الفجر التالي. وهو مستقل عن تذكيرات الصلوات الخمس.';
+
+  @override
+  String get prayerQiyamTone => 'نغمة قصيرة لتذكير قيام الليل';
+
+  @override
+  String get prayerQiyamNotification =>
+      'بدأ الثلث الأخير من الليل. تذكير اختياري بقيام الليل.';
+
+  @override
+  String get prayerQiyamUnavailable =>
+      'وقت القيام غير متاح لتعذّر حساب مغرب هذه الليلة أو فجرها التالي.';
+
+  @override
+  String prayerQiyamUpcoming(String time) {
+    return 'تذكير القيام القادم: $time';
+  }
 }

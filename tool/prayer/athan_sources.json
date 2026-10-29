@@ -14,20 +14,14 @@
       "licenseId": "UNVERIFIED",
       "licenseUrl": "",
       "redistributionConfirmed": false
-    },
+    }
+  ],
+  "rejectedSources": [
     {
-      "id": "egypt-minshawi",
-      "filename": "egypt-minshawi.mp3",
+      "formerId": "egypt-minshawi",
       "sourceSha256": "4f0700f65a25f66820662c003b056c13654a90b2a9b59955b88bb326d2bb0d3c",
-      "titleEn": "Adhan — Mohamed Siddiq El-Minshawi",
-      "titleAr": "أذان محمد صديق المنشاوي",
-      "creditedRecorder": "Attributed to Mohamed Siddiq El-Minshawi by Assabile; recording rights holder unverified",
-      "sourceUrl": "https://www.assabile.com/adhan-call-prayer/egypt",
-      "sourceRevision": "https://www.assabile.com/download/adhan/95",
       "originalUrl": "https://media.assabile.com/assabile/adhan_3435370/984f3e129c8c.mp3",
-      "licenseId": "UNVERIFIED",
-      "licenseUrl": "",
-      "redistributionConfirmed": false
+      "reason": "User identified that this recording is not El-Minshawi. Remove disputed attribution and exclude from preparation; actual performer remains unidentified."
     }
   ]
 }

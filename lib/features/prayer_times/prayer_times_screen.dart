@@ -6,6 +6,7 @@ import 'package:timezone/timezone.dart' as tz;
 
 import '../../app/l10n/app_localizations.dart';
 import '../../platform/prayer_location.dart';
+import '../../platform/prayer_notifications.dart';
 import '../../shared/numerals.dart';
 import 'location_setup_sheet.dart';
 import 'locations_sheet.dart';
@@ -15,10 +16,13 @@ import 'prayer_controller.dart';
 import 'prayer_copy.dart';
 import 'prayer_models.dart';
 import 'prayer_repository.dart';
+import 'reminder_settings.dart';
 import 'prayer_time_zones.dart';
 
 /// Owns its lazy services only while the route is open; no reader-startup IO.
 class PrayerTimesScreen extends StatefulWidget {
+  static int _openRoutes = 0;
+  static bool get hasOpenRoute => _openRoutes > 0;
   const PrayerTimesScreen({super.key, this.controller});
   final PrayerController? controller;
   @override
@@ -35,6 +39,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
   @override
   void initState() {
     super.initState();
+    PrayerTimesScreen._openRoutes++;
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) => unawaited(_load()));
   }
@@ -47,6 +52,15 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
             repository: PrayerRepository(SecurePrayerSnapshotStore()),
             locationClient: PrayerLocationService(),
             calculator: await PrayerCalculator.load(),
+            notifications: shortPrayerNotifications(
+              title: 'Mathani | مثاني',
+              body: (kind) {
+                final l = AppLocalizations.of(context);
+                return kind == PrayerKind.qiyam
+                    ? l.prayerQiyamNotification
+                    : l.prayerReminderBody(prayerName(l, kind));
+              },
+            ),
           );
       if (!mounted) {
         if (widget.controller == null) c.dispose();
@@ -88,6 +102,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
           if (_day != day || clockChanged) {
             _day = day;
             c.refresh();
+            unawaited(c.refreshReminders());
           }
         }
         setState(() {});
@@ -99,11 +114,15 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) _controller?.refresh();
+    if (state == AppLifecycleState.resumed) {
+      _controller?.refresh();
+      unawaited(_controller?.refreshReminders());
+    }
   }
 
   @override
   void dispose() {
+    PrayerTimesScreen._openRoutes--;
     _ticker?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     if (widget.controller == null) _controller?.dispose();
@@ -240,6 +259,11 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
             onPressed: c.busy ? null : () => showPrayerCalculation(context, c),
             icon: const Icon(Icons.tune),
             label: Text(l.prayerCalculationSettings),
+          ),
+          TextButton.icon(
+            onPressed: c.busy ? null : () => showPrayerReminders(context, c),
+            icon: const Icon(Icons.notifications_outlined),
+            label: Text(l.prayerReminderSettings),
           ),
           const SizedBox(height: 16),
           if (next != null) ...[

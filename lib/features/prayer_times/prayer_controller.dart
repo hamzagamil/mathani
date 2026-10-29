@@ -7,8 +7,11 @@ import 'package:timezone/timezone.dart' as tz;
 import 'prayer_calculator.dart';
 import 'prayer_models.dart';
 import 'prayer_repository.dart';
+import 'prayer_reminder_scheduler.dart';
 import 'prayer_services.dart';
 import 'prayer_time_zones.dart';
+
+typedef PrayerAudioReadiness = ({bool openingReady, bool fullReady});
 
 class PrayerController extends ChangeNotifier {
   PrayerController({
@@ -17,12 +20,49 @@ class PrayerController extends ChangeNotifier {
     required this.calculator,
     this.clock = prayerNow,
     this.notifications = const NoPrayerNotifications(),
-  });
+    PrayerReminderTarget? reminderTarget,
+    List<AthanRecording> recordings = const [],
+    this.audioReadiness,
+    this.reminderAudio,
+  }) : reminderTarget =
+           reminderTarget ??
+           (kIsWeb
+               ? PrayerReminderTarget.web
+               : defaultTargetPlatform == TargetPlatform.iOS
+               ? PrayerReminderTarget.ios
+               : PrayerReminderTarget.android),
+       recordings = List.unmodifiable(recordings);
   final PrayerRepository repository;
   final PrayerLocationClient locationClient;
   final PrayerCalculator calculator;
   final PrayerClock clock;
   final PrayerNotificationAdapter notifications;
+  final PrayerReminderTarget reminderTarget;
+  final List<AthanRecording> recordings;
+  final Future<PrayerAudioReadiness> Function(AthanRecording recording)?
+  audioReadiness;
+  final PrayerAudio? reminderAudio;
+  late final _reminderScheduler = PrayerReminderScheduler(
+    adapter: notifications,
+    calculator: calculator,
+    target: reminderTarget,
+    clock: clock,
+  );
+  ReminderCapability reminderCapability = const ReminderCapability(
+    permissionStatus: 'unsupported',
+  );
+  PrayerScheduleResult reminderStatus = PrayerScheduleResult(
+    PrayerScheduleStatus.disabled,
+  );
+  PrayerAudioReadiness reminderAudioReadiness = (
+    openingReady: false,
+    fullReady: false,
+  );
+  AthanRecording? get selectedAthan => recordings
+      .where((r) => r.id == state.reminders.selectedAthanId)
+      .firstOrNull;
+  bool previewingAthan = false;
+  DateTime? _cachedQiyam, _qiyamCheckedAt;
   String? viewedLocationId;
   SavedLocation? get viewedLocation {
     for (final location in state.locations) {
@@ -72,8 +112,11 @@ class PrayerController extends ChangeNotifier {
         state.activeLocationId ?? state.locations.firstOrNull?.id;
     initialized = true;
     refresh();
+    await _refreshReminders();
   });
   void refresh() {
+    _cachedQiyam = null;
+    _qiyamCheckedAt = null;
     final location = viewedLocation;
     if (location == null) {
       schedule = null;
@@ -253,8 +296,206 @@ class PrayerController extends ChangeNotifier {
     if (!initialized) throw const PrayerException(PrayerFailure.needsAttention);
     await repository.save(updated);
     state = updated;
+    reminderStatus = PrayerScheduleResult(
+      updated.reminders.anyEnabled
+          ? PrayerScheduleStatus.blocked
+          : PrayerScheduleStatus.disabled,
+    );
     refresh();
     if (cancelQueue) await notifications.cancelAll();
+    await _refreshReminders();
+  }
+
+  Future<void> _refreshReminders() async {
+    if (_disposed || !initialized) return;
+    reminderStatus = PrayerScheduleResult(
+      state.reminders.anyEnabled
+          ? PrayerScheduleStatus.blocked
+          : PrayerScheduleStatus.disabled,
+    );
+    _notify();
+    final revision = state.revision;
+    try {
+      final capability = await notifications.capabilities();
+      final recording = selectedAthan;
+      final ready = recording == null || audioReadiness == null
+          ? (openingReady: false, fullReady: false)
+          : await audioReadiness!(recording);
+      if (_disposed || state.revision != revision) return;
+      reminderCapability = capability;
+      reminderAudioReadiness = ready;
+      reminderStatus = await _reminderScheduler.reconcile(
+        state,
+        recording: recording,
+        openingReady: ready.openingReady,
+        fullReady: ready.fullReady,
+      );
+    } on Object {
+      reminderStatus = PrayerScheduleResult(
+        PrayerScheduleStatus.blocked,
+        failure: PrayerFailure.schedulePartial,
+      );
+      // No ready horizon survives a failed capability/readiness check.
+      try {
+        await notifications.cancelAll();
+      } on Object {
+        /* report blocked */
+      }
+    }
+    _notify();
+  }
+
+  Future<void> refreshReminders() => _run(_refreshReminders);
+
+  ReminderPreferences _reminderChoices({
+    Set<PrayerKind>? prayers,
+    String? recordingId,
+    AthanMode? mode,
+    Map<String, int>? acknowledgements,
+  }) {
+    final old = state.reminders;
+    return ReminderPreferences(
+      enabledPrayers: prayers ?? old.enabledPrayers,
+      selectedAthanId: recordingId ?? old.selectedAthanId,
+      requestedMode: mode ?? old.requestedMode,
+      qiyamEnabled: old.qiyamEnabled,
+      acknowledgedFallbacks: acknowledgements ?? old.acknowledgedFallbacks,
+    );
+  }
+
+  Future<void> setDailyReminder(PrayerKind kind, bool enabled) =>
+      _run(() async {
+        if (!dailyPrayers.contains(kind) || state.activeLocation == null) {
+          throw const PrayerException(PrayerFailure.needsAttention);
+        }
+        final prayers = {...state.reminders.enabledPrayers};
+        if (enabled) {
+          prayers.add(kind);
+        } else {
+          prayers.remove(kind);
+        }
+        if (setEquals(prayers, state.reminders.enabledPrayers)) return;
+        await _commit(
+          _updated(
+            reminders: _reminderChoices(prayers: prayers),
+            invalidate: true,
+          ),
+        );
+      });
+  Future<void> setAthanMode(AthanMode mode) => _run(() async {
+    if (mode == state.reminders.requestedMode) return;
+    await _commit(
+      _updated(reminders: _reminderChoices(mode: mode), invalidate: true),
+    );
+  });
+  Future<void> selectAthan(String id) => _run(() async {
+    final recording = recordings.where((r) => r.id == id).firstOrNull;
+    if (recording == null ||
+        !recording.completeRecordingReviewed ||
+        !recording.fourTakbirsReviewed) {
+      throw const PrayerException(PrayerFailure.audioUnavailable);
+    }
+    if (id == state.reminders.selectedAthanId) return;
+    await _commit(
+      _updated(reminders: _reminderChoices(recordingId: id), invalidate: true),
+    );
+  });
+  Future<void> requestReminderAuthorization() => _run(() async {
+    await notifications.requestAuthorization();
+    await _refreshReminders();
+  });
+  bool get canOpenNotificationSettings =>
+      notifications is PrayerNotificationSettings;
+  Future<void> openNotificationSettings({bool exactAlarm = false}) =>
+      _run(() async {
+        final adapter = notifications;
+        if (adapter is PrayerNotificationSettings) {
+          await (adapter as PrayerNotificationSettings)
+              .openNotificationSettings(exactAlarm: exactAlarm);
+        }
+      });
+  DateTime? get nextQiyam {
+    final place = state.activeLocation;
+    if (place == null) return null;
+    final now = clock();
+    if (_cachedQiyam?.isAfter(now) == true) return _cachedQiyam;
+    if (_cachedQiyam != null) {
+      _cachedQiyam = null;
+      _qiyamCheckedAt = null;
+    }
+    if (_cachedQiyam == null &&
+        _qiyamCheckedAt != null &&
+        !now.isBefore(_qiyamCheckedAt!) &&
+        now.difference(_qiyamCheckedAt!) < const Duration(minutes: 1)) {
+      return null;
+    }
+    _qiyamCheckedAt = now;
+    final day = tz.TZDateTime.from(now, prayerTimeZone(place.timezoneId));
+    for (var offset = -1; offset <= 2; offset++) {
+      final instant = calculator
+          .schedule(place, DateTime.utc(day.year, day.month, day.day + offset))
+          .qiyamUtc;
+      if (instant != null && instant.isAfter(now)) {
+        return _cachedQiyam = instant;
+      }
+    }
+    return null;
+  }
+
+  Future<void> setQiyamReminder(bool enabled) => _run(() async {
+    if (state.activeLocation == null || (enabled && nextQiyam == null)) {
+      throw const PrayerException(PrayerFailure.calculationUnavailable);
+    }
+    final old = state.reminders;
+    if (old.qiyamEnabled == enabled) return;
+    await _commit(
+      _updated(
+        reminders: ReminderPreferences(
+          enabledPrayers: old.enabledPrayers,
+          selectedAthanId: old.selectedAthanId,
+          requestedMode: old.requestedMode,
+          qiyamEnabled: enabled,
+          acknowledgedFallbacks: old.acknowledgedFallbacks,
+        ),
+        invalidate: true,
+      ),
+    );
+  });
+  Future<void> acknowledgeReminderFallback(String key) => _run(() async {
+    if (key != reminderStatus.requiredAcknowledgement) {
+      throw const PrayerException(PrayerFailure.needsAttention);
+    }
+    await _commit(
+      _updated(
+        reminders: _reminderChoices(
+          acknowledgements: {...state.reminders.acknowledgedFallbacks, key: 1},
+        ),
+        invalidate: true,
+      ),
+    );
+  });
+  Future<void> previewAthan(AthanRecording recording) => _run(() async {
+    if (reminderAudio == null || !recordings.contains(recording)) {
+      throw const PrayerException(PrayerFailure.audioUnavailable);
+    }
+    previewingAthan = true;
+    _notify();
+    try {
+      await reminderAudio!.preview(recording);
+    } on Object {
+      previewingAthan = false;
+      rethrow;
+    }
+  });
+  Future<void> stopAthan() async {
+    // Stop bypasses the busy guard so it can interrupt a pending preview load.
+    previewingAthan = false;
+    try {
+      await reminderAudio?.stop();
+    } on Object {
+      failure = PrayerFailure.audioUnavailable;
+    }
+    _notify();
   }
 
   void viewLocation(String id) {
@@ -356,6 +597,8 @@ class PrayerController extends ChangeNotifier {
     await notifications.cancelAll();
     await repository.delete();
     state = PrayerState(generation: state.generation + 1);
+    reminderStatus = PrayerScheduleResult(PrayerScheduleStatus.disabled);
+    reminderAudioReadiness = (openingReady: false, fullReady: false);
     viewedLocationId = null;
     candidate = null;
     results = [];

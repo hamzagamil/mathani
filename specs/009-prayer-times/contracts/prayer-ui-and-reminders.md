@@ -30,6 +30,8 @@ Arabic/English, inherited light/dark themes, RTL, portrait safe areas, font scal
 
 Changes in capability preserve requested choices but update effective states. A fallback must be disclosed before it is used; if not acknowledged, keep that reminder blocked until the user chooses an available alternative. Qiyam is always a short reminder tone.
 
+The native short-alert increment supports a standard system sound only under explicit `system_notification: 1` acknowledgement if daily recitation audio is unavailable (P06). Label it as a standard sound, not opening takbirs. Qiyam can still schedule when an enabled daily recitation is blocked, and a blocked per-kind channel must not suppress other deliverable kinds. Native full modes remain unadvertised. Android posts short sounds directly from the token-validating receiver; it does not start the headless media route. iOS installs future requests only; OS presentation has no application pre-delivery expiry hook (P07), so its strict-overdue-filter limitation must be disclosed rather than inferred from Android token tests.
+
 ## Application interfaces
 
 These are behavioural contracts, not full implementation bodies.

@@ -18,6 +18,13 @@ P01-P05 are also recorded in spec.md. They do not authorize further platform gap
 
 ## Required verification gates
 
+### Notification increment (2026-10-30)
+
+- **P06 / notification implementer**: Offer standard short native notification sounds only after the specific `system_notification: 1` acknowledgement when daily athan audio is unavailable. Keep requested athan/mode unchanged, label effective sound accurately, and do not mark G01/G02 or the two-recording story accepted. A separate original Qiyam tone is not an obligatory athan. Test independent daily/Qiyam channels, denial, replacement and cancellation; replace the fallback with approved recording support only after its existing gates pass.
+- **P07 / iOS implementer**: iOS owns delayed local presentation; there is no app pre-delivery expiry hook. Install future absolute dates only, actively cancel stale requests, disclose system timing/Stop/Quran boundaries, and measure delayed/power-off/resume cases on a physical device. Android/page delivery retains the 60-second expiry check. Do not infer iOS expiry filtering from mocked Dart tests.
+
+These additions document the usable short-alert increment; they do not waive full-athan feasibility, audio clearance, parity or measured timing acceptance.
+
 | ID | Evidence required | Failure rule |
 | --- | --- | --- |
 | G01 Android headless playback | On API24, API31+, API33+ and API36, prove exact alarm -> single audio_service handler with app process absent, locked screen/Doze, acknowledged command, timely foreground promotion, one media notification, Stop, Quran pause and no late duplicate fallback. Use source corresponding to locked audio_service version, not only upstream branch. | Do not enable/advertise full scheduled Android playback until proven; investigate/revise design. |

@@ -393,6 +393,7 @@ class ReminderCapability {
     this.reason,
     this.recoveryAction,
     this.channelRestricted,
+    this.restrictedPrayers = const {},
     this.scheduledThroughUtc,
     this.appMustReopenByUtc,
   });
@@ -400,6 +401,7 @@ class ReminderCapability {
   final bool exactAlarmAccess;
   final Set<AthanMode> foregroundModes, backgroundModes;
   final bool? channelRestricted;
+  final Set<PrayerKind> restrictedPrayers;
   final String? reason, recoveryAction;
   final DateTime? scheduledThroughUtc, appMustReopenByUtc;
 }

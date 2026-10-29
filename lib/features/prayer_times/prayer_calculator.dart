@@ -18,6 +18,21 @@ import 'prayer_services.dart';
 import 'prayer_time_zones.dart';
 
 class PrayerCalculator {
+  static DateTime? qiyamStart(DateTime? maghrib, DateTime? followingFajr) {
+    if (maghrib == null ||
+        followingFajr == null ||
+        !followingFajr.isAfter(maghrib)) {
+      return null;
+    }
+    final instant =
+        maghrib.toUtc().millisecondsSinceEpoch +
+        followingFajr.difference(maghrib).inMilliseconds * 2 ~/ 3;
+    return DateTime.fromMillisecondsSinceEpoch(
+      ((instant + 30000) ~/ 60000) * 60000,
+      isUtc: true,
+    );
+  }
+
   PrayerCalculator(this.calendar, {this.clock = prayerNow});
   final Map<String, dynamic> calendar;
   final PrayerClock clock;
@@ -231,6 +246,7 @@ class PrayerCalculator {
         fingerprint: fingerprint,
         generatedAtUtc: clock(),
         followingFajrUtc: next.fajr.toUtc(),
+        qiyamUtc: qiyamStart(t.maghrib.toUtc(), next.fajr.toUtc()),
         events: [
           for (final e in values.entries)
             PrayerEvent(

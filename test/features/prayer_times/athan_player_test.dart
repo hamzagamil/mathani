@@ -170,6 +170,10 @@ void main() {
       player.preview(fixtureAthan),
       throwsA(isA<PrayerException>()),
     );
+    port.reject = false;
+    await player.playFromUser(fixtureAthan, AthanMode.full);
+    expect(port.log.where((s) => s == 'play'), hasLength(2));
+    expect(claims, 1, reason: 'User Play does not replay a scheduled token');
     await player.stop();
     downloads.dispose();
   });

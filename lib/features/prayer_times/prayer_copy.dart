@@ -38,6 +38,12 @@ String prayerFailureMessage(AppLocalizations l, PrayerFailure reason) =>
       PrayerFailure.needsAttention => l.prayerNeedsAttention,
       PrayerFailure.calculationUnavailable ||
       PrayerFailure.conventionOutOfRange => l.prayerCalculationUnavailable,
+      PrayerFailure.audioUnavailable => l.prayerAudioAbsent,
+      PrayerFailure.notificationsDenied => l.prayerNotificationsDenied,
+      PrayerFailure.exactAlarmDenied => l.prayerExactAlarmLimit,
+      PrayerFailure.modeUnsupported => l.prayerRemindersBlocked,
+      PrayerFailure.schedulePartial ||
+      PrayerFailure.horizonExpired => l.prayerRemindersPartial,
       _ => l.prayerServiceUnavailable,
     };
 String prayerMadhhabName(AppLocalizations l, PrayerMadhhab madhhab) =>

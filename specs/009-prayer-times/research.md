@@ -80,6 +80,8 @@ Research combined repository inspection with two parallel research assignments: 
 
 **Alternatives considered**: Unlicensed celebrity recordings; runtime hotlinks to mutable third-party audio; bundling every full recording. Sources: [Beautiful adhan source/license](https://commons.wikimedia.org/wiki/File:Beautiful_adhan.ogg), [Madinah source/license](https://commons.wikimedia.org/wiki/File:33937_ejaz215_call-to-prayer-from-the-prophet-s-mo.ogg).
 
+**User correction**: The user identified that the Assabile `984f3e129c8c.mp3` link is not El-Minshawi. That candidate is removed from preparation and retained only as a rejected source hash; do not reuse the disputed performer attribution. Only the approved Husary candidate remains, with redistribution still unverified. No replacement performer or recording is yet verified.
+
 ## R8. Sensitive persistence
 
 **Decision**: Pin flutter_secure_storage 10.3.4 for a small versioned prayer snapshot. Phones use native protected storage without biometrics that would prevent routine reminder recovery. Keep coordinates/names out of plaintext SQLite and native alarm payloads. Exclude encrypted native preferences and audio from inappropriate backups; do not destroy unrelated reader data on a prayer-store error.

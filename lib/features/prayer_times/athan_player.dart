@@ -56,6 +56,18 @@ class AthanPlayer implements PrayerAudio {
   @override
   Future<void> preview(AthanRecording recording) =>
       _begin(recording, AthanMode.opening);
+
+  /// Only an explicit visible Play action may use this path after autoplay was
+  /// rejected. Scheduled-token consumption remains intact; no automatic retry.
+  Future<void> playFromUser(AthanRecording recording, AthanMode mode) {
+    if (!recordings.contains(recording)) {
+      return Future.error(
+        const PrayerException(PrayerFailure.audioUnavailable),
+      );
+    }
+    return _begin(recording, mode);
+  }
+
   @override
   Future<void> play(ScheduledReminder reminder) async {
     final key = '${reminder.generation}:${reminder.eventId}';

@@ -4,9 +4,7 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
-    <!-- G01 opt-in prototype; production declares neither these grants nor receiver. -->
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
+    <!-- G01 receiver remains opt-in/debug-only. Main declares short-alert grants. -->
     <application>
         <receiver android:name=".PrayerAlarmSpikeReceiver" android:exported="false"/>
     </application>

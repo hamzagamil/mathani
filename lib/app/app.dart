@@ -8,6 +8,7 @@ import '../features/onboarding/onboarding_controller.dart';
 import '../features/onboarding/onboarding_screen.dart';
 import '../features/recitation/recitation_controller.dart';
 import '../features/reader/reader_screen.dart';
+import '../features/prayer_times/prayer_notification_open_host.dart';
 import '../shared/reader_state.dart';
 import 'l10n/app_localizations.dart';
 import 'theme/app_theme.dart';
@@ -40,11 +41,13 @@ class MathaniApp extends StatelessWidget {
   static const supportedLocales = [Locale('ar'), Locale('en')];
 
   /// `system` → Arabic for Arabic device locales, English for everything else (FR-025).
-  static Locale resolveLocale(LanguagePref pref, List<Locale>? deviceLocales) => switch (pref) {
+  static Locale resolveLocale(LanguagePref pref, List<Locale>? deviceLocales) =>
+      switch (pref) {
         LanguagePref.ar => const Locale('ar'),
         LanguagePref.en => const Locale('en'),
         LanguagePref.system =>
-          (deviceLocales ?? const []).isNotEmpty && deviceLocales!.first.languageCode == 'ar'
+          (deviceLocales ?? const []).isNotEmpty &&
+                  deviceLocales!.first.languageCode == 'ar'
               ? const Locale('ar')
               : const Locale('en'),
       };
@@ -78,22 +81,27 @@ class MathaniApp extends StatelessWidget {
           localeListResolutionCallback: (deviceLocales, _) =>
               resolveLocale(prefs.language, deviceLocales),
           // Around the Navigator, so sheets, dialogs and snack bars stay inside the column.
-          builder: kIsWeb ? (context, child) => PhoneColumn(child: child!) : null,
-          home: const _Home(),
+          builder: kIsWeb
+              ? (context, child) => PhoneColumn(child: child!)
+              : null,
+          home: const PrayerNotificationOpenHost(child: _Home()),
         );
       },
     );
     final recitation = this.recitation;
     final onboarding = this.onboarding;
     final memorization = this.memorization;
-    final withMemorization =
-        memorization == null ? app : MemorizationScope(controller: memorization, child: app);
+    final withMemorization = memorization == null
+        ? app
+        : MemorizationScope(controller: memorization, child: app);
     final scoped = onboarding == null
         ? withMemorization
         : OnboardingScope(controller: onboarding, child: withMemorization);
     return ReaderScope(
       controller: controller,
-      child: recitation == null ? scoped : RecitationScope(controller: recitation, child: scoped),
+      child: recitation == null
+          ? scoped
+          : RecitationScope(controller: recitation, child: scoped),
     );
   }
 }
@@ -118,7 +126,9 @@ class PhoneColumn extends StatelessWidget {
           height: media.size.height,
           child: ClipRect(
             child: MediaQuery(
-              data: media.copyWith(size: Size(phoneColumnWidth, media.size.height)),
+              data: media.copyWith(
+                size: Size(phoneColumnWidth, media.size.height),
+              ),
               child: child,
             ),
           ),
@@ -136,7 +146,8 @@ class _Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
       switch (OnboardingScope.maybeOf(context)?.phase) {
-        OnboardingPhase.setup || OnboardingPhase.gestures => const OnboardingScreen(),
+        OnboardingPhase.setup ||
+        OnboardingPhase.gestures => const OnboardingScreen(),
         _ => const ReaderScreen(),
       };
 }

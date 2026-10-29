@@ -12,6 +12,8 @@ Calculate offline using `adhan_dart` and IANA time zones. Use one-shot device po
 
 Use local notifications for short system alerts and Android exact alarms plus the existing audio handler for full athan. iOS full automatic background playback is unavailable; browser closed-page delivery is unavailable. These are explicit spec exceptions with tracked follow-ups, not capabilities to advertise. See [research](./research.md), [capability contract](./contracts/prayer-ui-and-reminders.md) and [follow-ups](./follow-ups.md).
 
+**Notification increment (2026-10-30)**: Implement a separate native short-alert route before G01/G02-dependent full playback. Android AlarmManager receivers claim the protected queue and post OS notifications without creating a Flutter engine or media service. iOS uses the locked flutter_local_notifications API, future absolute UTC dates and verified pending requests. Daily standard sounds require explicit P06 acknowledgement; Qiyam has an original generated tone. G01 still blocks full Android playback and G02 still blocks recording assets. P07 documents that iOS cannot perform an application expiry check before a delayed OS-owned presentation. This route advances notifications without representing full/opening recitation as available.
+
 ## Technical Context
 
 **Language/Version**: Dart 3.13.5 / Flutter 3.47.7 as pinned by pubspec.yaml; existing Kotlin/Java 17 Android and Swift iOS host code; JavaScript Pages Functions and Node built-in test runner for endpoint tests.

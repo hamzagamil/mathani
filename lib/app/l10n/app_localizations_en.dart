@@ -1083,4 +1083,172 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get prayerDelete => 'Delete';
+
+  @override
+  String get prayerReminderSettings => 'Prayer reminders';
+
+  @override
+  String prayerReminderBody(String prayer) {
+    return 'It is time for $prayer.';
+  }
+
+  @override
+  String get prayerAthanRecording => 'Athan recording';
+
+  @override
+  String get prayerAthanFull => 'Full athan';
+
+  @override
+  String get prayerAthanOpening => 'Four opening takbirs';
+
+  @override
+  String get prayerAthanPreview => 'Preview';
+
+  @override
+  String get prayerAthanStop => 'Stop athan';
+
+  @override
+  String get prayerAthanPlay => 'Play athan';
+
+  @override
+  String get prayerAthanDownload => 'Download for offline playback';
+
+  @override
+  String get prayerAudioAbsent => 'Audio has not been downloaded.';
+
+  @override
+  String get prayerAudioDownloading => 'Downloading and checking audio…';
+
+  @override
+  String get prayerAudioVerified => 'Audio verified and ready offline';
+
+  @override
+  String get prayerAudioFailed =>
+      'Audio could not be verified. Download it again.';
+
+  @override
+  String prayerRecordingCredit(String credit) {
+    return 'Recording credit: $credit';
+  }
+
+  @override
+  String get prayerRecordingSource => 'Recording source and licence';
+
+  @override
+  String prayerRequestedMode(String mode) {
+    return 'Your choice: $mode';
+  }
+
+  @override
+  String prayerEffectiveMode(String mode) {
+    return 'Available delivery: $mode';
+  }
+
+  @override
+  String get prayerNotificationsPermission => 'Allow prayer notifications';
+
+  @override
+  String get prayerNotificationsDenied =>
+      'Notifications are blocked. Your reminder choices are saved; allow notifications in settings to use them.';
+
+  @override
+  String get prayerNotificationsOpenSettings => 'Open notification settings';
+
+  @override
+  String get prayerExactAlarmAccess => 'Allow alarms and reminders';
+
+  @override
+  String get prayerExactAlarmLimit =>
+      'Precise Android reminders need alarm access. Without it, you can accept approximate short alerts or keep reminders off. Late Android alerts are skipped, so approximate scheduling may miss reminders.';
+
+  @override
+  String get prayerIosFullLimit =>
+      'iOS cannot automatically play the full athan in the background or while locked. You can choose the short opening alert, then open Mathani and press Play for the full recording.';
+
+  @override
+  String get prayerIosSystemSoundLimit =>
+      'iOS controls notification sounds and delivery timing. Mathani cannot filter a delayed alert before the system presents it, guarantee pausing Quran playback, or stop a sound already playing. Device sound and notification settings apply.';
+
+  @override
+  String get prayerWebLimit =>
+      'Browser reminders work only while this page is open, visible and running. Closing, hiding or suspending it can prevent delivery. Automatic audio may require pressing Play. Use the mobile app for supported background reminders.';
+
+  @override
+  String get prayerMobileApps => 'Get the mobile app';
+
+  @override
+  String get prayerForegroundOnly => 'Active page only';
+
+  @override
+  String get prayerRemindersBlocked =>
+      'Reminders need attention before they can run.';
+
+  @override
+  String get prayerRemindersPartial =>
+      'Some reminders could not be scheduled. Try again and check the available delivery period.';
+
+  @override
+  String prayerScheduledThrough(String time) {
+    return 'Scheduled through $time';
+  }
+
+  @override
+  String prayerReopenBy(String time) {
+    return 'Open Prayer Times in Mathani again by $time to refresh upcoming reminders. Delivery is not scheduled indefinitely.';
+  }
+
+  @override
+  String get prayerReconcile => 'Refresh reminders';
+
+  @override
+  String get prayerAcceptFallback => 'Use this alternative';
+
+  @override
+  String get prayerNoReminders => 'All prayer reminders are off.';
+
+  @override
+  String get prayerAutoplayBlocked =>
+      'The browser did not start the athan. Press Play while this reminder is still current.';
+
+  @override
+  String get prayerAthanNotCleared =>
+      'Athan recordings are not available yet. Your reminder choices are saved.';
+
+  @override
+  String get prayerSystemSound => 'Standard notification sound';
+
+  @override
+  String get prayerApproximateDelivery =>
+      'Approximate delivery is active. Alerts more than one minute late are skipped.';
+
+  @override
+  String get prayerSystemSoundLimit =>
+      'Your device controls short notification sounds. Mathani cannot reliably stop a system sound or pause Quran playback for it. Device notification and sound settings apply.';
+
+  @override
+  String get prayerUseSystemSound => 'Use standard notification sound';
+
+  @override
+  String get prayerSystemSoundDisclosure =>
+      'The selected athan recording is unavailable. You can use your device’s standard short notification sound instead. This does not play the athan or its opening takbirs. System sounds may overlap Quran playback and cannot reliably be stopped from Mathani. Your athan choice stays saved.';
+
+  @override
+  String get prayerQiyamExplanation =>
+      'An optional reminder at the start of the last third of the night, from Maghrib to the following Fajr. It is independent of the five daily prayer reminders.';
+
+  @override
+  String get prayerQiyamTone => 'Short Qiyam reminder tone';
+
+  @override
+  String get prayerQiyamNotification =>
+      'The last third of the night has begun. Optional Qiyam reminder.';
+
+  @override
+  String get prayerQiyamUnavailable =>
+      'Qiyam time is unavailable because this night’s Maghrib or following Fajr cannot be calculated.';
+
+  @override
+  String prayerQiyamUpcoming(String time) {
+    return 'Next Qiyam reminder: $time';
+  }
 }

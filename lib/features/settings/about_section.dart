@@ -21,6 +21,7 @@ void registerAssetLicences() {
       (['Khatma FastConformer (NVIDIA FastConformer-Hybrid PCD Large, ar)'],
           'assets/licences/LICENSE-khatma-model.txt'),
       (['Silero VAD'], 'assets/licences/LICENSE-silero-vad.txt'),
+      (['Mathani Qiyam reminder tone'], 'assets/licences/prayer-tone.txt'),
     ]) {
       yield LicenseEntryWithLineBreaks(packages, await rootBundle.loadString(asset));
     }

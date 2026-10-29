@@ -2,7 +2,7 @@
 
 Status: **OPEN — no physical Android execution**. No API24/31+/33+/36, killed-process, lock-screen or Doze result is claimed.
 
-The opt-in prototype registers an exact debug alarm carrying only opaque event ID/generation. Its receiver claims the encrypted native queue, attaches to audio_service's cached engine or creates that same engine, and dispatches through the existing media handler. A generated tone, explicit playback acknowledgement, timeout fallback, consumed tokens and acknowledged Stop exercise the route. Debug-only permissions/receiver/tone are in `src/debug`; Dart additionally requires `kDebugMode` and `PRAYER_ALARM_SPIKE=true`. Production Android full scheduling remains disabled.
+The opt-in prototype registers an exact debug alarm carrying only opaque event ID/generation. Its receiver claims the encrypted native queue, attaches to audio_service's cached engine or creates that same engine, and dispatches through the existing media handler. A generated tone, explicit playback acknowledgement, timeout fallback, consumed tokens and acknowledged Stop exercise the route. The prototype receiver/tone remain in `src/debug`; Dart additionally requires `kDebugMode` and `PRAYER_ALARM_SPIKE=true`. Notification/alarm permission declarations are now shared with the production **short OS alert** route, which never starts a Flutter engine/media service. Production Android full scheduling remains disabled.
 
 Run on a connected Android device after manually granting Notifications and Alarms & reminders:
 

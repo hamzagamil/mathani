@@ -111,6 +111,12 @@ class PrayerReminderScheduler {
         );
       }
       final capability = await adapter.capabilities();
+      if (capability.permissionStatus == 'unsupported') {
+        return PrayerScheduleResult(
+          PrayerScheduleStatus.blocked,
+          failure: PrayerFailure.modeUnsupported,
+        );
+      }
       if (!['granted', 'authorized'].contains(capability.permissionStatus) &&
           !(target == PrayerReminderTarget.web &&
               capability.permissionStatus == 'notRequired')) {
@@ -126,6 +132,38 @@ class PrayerReminderScheduler {
         );
       }
       var mode = state.reminders.requestedMode;
+      final hasDaily = state.reminders.enabledPrayers.isNotEmpty;
+      var deliverDaily = hasDaily;
+      String? pendingAcknowledgement;
+      final reviewed =
+          recording != null &&
+          recording.id == state.reminders.selectedAthanId &&
+          recording.completeRecordingReviewed &&
+          recording.fourTakbirsReviewed;
+      final nativeDefault =
+          hasDaily &&
+          target != PrayerReminderTarget.web &&
+          (!reviewed ||
+              (!openingReady &&
+                  !(state.reminders.requestedMode == AthanMode.full &&
+                      fullReady &&
+                      target == PrayerReminderTarget.android &&
+                      androidHeadlessVerified &&
+                      capability.exactAlarmAccess)));
+      if (nativeDefault &&
+          state.reminders.acknowledgedFallbacks['system_notification'] != 1) {
+        if (state.reminders.qiyamEnabled) {
+          deliverDaily = false;
+          pendingAcknowledgement = 'system_notification';
+        } else {
+          return PrayerScheduleResult(
+            PrayerScheduleStatus.blocked,
+            failure: PrayerFailure.audioUnavailable,
+            requiredAcknowledgement: 'system_notification',
+          );
+        }
+      }
+      if (!hasDaily || nativeDefault) mode = AthanMode.opening;
       var mechanism = target == PrayerReminderTarget.web ? 'inPage' : 'system';
       final supported = target == PrayerReminderTarget.web
           ? capability.foregroundModes
@@ -172,15 +210,17 @@ class PrayerReminderScheduler {
         mode = AthanMode.opening;
         mechanism = 'inexactSystem';
       }
-      if (recording == null ||
-          recording.id != state.reminders.selectedAthanId ||
-          !recording.completeRecordingReviewed) {
+      if (hasDaily &&
+          !nativeDefault &&
+          (recording == null ||
+              recording.id != state.reminders.selectedAthanId ||
+              !recording.completeRecordingReviewed)) {
         return PrayerScheduleResult(
           PrayerScheduleStatus.blocked,
           failure: PrayerFailure.audioUnavailable,
         );
       }
-      if (mode == AthanMode.full && !fullReady) {
+      if (hasDaily && !nativeDefault && mode == AthanMode.full && !fullReady) {
         if (!acknowledged('full_audio_unavailable')) {
           return disclosure(
             'full_audio_unavailable',
@@ -189,16 +229,23 @@ class PrayerReminderScheduler {
         }
         mode = AthanMode.opening;
       }
-      if (mode == AthanMode.opening &&
+      if (hasDaily &&
+          !nativeDefault &&
+          mode == AthanMode.opening &&
           (!openingReady ||
-              !recording.fourTakbirsReviewed ||
-              recording.openingDurationMs <= 0 ||
+              recording?.fourTakbirsReviewed != true ||
+              recording!.openingDurationMs <= 0 ||
               (target == PrayerReminderTarget.ios &&
                   !recording.iosShortEligible))) {
         return PrayerScheduleResult(
           PrayerScheduleStatus.blocked,
           failure: PrayerFailure.audioUnavailable,
         );
+      }
+      if (nativeDefault) {
+        mechanism = mechanism == 'inexactSystem'
+            ? 'inexactSystemDefault'
+            : 'systemDefault';
       }
       if (mode == AthanMode.full && target == PrayerReminderTarget.android) {
         mechanism = 'appAudio';
@@ -208,13 +255,21 @@ class PrayerReminderScheduler {
       final local = tz.TZDateTime.from(now, prayerTimeZone(place.timezoneId));
       final events = <ScheduledReminder>[];
       var unavailable = 0;
-      for (var offset = 0; offset <= 31; offset++) {
+      // After midnight, the next Qiyam can belong to yesterday's Maghrib.
+      for (var offset = -1; offset <= 31; offset++) {
         final schedule = calculator.schedule(
           place,
           DateTime.utc(local.year, local.month, local.day + offset),
         );
         for (final event in schedule.events) {
-          if (!state.reminders.enabledPrayers.contains(event.kind)) continue;
+          if (!deliverDaily ||
+              !state.reminders.enabledPrayers.contains(event.kind)) {
+            continue;
+          }
+          if (capability.restrictedPrayers.contains(event.kind)) {
+            unavailable++;
+            continue;
+          }
           final due = event.dueAtUtc;
           if (due == null) {
             unavailable++;
@@ -236,11 +291,44 @@ class PrayerReminderScheduler {
               kind: event.kind,
               dueAtUtc: due.toUtc(),
               expiresAtUtc: due.toUtc().add(const Duration(seconds: 60)),
-              audioId: recording.id,
+              audioId: nativeDefault ? 'system_default' : recording!.id,
               mode: mode,
               deliveryMechanism: mechanism,
             ),
           );
+        }
+        if (state.reminders.qiyamEnabled) {
+          final due = capability.restrictedPrayers.contains(PrayerKind.qiyam)
+              ? null
+              : schedule.qiyamUtc;
+          if (due == null) {
+            unavailable++;
+          } else if (due.isAfter(now) && !due.isAfter(end)) {
+            events.add(
+              ScheduledReminder(
+                eventId: sha256
+                    .convert(
+                      utf8.encode(
+                        '${place.id}|${schedule.localDate.toIso8601String()}|qiyam|${state.generation}',
+                      ),
+                    )
+                    .toString(),
+                locationId: place.id,
+                generation: state.generation,
+                kind: PrayerKind.qiyam,
+                dueAtUtc: due,
+                expiresAtUtc: due.add(const Duration(seconds: 60)),
+                audioId: 'qiyam_tone',
+                mode: AthanMode.opening,
+                deliveryMechanism: target == PrayerReminderTarget.web
+                    ? 'inPage'
+                    : target == PrayerReminderTarget.android &&
+                          !capability.exactAlarmAccess
+                    ? 'inexactSystem'
+                    : 'system',
+              ),
+            );
+          }
         }
       }
       events.sort((a, b) => a.dueAtUtc.compareTo(b.dueAtUtc));
@@ -250,7 +338,9 @@ class PrayerReminderScheduler {
       if (bounded.isEmpty) {
         return PrayerScheduleResult(
           PrayerScheduleStatus.blocked,
-          failure: PrayerFailure.calculationUnavailable,
+          failure: capability.restrictedPrayers.isNotEmpty
+              ? PrayerFailure.notificationsDenied
+              : PrayerFailure.calculationUnavailable,
         );
       }
       final installed = await adapter.replace(state, bounded);
@@ -262,10 +352,16 @@ class PrayerReminderScheduler {
             'authorized',
             'notRequired',
           ].contains(installed.permissionStatus);
-      final partial = !matches || unavailable > 0;
+      final partial =
+          !matches || unavailable > 0 || pendingAcknowledgement != null;
       return PrayerScheduleResult(
         partial ? PrayerScheduleStatus.partial : PrayerScheduleStatus.scheduled,
-        failure: partial ? PrayerFailure.schedulePartial : null,
+        failure: pendingAcknowledgement != null
+            ? PrayerFailure.audioUnavailable
+            : partial
+            ? PrayerFailure.schedulePartial
+            : null,
+        requiredAcknowledgement: pendingAcknowledgement,
         effectiveMode: mode,
         events: bounded,
         scheduledThroughUtc: through,

@@ -27,7 +27,9 @@ data class PrayerAlarmEvent(
 ) {
     init {
         require(Regex("[A-Za-z0-9_-]{1,160}").matches(eventId))
-        require(Regex("[A-Za-z0-9_-]{1,160}").matches(locationId))
+        // Saved locations created by base64UrlEncode retain optional padding.
+        // Keep those stable IDs usable without rewriting encrypted snapshots.
+        require(locationId.length <= 160 && Regex("[A-Za-z0-9_-]+={0,2}").matches(locationId))
         require(generation >= 0 && dueAtMs > 0 && expiresAtMs >= dueAtMs && expiresAtMs - dueAtMs <= 60_000)
         require(kind in setOf("fajr", "dhuhr", "asr", "maghrib", "isha", "qiyam"))
         require(Regex("[a-z][a-z0-9_]{0,63}").matches(assetId))
@@ -137,6 +139,7 @@ class PrayerAlarmStore(private val backend: PrayerQueueBackend) {
         backend.write(bytes.toByteArray())
     }
     fun generation(): Long = synchronized(lock) { load().generation }
+    fun clearPending() = synchronized(lock) { save(Snapshot(load().generation, emptyList())) }
     fun replace(generation: Long, events: List<PrayerAlarmEvent>, nowMs: Long) = synchronized(lock) {
         val previous = load()
         require(generation >= previous.generation && events.size <= MAX_EVENTS)
@@ -177,6 +180,13 @@ class PrayerAlarmStore(private val backend: PrayerQueueBackend) {
     fun claimFallback(eventId: String, generation: Long, nowMs: Long): Boolean = change(eventId, generation) {
         if (due(it, nowMs) && (it.state == "pending" || (it.state == "claimed" && it.owner == "appAudio")))
             it.copy(state = "delivered", owner = "systemFallback", consumed = true) else null
+    }
+    /** Keep source invalidation/cancellation ordered after the OS post, rather
+     * than letting an already-claimed receiver post after cancelAll returned. */
+    fun deliverFallback(eventId: String, generation: Long, nowMs: Long, deliver: () -> Unit): Boolean = synchronized(lock) {
+        if (!claimFallback(eventId, generation, nowMs)) return false
+        deliver()
+        true
     }
     fun cancel(eventId: String, generation: Long): Boolean = change(eventId, generation) { it.copy(state = "cancelled", consumed = true) }
     fun finish(eventId: String, generation: Long): Boolean = change(eventId, generation) {

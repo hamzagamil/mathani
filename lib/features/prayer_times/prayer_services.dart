@@ -57,6 +57,10 @@ abstract interface class PrayerNotificationAdapter {
   Future<void> cancelAll();
 }
 
+abstract interface class PrayerNotificationSettings {
+  Future<void> openNotificationSettings({bool exactAlarm = false});
+}
+
 /// Explicitly owns no queue before the notification increment is implemented.
 class NoPrayerNotifications implements PrayerNotificationAdapter {
   const NoPrayerNotifications();

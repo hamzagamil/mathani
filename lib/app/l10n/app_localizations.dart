@@ -1914,6 +1914,282 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete'**
   String get prayerDelete;
+
+  /// No description provided for @prayerReminderSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Prayer reminders'**
+  String get prayerReminderSettings;
+
+  /// No description provided for @prayerReminderBody.
+  ///
+  /// In en, this message translates to:
+  /// **'It is time for {prayer}.'**
+  String prayerReminderBody(String prayer);
+
+  /// No description provided for @prayerAthanRecording.
+  ///
+  /// In en, this message translates to:
+  /// **'Athan recording'**
+  String get prayerAthanRecording;
+
+  /// No description provided for @prayerAthanFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Full athan'**
+  String get prayerAthanFull;
+
+  /// No description provided for @prayerAthanOpening.
+  ///
+  /// In en, this message translates to:
+  /// **'Four opening takbirs'**
+  String get prayerAthanOpening;
+
+  /// No description provided for @prayerAthanPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get prayerAthanPreview;
+
+  /// No description provided for @prayerAthanStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop athan'**
+  String get prayerAthanStop;
+
+  /// No description provided for @prayerAthanPlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Play athan'**
+  String get prayerAthanPlay;
+
+  /// No description provided for @prayerAthanDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Download for offline playback'**
+  String get prayerAthanDownload;
+
+  /// No description provided for @prayerAudioAbsent.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio has not been downloaded.'**
+  String get prayerAudioAbsent;
+
+  /// No description provided for @prayerAudioDownloading.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading and checking audio…'**
+  String get prayerAudioDownloading;
+
+  /// No description provided for @prayerAudioVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio verified and ready offline'**
+  String get prayerAudioVerified;
+
+  /// No description provided for @prayerAudioFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio could not be verified. Download it again.'**
+  String get prayerAudioFailed;
+
+  /// No description provided for @prayerRecordingCredit.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording credit: {credit}'**
+  String prayerRecordingCredit(String credit);
+
+  /// No description provided for @prayerRecordingSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording source and licence'**
+  String get prayerRecordingSource;
+
+  /// No description provided for @prayerRequestedMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Your choice: {mode}'**
+  String prayerRequestedMode(String mode);
+
+  /// No description provided for @prayerEffectiveMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Available delivery: {mode}'**
+  String prayerEffectiveMode(String mode);
+
+  /// No description provided for @prayerNotificationsPermission.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow prayer notifications'**
+  String get prayerNotificationsPermission;
+
+  /// No description provided for @prayerNotificationsDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications are blocked. Your reminder choices are saved; allow notifications in settings to use them.'**
+  String get prayerNotificationsDenied;
+
+  /// No description provided for @prayerNotificationsOpenSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open notification settings'**
+  String get prayerNotificationsOpenSettings;
+
+  /// No description provided for @prayerExactAlarmAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow alarms and reminders'**
+  String get prayerExactAlarmAccess;
+
+  /// No description provided for @prayerExactAlarmLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Precise Android reminders need alarm access. Without it, you can accept approximate short alerts or keep reminders off. Late Android alerts are skipped, so approximate scheduling may miss reminders.'**
+  String get prayerExactAlarmLimit;
+
+  /// No description provided for @prayerIosFullLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'iOS cannot automatically play the full athan in the background or while locked. You can choose the short opening alert, then open Mathani and press Play for the full recording.'**
+  String get prayerIosFullLimit;
+
+  /// No description provided for @prayerIosSystemSoundLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'iOS controls notification sounds and delivery timing. Mathani cannot filter a delayed alert before the system presents it, guarantee pausing Quran playback, or stop a sound already playing. Device sound and notification settings apply.'**
+  String get prayerIosSystemSoundLimit;
+
+  /// No description provided for @prayerWebLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Browser reminders work only while this page is open, visible and running. Closing, hiding or suspending it can prevent delivery. Automatic audio may require pressing Play. Use the mobile app for supported background reminders.'**
+  String get prayerWebLimit;
+
+  /// No description provided for @prayerMobileApps.
+  ///
+  /// In en, this message translates to:
+  /// **'Get the mobile app'**
+  String get prayerMobileApps;
+
+  /// No description provided for @prayerForegroundOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Active page only'**
+  String get prayerForegroundOnly;
+
+  /// No description provided for @prayerRemindersBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders need attention before they can run.'**
+  String get prayerRemindersBlocked;
+
+  /// No description provided for @prayerRemindersPartial.
+  ///
+  /// In en, this message translates to:
+  /// **'Some reminders could not be scheduled. Try again and check the available delivery period.'**
+  String get prayerRemindersPartial;
+
+  /// No description provided for @prayerScheduledThrough.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled through {time}'**
+  String prayerScheduledThrough(String time);
+
+  /// No description provided for @prayerReopenBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Prayer Times in Mathani again by {time} to refresh upcoming reminders. Delivery is not scheduled indefinitely.'**
+  String prayerReopenBy(String time);
+
+  /// No description provided for @prayerReconcile.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh reminders'**
+  String get prayerReconcile;
+
+  /// No description provided for @prayerAcceptFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this alternative'**
+  String get prayerAcceptFallback;
+
+  /// No description provided for @prayerNoReminders.
+  ///
+  /// In en, this message translates to:
+  /// **'All prayer reminders are off.'**
+  String get prayerNoReminders;
+
+  /// No description provided for @prayerAutoplayBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'The browser did not start the athan. Press Play while this reminder is still current.'**
+  String get prayerAutoplayBlocked;
+
+  /// No description provided for @prayerAthanNotCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Athan recordings are not available yet. Your reminder choices are saved.'**
+  String get prayerAthanNotCleared;
+
+  /// No description provided for @prayerSystemSound.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard notification sound'**
+  String get prayerSystemSound;
+
+  /// No description provided for @prayerApproximateDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Approximate delivery is active. Alerts more than one minute late are skipped.'**
+  String get prayerApproximateDelivery;
+
+  /// No description provided for @prayerSystemSoundLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Your device controls short notification sounds. Mathani cannot reliably stop a system sound or pause Quran playback for it. Device notification and sound settings apply.'**
+  String get prayerSystemSoundLimit;
+
+  /// No description provided for @prayerUseSystemSound.
+  ///
+  /// In en, this message translates to:
+  /// **'Use standard notification sound'**
+  String get prayerUseSystemSound;
+
+  /// No description provided for @prayerSystemSoundDisclosure.
+  ///
+  /// In en, this message translates to:
+  /// **'The selected athan recording is unavailable. You can use your device’s standard short notification sound instead. This does not play the athan or its opening takbirs. System sounds may overlap Quran playback and cannot reliably be stopped from Mathani. Your athan choice stays saved.'**
+  String get prayerSystemSoundDisclosure;
+
+  /// No description provided for @prayerQiyamExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'An optional reminder at the start of the last third of the night, from Maghrib to the following Fajr. It is independent of the five daily prayer reminders.'**
+  String get prayerQiyamExplanation;
+
+  /// No description provided for @prayerQiyamTone.
+  ///
+  /// In en, this message translates to:
+  /// **'Short Qiyam reminder tone'**
+  String get prayerQiyamTone;
+
+  /// No description provided for @prayerQiyamNotification.
+  ///
+  /// In en, this message translates to:
+  /// **'The last third of the night has begun. Optional Qiyam reminder.'**
+  String get prayerQiyamNotification;
+
+  /// No description provided for @prayerQiyamUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Qiyam time is unavailable because this night’s Maghrib or following Fajr cannot be calculated.'**
+  String get prayerQiyamUnavailable;
+
+  /// No description provided for @prayerQiyamUpcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Next Qiyam reminder: {time}'**
+  String prayerQiyamUpcoming(String time);
 }
 
 class _AppLocalizationsDelegate
