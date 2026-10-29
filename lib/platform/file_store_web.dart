@@ -61,18 +61,31 @@ class OpfsFileStore implements FileStore {
     final h = await _file(file, create: true);
     // Safari before 26 (all of iOS 18 and earlier) cannot write from the page: a worker does.
     if (forceWorkerWrites || !h!.has('createWritable')) return _workerAppend(file, chunks);
-    final writable = await _guard(() => h.createWritable(_keep()).toDart);
+    _Writable? writable;
+    try {
+      writable = await _guard(() => h.createWritable(_keep()).toDart);
+      await _guard(() async => writable!.seek((await h.getFile().toDart).size).toDart);
+    } on Object {
+      // If Safari exposes createWritable but cannot open or seek it for this OPFS file, retry
+      // through its worker-only synchronous access handle. The stream has not been consumed yet.
+      try {
+        await writable?.close().toDart;
+      } on Object {
+        // The writable may already have been closed by the failed operation.
+      }
+      await delete(file);
+      return _workerAppend(file, chunks);
+    }
     try {
       await _guard(() async {
-        await writable.seek((await h.getFile().toDart).size).toDart;
         await for (final chunk in chunks) {
           final bytes = chunk is Uint8List ? chunk : Uint8List.fromList(chunk);
-          await writable.write(bytes.toJS).toDart;
+          await writable!.write(bytes.toJS).toDart;
         }
       });
     } finally {
       try {
-        await writable.close().toDart;
+        await writable!.close().toDart;
       } on Object {
         // Already closed by a failed write.
       }
@@ -232,7 +245,16 @@ class OpfsFileStore implements FileStore {
   Future<Uri> playableUri(StoreFile file) async {
     final h = await _file(file);
     if (h == null) throw StateError('playableUri: $file does not exist');
-    return Uri.parse(_URL.createObjectURL(await h.getFile().toDart));
+    final f = await h.getFile().toDart;
+    // Safari may reject audio from a blob URL when the blob has no MIME type. OPFS files
+    // created by the app have an empty type, so add the type from the known file extension.
+    final type = switch (_name(file.path).split('.').last.toLowerCase()) {
+      'mp3' => 'audio/mpeg',
+      'png' => 'image/png',
+      _ => null,
+    };
+    final blob = type == null ? f.slice(0, f.size) : f.slice(0, f.size, type);
+    return Uri.parse(_URL.createObjectURL(blob));
   }
 
   @override
@@ -310,7 +332,11 @@ extension type _Writable._(JSObject _) implements JSObject {
 extension type _File._(JSObject _) implements JSObject {
   external int get size;
   external int get lastModified;
-  external _File slice(int start, int end);
+  external _Blob slice(int start, int end, [String contentType]);
+  external JSPromise<JSArrayBuffer> arrayBuffer();
+}
+
+extension type _Blob._(JSObject _) implements JSObject {
   external JSPromise<JSArrayBuffer> arrayBuffer();
 }
 
@@ -336,7 +362,7 @@ extension type _MessageEvent._(JSObject _) implements JSObject {
 
 @JS('URL')
 extension type _URL._(JSObject _) implements JSObject {
-  external static String createObjectURL(_File file);
+  external static String createObjectURL(_Blob blob);
   external static void revokeObjectURL(String url);
 }
 
