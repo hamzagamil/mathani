@@ -39,10 +39,13 @@ void main() {
       ];
 
   test('search: Arabic with or without ال and letter forms, English ignoring case', () {
-    expect(ids('عفاسي'), ['alafasy']);
-    expect(ids('العفاسي'), ['alafasy']);
-    expect(ids('alafasy'), ['alafasy']);
-    expect(ids('ALAFASY'), ['alafasy']);
+    expect(ids('غامدي'), ['ghamdi']);
+    expect(ids('الغامدي'), ['ghamdi']);
+    expect(ids('ghamdi'), ['ghamdi']);
+    expect(ids('GHAMDI'), ['ghamdi']);
+    expect(ids('المعيقلي'), ['muaiqly']);
+    expect(ids('muaiqly'), ['muaiqly']);
+    expect(ids('alafasy'), isEmpty, reason: 'no longer in the catalogue');
     expect(ids('الحصري'), unorderedEquals(['husary', 'husary_mujawwad', 'husary_muallim']));
     expect(ids('حصري'), unorderedEquals(['husary', 'husary_mujawwad', 'husary_muallim']));
     expect(ids('husary'), hasLength(3));
@@ -96,10 +99,10 @@ void main() {
   testWidgets('filters as the reader types, and shows a message when nothing matches',
       (tester) async {
     await pumpList(tester, locale: const Locale('ar'), selected: 'husary');
-    await tester.enterText(find.byType(TextField), 'عفاسي');
+    await tester.enterText(find.byType(TextField), 'غامدي');
     await tester.pump();
     expect(find.byType(ListTile), findsOneWidget);
-    expect(find.text('مشاري راشد العفاسي'), findsOneWidget);
+    expect(find.text('سعد الغامدي'), findsOneWidget);
     expect(find.text('مرتّل'), findsOneWidget, reason: 'the style label is shown');
 
     await tester.enterText(find.byType(TextField), 'لا أحد');

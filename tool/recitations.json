@@ -135,19 +135,19 @@
     "sort": 9
   },
   {
-    "id": "alafasy",
-    "name_ar": "مشاري راشد العفاسي",
-    "name_en": "Mishary Rashid Alafasy",
-    "short_ar": "العفاسي",
-    "short_en": "Alafasy",
+    "id": "muaiqly",
+    "name_ar": "ماهر المعيقلي",
+    "name_en": "Maher Al-Muaiqly",
+    "short_ar": "المعيقلي",
+    "short_en": "Al-Muaiqly",
     "style": "murattal",
     "source": "everyayah",
-    "base_url": "https://everyayah.com/data/Alafasy_64kbps",
-    "mirror_url": "https://mirrors.quranicaudio.com/everyayah/Alafasy_64kbps",
+    "base_url": "https://everyayah.com/data/Maher_AlMuaiqly_64kbps",
+    "mirror_url": "https://mirrors.quranicaudio.com/everyayah/Maher_AlMuaiqly_64kbps",
     "file_pattern": "{sss}{aaa}.mp3",
     "basmala_in_ayah1": 0,
     "bitrate_kbps": 64,
-    "sort": 10
+    "sort": 13
   },
   {
     "id": "ghamdi",
