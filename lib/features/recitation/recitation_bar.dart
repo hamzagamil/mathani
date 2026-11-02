@@ -97,6 +97,7 @@ class RecitationBar extends StatelessWidget {
             tooltip: l10n.nextAyah,
             onPressed: ended ? null : recitation.next,
           ),
+          _RepeatButton(recitation: recitation, enabled: !ended),
         ]),
       ),
     );
@@ -200,6 +201,50 @@ class RecitationBar extends StatelessWidget {
   }
 }
 
+/// One button for repeat: each tap moves off → ayah → page → surah → off. When on, it is in the
+/// accent colour with what it repeats written under it.
+class _RepeatButton extends StatelessWidget {
+  const _RepeatButton({required this.recitation, required this.enabled});
+
+  final RecitationController recitation;
+  final bool enabled;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final colors = MathaniColors.of(context);
+    final repeat = recitation.repeat;
+    final (tooltip, label) = switch (repeat) {
+      RecitationRepeat.off => (l10n.repeatOff, null),
+      RecitationRepeat.ayah => (l10n.repeatAyah, l10n.repeatAyahShort),
+      RecitationRepeat.page => (l10n.repeatPage, l10n.repeatPageShort),
+      RecitationRepeat.surah => (l10n.repeatSurah, l10n.repeatSurahShort),
+    };
+    final next = RecitationRepeat.values[(repeat.index + 1) % RecitationRepeat.values.length];
+    return SizedBox.square(
+      dimension: 48,
+      child: IconButton(
+        tooltip: tooltip,
+        isSelected: label != null,
+        padding: EdgeInsets.zero,
+        onPressed: enabled ? () => recitation.setRepeat(next) : null,
+        icon: label == null
+            ? Icon(MathaniIcons.repeat, color: colors.inkMuted)
+            : Column(mainAxisSize: MainAxisSize.min, children: [
+                Icon(repeat == RecitationRepeat.ayah ? MathaniIcons.repeatOne : MathaniIcons.repeat,
+                    size: 20, color: colors.accent),
+                Text(
+                  label,
+                  maxLines: 1,
+                  style: TypeScale.caption.copyWith(
+                      fontFamily: TypeScale.uiFamily, fontSize: 10, height: 1.2, color: colors.accent),
+                ),
+              ]),
+      ),
+    );
+  }
+}
+
 class _ReciterChip extends StatelessWidget {
   const _ReciterChip({required this.label, required this.tooltip, this.onTap});
 
@@ -213,9 +258,9 @@ class _ReciterChip extends StatelessWidget {
     final chip = Container(
       constraints: const BoxConstraints(minHeight: 48),
       alignment: Alignment.center,
-      padding: const EdgeInsets.symmetric(horizontal: Space.s2),
+      padding: const EdgeInsets.symmetric(horizontal: Space.s1),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: Space.s3, vertical: Space.s1),
+        padding: const EdgeInsets.symmetric(horizontal: Space.s2, vertical: Space.s1),
         decoration: BoxDecoration(
           color: colors.surfaceSunken,
           borderRadius: BorderRadius.circular(Radii.pill),

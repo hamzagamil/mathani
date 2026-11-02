@@ -19,6 +19,7 @@ first `play`.
 | `setReciter(String id)` | Saves the preference. During a session: resolves the **current item** with the new reciter, then restarts that item from its start. If that fails with `offline`, the session keeps its reciter and shows the message «{name} غير منزّل لهذه السورة» / "{name} isn't downloaded for this surah", and the preference is set back. |
 | `returnToRecitation()` | Calls the follow jump (`_followJump`, see Following), then sets `following = true`. |
 | `retry()` | Retries the item that failed. |
+| `repeat`, `setRepeat(RecitationRepeat)` | `off`, `ayah`, `page` or `surah`. Kept while the app runs, across sessions; never persisted. See Repeat. |
 
 Starting a new `play*` while a session exists replaces the item and keeps the reciter.
 `following` becomes `true` on every `play*`.
@@ -53,6 +54,20 @@ Starting a new `play*` while a session exists replaces the item and keeps the re
 - If the current entry ends and the next is not in the window, the player waits on the
   **current** item in `loading(next)` until the next file resolves. It never skips (FR-007).
 - `next`, `previous`, `playFrom` and `setReciter` rebuild the window around the new current item.
+
+## Repeat
+
+- At the end of the span that holds the current item (the ayah, its Mushaf page, or its surah),
+  the recitation goes back to the span's start instead of going on: the ayah itself, the first
+  ayah that **begins** on the page (its basmala when that is ayah 1), or the surah's basmala.
+  Repeating a surah or the last page never reaches the end of the Quran.
+- A basmala is not repeated on its own: with `ayah`, it goes on to ayah 1, which repeats.
+- The span follows the current item: `next`, `previous` and `playFrom` move to another ayah,
+  page or surah, which then repeats.
+- The lookahead stops at the end of the span, so an item is never in the window twice; going back
+  loads a fresh window. Items already queued past the end when repeat is chosen are not played:
+  the recitation goes back as soon as the player reaches one. Turning repeat off lets the
+  lookahead carry on.
 
 ## Following (FR-012 to FR-014)
 

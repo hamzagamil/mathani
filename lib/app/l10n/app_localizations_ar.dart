@@ -347,6 +347,27 @@ class AppLocalizationsAr extends AppLocalizations {
   String get closePlayer => 'إيقاف وإغلاق';
 
   @override
+  String get repeatOff => 'التكرار متوقف';
+
+  @override
+  String get repeatAyah => 'تكرار هذه الآية';
+
+  @override
+  String get repeatPage => 'تكرار هذه الصفحة';
+
+  @override
+  String get repeatSurah => 'تكرار هذه السورة';
+
+  @override
+  String get repeatAyahShort => 'آية';
+
+  @override
+  String get repeatPageShort => 'صفحة';
+
+  @override
+  String get repeatSurahShort => 'سورة';
+
+  @override
   String get recitationOffline =>
       'لا يوجد اتصال. نزّل السورة للاستماع دون إنترنت.';
 

@@ -36,6 +36,8 @@ void main() {
         MathaniIcons.pause,
         MathaniIcons.previous,
         MathaniIcons.next,
+        MathaniIcons.repeat,
+        MathaniIcons.repeatOne,
         MathaniIcons.download,
         MathaniIcons.downloaded,
         MathaniIcons.more,

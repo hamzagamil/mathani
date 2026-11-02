@@ -92,6 +92,31 @@ void main() {
     await finish(tester);
   });
 
+  testWidgets('the repeat button moves through off, ayah, page and surah', (tester) async {
+    await pumpApp(tester);
+    await tester.runAsync(() => recitation.playFrom(const AyahRef(67, 12)));
+    await settle(tester);
+    var tip = 'التكرار متوقف';
+    final size = tester.getSize(find.byTooltip(tip));
+    expect(size.width, greaterThanOrEqualTo(48));
+    expect(size.height, greaterThanOrEqualTo(48));
+    for (final (next, label, mode) in [
+      ('تكرار هذه الآية', 'آية', RecitationRepeat.ayah),
+      ('تكرار هذه الصفحة', 'صفحة', RecitationRepeat.page),
+      ('تكرار هذه السورة', 'سورة', RecitationRepeat.surah),
+      ('التكرار متوقف', null, RecitationRepeat.off),
+    ]) {
+      await tester.tap(find.byTooltip(tip));
+      await settle(tester, 2);
+      tip = next;
+      expect(recitation.repeat, mode);
+      expect(find.byTooltip(tip), findsOneWidget);
+      if (label != null) expect(find.text(label), findsOneWidget);
+    }
+    expect(find.text('سورة'), findsNothing, reason: 'no label while off');
+    await finish(tester);
+  });
+
   testWidgets('the item text names the surah and ayah, and the basmala', (tester) async {
     await pumpApp(tester);
     await tester.runAsync(() => recitation.playFrom(const AyahRef(67, 12)));

@@ -49,6 +49,8 @@ abstract final class MathaniIcons {
   static const pause = IconData(0xe12e, fontFamily: _family);
   static const previous = IconData(0xe15f, fontFamily: _family); // skip-back
   static const next = IconData(0xe160, fontFamily: _family); // skip-forward
+  static const repeat = IconData(0xe146, fontFamily: _family);
+  static const repeatOne = IconData(0xe1fd, fontFamily: _family); // repeat-1
 
   // Direction icons mirror with the interface direction; media icons never do (brand guide).
   // Glyphs are the left-to-right forms; they flip automatically in Arabic (RTL).

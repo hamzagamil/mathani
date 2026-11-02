@@ -291,6 +291,71 @@ void main() {
     });
   });
 
+  group('repeat', () {
+    recitationTest('an ayah plays again and again; its basmala is not repeated alone', (tester) async {
+      c.setRepeat(RecitationRepeat.ayah);
+      c.playFrom(const AyahRef(67, 1));
+      await settle(tester);
+      expect(engine.window, [const RecitedItem.basmala(67), ayah(67, 1)],
+          reason: 'the basmala goes on to its ayah; nothing is queued after the repeated ayah');
+      engine.finishCurrent();
+      await settle(tester);
+      expect(session().item, ayah(67, 1));
+      for (var i = 0; i < 2; i++) {
+        engine.finishCurrent();
+        await settle(tester);
+        expect(session().item, ayah(67, 1));
+        expect(session().status, RecitationStatus.playing);
+        expect(engine.currentItem, ayah(67, 1));
+      }
+    });
+
+    recitationTest('chosen with ayat already queued, it goes back instead of on; off goes on',
+        (tester) async {
+      c.playFrom(const AyahRef(67, 12));
+      await settle(tester);
+      expect(engine.window, contains(ayah(67, 13)));
+      c.setRepeat(RecitationRepeat.ayah);
+      engine.finishCurrent(); // 67:13 was queued before repeat
+      await settle(tester);
+      expect(session().item, ayah(67, 12));
+      expect(engine.currentItem, ayah(67, 12));
+
+      c.setRepeat(RecitationRepeat.off);
+      await settle(tester);
+      expect(engine.window, contains(ayah(67, 13)), reason: 'the lookahead carries on');
+      engine.finishCurrent();
+      await settle(tester);
+      expect(session().item, ayah(67, 13));
+    });
+
+    recitationTest('a page goes back to the first ayah that begins on it', (tester) async {
+      final quran = reader.quran;
+      final onPage = quran.ayahsStartingOnPage(50);
+      c.setRepeat(RecitationRepeat.page);
+      c.playFrom(onPage.last.ref);
+      await settle(tester);
+      engine.finishCurrent();
+      await settle(tester);
+      expect(session().item.ref, onPage.first.ref);
+      expect(session().status, RecitationStatus.playing);
+      expect(reader.page, 50);
+    });
+
+    recitationTest('a surah goes back to its basmala, even at the end of the Quran', (tester) async {
+      c.setRepeat(RecitationRepeat.surah);
+      c.playFrom(const AyahRef(114, 5));
+      await settle(tester);
+      expect(engine.window, [ayah(114, 5), ayah(114, 6)]);
+      engine.finishCurrent();
+      await settle(tester);
+      engine.finishCurrent();
+      await settle(tester);
+      expect(session().item, const RecitedItem.basmala(114));
+      expect(session().status, RecitationStatus.playing);
+    });
+  });
+
   group('choosing a reciter (US2)', () {
     recitationTest('switching mid-ayah saves it and restarts the same ayah in the new voice',
         (tester) async {

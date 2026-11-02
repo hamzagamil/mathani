@@ -619,6 +619,48 @@ abstract class AppLocalizations {
   /// **'Stop and close'**
   String get closePlayer;
 
+  /// No description provided for @repeatOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat off'**
+  String get repeatOff;
+
+  /// No description provided for @repeatAyah.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeating this ayah'**
+  String get repeatAyah;
+
+  /// No description provided for @repeatPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeating this page'**
+  String get repeatPage;
+
+  /// No description provided for @repeatSurah.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeating this surah'**
+  String get repeatSurah;
+
+  /// No description provided for @repeatAyahShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Ayah'**
+  String get repeatAyahShort;
+
+  /// No description provided for @repeatPageShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Page'**
+  String get repeatPageShort;
+
+  /// No description provided for @repeatSurahShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Surah'**
+  String get repeatSurahShort;
+
   /// No description provided for @recitationOffline.
   ///
   /// In en, this message translates to:

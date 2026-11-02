@@ -338,6 +338,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get closePlayer => 'Stop and close';
 
   @override
+  String get repeatOff => 'Repeat off';
+
+  @override
+  String get repeatAyah => 'Repeating this ayah';
+
+  @override
+  String get repeatPage => 'Repeating this page';
+
+  @override
+  String get repeatSurah => 'Repeating this surah';
+
+  @override
+  String get repeatAyahShort => 'Ayah';
+
+  @override
+  String get repeatPageShort => 'Page';
+
+  @override
+  String get repeatSurahShort => 'Surah';
+
+  @override
   String get recitationOffline =>
       'No connection. Download this surah to listen offline.';
 

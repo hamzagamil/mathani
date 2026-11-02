@@ -25,6 +25,10 @@ const endedBannerDuration = Duration(seconds: 3);
 
 enum RecitationStatus { loading, playing, paused, error, ended }
 
+/// What the recitation goes back over when it reaches the end of it: nothing, the ayah, the
+/// Mushaf page or the surah being recited.
+enum RecitationRepeat { off, ayah, page, surah }
+
 /// A one-off message for the bar (US2: switching to a reciter that isn't downloaded, offline).
 class RecitationNotice {
   const RecitationNotice.reciterNotDownloaded(this.reciter);
@@ -134,6 +138,37 @@ class RecitationController extends ChangeNotifier with WidgetsBindingObserver {
     final n = _notice;
     _notice = null;
     return n;
+  }
+
+  /// Kept while the app runs, across sessions; never persisted.
+  RecitationRepeat get repeat => _repeat;
+  RecitationRepeat _repeat = RecitationRepeat.off;
+
+  void setRepeat(RecitationRepeat value) {
+    if (value == _repeat) return;
+    _repeat = value;
+    notifyListeners();
+    // The lookahead stops at the end of a repeated span: let it carry on past it now.
+    unawaited(_fillAhead(_generation));
+  }
+
+  /// Where the recitation goes back to after [item], or null when it goes on: [item] ends the
+  /// repeated ayah, page or surah. A basmala is not repeated on its own; its ayah 1 is.
+  RecitedItem? _repeatFrom(RecitedItem item) {
+    final next = _order.next(item);
+    switch (_repeat) {
+      case RecitationRepeat.off:
+        return null;
+      case RecitationRepeat.ayah:
+        return item.isBasmala ? null : item;
+      case RecitationRepeat.page:
+        final page = quran.pageOf(item.ref);
+        if (next != null && quran.pageOf(next.ref) == page) return null;
+        return _order.startItem(quran.ayahsStartingOnPage(page).first.ref);
+      case RecitationRepeat.surah:
+        if (next != null && next.surah == item.surah) return null;
+        return _order.startItem(AyahRef(item.surah, 1));
+    }
   }
 
   AudioEngine get _player {
@@ -247,6 +282,8 @@ class RecitationController extends ChangeNotifier with WidgetsBindingObserver {
         if (s == null || _window.isEmpty) return;
         final current = _window.indexOf(s.item);
         if (current < 0 || _window.length - 1 - current >= prefetchAhead) return;
+        // Going back starts a fresh window when this one completes: an item is never in it twice.
+        if (_repeatFrom(_window.last) != null) return;
         final next = _order.next(_window.last);
         if (next == null) return; // the end of the Quran
         final StoreFile file;
@@ -330,6 +367,13 @@ class RecitationController extends ChangeNotifier with WidgetsBindingObserver {
         // Only an ayah of the current window: a late event from a replaced window is not news.
         if (!_window.contains(item)) return;
         if (item != s.item && s.status != RecitationStatus.paused) {
+          final again = _repeatFrom(s.item);
+          if (again != null) {
+            // Queued before repeat was chosen: go back instead of on.
+            unawaited(_player.pause());
+            _goTo(again);
+            return;
+          }
           s.item = item;
           notifyListeners();
           unawaited(_followJump(item));
@@ -342,6 +386,11 @@ class RecitationController extends ChangeNotifier with WidgetsBindingObserver {
         }
         unawaited(_fillAhead(_generation));
       case WindowCompleted(:final item):
+        final again = _repeatFrom(item);
+        if (again != null) {
+          _goTo(again);
+          return;
+        }
         final next = _order.next(item);
         if (next == null) {
           _end();
@@ -366,6 +415,17 @@ class RecitationController extends ChangeNotifier with WidgetsBindingObserver {
           notifyListeners();
         }
     }
+  }
+
+  /// Plays on from [item] in a fresh window (repeat going back).
+  void _goTo(RecitedItem item) {
+    final s = _session!;
+    s
+      ..item = item
+      ..status = RecitationStatus.loading;
+    notifyListeners();
+    unawaited(_followJump(item));
+    unawaited(_load(item, play: true));
   }
 
   void _end() {
