@@ -230,7 +230,7 @@ class Reciter {
   final int sort;
   final RecitationSource source;
   final String filePattern; // `{sss}{aaa}.mp3`, or `{sss}.mp3` / `{s}.mp3` for surah files
-  final bool basmalaInAyah1; // surah files: the basmala is inside ayah 1's clip
+  final bool basmalaInAyah1; // surah files, and ayah recordings that open with it: in ayah 1's clip
 
   String name({required bool arabic}) => arabic ? nameAr : nameEn;
   String shortName({required bool arabic}) => arabic ? shortAr : shortEn;

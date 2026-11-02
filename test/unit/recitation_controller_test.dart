@@ -108,6 +108,20 @@ void main() {
       await settle(tester);
       expect(session().item, ayah(1, 1));
     });
+
+    recitationTest('reciters whose ayah 1 opens with the basmala get no separate basmala',
+        (tester) async {
+      // Their EveryAyah ayah-1 recordings begin with it: a basmala item would recite it twice.
+      for (final id in ['banna', 'parhizgar', 'abdulkareem']) {
+        expect(reader.quran.reciter(id)?.basmalaInAyah1, isTrue, reason: id);
+        await c.stop();
+        reader.updatePreferences(reader.preferences.copyWith(reciter: id));
+        c.playFrom(const AyahRef(67, 1));
+        await settle(tester);
+        expect(session().item, ayah(67, 1), reason: id);
+      }
+      expect(reader.quran.reciter('husary')?.basmalaInAyah1, isFalse);
+    });
   });
 
   group('never skips (FR-007, FR-020)', () {

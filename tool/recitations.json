@@ -130,7 +130,7 @@
     "base_url": "https://everyayah.com/data/mahmoud_ali_al_banna_32kbps",
     "mirror_url": "https://mirrors.quranicaudio.com/everyayah/mahmoud_ali_al_banna_32kbps",
     "file_pattern": "{sss}{aaa}.mp3",
-    "basmala_in_ayah1": 0,
+    "basmala_in_ayah1": 1,
     "bitrate_kbps": 32,
     "sort": 9
   },
@@ -250,7 +250,7 @@
     "base_url": "https://everyayah.com/data/Muhammad_AbdulKareem_128kbps",
     "mirror_url": "https://mirrors.quranicaudio.com/everyayah/Muhammad_AbdulKareem_128kbps",
     "file_pattern": "{sss}{aaa}.mp3",
-    "basmala_in_ayah1": 0,
+    "basmala_in_ayah1": 1,
     "bitrate_kbps": 128,
     "sort": 29
   },
@@ -295,7 +295,7 @@
     "base_url": "https://everyayah.com/data/Parhizgar_48kbps",
     "mirror_url": "https://mirrors.quranicaudio.com/everyayah/Parhizgar_48kbps",
     "file_pattern": "{sss}{aaa}.mp3",
-    "basmala_in_ayah1": 0,
+    "basmala_in_ayah1": 1,
     "bitrate_kbps": 48,
     "sort": 32
   },
