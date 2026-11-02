@@ -844,57 +844,55 @@ class AppLocalizationsEn extends AppLocalizations {
   String get prayerTimesTitle => 'Prayer times';
 
   @override
-  String get prayerAddLocation => 'Choose location';
+  String get prayerFirstTimeTitle => 'Set your place';
 
   @override
-  String get prayerDetectLocation => 'Detect my location';
+  String get prayerLocationWhy =>
+      'Your approximate location is used only to work out prayer times for your city. You can search for a city instead.';
+
+  @override
+  String get prayerUseMyLocation => 'Use my location';
 
   @override
   String get prayerSearchCity => 'Search for a city';
 
   @override
-  String get prayerApproximateLocation => 'Try approximate location';
+  String prayerSuggested(String place) {
+    return 'Suggested: $place';
+  }
 
   @override
-  String get prayerLocationDisclosure =>
-      'Device location is used only to find prayer times. To resolve the place and time zone, coordinates are sent to Mathani/Cloudflare and GeoNames. You can choose a city instead.';
-
-  @override
-  String get prayerIpDisclosure =>
-      'Approximate lookup uses your connection\'s IP address at Cloudflare. It may be wrong with a VPN. Confirm or change the result before use.';
-
-  @override
-  String get prayerApproximate => 'Approximate location';
-
-  @override
-  String get prayerConfirmLocation => 'Use this location';
-
-  @override
-  String get prayerChangeLocation => 'Change location';
-
-  @override
-  String get prayerCancel => 'Cancel';
-
-  @override
-  String get prayerNoLocation => 'Choose a location to see its prayer times.';
+  String get prayerEstimateNote => 'Estimated from your internet connection';
 
   @override
   String get prayerNoResults => 'No matching cities. Try another name.';
 
   @override
+  String get prayerGeoNamesAttribution => 'Place data: GeoNames';
+
+  @override
+  String get prayerCancel => 'Cancel';
+
+  @override
+  String get prayerRetry => 'Try again';
+
+  @override
+  String get prayerSave => 'Save';
+
+  @override
+  String get prayerDelete => 'Delete';
+
+  @override
+  String get prayerRename => 'Rename';
+
+  @override
   String get prayerUnavailable => 'Unavailable';
-
-  @override
-  String get prayerAdjusted => 'Adjusted for high latitude';
-
-  @override
-  String get prayerNext => 'Next prayer';
 
   @override
   String get prayerFajr => 'Fajr';
 
   @override
-  String get prayerSunrise => 'Sunrise (information only)';
+  String get prayerSunrise => 'Sunrise';
 
   @override
   String get prayerDhuhr => 'Dhuhr';
@@ -912,10 +910,122 @@ class AppLocalizationsEn extends AppLocalizations {
   String get prayerQiyam => 'Qiyam';
 
   @override
-  String get prayerMethod => 'Calculation method';
+  String get prayerNotAPrayer => 'Not a prayer';
 
   @override
-  String get prayerMadhhab => 'Asr madhhab';
+  String get prayerNext => 'Next prayer';
+
+  @override
+  String get prayerToday => 'Today';
+
+  @override
+  String get prayerPreviousDay => 'Previous day';
+
+  @override
+  String get prayerNextDay => 'Next day';
+
+  @override
+  String prayerZoneNote(String zone) {
+    return 'Times in $zone';
+  }
+
+  @override
+  String prayerAdjustedLatitude(String rule) {
+    return 'Adjusted: $rule';
+  }
+
+  @override
+  String prayerAdjustedMinutes(String minutes) {
+    return 'Adjusted $minutes min';
+  }
+
+  @override
+  String prayerMovedTo(String city) {
+    return 'Moved to $city. Times and alerts are updated.';
+  }
+
+  @override
+  String prayerViewingNote(String place) {
+    return 'Viewing only. Alerts follow $place.';
+  }
+
+  @override
+  String get prayerUseThisPlace => 'Use this place';
+
+  @override
+  String get prayerCalculationUnavailable =>
+      'Times can\'t be calculated for this place and date.';
+
+  @override
+  String get prayerAutoplayBlocked => 'The browser blocked the athan sound.';
+
+  @override
+  String get prayerAthanPlay => 'Play athan';
+
+  @override
+  String get prayerPlaces => 'Places';
+
+  @override
+  String get prayerMyLocation => 'My location';
+
+  @override
+  String get prayerCurrentPlace => 'Alerts follow this place';
+
+  @override
+  String get prayerPlaceActions => 'Place options';
+
+  @override
+  String get prayerRefreshLocation => 'Update my location';
+
+  @override
+  String get prayerAddPlace => 'Add a place';
+
+  @override
+  String get prayerPlaceName => 'Place name';
+
+  @override
+  String get prayerLabelError =>
+      'Enter 1–80 characters without line breaks or control characters.';
+
+  @override
+  String get prayerDeletePlace => 'Delete place';
+
+  @override
+  String prayerDeleteConfirm(String place) {
+    return 'Delete $place and its settings?';
+  }
+
+  @override
+  String get prayerDeleteLastConfirm =>
+      'This is your only place. Delete it and turn off all prayer alerts?';
+
+  @override
+  String get prayerDeleteCurrentTitle => 'Alerts follow this place';
+
+  @override
+  String get prayerDeleteCurrentBody =>
+      'Choose where alerts should follow, or turn them off.';
+
+  @override
+  String prayerAlertsFollow(String place) {
+    return 'Alerts follow $place';
+  }
+
+  @override
+  String get prayerDeleteAlertsOff => 'Delete and turn alerts off';
+
+  @override
+  String get prayerClearData => 'Delete all prayer data';
+
+  @override
+  String get prayerClearDataConfirm =>
+      'Delete all saved places and prayer settings, and turn off prayer alerts? Your Quran bookmarks, reading position and downloads are kept.';
+
+  @override
+  String get prayerCalculationSettings => 'Calculation settings';
+
+  @override
+  String get prayerMethod => 'Calculation method';
 
   @override
   String get prayerMethodMwl => 'Muslim World League';
@@ -924,25 +1034,49 @@ class AppLocalizationsEn extends AppLocalizations {
   String get prayerMethodEgypt => 'Egyptian General Authority of Survey';
 
   @override
-  String get prayerMethodKarachi => 'University of Islamic Sciences, Karachi';
+  String get prayerMethodMakkah => 'Umm al-Qura, Makkah';
 
   @override
-  String get prayerMethodMakkah => 'Umm al-Qura, Makkah';
+  String get prayerMethodKarachi => 'University of Islamic Sciences, Karachi';
 
   @override
   String get prayerMethodNorthAmerica => 'North America (ISNA)';
 
   @override
-  String get prayerHanafi => 'Hanafi';
+  String get prayerMethodDubai => 'Dubai';
 
   @override
-  String get prayerShafii => 'Shafi‘i';
+  String get prayerMethodKuwait => 'Kuwait';
 
   @override
-  String get prayerMaliki => 'Maliki';
+  String get prayerMethodQatar => 'Qatar';
 
   @override
-  String get prayerHanbali => 'Hanbali';
+  String get prayerMethodSingapore => 'Singapore';
+
+  @override
+  String get prayerMethodTurkey => 'Turkey (Diyanet)';
+
+  @override
+  String get prayerMethodMoonsighting => 'Moonsighting Committee';
+
+  @override
+  String get prayerSuggestedMethod => 'Suggested';
+
+  @override
+  String get prayerAsrSetting => 'Asr';
+
+  @override
+  String get prayerAsrStandard => 'Standard (Shafi\'i, Maliki, Hanbali)';
+
+  @override
+  String get prayerAsrHanafi => 'Hanafi';
+
+  @override
+  String get prayerAsrNote => 'This setting changes Asr only.';
+
+  @override
+  String get prayerHighLatitude => 'High-latitude rule';
 
   @override
   String get prayerMiddleNight => 'Middle of the night';
@@ -951,304 +1085,169 @@ class AppLocalizationsEn extends AppLocalizations {
   String get prayerSeventhNight => 'One seventh of the night';
 
   @override
-  String get prayerHighLatitude => 'High-latitude rule';
+  String get prayerMiddleNightNote =>
+      'Fajr no earlier, and Isha no later, than the middle of the night.';
 
   @override
-  String get prayerLocationDenied =>
-      'Location access was denied. You can choose a city manually.';
+  String get prayerSeventhNightNote =>
+      'Fajr no earlier than the last seventh of the night, Isha no later than the first.';
 
   @override
-  String get prayerLocationUnavailable =>
-      'Device location is unavailable. Choose a city or try approximate location.';
+  String get prayerOffsets => 'Adjust times';
 
   @override
-  String get prayerTimezoneUnavailable =>
-      'The time zone could not be resolved. Choose a city instead.';
+  String get prayerOffsetsNote =>
+      'Match your local mosque by moving a prayer up to 30 minutes.';
 
   @override
-  String get prayerOffline =>
-      'A connection is needed for this lookup. Saved places still work offline.';
+  String get prayerNoOffset => 'No change';
 
   @override
-  String get prayerStorageUnavailable =>
-      'Saved location data could not be read securely. Retry, or continue for this session without changing existing saved data.';
-
-  @override
-  String get prayerSessionOnly => 'Use for this session';
-
-  @override
-  String get prayerSessionNotice =>
-      'Changes are kept only until you close this session.';
-
-  @override
-  String get prayerServiceUnavailable =>
-      'Location lookup is unavailable. Try again later or keep using a saved place.';
-
-  @override
-  String get prayerCalculationUnavailable =>
-      'Times cannot be calculated for this date and convention. No reminder is scheduled for unavailable times.';
-
-  @override
-  String get prayerNeedsAttention =>
-      'Saved prayer settings need attention. Existing saved data has been preserved.';
-
-  @override
-  String get prayerRetry => 'Try again';
-
-  @override
-  String get prayerGeoNamesAttribution => 'Place data: GeoNames';
-
-  @override
-  String get prayerSavedLocations => 'Saved locations';
-
-  @override
-  String get prayerNewLocation => 'Add a location';
-
-  @override
-  String get prayerLocationLabel => 'Location name';
-
-  @override
-  String get prayerLabelError =>
-      'Enter 1–80 characters without line breaks or control characters.';
-
-  @override
-  String get prayerRename => 'Rename';
-
-  @override
-  String get prayerViewLocation => 'View times';
-
-  @override
-  String get prayerUseForReminders => 'Use for reminders';
-
-  @override
-  String get prayerActiveLocation => 'Active reminder location';
-
-  @override
-  String get prayerViewedLocation => 'Viewing another location';
-
-  @override
-  String get prayerDeleteLocation => 'Delete location';
-
-  @override
-  String get prayerDeleteInactiveConfirm =>
-      'Delete this saved location and its calculation settings?';
-
-  @override
-  String get prayerDeleteActiveConfirm =>
-      'Choose a replacement for reminders, or delete this location and turn off all prayer reminders.';
-
-  @override
-  String get prayerDeleteAndDisable => 'Delete and turn off reminders';
-
-  @override
-  String get prayerReplaceAndDelete => 'Replace and delete';
-
-  @override
-  String get prayerReplacementLocation => 'Replacement location';
-
-  @override
-  String get prayerClearData => 'Clear prayer data';
-
-  @override
-  String get prayerClearDataConfirm =>
-      'Delete all saved prayer locations and prayer settings, and cancel prayer reminders? Your Quran bookmarks and reading position will be kept.';
-
-  @override
-  String get prayerActivateConfirm =>
-      'Use this location for reminders? Future prayer reminders will use its calculation settings.';
-
-  @override
-  String get prayerCalculationSettings => 'Calculation settings';
-
-  @override
-  String get prayerSave => 'Save';
-
-  @override
-  String get prayerSuggestedMethod => 'Suggested for this country';
-
-  @override
-  String get prayerAsrExplanation =>
-      'These madhhab choices affect Asr only. Hanafi uses shadow factor 2; Shafi‘i, Maliki and Hanbali use factor 1. Your chosen label is saved.';
-
-  @override
-  String get prayerCalculationExplanation =>
-      'Choose the convention you follow. High-latitude adjustments are labelled; unavailable times are never replaced with guessed times.';
-
-  @override
-  String get prayerNoActiveLocation => 'No active reminder location';
-
-  @override
-  String get prayerReminderLocationHint =>
-      'Viewing times here does not change the reminder location.';
-
-  @override
-  String get prayerDelete => 'Delete';
-
-  @override
-  String get prayerReminderSettings => 'Prayer reminders';
-
-  @override
-  String prayerReminderBody(String prayer) {
-    return 'It is time for $prayer.';
+  String prayerOffsetMinutes(String minutes) {
+    return '$minutes min';
   }
 
   @override
-  String get prayerAthanRecording => 'Athan recording';
+  String prayerEarlier(String prayer) {
+    return '$prayer 1 minute earlier';
+  }
 
   @override
-  String get prayerAthanFull => 'Full athan';
+  String prayerLater(String prayer) {
+    return '$prayer 1 minute later';
+  }
 
   @override
-  String get prayerAthanOpening => 'Four opening takbirs';
+  String get prayerAlerts => 'Alerts';
 
   @override
-  String get prayerAthanPreview => 'Preview';
+  String get prayerSound => 'Sound';
+
+  @override
+  String get prayerSoundTone => 'Simple tone';
+
+  @override
+  String get prayerSoundSilent => 'Silent';
+
+  @override
+  String prayerPreview(String sound) {
+    return 'Preview $sound';
+  }
 
   @override
   String get prayerAthanStop => 'Stop athan';
 
   @override
-  String get prayerAthanPlay => 'Play athan';
+  String get prayerAthanLength => 'Athan length';
 
   @override
-  String get prayerAthanDownload => 'Download for offline playback';
+  String get prayerAthanOpening => 'Opening takbirat';
 
   @override
-  String get prayerAudioAbsent => 'Audio has not been downloaded.';
+  String get prayerAthanFull => 'Full athan';
+
+  @override
+  String get prayerFullAndroid =>
+      'Plays in full even when your phone is locked.';
+
+  @override
+  String get prayerFullIos =>
+      'The alert plays the opening; tap it to hear the full athan.';
+
+  @override
+  String get prayerFullWeb => 'Plays only while this page is open.';
+
+  @override
+  String get prayerFullNotDownloaded =>
+      'Until downloaded, alerts play the opening.';
+
+  @override
+  String get prayerDownload => 'Download';
 
   @override
   String get prayerAudioDownloading => 'Downloading and checking audio…';
 
   @override
-  String get prayerAudioVerified => 'Audio verified and ready offline';
-
-  @override
   String get prayerAudioFailed =>
-      'Audio could not be verified. Download it again.';
+      'The recording couldn\'t be downloaded. Try again.';
 
   @override
-  String prayerRecordingCredit(String credit) {
-    return 'Recording credit: $credit';
-  }
-
-  @override
-  String get prayerRecordingSource => 'Recording source and licence';
-
-  @override
-  String prayerRequestedMode(String mode) {
-    return 'Your choice: $mode';
-  }
-
-  @override
-  String prayerEffectiveMode(String mode) {
-    return 'Available delivery: $mode';
-  }
-
-  @override
-  String get prayerNotificationsPermission => 'Allow prayer notifications';
+  String get prayerAudioReady => 'Downloaded and ready offline';
 
   @override
   String get prayerNotificationsDenied =>
-      'Notifications are blocked. Your reminder choices are saved; allow notifications in settings to use them.';
+      'Alerts are blocked. Your choices are saved.';
 
   @override
-  String get prayerNotificationsOpenSettings => 'Open notification settings';
+  String get prayerOpenSettings => 'Open settings';
 
   @override
-  String get prayerExactAlarmAccess => 'Allow alarms and reminders';
+  String get prayerExactOff =>
+      'Exact alarms are off, so alerts may be a few minutes late.';
 
   @override
-  String get prayerExactAlarmLimit =>
-      'Precise Android reminders need alarm access. Without it, you can accept approximate short alerts or keep reminders off. Late Android alerts are skipped, so approximate scheduling may miss reminders.';
+  String get prayerAllow => 'Allow';
 
   @override
-  String get prayerIosFullLimit =>
-      'iOS cannot automatically play the full athan in the background or while locked. You can choose the short opening alert, then open Mathani and press Play for the full recording.';
-
-  @override
-  String get prayerIosSystemSoundLimit =>
-      'iOS controls notification sounds and delivery timing. Mathani cannot filter a delayed alert before the system presents it, guarantee pausing Quran playback, or stop a sound already playing. Device sound and notification settings apply.';
-
-  @override
-  String get prayerWebLimit =>
-      'Browser reminders work only while this page is open, visible and running. Closing, hiding or suspending it can prevent delivery. Automatic audio may require pressing Play. Use the mobile app for supported background reminders.';
+  String get prayerWebLimit => 'Alerts work only while this page is open.';
 
   @override
   String get prayerMobileApps => 'Get the mobile app';
 
   @override
-  String get prayerForegroundOnly => 'Active page only';
-
-  @override
-  String get prayerRemindersBlocked =>
-      'Reminders need attention before they can run.';
-
-  @override
-  String get prayerRemindersPartial =>
-      'Some reminders could not be scheduled. Try again and check the available delivery period.';
-
-  @override
-  String prayerScheduledThrough(String time) {
-    return 'Scheduled through $time';
+  String prayerQiyamUpcoming(String time) {
+    return 'Tonight at $time';
   }
-
-  @override
-  String prayerReopenBy(String time) {
-    return 'Open Prayer Times in Mathani again by $time to refresh upcoming reminders. Delivery is not scheduled indefinitely.';
-  }
-
-  @override
-  String get prayerReconcile => 'Refresh reminders';
-
-  @override
-  String get prayerAcceptFallback => 'Use this alternative';
-
-  @override
-  String get prayerNoReminders => 'All prayer reminders are off.';
-
-  @override
-  String get prayerAutoplayBlocked =>
-      'The browser did not start the athan. Press Play while this reminder is still current.';
-
-  @override
-  String get prayerAthanNotCleared =>
-      'Athan recordings are not available yet. Your reminder choices are saved.';
-
-  @override
-  String get prayerSystemSound => 'Standard notification sound';
-
-  @override
-  String get prayerApproximateDelivery =>
-      'Approximate delivery is active. Alerts more than one minute late are skipped.';
-
-  @override
-  String get prayerSystemSoundLimit =>
-      'Your device controls short notification sounds. Mathani cannot reliably stop a system sound or pause Quran playback for it. Device notification and sound settings apply.';
-
-  @override
-  String get prayerUseSystemSound => 'Use standard notification sound';
-
-  @override
-  String get prayerSystemSoundDisclosure =>
-      'The selected athan recording is unavailable. You can use your device’s standard short notification sound instead. This does not play the athan or its opening takbirs. System sounds may overlap Quran playback and cannot reliably be stopped from Mathani. Your athan choice stays saved.';
 
   @override
   String get prayerQiyamExplanation =>
-      'An optional reminder at the start of the last third of the night, from Maghrib to the following Fajr. It is independent of the five daily prayer reminders.';
-
-  @override
-  String get prayerQiyamTone => 'Short Qiyam reminder tone';
-
-  @override
-  String get prayerQiyamNotification =>
-      'The last third of the night has begun. Optional Qiyam reminder.';
+      'Starts the last third of the night, from Maghrib to Fajr.';
 
   @override
   String get prayerQiyamUnavailable =>
-      'Qiyam time is unavailable because this night’s Maghrib or following Fajr cannot be calculated.';
+      'Unavailable tonight: Maghrib or the next Fajr can\'t be calculated here.';
 
   @override
-  String prayerQiyamUpcoming(String time) {
-    return 'Next Qiyam reminder: $time';
+  String get prayerQiyamNotification =>
+      'The last third of the night has begun.';
+
+  @override
+  String prayerAlertBody(String time, String place) {
+    return '$time · $place';
   }
+
+  @override
+  String prayerChannelSound(String sound) {
+    return 'Prayer alerts: $sound';
+  }
+
+  @override
+  String get prayerChannelQiyam => 'Qiyam reminder';
+
+  @override
+  String get prayerChannelAthan => 'Athan playback';
+
+  @override
+  String get prayerLocationDenied =>
+      'Location wasn\'t allowed. Search for a city instead.';
+
+  @override
+  String get prayerLocationUnavailable =>
+      'Your location couldn\'t be found. Try again or search for a city.';
+
+  @override
+  String get prayerTimezoneUnavailable =>
+      'This place\'s time zone couldn\'t be found. Choose another city.';
+
+  @override
+  String get prayerServiceUnavailable =>
+      'Couldn\'t reach the place service. Try again later.';
+
+  @override
+  String get prayerOffline =>
+      'You need a connection for this. Saved places still work offline.';
+
+  @override
+  String get prayerRateLimited =>
+      'Too many searches right now. Try again in a minute.';
 }

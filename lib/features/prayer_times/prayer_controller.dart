@@ -1,103 +1,71 @@
-import 'dart:convert';
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
-import 'package:timezone/timezone.dart' as tz;
 
+import 'prayer_alerts.dart';
 import 'prayer_calculator.dart';
 import 'prayer_models.dart';
-import 'prayer_repository.dart';
-import 'prayer_reminder_scheduler.dart';
 import 'prayer_services.dart';
-import 'prayer_time_zones.dart';
 
-typedef PrayerAudioReadiness = ({bool openingReady, bool fullReady});
-
+/// Prayer Times while its route is open. The saved state belongs to [PrayerAlerts]; this
+/// holds what the screen shows: the viewed place and day, search and errors.
 class PrayerController extends ChangeNotifier {
-  PrayerController({
-    required this.repository,
-    required this.locationClient,
-    required this.calculator,
-    this.clock = prayerNow,
-    this.notifications = const NoPrayerNotifications(),
-    PrayerReminderTarget? reminderTarget,
-    List<AthanRecording> recordings = const [],
-    this.audioReadiness,
-    this.reminderAudio,
-  }) : reminderTarget =
-           reminderTarget ??
-           (kIsWeb
-               ? PrayerReminderTarget.web
-               : defaultTargetPlatform == TargetPlatform.iOS
-               ? PrayerReminderTarget.ios
-               : PrayerReminderTarget.android),
-       recordings = List.unmodifiable(recordings);
-  final PrayerRepository repository;
-  final PrayerLocationClient locationClient;
-  final PrayerCalculator calculator;
+  PrayerController({required this.hub, this.clock = prayerNow});
+  final PrayerAlerts hub;
   final PrayerClock clock;
-  final PrayerNotificationAdapter notifications;
-  final PrayerReminderTarget reminderTarget;
-  final List<AthanRecording> recordings;
-  final Future<PrayerAudioReadiness> Function(AthanRecording recording)?
-  audioReadiness;
-  final PrayerAudio? reminderAudio;
-  late final _reminderScheduler = PrayerReminderScheduler(
-    adapter: notifications,
-    calculator: calculator,
-    target: reminderTarget,
-    clock: clock,
-  );
-  ReminderCapability reminderCapability = const ReminderCapability(
-    permissionStatus: 'unsupported',
-  );
-  PrayerScheduleResult reminderStatus = PrayerScheduleResult(
-    PrayerScheduleStatus.disabled,
-  );
-  PrayerAudioReadiness reminderAudioReadiness = (
-    openingReady: false,
-    fullReady: false,
-  );
-  AthanRecording? get selectedAthan => recordings
-      .where((r) => r.id == state.reminders.selectedAthanId)
-      .firstOrNull;
-  bool previewingAthan = false;
-  DateTime? _cachedQiyam, _qiyamCheckedAt;
-  String? viewedLocationId;
-  SavedLocation? get viewedLocation {
-    for (final location in state.locations) {
-      if (location.id == viewedLocationId) return location;
-    }
-    return state.activeLocation ?? state.locations.firstOrNull;
-  }
-
-  DailyPrayerSchedule? activeSchedule;
+  late PrayerServices services;
   PrayerState state = PrayerState();
-  Map<String, dynamic>? candidate;
-  List<Map<String, dynamic>> results = [];
+  bool initialized = false, busy = false, searching = false;
+  bool _disposed = false;
   PrayerFailure? failure;
-  bool busy = false, initialized = false, _disposed = false;
-  bool searching = false;
-  int _searchVersion = 0;
-  DailyPrayerSchedule? schedule;
-  PrayerEvent? _next;
-  bool get sessionOnly => repository.sessionOnly;
+
+  /// The place on screen; alerts follow [PrayerState.current] (FR-010).
+  String? viewedPlaceId;
+
+  /// Days from today in the viewed place (FR-005).
+  int dayOffset = 0;
+  List<Map<String, dynamic>> results = const [];
+
+  /// The internet-based estimate shown as the first search row (R5).
+  Map<String, dynamic>? suggestion;
+
+  /// Set after "Use my location" fails, so the app never asks twice in a session.
+  PrayerFailure? locationFailure;
+  int _search = 0;
+
   void _notify() {
     if (!_disposed) notifyListeners();
+  }
+
+  Future<void> initialize() async {
+    services = await hub.services();
+    state = await hub.state();
+    viewedPlaceId = state.currentPlace?.id;
+    hub.addListener(_hubChanged);
+    initialized = true;
+    _notify();
+  }
+
+  void _hubChanged() {
+    final latest = hub.current;
+    if (latest == null) return;
+    state = latest;
+    if (state.placeById(viewedPlaceId) == null) {
+      viewedPlaceId = state.currentPlace?.id;
+    }
+    _notify();
   }
 
   Future<void> _run(Future<void> Function() action) async {
     if (busy || _disposed) return;
     busy = true;
-    searching = false;
     failure = null;
     _notify();
     try {
       await action();
     } on PrayerException catch (e) {
       failure = e.reason;
-    } on FormatException {
-      failure = PrayerFailure.needsAttention;
     } on Object {
       failure = PrayerFailure.providerUnavailable;
     } finally {
@@ -106,519 +74,373 @@ class PrayerController extends ChangeNotifier {
     }
   }
 
-  Future<void> initialize() => _run(() async {
-    state = await repository.load();
-    viewedLocationId =
-        state.activeLocationId ?? state.locations.firstOrNull?.id;
-    initialized = true;
-    refresh();
-    await _refreshReminders();
-  });
-  void refresh() {
-    _cachedQiyam = null;
-    _qiyamCheckedAt = null;
-    final location = viewedLocation;
-    if (location == null) {
-      schedule = null;
-      _next = null;
-      activeSchedule = null;
-      _notify();
-      return;
-    }
-    final local = tz.TZDateTime.from(
+  Future<void> _save(PrayerState next) async {
+    await hub.save(next);
+    state = next;
+  }
+
+  // --- Schedule -------------------------------------------------------------------------------
+
+  Place? get viewedPlace =>
+      state.placeById(viewedPlaceId) ?? state.currentPlace;
+  bool get viewingCurrent => viewedPlace?.id == state.currentPlace?.id;
+
+  DateTime? get viewedDate {
+    final place = viewedPlace;
+    if (place == null) return null;
+    return PrayerCalculator.localDay(
+      place,
       clock(),
-      prayerTimeZone(location.timezoneId),
-    );
-    schedule = calculator.schedule(
-      location,
-      DateTime.utc(local.year, local.month, local.day),
-    );
-    _next = calculator.nextPrayer(location, clock());
-    final active = state.activeLocation;
-    if (active == null) {
-      activeSchedule = null;
-    } else if (active.id == location.id) {
-      activeSchedule = schedule;
-    } else {
-      final activeLocal = tz.TZDateTime.from(
-        clock(),
-        prayerTimeZone(active.timezoneId),
-      );
-      activeSchedule = calculator.schedule(
-        active,
-        DateTime.utc(activeLocal.year, activeLocal.month, activeLocal.day),
-      );
-    }
-    _notify();
+    ).add(Duration(days: dayOffset));
   }
 
+  DaySchedule? get schedule {
+    final place = viewedPlace, date = viewedDate;
+    if (place == null || date == null) return null;
+    return services.calculator.schedule(place, date);
+  }
+
+  /// Highlighted with a countdown on today only.
   PrayerEvent? get nextPrayer {
-    if (viewedLocation == null) return null;
-    if (_next?.dueAtUtc?.isAfter(clock()) != true) {
-      _next = calculator.nextPrayer(viewedLocation!, clock());
-    }
-    return _next;
+    final place = viewedPlace;
+    if (place == null || dayOffset != 0) return null;
+    final next = services.calculator.nextPrayer(place, clock());
+    final date = viewedDate!;
+    final local = next?.atUtc == null
+        ? null
+        : PrayerCalculator.localDay(place, next!.atUtc!);
+    return local == date ? next : null;
   }
 
-  Future<void> approximate(String language) => _run(() async {
-    locationClient.cancelSearch();
-    _searchVersion++;
-    results = [];
-    candidate = await locationClient.approximate(language);
-    candidate = {
-      ...candidate!,
-      'source': 'ip',
-      'approximate': true,
-      'requiresConfirmation': true,
-    };
-  });
-  Future<void> detect(String language) => _run(() async {
-    locationClient.cancelSearch();
-    _searchVersion++;
-    results = [];
-    candidate = await locationClient.detect(language);
-  });
-  Future<void> search(String q, String language) async {
-    final token = ++_searchVersion;
-    candidate = null;
-    failure = null;
-    results = [];
-    searching = q.trim().length >= 2;
-    _notify();
-    try {
-      final found = await locationClient.search(q, language);
-      if (token == _searchVersion && !_disposed) {
-        results = found;
-        searching = false;
-        _notify();
-      }
-    } on PrayerException catch (e) {
-      if (token == _searchVersion && !_disposed) {
-        failure = e.reason;
-        searching = false;
-        _notify();
-      }
-    } on Object {
-      if (token == _searchVersion && !_disposed) {
-        failure = PrayerFailure.providerUnavailable;
-        searching = false;
-        _notify();
-      }
-    }
-  }
-
-  Future<void> choose(Map<String, dynamic> place, {String language = 'en'}) =>
-      _run(() async {
-        locationClient.cancelSearch();
-        _searchVersion++;
-        candidate = place['timezoneId'] == null
-            ? await locationClient.resolve(place, language)
-            : Map.of(place);
-        results = [];
-      });
-  void discardCandidate() {
-    candidate = null;
-    failure = null;
+  void changeDay(int delta) {
+    dayOffset = delta == 0 ? 0 : dayOffset + delta;
     _notify();
   }
 
-  Future<void> confirmCandidate({String? label}) => _run(() async {
-    final c = candidate;
-    if (c == null || !initialized) {
-      throw const PrayerException(PrayerFailure.needsAttention);
-    }
-    final city = c['city'] as String? ?? '';
-    final country = c['countryCode'] as String? ?? '';
-    final source = LocationSource.values.firstWhere(
-      (v) => v.name == c['source'],
-    );
-    final id = base64UrlEncode(
-      List<int>.generate(16, (_) => Random.secure().nextInt(256)),
-    );
-    final location = SavedLocation(
-      id: id,
-      label:
-          label ??
-          (city.isNotEmpty
-              ? city
-              : [
-                  (c['latitude'] as num).toStringAsFixed(3),
-                  (c['longitude'] as num).toStringAsFixed(3),
-                ].join(', ')),
-      city: city,
-      region: c['region'] as String? ?? '',
-      countryCode: country,
-      latitude: (c['latitude'] as num).toDouble(),
-      longitude: (c['longitude'] as num).toDouble(),
-      timezoneId: c['timezoneId'] as String,
-      source: source,
-      approximate: c['approximate'] as bool? ?? false,
-      accuracyMeters: (c['accuracyMeters'] as num?)?.toDouble(),
-      geonamesId: c['placeId'] as String?,
-      confirmedAtUtc: clock(),
-      calculation: CalculationPreferences(
-        method: CalculationPreferences.suggestion(country),
-      ),
-    );
-    final updated = PrayerState(
-      revision: state.revision + 1,
-      generation: state.generation + (state.locations.isEmpty ? 1 : 0),
-      locations: [...state.locations, location],
-      activeLocationId: state.locations.isEmpty ? id : state.activeLocationId,
-      reminders: state.reminders,
-    );
-    await repository.save(updated);
-    if (_disposed) return;
-    state = updated;
-    viewedLocationId = id;
-    candidate = null;
-    refresh();
-  });
-  SavedLocation _location(String id) => state.locations.firstWhere(
-    (p) => p.id == id,
-    orElse: () => throw const FormatException('Unknown saved location'),
-  );
-  PrayerState _updated({
-    List<SavedLocation>? locations,
-    String? activeId,
-    bool clearActive = false,
-    ReminderPreferences? reminders,
-    bool invalidate = false,
-  }) => PrayerState(
-    revision: state.revision + 1,
-    generation: state.generation + (invalidate ? 1 : 0),
-    calculationVersion: state.calculationVersion,
-    locations: locations ?? state.locations,
-    activeLocationId: clearActive ? null : activeId ?? state.activeLocationId,
-    reminders: reminders ?? state.reminders,
-  );
-  Future<void> _commit(PrayerState updated, {bool cancelQueue = false}) async {
-    if (!initialized) throw const PrayerException(PrayerFailure.needsAttention);
-    await repository.save(updated);
-    state = updated;
-    reminderStatus = PrayerScheduleResult(
-      updated.reminders.anyEnabled
-          ? PrayerScheduleStatus.blocked
-          : PrayerScheduleStatus.disabled,
-    );
-    refresh();
-    if (cancelQueue) await notifications.cancelAll();
-    await _refreshReminders();
-  }
-
-  Future<void> _refreshReminders() async {
-    if (_disposed || !initialized) return;
-    reminderStatus = PrayerScheduleResult(
-      state.reminders.anyEnabled
-          ? PrayerScheduleStatus.blocked
-          : PrayerScheduleStatus.disabled,
-    );
-    _notify();
-    final revision = state.revision;
-    try {
-      final capability = await notifications.capabilities();
-      final recording = selectedAthan;
-      final ready = recording == null || audioReadiness == null
-          ? (openingReady: false, fullReady: false)
-          : await audioReadiness!(recording);
-      if (_disposed || state.revision != revision) return;
-      reminderCapability = capability;
-      reminderAudioReadiness = ready;
-      reminderStatus = await _reminderScheduler.reconcile(
-        state,
-        recording: recording,
-        openingReady: ready.openingReady,
-        fullReady: ready.fullReady,
-      );
-    } on Object {
-      reminderStatus = PrayerScheduleResult(
-        PrayerScheduleStatus.blocked,
-        failure: PrayerFailure.schedulePartial,
-      );
-      // No ready horizon survives a failed capability/readiness check.
-      try {
-        await notifications.cancelAll();
-      } on Object {
-        /* report blocked */
-      }
-    }
-    _notify();
-  }
-
-  Future<void> refreshReminders() => _run(_refreshReminders);
-
-  ReminderPreferences _reminderChoices({
-    Set<PrayerKind>? prayers,
-    String? recordingId,
-    AthanMode? mode,
-    Map<String, int>? acknowledgements,
-  }) {
-    final old = state.reminders;
-    return ReminderPreferences(
-      enabledPrayers: prayers ?? old.enabledPrayers,
-      selectedAthanId: recordingId ?? old.selectedAthanId,
-      requestedMode: mode ?? old.requestedMode,
-      qiyamEnabled: old.qiyamEnabled,
-      acknowledgedFallbacks: acknowledgements ?? old.acknowledgedFallbacks,
-    );
-  }
-
-  Future<void> setDailyReminder(PrayerKind kind, bool enabled) =>
-      _run(() async {
-        if (!dailyPrayers.contains(kind) || state.activeLocation == null) {
-          throw const PrayerException(PrayerFailure.needsAttention);
-        }
-        final prayers = {...state.reminders.enabledPrayers};
-        if (enabled) {
-          prayers.add(kind);
-        } else {
-          prayers.remove(kind);
-        }
-        if (setEquals(prayers, state.reminders.enabledPrayers)) return;
-        await _commit(
-          _updated(
-            reminders: _reminderChoices(prayers: prayers),
-            invalidate: true,
-          ),
-        );
-      });
-  Future<void> setAthanMode(AthanMode mode) => _run(() async {
-    if (mode == state.reminders.requestedMode) return;
-    await _commit(
-      _updated(reminders: _reminderChoices(mode: mode), invalidate: true),
-    );
-  });
-  Future<void> selectAthan(String id) => _run(() async {
-    final recording = recordings.where((r) => r.id == id).firstOrNull;
-    if (recording == null ||
-        !recording.completeRecordingReviewed ||
-        !recording.fourTakbirsReviewed) {
-      throw const PrayerException(PrayerFailure.audioUnavailable);
-    }
-    if (id == state.reminders.selectedAthanId) return;
-    await _commit(
-      _updated(reminders: _reminderChoices(recordingId: id), invalidate: true),
-    );
-  });
-  Future<void> requestReminderAuthorization() => _run(() async {
-    await notifications.requestAuthorization();
-    await _refreshReminders();
-  });
-  bool get canOpenNotificationSettings =>
-      notifications is PrayerNotificationSettings;
-  Future<void> openNotificationSettings({bool exactAlarm = false}) =>
-      _run(() async {
-        final adapter = notifications;
-        if (adapter is PrayerNotificationSettings) {
-          await (adapter as PrayerNotificationSettings)
-              .openNotificationSettings(exactAlarm: exactAlarm);
-        }
-      });
+  /// Tonight's Qiyam for the current place, or null when unavailable.
   DateTime? get nextQiyam {
-    final place = state.activeLocation;
+    final place = state.currentPlace;
     if (place == null) return null;
     final now = clock();
-    if (_cachedQiyam?.isAfter(now) == true) return _cachedQiyam;
-    if (_cachedQiyam != null) {
-      _cachedQiyam = null;
-      _qiyamCheckedAt = null;
-    }
-    if (_cachedQiyam == null &&
-        _qiyamCheckedAt != null &&
-        !now.isBefore(_qiyamCheckedAt!) &&
-        now.difference(_qiyamCheckedAt!) < const Duration(minutes: 1)) {
-      return null;
-    }
-    _qiyamCheckedAt = now;
-    final day = tz.TZDateTime.from(now, prayerTimeZone(place.timezoneId));
-    for (var offset = -1; offset <= 2; offset++) {
-      final instant = calculator
-          .schedule(place, DateTime.utc(day.year, day.month, day.day + offset))
+    final today = PrayerCalculator.localDay(place, now);
+    for (var d = -1; d <= 1; d++) {
+      final q = services.calculator
+          .schedule(place, today.add(Duration(days: d)))
           .qiyamUtc;
-      if (instant != null && instant.isAfter(now)) {
-        return _cachedQiyam = instant;
-      }
+      if (q != null && q.isAfter(now)) return q;
     }
     return null;
   }
 
-  Future<void> setQiyamReminder(bool enabled) => _run(() async {
-    if (state.activeLocation == null || (enabled && nextQiyam == null)) {
-      throw const PrayerException(PrayerFailure.calculationUnavailable);
+  Future<void> clearMovedNotice() async {
+    if (state.movedNotice == null) return;
+    await _save(state.copyWith(movedNotice: null));
+  }
+
+  // --- Setting a place ------------------------------------------------------------------------
+
+  static String _newId() =>
+      [for (var i = 0; i < 12; i++) Random.secure().nextInt(256)]
+          .map((b) => b.toRadixString(16).padLeft(2, '0'))
+          .join();
+
+  /// Detects the phone's position and makes "My location" current (Story 1, Story 3).
+  Future<void> useMyLocation(String language) => _run(() async {
+    if (locationFailure == PrayerFailure.locationDenied) {
+      throw const PrayerException(PrayerFailure.locationDenied);
     }
-    final old = state.reminders;
-    if (old.qiyamEnabled == enabled) return;
-    await _commit(
-      _updated(
-        reminders: ReminderPreferences(
-          enabledPrayers: old.enabledPrayers,
-          selectedAthanId: old.selectedAthanId,
-          requestedMode: old.requestedMode,
-          qiyamEnabled: enabled,
-          acknowledgedFallbacks: old.acknowledgedFallbacks,
-        ),
-        invalidate: true,
-      ),
-    );
-  });
-  Future<void> acknowledgeReminderFallback(String key) => _run(() async {
-    if (key != reminderStatus.requiredAcknowledgement) {
-      throw const PrayerException(PrayerFailure.needsAttention);
-    }
-    await _commit(
-      _updated(
-        reminders: _reminderChoices(
-          acknowledgements: {...state.reminders.acknowledgedFallbacks, key: 1},
-        ),
-        invalidate: true,
-      ),
-    );
-  });
-  Future<void> previewAthan(AthanRecording recording) => _run(() async {
-    if (reminderAudio == null || !recordings.contains(recording)) {
-      throw const PrayerException(PrayerFailure.audioUnavailable);
-    }
-    previewingAthan = true;
-    _notify();
+    final Map<String, dynamic> raw;
     try {
-      await reminderAudio!.preview(recording);
-    } on Object {
-      previewingAthan = false;
+      raw = await services.location.detect(language);
+    } on PrayerException catch (e) {
+      if (e.reason == PrayerFailure.locationDenied ||
+          e.reason == PrayerFailure.locationUnavailable) {
+        locationFailure = e.reason;
+      }
       rethrow;
     }
+    locationFailure = null;
+    final old = state.myLocation;
+    final country = raw['countryCode'] as String? ?? '';
+    final place = Place.fromResult(
+      raw,
+      id: old?.id ?? _newId(),
+      calculation: old == null
+          ? null
+          : old.calculation.methodChosen
+          ? old.calculation
+          : old.calculation.copyWith(
+              method: CalculationSettings.suggestion(country),
+            ),
+    );
+    await _save(
+      state.copyWith(myLocation: place, current: myLocationKey).bumped(),
+    );
+    viewedPlaceId = place.id;
+    dayOffset = 0;
   });
-  Future<void> stopAthan() async {
-    // Stop bypasses the busy guard so it can interrupt a pending preview load.
-    previewingAthan = false;
+
+  /// Makes the saved "My location" current again without detecting.
+  Future<void> useSavedMyLocation() => _run(() async {
+    if (state.myLocation == null || state.current == myLocationKey) return;
+    await _save(state.copyWith(current: myLocationKey).bumped());
+    viewedPlaceId = state.myLocation!.id;
+  });
+
+  /// Picks a search result or the estimate. The first place becomes current; later ones are
+  /// saved and shown, and alerts keep following the current place (FR-010).
+  Future<void> choosePlace(Map<String, dynamic> result, String language) =>
+      _run(() async {
+        cancelSearch();
+        var raw = result;
+        if (raw['timezoneId'] == null) {
+          raw = await services.location.resolve(
+            (raw['latitude'] as num).toDouble(),
+            (raw['longitude'] as num).toDouble(),
+            language,
+          );
+          raw = {...raw, 'source': result['source']};
+        }
+        final place = Place.fromResult(raw, id: _newId());
+        final first = !state.isSetUp;
+        final next = state.copyWith(
+          places: [...state.places, place],
+          current: first ? place.id : state.current,
+        );
+        await _save(first ? next.bumped() : next);
+        viewedPlaceId = place.id;
+        dayOffset = 0;
+        results = const [];
+        suggestion = null;
+      });
+
+  /// Loads the "Suggested" row when location cannot be used (FR-008).
+  Future<void> loadSuggestion(String language) async {
+    if (suggestion != null) return;
     try {
-      await reminderAudio?.stop();
+      if (locationFailure == null && await services.location.canLocate()) {
+        return;
+      }
+      final estimate = await services.location.approximate(language);
+      if (!_disposed) {
+        suggestion = estimate;
+        _notify();
+      }
     } on Object {
-      failure = PrayerFailure.audioUnavailable;
+      /* offline or unavailable: search alone is enough */
     }
+  }
+
+  Future<void> search(String query, String language) async {
+    final token = ++_search;
+    failure = null;
+    results = const [];
+    searching = query.trim().length >= 2;
+    _notify();
+    try {
+      final found = await services.location.search(query, language);
+      if (token == _search && !_disposed) results = found;
+    } on PrayerException catch (e) {
+      if (token == _search) failure = e.reason;
+    } on Object {
+      if (token == _search) failure = PrayerFailure.providerUnavailable;
+    } finally {
+      if (token == _search && !_disposed) {
+        searching = false;
+        _notify();
+      }
+    }
+  }
+
+  void cancelSearch() {
+    _search++;
+    searching = false;
+    services.location.cancelSearch();
+  }
+
+  // --- Places ---------------------------------------------------------------------------------
+
+  void viewPlace(String id) {
+    if (state.placeById(id) == null) return;
+    viewedPlaceId = id;
+    dayOffset = 0;
     _notify();
   }
 
-  void viewLocation(String id) {
-    if (busy || _disposed) return;
+  /// Alerts follow [id] from now on.
+  Future<void> usePlace(String id) => _run(() async {
+    if (state.placeById(id) == null || state.current == id) return;
+    if (id == state.myLocation?.id) {
+      await _save(state.copyWith(current: myLocationKey).bumped());
+    } else {
+      await _save(state.copyWith(current: id).bumped());
+    }
+    viewedPlaceId = id;
+  });
+
+  Future<void> renamePlace(String id, String name) => _run(() async {
+    final place = state.placeById(id);
+    if (place == null || !validPlaceName(name)) return;
+    final renamed = place.copyWith(name: name);
+    var next = id == state.myLocation?.id
+        ? state.copyWith(myLocation: renamed)
+        : state.copyWith(
+            places: [for (final p in state.places) p.id == id ? renamed : p],
+          );
+    // Alert text names the current place.
+    if (state.currentPlace?.id == id) next = next.bumped();
+    await _save(next);
+  });
+
+  /// Deleting the current place needs a [replacementId] or [alertsOff] (FR-010, Story 3).
+  Future<void> deletePlace(
+    String id, {
+    String? replacementId,
+    bool alertsOff = false,
+  }) => _run(() async {
+    final isMy = id == state.myLocation?.id;
+    final isCurrent = state.currentPlace?.id == id;
+    if (state.placeById(id) == null) return;
+    final places = [
+      for (final p in state.places)
+        if (p.id != id) p,
+    ];
+    final my = isMy ? null : state.myLocation;
+    final remainingSetUp = places.isNotEmpty || my != null;
+    String? current = state.current;
+    var alerts = state.alerts;
+    if (isCurrent) {
+      if (!remainingSetUp) {
+        current = null;
+        alerts = alerts.copyWith(prayers: const {}, qiyam: false);
+      } else if (replacementId != null &&
+          (replacementId == my?.id ||
+              places.any((p) => p.id == replacementId))) {
+        current = replacementId == my?.id ? myLocationKey : replacementId;
+      } else if (alertsOff) {
+        current = my != null ? myLocationKey : places.first.id;
+        alerts = alerts.copyWith(prayers: const {}, qiyam: false);
+      } else {
+        return;
+      }
+    }
+    await _save(
+      PrayerState(
+        places: places,
+        myLocation: my,
+        current: current,
+        alerts: alerts,
+        generation: state.generation + 1,
+      ),
+    );
+    if (viewedPlaceId == id) viewedPlaceId = state.currentPlace?.id;
+  });
+
+  Future<void> deleteAllPrayerData() => _run(() async {
+    await hub.deleteAll();
+    state = await hub.state();
+    viewedPlaceId = null;
+    dayOffset = 0;
+  });
+
+  // --- Calculation ----------------------------------------------------------------------------
+
+  Future<void> updateCalculation(
+    String placeId,
+    CalculationSettings settings,
+  ) => _run(() async {
+    final place = state.placeById(placeId);
+    if (place == null) return;
+    final old = place.calculation;
+    final next = settings.copyWith(
+      methodChosen: old.methodChosen || settings.method != old.method,
+      offsets: {
+        for (final e in settings.offsets.entries) e.key: e.value.clamp(-30, 30),
+      },
+    );
+    if (next == old) return;
+    final updated = place.copyWith(calculation: next);
+    var s = placeId == state.myLocation?.id
+        ? state.copyWith(myLocation: updated)
+        : state.copyWith(
+            places: [
+              for (final p in state.places) p.id == placeId ? updated : p,
+            ],
+          );
+    if (state.currentPlace?.id == placeId) s = s.bumped();
+    await _save(s);
+  });
+
+  // --- Alerts ---------------------------------------------------------------------------------
+
+  /// The first alert turned on asks for notification permission, in context (FR-018).
+  Future<void> setPrayerAlert(PrayerKind kind, bool enabled) => _run(() async {
+    if (!dailyPrayers.contains(kind)) return;
+    if (enabled) await _askPermission();
+    final prayers = {...state.alerts.prayers};
+    enabled ? prayers.add(kind) : prayers.remove(kind);
+    await _save(
+      state.copyWith(alerts: state.alerts.copyWith(prayers: prayers)).bumped(),
+    );
+  });
+
+  Future<void> setQiyam(bool enabled) => _run(() async {
+    if (enabled) await _askPermission();
+    await _save(
+      state.copyWith(alerts: state.alerts.copyWith(qiyam: enabled)).bumped(),
+    );
+  });
+
+  Future<void> setSound(String sound) => _run(() async {
+    if (!services.catalogue.soundChoices.contains(sound)) return;
+    await _save(
+      state.copyWith(alerts: state.alerts.copyWith(sound: sound)).bumped(),
+    );
+  });
+
+  Future<void> setAthanLength(AthanLength length) => _run(() async {
+    await _save(
+      state.copyWith(alerts: state.alerts.copyWith(athan: length)).bumped(),
+    );
+  });
+
+  /// iOS cannot tell "never asked" from "refused" without asking, and the OS shows its prompt
+  /// only once, so turning an alert on asks whenever alerts are not allowed yet.
+  Future<void> _askPermission() async {
+    final status = await services.platform.status();
+    if (status.notifications == NotificationPermission.notDetermined ||
+        status.notifications == NotificationPermission.denied) {
+      await services.platform.requestPermission();
+    }
+  }
+
+  Future<void> openSettings({bool exactAlarms = false}) =>
+      services.platform.openSettings(exactAlarms: exactAlarms);
+
+  /// Downloads the chosen recording for full athan (FR-023).
+  Future<void> downloadFull() => _run(() async {
+    final r = services.catalogue.byId(state.alerts.sound);
+    if (r == null) return;
+    await services.downloads.download(r);
+    await hub.refill();
+  });
+
+  Future<void> preview(String sound) async {
     try {
-      _location(id);
-      viewedLocationId = id;
-      failure = null;
-      refresh();
-    } on FormatException {
-      failure = PrayerFailure.needsAttention;
+      await services.player.preview(sound);
+    } on Object {
+      failure = PrayerFailure.audioUnavailable;
       _notify();
     }
   }
 
-  Future<void> renameLocation(String id, String label) => _run(() async {
-    final renamed = _location(id).copyWith(label: label);
-    await _commit(
-      _updated(
-        locations: [for (final p in state.locations) p.id == id ? renamed : p],
-      ),
-    );
-  });
-  Future<void> activateLocation(String id, {bool confirmed = false}) =>
-      _run(() async {
-        _location(id);
-        if (id == state.activeLocationId) return;
-        if (state.reminders.anyEnabled && !confirmed) {
-          throw const PrayerException(PrayerFailure.needsAttention);
-        }
-        await _commit(
-          _updated(activeId: id, invalidate: true),
-          cancelQueue: true,
-        );
-      });
-  Future<void> updateCalculation(
-    String id,
-    CalculationPreferences preferences,
-  ) => _run(() async {
-    // Round-trip validates supported convention versions before writing.
-    final checked = CalculationPreferences.fromJson(preferences.toJson());
-    final place = _location(id).copyWith(calculation: checked);
-    if (jsonEncode(place.calculation.toJson()) ==
-        jsonEncode(_location(id).calculation.toJson())) {
-      return;
-    }
-    await _commit(
-      _updated(
-        locations: [for (final p in state.locations) p.id == id ? place : p],
-        invalidate: true,
-      ),
-      cancelQueue: true,
-    );
-  });
-  Future<void> deleteLocation(
-    String id, {
-    String? replacementId,
-    bool disableReminders = false,
-  }) => _run(() async {
-    _location(id);
-    final isActive = id == state.activeLocationId;
-    if (replacementId != null) {
-      _location(replacementId);
-      if (replacementId == id) {
-        throw const FormatException('Invalid replacement');
-      }
-    }
-    if (isActive && replacementId == null && !disableReminders) {
-      throw const PrayerException(PrayerFailure.needsAttention);
-    }
-    final updated = _updated(
-      locations: state.locations.where((p) => p.id != id).toList(),
-      activeId: isActive ? replacementId : null,
-      clearActive: isActive && replacementId == null,
-      reminders: isActive && replacementId == null
-          ? ReminderPreferences(
-              selectedAthanId: state.reminders.selectedAthanId,
-              requestedMode: state.reminders.requestedMode,
-              acknowledgedFallbacks: state.reminders.acknowledgedFallbacks,
-            )
-          : state.reminders,
-      invalidate: true,
-    );
-    // Do not erase a place while an obsolete alert may still contain it.
-    // A failed save after cancellation retains the source snapshot for retry.
-    await notifications.cancelAll();
-    await _commit(updated);
-    if (viewedLocationId == id) {
-      viewedLocationId =
-          updated.activeLocationId ?? updated.locations.firstOrNull?.id;
-    }
-    refresh();
-  });
-  Future<void> clearPrayerData({bool confirmed = false}) => _run(() async {
-    if (!confirmed || !initialized) {
-      throw const PrayerException(PrayerFailure.needsAttention);
-    }
-    // Never erase the source snapshot while obsolete alerts may remain queued.
-    await notifications.cancelAll();
-    await repository.delete();
-    state = PrayerState(generation: state.generation + 1);
-    reminderStatus = PrayerScheduleResult(PrayerScheduleStatus.disabled);
-    reminderAudioReadiness = (openingReady: false, fullReady: false);
-    viewedLocationId = null;
-    candidate = null;
-    results = [];
-    locationClient.cancelSearch();
-    _searchVersion++;
-    refresh();
-  });
-  Future<void> useSessionOnly() => _run(() async {
-    repository.useSessionOnly();
-    state = await repository.load();
-    viewedLocationId =
-        state.activeLocationId ?? state.locations.firstOrNull?.id;
-    initialized = true;
-    refresh();
-  });
+  Future<void> stopSound() => services.player.stop();
+
   @override
   void dispose() {
     _disposed = true;
-    _searchVersion++;
-    locationClient.dispose();
+    _search++;
+    hub.removeListener(_hubChanged);
     super.dispose();
   }
 }

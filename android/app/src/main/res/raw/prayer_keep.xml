@@ -1,2 +1,2 @@
 <resources xmlns:tools="http://schemas.android.com/tools"
-    tools:keep="@raw/qiyam_tone" />
+    tools:keep="@raw/qiyam_tone,@raw/athan_*" />

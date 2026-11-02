@@ -10,48 +10,33 @@ import 'prayer_notifications_page.dart';
 
 export 'prayer_notifications_page.dart';
 
-Stream<void> get prayerNotificationOpens => const Stream.empty();
-Future<bool> takePrayerNotificationOpen() async => false;
+PrayerAlertPlatform prayerAlertPlatform({
+  required Map<String, String> Function() channels,
+}) => PageAlerts(port: BrowserPrayerPagePort());
 
-PrayerNotificationAdapter shortPrayerNotifications({
-  required String title,
-  required String Function(PrayerKind kind) body,
-}) => const NoPrayerNotifications();
-
-PrayerPageNotifications prayerNotifications({
-  required PrayerAudio audio,
-  required Future<void> Function(ScheduledReminder event) playFromUser,
-  required void Function(PrayerPageDelivery delivery) onDelivery,
-  required String notificationTitle,
-  required String Function(PrayerKind kind) notificationBody,
-}) => PrayerPageNotifications(
-  port: BrowserPrayerPagePort(
-    notificationTitle: notificationTitle,
-    notificationBody: notificationBody,
-  ),
-  audio: audio,
-  playFromUser: playFromUser,
-  onDelivery: onDelivery,
-);
+/// Removes the first draft's encrypted prayer snapshot and its key from this browser
+/// (`flutter_secure_storage` 10.3.4 web defaults; research R6).
+Future<void> clearLegacyPrayerStorage() async {
+  try {
+    final storage = web.window.localStorage;
+    storage.removeItem('FlutterSecureStorage.mathani.prayer.snapshot.v1');
+    storage.removeItem('FlutterSecureStorage');
+  } on Object {
+    /* storage blocked: nothing to clean */
+  }
+}
 
 class BrowserPrayerPagePort implements PrayerPagePort {
-  BrowserPrayerPagePort({
-    required this.notificationTitle,
-    required this.notificationBody,
-  });
-  final String notificationTitle;
-  final String Function(PrayerKind kind) notificationBody;
   bool _pageHidden = false;
   @override
   bool get active => !_pageHidden && web.document.visibilityState == 'visible';
   @override
-  bool get secureContext => web.window.isSecureContext;
-  @override
   bool get notificationsSupported =>
-      secureContext && globalContext.hasProperty('Notification'.toJS).toDart;
+      web.window.isSecureContext &&
+      globalContext.hasProperty('Notification'.toJS).toDart;
   @override
   String get notificationPermission =>
-      notificationsSupported ? web.Notification.permission : 'unsupported';
+      notificationsSupported ? web.Notification.permission : 'denied';
   @override
   Future<void> requestNotificationPermission() async {
     if (notificationsSupported) {
@@ -87,16 +72,14 @@ class BrowserPrayerPagePort implements PrayerPagePort {
   }
 
   @override
-  void Function()? showSilentNotification(ScheduledReminder event) {
-    if (notificationPermission != 'granted') return null;
-    final notice = web.Notification(
-      notificationTitle,
+  void showNotification(Alert alert) {
+    web.Notification(
+      alert.title,
       web.NotificationOptions(
-        body: notificationBody(event.kind),
-        tag: 'mathani-prayer-${event.generation}-${event.eventId}',
+        body: alert.body,
+        tag: 'mathani-prayer-${alert.id}',
         silent: true,
       ),
     );
-    return () => notice.close();
   }
 }

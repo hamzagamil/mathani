@@ -1,98 +1,69 @@
+import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
+import '../../data/user_repository.dart';
 import 'prayer_models.dart';
-import 'prayer_services.dart';
 
-class SecurePrayerSnapshotStore implements PrayerSnapshotStore {
-  SecurePrayerSnapshotStore({FlutterSecureStorage? storage})
-    : _storage =
-          storage ??
-          const FlutterSecureStorage(
-            aOptions: AndroidOptions(
-              resetOnError: false,
-              storageNamespace: 'mathani_prayer',
-            ),
-            iOptions: IOSOptions(
-              accessibility: KeychainAccessibility.first_unlock_this_device,
-              synchronizable: false,
-            ),
-          );
-  static const key = 'mathani.prayer.snapshot.v1';
-  final FlutterSecureStorage _storage;
-  @override
-  Future<String?> read() => _storage.read(key: key);
-  @override
-  Future<void> write(String value) => _storage.write(key: key, value: value);
-  @override
-  Future<void> delete() => _storage.delete(key: key);
+/// Where the prayer JSON lives. [UserPrayerStateStore] in the app; a map in tests.
+abstract interface class PrayerStateStore {
+  Future<String?> read();
+  Future<void> write(String value);
+  Future<void> delete();
 }
 
-/// Dedicated ciphertext snapshot. Never opens or migrates user.db.
+/// The `prayer.state` row of user.db's `preferences` table (research R6).
+class UserPrayerStateStore implements PrayerStateStore {
+  UserPrayerStateStore(this._user);
+  final UserRepository _user;
+  @override
+  Future<String?> read() => _user.readPreference(UserRepository.prayerStateKey);
+  @override
+  Future<void> write(String value) =>
+      _user.writePreference(UserRepository.prayerStateKey, value);
+  @override
+  Future<void> delete() =>
+      _user.deletePreference(UserRepository.prayerStateKey);
+}
+
+/// Loads and saves [PrayerState]. A missing, unreadable or newer-schema value loads as "not set
+/// up" and is left untouched until the next [save], so an older app never destroys newer data.
 class PrayerRepository {
   PrayerRepository(this._store);
-  final PrayerSnapshotStore _store;
+  final PrayerStateStore _store;
   Future<void> _tail = Future<void>.value();
-  bool _loaded = false, _sessionOnly = false;
-  PrayerState? _session;
-  bool get sessionOnly => _sessionOnly;
+
   Future<T> _serial<T>(Future<T> Function() action) {
     final result = _tail.then((_) => action());
-    _tail = result.then<void>((_) {}, onError: (Object _, StackTrace stack) {});
+    _tail = result.then<void>((_) {}, onError: (Object _, StackTrace _) {});
     return result;
   }
 
   Future<PrayerState> load() => _serial(() async {
-    if (_sessionOnly) return _session ?? PrayerState();
-    _loaded = false;
+    final raw = await _store.read();
+    if (raw == null) return PrayerState();
     try {
-      final raw = await _store.read();
-      final state = raw == null
-          ? PrayerState()
-          : PrayerState.fromJson(
-              Map<String, dynamic>.from(jsonDecode(raw) as Map),
-            );
-      _loaded = true;
-      return state;
-    } on FormatException {
-      throw const PrayerException(PrayerFailure.needsAttention);
+      return PrayerState.fromJson(
+        Map<String, dynamic>.from(jsonDecode(raw) as Map),
+      );
     } on Object {
-      throw const PrayerException(PrayerFailure.secureStorageUnavailable);
+      return PrayerState();
     }
   });
 
-  /// Explicit recovery; never overwrites unreadable encrypted persistent data.
-  void useSessionOnly() {
-    _sessionOnly = true;
-    _loaded = true;
-    _session = PrayerState();
-  }
+  Future<void> save(PrayerState state) =>
+      _serial(() => _store.write(jsonEncode(state.toJson())));
 
-  Future<void> save(PrayerState state) => _serial(() async {
-    if (!_loaded) {
-      throw const PrayerException(PrayerFailure.secureStorageUnavailable);
-    }
-    if (_sessionOnly) {
-      _session = state;
-      return;
-    }
-    try {
-      await _store.write(jsonEncode(state.toJson()));
-    } on Object {
-      throw const PrayerException(PrayerFailure.secureStorageUnavailable);
-    }
-  });
-  Future<void> delete() => _serial(() async {
-    if (_sessionOnly) {
-      _session = PrayerState();
-      return;
-    }
-    try {
-      await _store.delete();
-      _loaded = true;
-    } on Object {
-      throw const PrayerException(PrayerFailure.secureStorageUnavailable);
-    }
-  });
+  Future<void> delete() => _serial(_store.delete);
+}
+
+/// In-memory store, for tests.
+class MemoryPrayerStateStore implements PrayerStateStore {
+  MemoryPrayerStateStore([this.value]);
+  String? value;
+  @override
+  Future<String?> read() async => value;
+  @override
+  Future<void> write(String value) async => this.value = value;
+  @override
+  Future<void> delete() async => value = null;
 }

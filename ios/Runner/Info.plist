@@ -62,8 +62,11 @@
 	<string>Main</string>
 	<!-- Recitations keep playing with the screen locked or the app in the background (specs/004). -->
 	<!-- Memorization (specs/006 research R16); localised in InfoPlist.strings. -->
+	<!-- Prayer times (specs/009 FR-006): the system prompt offers approximate location by default. -->
+	<key>NSLocationDefaultAccuracyReduced</key>
+	<true/>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Mathani uses location only when you choose detection for prayer times. Coordinates are sent to Mathani and GeoNames to resolve the place and time zone. You can select a city instead.</string>
+	<string>Mathani uses your approximate location only to set the place for prayer times, when you tap Use my location. You can search for a city instead.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Mathani uses the microphone only during a memorization session, to follow your recitation on your device. Your voice is not recorded and never leaves the device.</string>
 	<key>UIBackgroundModes</key>

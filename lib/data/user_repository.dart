@@ -14,6 +14,9 @@ class UserRepository extends ChangeNotifier {
 
   static const _schemaVersion = 1;
 
+  /// The prayer-times state, one JSON value in `preferences` (specs/009 data-model.md).
+  static const prayerStateKey = 'prayer.state';
+
   final Database _db;
 
   /// Bookmarks, newest first (FR-015). Kept in memory; the table is small.
@@ -113,7 +116,8 @@ class UserRepository extends ChangeNotifier {
   Future<(AyahRef, ReaderPreferences)> loadStartup() async {
     final results = await Future.wait([
       _db.query('reading_state', where: 'id = 1'),
-      _db.query('preferences'),
+      // Prayer times read their own row only when needed (specs/009 research R11).
+      _db.query('preferences', where: 'key != ?', whereArgs: [prayerStateKey]),
     ]);
     final state = results[0];
     final anchor = state.isEmpty
@@ -178,4 +182,19 @@ class UserRepository extends ChangeNotifier {
     }
     return batch.commit(noResult: true);
   }
+
+  /// One preference row by [key], for features that keep their own value (specs/009).
+  Future<String?> readPreference(String key) async {
+    final rows = await _db.query('preferences', where: 'key = ?', whereArgs: [key]);
+    return rows.isEmpty ? null : rows.first['value'] as String;
+  }
+
+  Future<void> writePreference(String key, String value) => _db.insert(
+        'preferences',
+        {'key': key, 'value': value},
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+
+  Future<void> deletePreference(String key) =>
+      _db.delete('preferences', where: 'key = ?', whereArgs: [key]);
 }

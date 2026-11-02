@@ -1471,17 +1471,23 @@ abstract class AppLocalizations {
   /// **'Prayer times'**
   String get prayerTimesTitle;
 
-  /// No description provided for @prayerAddLocation.
+  /// No description provided for @prayerFirstTimeTitle.
   ///
   /// In en, this message translates to:
-  /// **'Choose location'**
-  String get prayerAddLocation;
+  /// **'Set your place'**
+  String get prayerFirstTimeTitle;
 
-  /// No description provided for @prayerDetectLocation.
+  /// No description provided for @prayerLocationWhy.
   ///
   /// In en, this message translates to:
-  /// **'Detect my location'**
-  String get prayerDetectLocation;
+  /// **'Your approximate location is used only to work out prayer times for your city. You can search for a city instead.'**
+  String get prayerLocationWhy;
+
+  /// No description provided for @prayerUseMyLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Use my location'**
+  String get prayerUseMyLocation;
 
   /// No description provided for @prayerSearchCity.
   ///
@@ -1489,53 +1495,17 @@ abstract class AppLocalizations {
   /// **'Search for a city'**
   String get prayerSearchCity;
 
-  /// No description provided for @prayerApproximateLocation.
+  /// No description provided for @prayerSuggested.
   ///
   /// In en, this message translates to:
-  /// **'Try approximate location'**
-  String get prayerApproximateLocation;
+  /// **'Suggested: {place}'**
+  String prayerSuggested(String place);
 
-  /// No description provided for @prayerLocationDisclosure.
+  /// No description provided for @prayerEstimateNote.
   ///
   /// In en, this message translates to:
-  /// **'Device location is used only to find prayer times. To resolve the place and time zone, coordinates are sent to Mathani/Cloudflare and GeoNames. You can choose a city instead.'**
-  String get prayerLocationDisclosure;
-
-  /// No description provided for @prayerIpDisclosure.
-  ///
-  /// In en, this message translates to:
-  /// **'Approximate lookup uses your connection\'s IP address at Cloudflare. It may be wrong with a VPN. Confirm or change the result before use.'**
-  String get prayerIpDisclosure;
-
-  /// No description provided for @prayerApproximate.
-  ///
-  /// In en, this message translates to:
-  /// **'Approximate location'**
-  String get prayerApproximate;
-
-  /// No description provided for @prayerConfirmLocation.
-  ///
-  /// In en, this message translates to:
-  /// **'Use this location'**
-  String get prayerConfirmLocation;
-
-  /// No description provided for @prayerChangeLocation.
-  ///
-  /// In en, this message translates to:
-  /// **'Change location'**
-  String get prayerChangeLocation;
-
-  /// No description provided for @prayerCancel.
-  ///
-  /// In en, this message translates to:
-  /// **'Cancel'**
-  String get prayerCancel;
-
-  /// No description provided for @prayerNoLocation.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose a location to see its prayer times.'**
-  String get prayerNoLocation;
+  /// **'Estimated from your internet connection'**
+  String get prayerEstimateNote;
 
   /// No description provided for @prayerNoResults.
   ///
@@ -1543,23 +1513,47 @@ abstract class AppLocalizations {
   /// **'No matching cities. Try another name.'**
   String get prayerNoResults;
 
+  /// No description provided for @prayerGeoNamesAttribution.
+  ///
+  /// In en, this message translates to:
+  /// **'Place data: GeoNames'**
+  String get prayerGeoNamesAttribution;
+
+  /// No description provided for @prayerCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get prayerCancel;
+
+  /// No description provided for @prayerRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get prayerRetry;
+
+  /// No description provided for @prayerSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get prayerSave;
+
+  /// No description provided for @prayerDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get prayerDelete;
+
+  /// No description provided for @prayerRename.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get prayerRename;
+
   /// No description provided for @prayerUnavailable.
   ///
   /// In en, this message translates to:
   /// **'Unavailable'**
   String get prayerUnavailable;
-
-  /// No description provided for @prayerAdjusted.
-  ///
-  /// In en, this message translates to:
-  /// **'Adjusted for high latitude'**
-  String get prayerAdjusted;
-
-  /// No description provided for @prayerNext.
-  ///
-  /// In en, this message translates to:
-  /// **'Next prayer'**
-  String get prayerNext;
 
   /// No description provided for @prayerFajr.
   ///
@@ -1570,7 +1564,7 @@ abstract class AppLocalizations {
   /// No description provided for @prayerSunrise.
   ///
   /// In en, this message translates to:
-  /// **'Sunrise (information only)'**
+  /// **'Sunrise'**
   String get prayerSunrise;
 
   /// No description provided for @prayerDhuhr.
@@ -1603,17 +1597,203 @@ abstract class AppLocalizations {
   /// **'Qiyam'**
   String get prayerQiyam;
 
+  /// No description provided for @prayerNotAPrayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Not a prayer'**
+  String get prayerNotAPrayer;
+
+  /// No description provided for @prayerNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next prayer'**
+  String get prayerNext;
+
+  /// No description provided for @prayerToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get prayerToday;
+
+  /// No description provided for @prayerPreviousDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous day'**
+  String get prayerPreviousDay;
+
+  /// No description provided for @prayerNextDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Next day'**
+  String get prayerNextDay;
+
+  /// No description provided for @prayerZoneNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Times in {zone}'**
+  String prayerZoneNote(String zone);
+
+  /// No description provided for @prayerAdjustedLatitude.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjusted: {rule}'**
+  String prayerAdjustedLatitude(String rule);
+
+  /// No description provided for @prayerAdjustedMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjusted {minutes} min'**
+  String prayerAdjustedMinutes(String minutes);
+
+  /// No description provided for @prayerMovedTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Moved to {city}. Times and alerts are updated.'**
+  String prayerMovedTo(String city);
+
+  /// No description provided for @prayerViewingNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Viewing only. Alerts follow {place}.'**
+  String prayerViewingNote(String place);
+
+  /// No description provided for @prayerUseThisPlace.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this place'**
+  String get prayerUseThisPlace;
+
+  /// No description provided for @prayerCalculationUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Times can\'t be calculated for this place and date.'**
+  String get prayerCalculationUnavailable;
+
+  /// No description provided for @prayerAutoplayBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'The browser blocked the athan sound.'**
+  String get prayerAutoplayBlocked;
+
+  /// No description provided for @prayerAthanPlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Play athan'**
+  String get prayerAthanPlay;
+
+  /// No description provided for @prayerPlaces.
+  ///
+  /// In en, this message translates to:
+  /// **'Places'**
+  String get prayerPlaces;
+
+  /// No description provided for @prayerMyLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'My location'**
+  String get prayerMyLocation;
+
+  /// No description provided for @prayerCurrentPlace.
+  ///
+  /// In en, this message translates to:
+  /// **'Alerts follow this place'**
+  String get prayerCurrentPlace;
+
+  /// No description provided for @prayerPlaceActions.
+  ///
+  /// In en, this message translates to:
+  /// **'Place options'**
+  String get prayerPlaceActions;
+
+  /// No description provided for @prayerRefreshLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Update my location'**
+  String get prayerRefreshLocation;
+
+  /// No description provided for @prayerAddPlace.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a place'**
+  String get prayerAddPlace;
+
+  /// No description provided for @prayerPlaceName.
+  ///
+  /// In en, this message translates to:
+  /// **'Place name'**
+  String get prayerPlaceName;
+
+  /// No description provided for @prayerLabelError.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter 1–80 characters without line breaks or control characters.'**
+  String get prayerLabelError;
+
+  /// No description provided for @prayerDeletePlace.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete place'**
+  String get prayerDeletePlace;
+
+  /// No description provided for @prayerDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {place} and its settings?'**
+  String prayerDeleteConfirm(String place);
+
+  /// No description provided for @prayerDeleteLastConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'This is your only place. Delete it and turn off all prayer alerts?'**
+  String get prayerDeleteLastConfirm;
+
+  /// No description provided for @prayerDeleteCurrentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Alerts follow this place'**
+  String get prayerDeleteCurrentTitle;
+
+  /// No description provided for @prayerDeleteCurrentBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose where alerts should follow, or turn them off.'**
+  String get prayerDeleteCurrentBody;
+
+  /// No description provided for @prayerAlertsFollow.
+  ///
+  /// In en, this message translates to:
+  /// **'Alerts follow {place}'**
+  String prayerAlertsFollow(String place);
+
+  /// No description provided for @prayerDeleteAlertsOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete and turn alerts off'**
+  String get prayerDeleteAlertsOff;
+
+  /// No description provided for @prayerClearData.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete all prayer data'**
+  String get prayerClearData;
+
+  /// No description provided for @prayerClearDataConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete all saved places and prayer settings, and turn off prayer alerts? Your Quran bookmarks, reading position and downloads are kept.'**
+  String get prayerClearDataConfirm;
+
+  /// No description provided for @prayerCalculationSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Calculation settings'**
+  String get prayerCalculationSettings;
+
   /// No description provided for @prayerMethod.
   ///
   /// In en, this message translates to:
   /// **'Calculation method'**
   String get prayerMethod;
-
-  /// No description provided for @prayerMadhhab.
-  ///
-  /// In en, this message translates to:
-  /// **'Asr madhhab'**
-  String get prayerMadhhab;
 
   /// No description provided for @prayerMethodMwl.
   ///
@@ -1627,17 +1807,17 @@ abstract class AppLocalizations {
   /// **'Egyptian General Authority of Survey'**
   String get prayerMethodEgypt;
 
-  /// No description provided for @prayerMethodKarachi.
-  ///
-  /// In en, this message translates to:
-  /// **'University of Islamic Sciences, Karachi'**
-  String get prayerMethodKarachi;
-
   /// No description provided for @prayerMethodMakkah.
   ///
   /// In en, this message translates to:
   /// **'Umm al-Qura, Makkah'**
   String get prayerMethodMakkah;
+
+  /// No description provided for @prayerMethodKarachi.
+  ///
+  /// In en, this message translates to:
+  /// **'University of Islamic Sciences, Karachi'**
+  String get prayerMethodKarachi;
 
   /// No description provided for @prayerMethodNorthAmerica.
   ///
@@ -1645,29 +1825,77 @@ abstract class AppLocalizations {
   /// **'North America (ISNA)'**
   String get prayerMethodNorthAmerica;
 
-  /// No description provided for @prayerHanafi.
+  /// No description provided for @prayerMethodDubai.
+  ///
+  /// In en, this message translates to:
+  /// **'Dubai'**
+  String get prayerMethodDubai;
+
+  /// No description provided for @prayerMethodKuwait.
+  ///
+  /// In en, this message translates to:
+  /// **'Kuwait'**
+  String get prayerMethodKuwait;
+
+  /// No description provided for @prayerMethodQatar.
+  ///
+  /// In en, this message translates to:
+  /// **'Qatar'**
+  String get prayerMethodQatar;
+
+  /// No description provided for @prayerMethodSingapore.
+  ///
+  /// In en, this message translates to:
+  /// **'Singapore'**
+  String get prayerMethodSingapore;
+
+  /// No description provided for @prayerMethodTurkey.
+  ///
+  /// In en, this message translates to:
+  /// **'Turkey (Diyanet)'**
+  String get prayerMethodTurkey;
+
+  /// No description provided for @prayerMethodMoonsighting.
+  ///
+  /// In en, this message translates to:
+  /// **'Moonsighting Committee'**
+  String get prayerMethodMoonsighting;
+
+  /// No description provided for @prayerSuggestedMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested'**
+  String get prayerSuggestedMethod;
+
+  /// No description provided for @prayerAsrSetting.
+  ///
+  /// In en, this message translates to:
+  /// **'Asr'**
+  String get prayerAsrSetting;
+
+  /// No description provided for @prayerAsrStandard.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard (Shafi\'i, Maliki, Hanbali)'**
+  String get prayerAsrStandard;
+
+  /// No description provided for @prayerAsrHanafi.
   ///
   /// In en, this message translates to:
   /// **'Hanafi'**
-  String get prayerHanafi;
+  String get prayerAsrHanafi;
 
-  /// No description provided for @prayerShafii.
+  /// No description provided for @prayerAsrNote.
   ///
   /// In en, this message translates to:
-  /// **'Shafi‘i'**
-  String get prayerShafii;
+  /// **'This setting changes Asr only.'**
+  String get prayerAsrNote;
 
-  /// No description provided for @prayerMaliki.
+  /// No description provided for @prayerHighLatitude.
   ///
   /// In en, this message translates to:
-  /// **'Maliki'**
-  String get prayerMaliki;
-
-  /// No description provided for @prayerHanbali.
-  ///
-  /// In en, this message translates to:
-  /// **'Hanbali'**
-  String get prayerHanbali;
+  /// **'High-latitude rule'**
+  String get prayerHighLatitude;
 
   /// No description provided for @prayerMiddleNight.
   ///
@@ -1681,275 +1909,83 @@ abstract class AppLocalizations {
   /// **'One seventh of the night'**
   String get prayerSeventhNight;
 
-  /// No description provided for @prayerHighLatitude.
+  /// No description provided for @prayerMiddleNightNote.
   ///
   /// In en, this message translates to:
-  /// **'High-latitude rule'**
-  String get prayerHighLatitude;
+  /// **'Fajr no earlier, and Isha no later, than the middle of the night.'**
+  String get prayerMiddleNightNote;
 
-  /// No description provided for @prayerLocationDenied.
+  /// No description provided for @prayerSeventhNightNote.
   ///
   /// In en, this message translates to:
-  /// **'Location access was denied. You can choose a city manually.'**
-  String get prayerLocationDenied;
+  /// **'Fajr no earlier than the last seventh of the night, Isha no later than the first.'**
+  String get prayerSeventhNightNote;
 
-  /// No description provided for @prayerLocationUnavailable.
+  /// No description provided for @prayerOffsets.
   ///
   /// In en, this message translates to:
-  /// **'Device location is unavailable. Choose a city or try approximate location.'**
-  String get prayerLocationUnavailable;
+  /// **'Adjust times'**
+  String get prayerOffsets;
 
-  /// No description provided for @prayerTimezoneUnavailable.
+  /// No description provided for @prayerOffsetsNote.
   ///
   /// In en, this message translates to:
-  /// **'The time zone could not be resolved. Choose a city instead.'**
-  String get prayerTimezoneUnavailable;
+  /// **'Match your local mosque by moving a prayer up to 30 minutes.'**
+  String get prayerOffsetsNote;
 
-  /// No description provided for @prayerOffline.
+  /// No description provided for @prayerNoOffset.
   ///
   /// In en, this message translates to:
-  /// **'A connection is needed for this lookup. Saved places still work offline.'**
-  String get prayerOffline;
+  /// **'No change'**
+  String get prayerNoOffset;
 
-  /// No description provided for @prayerStorageUnavailable.
+  /// No description provided for @prayerOffsetMinutes.
   ///
   /// In en, this message translates to:
-  /// **'Saved location data could not be read securely. Retry, or continue for this session without changing existing saved data.'**
-  String get prayerStorageUnavailable;
+  /// **'{minutes} min'**
+  String prayerOffsetMinutes(String minutes);
 
-  /// No description provided for @prayerSessionOnly.
+  /// No description provided for @prayerEarlier.
   ///
   /// In en, this message translates to:
-  /// **'Use for this session'**
-  String get prayerSessionOnly;
+  /// **'{prayer} 1 minute earlier'**
+  String prayerEarlier(String prayer);
 
-  /// No description provided for @prayerSessionNotice.
+  /// No description provided for @prayerLater.
   ///
   /// In en, this message translates to:
-  /// **'Changes are kept only until you close this session.'**
-  String get prayerSessionNotice;
+  /// **'{prayer} 1 minute later'**
+  String prayerLater(String prayer);
 
-  /// No description provided for @prayerServiceUnavailable.
+  /// No description provided for @prayerAlerts.
   ///
   /// In en, this message translates to:
-  /// **'Location lookup is unavailable. Try again later or keep using a saved place.'**
-  String get prayerServiceUnavailable;
+  /// **'Alerts'**
+  String get prayerAlerts;
 
-  /// No description provided for @prayerCalculationUnavailable.
+  /// No description provided for @prayerSound.
   ///
   /// In en, this message translates to:
-  /// **'Times cannot be calculated for this date and convention. No reminder is scheduled for unavailable times.'**
-  String get prayerCalculationUnavailable;
+  /// **'Sound'**
+  String get prayerSound;
 
-  /// No description provided for @prayerNeedsAttention.
+  /// No description provided for @prayerSoundTone.
   ///
   /// In en, this message translates to:
-  /// **'Saved prayer settings need attention. Existing saved data has been preserved.'**
-  String get prayerNeedsAttention;
+  /// **'Simple tone'**
+  String get prayerSoundTone;
 
-  /// No description provided for @prayerRetry.
+  /// No description provided for @prayerSoundSilent.
   ///
   /// In en, this message translates to:
-  /// **'Try again'**
-  String get prayerRetry;
+  /// **'Silent'**
+  String get prayerSoundSilent;
 
-  /// No description provided for @prayerGeoNamesAttribution.
+  /// No description provided for @prayerPreview.
   ///
   /// In en, this message translates to:
-  /// **'Place data: GeoNames'**
-  String get prayerGeoNamesAttribution;
-
-  /// No description provided for @prayerSavedLocations.
-  ///
-  /// In en, this message translates to:
-  /// **'Saved locations'**
-  String get prayerSavedLocations;
-
-  /// No description provided for @prayerNewLocation.
-  ///
-  /// In en, this message translates to:
-  /// **'Add a location'**
-  String get prayerNewLocation;
-
-  /// No description provided for @prayerLocationLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Location name'**
-  String get prayerLocationLabel;
-
-  /// No description provided for @prayerLabelError.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter 1–80 characters without line breaks or control characters.'**
-  String get prayerLabelError;
-
-  /// No description provided for @prayerRename.
-  ///
-  /// In en, this message translates to:
-  /// **'Rename'**
-  String get prayerRename;
-
-  /// No description provided for @prayerViewLocation.
-  ///
-  /// In en, this message translates to:
-  /// **'View times'**
-  String get prayerViewLocation;
-
-  /// No description provided for @prayerUseForReminders.
-  ///
-  /// In en, this message translates to:
-  /// **'Use for reminders'**
-  String get prayerUseForReminders;
-
-  /// No description provided for @prayerActiveLocation.
-  ///
-  /// In en, this message translates to:
-  /// **'Active reminder location'**
-  String get prayerActiveLocation;
-
-  /// No description provided for @prayerViewedLocation.
-  ///
-  /// In en, this message translates to:
-  /// **'Viewing another location'**
-  String get prayerViewedLocation;
-
-  /// No description provided for @prayerDeleteLocation.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete location'**
-  String get prayerDeleteLocation;
-
-  /// No description provided for @prayerDeleteInactiveConfirm.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete this saved location and its calculation settings?'**
-  String get prayerDeleteInactiveConfirm;
-
-  /// No description provided for @prayerDeleteActiveConfirm.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose a replacement for reminders, or delete this location and turn off all prayer reminders.'**
-  String get prayerDeleteActiveConfirm;
-
-  /// No description provided for @prayerDeleteAndDisable.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete and turn off reminders'**
-  String get prayerDeleteAndDisable;
-
-  /// No description provided for @prayerReplaceAndDelete.
-  ///
-  /// In en, this message translates to:
-  /// **'Replace and delete'**
-  String get prayerReplaceAndDelete;
-
-  /// No description provided for @prayerReplacementLocation.
-  ///
-  /// In en, this message translates to:
-  /// **'Replacement location'**
-  String get prayerReplacementLocation;
-
-  /// No description provided for @prayerClearData.
-  ///
-  /// In en, this message translates to:
-  /// **'Clear prayer data'**
-  String get prayerClearData;
-
-  /// No description provided for @prayerClearDataConfirm.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete all saved prayer locations and prayer settings, and cancel prayer reminders? Your Quran bookmarks and reading position will be kept.'**
-  String get prayerClearDataConfirm;
-
-  /// No description provided for @prayerActivateConfirm.
-  ///
-  /// In en, this message translates to:
-  /// **'Use this location for reminders? Future prayer reminders will use its calculation settings.'**
-  String get prayerActivateConfirm;
-
-  /// No description provided for @prayerCalculationSettings.
-  ///
-  /// In en, this message translates to:
-  /// **'Calculation settings'**
-  String get prayerCalculationSettings;
-
-  /// No description provided for @prayerSave.
-  ///
-  /// In en, this message translates to:
-  /// **'Save'**
-  String get prayerSave;
-
-  /// No description provided for @prayerSuggestedMethod.
-  ///
-  /// In en, this message translates to:
-  /// **'Suggested for this country'**
-  String get prayerSuggestedMethod;
-
-  /// No description provided for @prayerAsrExplanation.
-  ///
-  /// In en, this message translates to:
-  /// **'These madhhab choices affect Asr only. Hanafi uses shadow factor 2; Shafi‘i, Maliki and Hanbali use factor 1. Your chosen label is saved.'**
-  String get prayerAsrExplanation;
-
-  /// No description provided for @prayerCalculationExplanation.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose the convention you follow. High-latitude adjustments are labelled; unavailable times are never replaced with guessed times.'**
-  String get prayerCalculationExplanation;
-
-  /// No description provided for @prayerNoActiveLocation.
-  ///
-  /// In en, this message translates to:
-  /// **'No active reminder location'**
-  String get prayerNoActiveLocation;
-
-  /// No description provided for @prayerReminderLocationHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Viewing times here does not change the reminder location.'**
-  String get prayerReminderLocationHint;
-
-  /// No description provided for @prayerDelete.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete'**
-  String get prayerDelete;
-
-  /// No description provided for @prayerReminderSettings.
-  ///
-  /// In en, this message translates to:
-  /// **'Prayer reminders'**
-  String get prayerReminderSettings;
-
-  /// No description provided for @prayerReminderBody.
-  ///
-  /// In en, this message translates to:
-  /// **'It is time for {prayer}.'**
-  String prayerReminderBody(String prayer);
-
-  /// No description provided for @prayerAthanRecording.
-  ///
-  /// In en, this message translates to:
-  /// **'Athan recording'**
-  String get prayerAthanRecording;
-
-  /// No description provided for @prayerAthanFull.
-  ///
-  /// In en, this message translates to:
-  /// **'Full athan'**
-  String get prayerAthanFull;
-
-  /// No description provided for @prayerAthanOpening.
-  ///
-  /// In en, this message translates to:
-  /// **'Four opening takbirs'**
-  String get prayerAthanOpening;
-
-  /// No description provided for @prayerAthanPreview.
-  ///
-  /// In en, this message translates to:
-  /// **'Preview'**
-  String get prayerAthanPreview;
+  /// **'Preview {sound}'**
+  String prayerPreview(String sound);
 
   /// No description provided for @prayerAthanStop.
   ///
@@ -1957,23 +1993,53 @@ abstract class AppLocalizations {
   /// **'Stop athan'**
   String get prayerAthanStop;
 
-  /// No description provided for @prayerAthanPlay.
+  /// No description provided for @prayerAthanLength.
   ///
   /// In en, this message translates to:
-  /// **'Play athan'**
-  String get prayerAthanPlay;
+  /// **'Athan length'**
+  String get prayerAthanLength;
 
-  /// No description provided for @prayerAthanDownload.
+  /// No description provided for @prayerAthanOpening.
   ///
   /// In en, this message translates to:
-  /// **'Download for offline playback'**
-  String get prayerAthanDownload;
+  /// **'Opening takbirat'**
+  String get prayerAthanOpening;
 
-  /// No description provided for @prayerAudioAbsent.
+  /// No description provided for @prayerAthanFull.
   ///
   /// In en, this message translates to:
-  /// **'Audio has not been downloaded.'**
-  String get prayerAudioAbsent;
+  /// **'Full athan'**
+  String get prayerAthanFull;
+
+  /// No description provided for @prayerFullAndroid.
+  ///
+  /// In en, this message translates to:
+  /// **'Plays in full even when your phone is locked.'**
+  String get prayerFullAndroid;
+
+  /// No description provided for @prayerFullIos.
+  ///
+  /// In en, this message translates to:
+  /// **'The alert plays the opening; tap it to hear the full athan.'**
+  String get prayerFullIos;
+
+  /// No description provided for @prayerFullWeb.
+  ///
+  /// In en, this message translates to:
+  /// **'Plays only while this page is open.'**
+  String get prayerFullWeb;
+
+  /// No description provided for @prayerFullNotDownloaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Until downloaded, alerts play the opening.'**
+  String get prayerFullNotDownloaded;
+
+  /// No description provided for @prayerDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get prayerDownload;
 
   /// No description provided for @prayerAudioDownloading.
   ///
@@ -1981,88 +2047,46 @@ abstract class AppLocalizations {
   /// **'Downloading and checking audio…'**
   String get prayerAudioDownloading;
 
-  /// No description provided for @prayerAudioVerified.
-  ///
-  /// In en, this message translates to:
-  /// **'Audio verified and ready offline'**
-  String get prayerAudioVerified;
-
   /// No description provided for @prayerAudioFailed.
   ///
   /// In en, this message translates to:
-  /// **'Audio could not be verified. Download it again.'**
+  /// **'The recording couldn\'t be downloaded. Try again.'**
   String get prayerAudioFailed;
 
-  /// No description provided for @prayerRecordingCredit.
+  /// No description provided for @prayerAudioReady.
   ///
   /// In en, this message translates to:
-  /// **'Recording credit: {credit}'**
-  String prayerRecordingCredit(String credit);
-
-  /// No description provided for @prayerRecordingSource.
-  ///
-  /// In en, this message translates to:
-  /// **'Recording source and licence'**
-  String get prayerRecordingSource;
-
-  /// No description provided for @prayerRequestedMode.
-  ///
-  /// In en, this message translates to:
-  /// **'Your choice: {mode}'**
-  String prayerRequestedMode(String mode);
-
-  /// No description provided for @prayerEffectiveMode.
-  ///
-  /// In en, this message translates to:
-  /// **'Available delivery: {mode}'**
-  String prayerEffectiveMode(String mode);
-
-  /// No description provided for @prayerNotificationsPermission.
-  ///
-  /// In en, this message translates to:
-  /// **'Allow prayer notifications'**
-  String get prayerNotificationsPermission;
+  /// **'Downloaded and ready offline'**
+  String get prayerAudioReady;
 
   /// No description provided for @prayerNotificationsDenied.
   ///
   /// In en, this message translates to:
-  /// **'Notifications are blocked. Your reminder choices are saved; allow notifications in settings to use them.'**
+  /// **'Alerts are blocked. Your choices are saved.'**
   String get prayerNotificationsDenied;
 
-  /// No description provided for @prayerNotificationsOpenSettings.
+  /// No description provided for @prayerOpenSettings.
   ///
   /// In en, this message translates to:
-  /// **'Open notification settings'**
-  String get prayerNotificationsOpenSettings;
+  /// **'Open settings'**
+  String get prayerOpenSettings;
 
-  /// No description provided for @prayerExactAlarmAccess.
+  /// No description provided for @prayerExactOff.
   ///
   /// In en, this message translates to:
-  /// **'Allow alarms and reminders'**
-  String get prayerExactAlarmAccess;
+  /// **'Exact alarms are off, so alerts may be a few minutes late.'**
+  String get prayerExactOff;
 
-  /// No description provided for @prayerExactAlarmLimit.
+  /// No description provided for @prayerAllow.
   ///
   /// In en, this message translates to:
-  /// **'Precise Android reminders need alarm access. Without it, you can accept approximate short alerts or keep reminders off. Late Android alerts are skipped, so approximate scheduling may miss reminders.'**
-  String get prayerExactAlarmLimit;
-
-  /// No description provided for @prayerIosFullLimit.
-  ///
-  /// In en, this message translates to:
-  /// **'iOS cannot automatically play the full athan in the background or while locked. You can choose the short opening alert, then open Mathani and press Play for the full recording.'**
-  String get prayerIosFullLimit;
-
-  /// No description provided for @prayerIosSystemSoundLimit.
-  ///
-  /// In en, this message translates to:
-  /// **'iOS controls notification sounds and delivery timing. Mathani cannot filter a delayed alert before the system presents it, guarantee pausing Quran playback, or stop a sound already playing. Device sound and notification settings apply.'**
-  String get prayerIosSystemSoundLimit;
+  /// **'Allow'**
+  String get prayerAllow;
 
   /// No description provided for @prayerWebLimit.
   ///
   /// In en, this message translates to:
-  /// **'Browser reminders work only while this page is open, visible and running. Closing, hiding or suspending it can prevent delivery. Automatic audio may require pressing Play. Use the mobile app for supported background reminders.'**
+  /// **'Alerts work only while this page is open.'**
   String get prayerWebLimit;
 
   /// No description provided for @prayerMobileApps.
@@ -2071,125 +2095,89 @@ abstract class AppLocalizations {
   /// **'Get the mobile app'**
   String get prayerMobileApps;
 
-  /// No description provided for @prayerForegroundOnly.
+  /// No description provided for @prayerQiyamUpcoming.
   ///
   /// In en, this message translates to:
-  /// **'Active page only'**
-  String get prayerForegroundOnly;
-
-  /// No description provided for @prayerRemindersBlocked.
-  ///
-  /// In en, this message translates to:
-  /// **'Reminders need attention before they can run.'**
-  String get prayerRemindersBlocked;
-
-  /// No description provided for @prayerRemindersPartial.
-  ///
-  /// In en, this message translates to:
-  /// **'Some reminders could not be scheduled. Try again and check the available delivery period.'**
-  String get prayerRemindersPartial;
-
-  /// No description provided for @prayerScheduledThrough.
-  ///
-  /// In en, this message translates to:
-  /// **'Scheduled through {time}'**
-  String prayerScheduledThrough(String time);
-
-  /// No description provided for @prayerReopenBy.
-  ///
-  /// In en, this message translates to:
-  /// **'Open Prayer Times in Mathani again by {time} to refresh upcoming reminders. Delivery is not scheduled indefinitely.'**
-  String prayerReopenBy(String time);
-
-  /// No description provided for @prayerReconcile.
-  ///
-  /// In en, this message translates to:
-  /// **'Refresh reminders'**
-  String get prayerReconcile;
-
-  /// No description provided for @prayerAcceptFallback.
-  ///
-  /// In en, this message translates to:
-  /// **'Use this alternative'**
-  String get prayerAcceptFallback;
-
-  /// No description provided for @prayerNoReminders.
-  ///
-  /// In en, this message translates to:
-  /// **'All prayer reminders are off.'**
-  String get prayerNoReminders;
-
-  /// No description provided for @prayerAutoplayBlocked.
-  ///
-  /// In en, this message translates to:
-  /// **'The browser did not start the athan. Press Play while this reminder is still current.'**
-  String get prayerAutoplayBlocked;
-
-  /// No description provided for @prayerAthanNotCleared.
-  ///
-  /// In en, this message translates to:
-  /// **'Athan recordings are not available yet. Your reminder choices are saved.'**
-  String get prayerAthanNotCleared;
-
-  /// No description provided for @prayerSystemSound.
-  ///
-  /// In en, this message translates to:
-  /// **'Standard notification sound'**
-  String get prayerSystemSound;
-
-  /// No description provided for @prayerApproximateDelivery.
-  ///
-  /// In en, this message translates to:
-  /// **'Approximate delivery is active. Alerts more than one minute late are skipped.'**
-  String get prayerApproximateDelivery;
-
-  /// No description provided for @prayerSystemSoundLimit.
-  ///
-  /// In en, this message translates to:
-  /// **'Your device controls short notification sounds. Mathani cannot reliably stop a system sound or pause Quran playback for it. Device notification and sound settings apply.'**
-  String get prayerSystemSoundLimit;
-
-  /// No description provided for @prayerUseSystemSound.
-  ///
-  /// In en, this message translates to:
-  /// **'Use standard notification sound'**
-  String get prayerUseSystemSound;
-
-  /// No description provided for @prayerSystemSoundDisclosure.
-  ///
-  /// In en, this message translates to:
-  /// **'The selected athan recording is unavailable. You can use your device’s standard short notification sound instead. This does not play the athan or its opening takbirs. System sounds may overlap Quran playback and cannot reliably be stopped from Mathani. Your athan choice stays saved.'**
-  String get prayerSystemSoundDisclosure;
+  /// **'Tonight at {time}'**
+  String prayerQiyamUpcoming(String time);
 
   /// No description provided for @prayerQiyamExplanation.
   ///
   /// In en, this message translates to:
-  /// **'An optional reminder at the start of the last third of the night, from Maghrib to the following Fajr. It is independent of the five daily prayer reminders.'**
+  /// **'Starts the last third of the night, from Maghrib to Fajr.'**
   String get prayerQiyamExplanation;
-
-  /// No description provided for @prayerQiyamTone.
-  ///
-  /// In en, this message translates to:
-  /// **'Short Qiyam reminder tone'**
-  String get prayerQiyamTone;
-
-  /// No description provided for @prayerQiyamNotification.
-  ///
-  /// In en, this message translates to:
-  /// **'The last third of the night has begun. Optional Qiyam reminder.'**
-  String get prayerQiyamNotification;
 
   /// No description provided for @prayerQiyamUnavailable.
   ///
   /// In en, this message translates to:
-  /// **'Qiyam time is unavailable because this night’s Maghrib or following Fajr cannot be calculated.'**
+  /// **'Unavailable tonight: Maghrib or the next Fajr can\'t be calculated here.'**
   String get prayerQiyamUnavailable;
 
-  /// No description provided for @prayerQiyamUpcoming.
+  /// No description provided for @prayerQiyamNotification.
   ///
   /// In en, this message translates to:
-  /// **'Next Qiyam reminder: {time}'**
-  String prayerQiyamUpcoming(String time);
+  /// **'The last third of the night has begun.'**
+  String get prayerQiyamNotification;
+
+  /// No description provided for @prayerAlertBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{time} · {place}'**
+  String prayerAlertBody(String time, String place);
+
+  /// No description provided for @prayerChannelSound.
+  ///
+  /// In en, this message translates to:
+  /// **'Prayer alerts: {sound}'**
+  String prayerChannelSound(String sound);
+
+  /// No description provided for @prayerChannelQiyam.
+  ///
+  /// In en, this message translates to:
+  /// **'Qiyam reminder'**
+  String get prayerChannelQiyam;
+
+  /// No description provided for @prayerChannelAthan.
+  ///
+  /// In en, this message translates to:
+  /// **'Athan playback'**
+  String get prayerChannelAthan;
+
+  /// No description provided for @prayerLocationDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Location wasn\'t allowed. Search for a city instead.'**
+  String get prayerLocationDenied;
+
+  /// No description provided for @prayerLocationUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Your location couldn\'t be found. Try again or search for a city.'**
+  String get prayerLocationUnavailable;
+
+  /// No description provided for @prayerTimezoneUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This place\'s time zone couldn\'t be found. Choose another city.'**
+  String get prayerTimezoneUnavailable;
+
+  /// No description provided for @prayerServiceUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t reach the place service. Try again later.'**
+  String get prayerServiceUnavailable;
+
+  /// No description provided for @prayerOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'You need a connection for this. Saved places still work offline.'**
+  String get prayerOffline;
+
+  /// No description provided for @prayerRateLimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many searches right now. Try again in a minute.'**
+  String get prayerRateLimited;
 }
 
 class _AppLocalizationsDelegate

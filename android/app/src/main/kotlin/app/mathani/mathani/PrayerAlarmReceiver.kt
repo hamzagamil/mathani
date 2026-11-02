@@ -5,50 +5,76 @@ import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.media.RingtoneManager
-import android.net.Uri
+import android.media.AudioManager
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
+import java.io.File
 import java.util.concurrent.Executors
 
-/** No Flutter/media start. OS-owned short sounds only; validate the protected token. */
+/** Posts a due prayer alert, or starts the full athan, without starting Flutter. Restores future
+ * alarms after a reboot or a clock change (specs/009 contracts › Android). */
 class PrayerAlarmReceiver : BroadcastReceiver() {
-    companion object { private val executor = Executors.newSingleThreadExecutor() }
+    companion object {
+        private val executor = Executors.newSingleThreadExecutor()
+
+        fun openIntent(context: Context, alert: PrayerAlert): PendingIntent = PendingIntent.getActivity(
+            context, alert.id,
+            Intent(context, MainActivity::class.java).setAction(PrayerNotificationsPlugin.OPEN_ACTION)
+                .putExtra("id", alert.id).putExtra("kind", alert.kind)
+                .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+
+        fun post(context: Context, alert: PrayerAlert) {
+            val notification = NotificationCompat.Builder(context, PrayerNotificationsPlugin.soundChannel(alert))
+                .setSmallIcon(R.drawable.ic_stat_recitation)
+                .setContentTitle(alert.title).setContentText(alert.body)
+                .setContentIntent(openIntent(context, alert))
+                .setCategory(NotificationCompat.CATEGORY_REMINDER)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setSound(PrayerNotificationsPlugin.soundUri(context, if (alert.kind == "qiyam") "tone" else alert.sound))
+                .setAutoCancel(true).build()
+            context.getSystemService(NotificationManager::class.java).notify("mathani.prayer", alert.id, notification)
+        }
+    }
+
     override fun onReceive(context: Context, intent: Intent) {
         val work = goAsync()
         executor.execute {
             try {
                 val store = PrayerAlarmStore(context)
                 val now = System.currentTimeMillis()
-                val id = intent.getStringExtra("eventId")
-                if (id == null) {
-                    if (intent.action in setOf(Intent.ACTION_BOOT_COMPLETED, Intent.ACTION_USER_UNLOCKED,
-                        Intent.ACTION_TIME_CHANGED, Intent.ACTION_TIMEZONE_CHANGED, Intent.ACTION_MY_PACKAGE_REPLACED,
-                        "android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED")) {
-                        if (PrayerNotificationsPlugin.granted(context)) PrayerNotificationsPlugin.install(context, store.future(now))
-                    }
+                if (intent.action != PrayerNotificationsPlugin.ALERT_ACTION) {
+                    // Boot, unlock, update, clock or exact-alarm changes: future alerts only.
+                    PrayerNotificationsPlugin.install(context, store, now)
                     return@execute
                 }
-                val generation = intent.getLongExtra("generation", -1)
-                val event = store.event(id, generation) ?: return@execute
-                if (!PrayerNotificationsPlugin.granted(context) || !PrayerNotificationsPlugin.supported(event)) return@execute
-                store.deliverFallback(id, generation, now) {
-                if (System.currentTimeMillis() > event.expiresAtMs) return@deliverFallback
-                val qiyam = event.kind == "qiyam"
-                val channel = if (qiyam) PrayerNotificationsPlugin.QIYAM_CHANNEL else PrayerNotificationsPlugin.DEFAULT_CHANNEL
-                val open = PendingIntent.getActivity(context, 0, Intent(context, MainActivity::class.java)
-                    .setAction("app.mathani.OPEN_PRAYER.$id").addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-                val sound = if (qiyam) Uri.parse("android.resource://${context.packageName}/raw/qiyam_tone")
-                    else RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-                val notification = NotificationCompat.Builder(context, channel).setSmallIcon(R.drawable.ic_stat_recitation)
-                    .setContentTitle(event.title).setContentText(event.body).setContentIntent(open)
-                    .setPriority(NotificationCompat.PRIORITY_HIGH).setSound(sound).setAutoCancel(true)
-                    .setTimeoutAfter(60_000).build()
-                context.getSystemService(NotificationManager::class.java).notify(PrayerNotificationsPlugin.TAG_PREFIX + id, 0, notification)
+                val id = intent.getIntExtra("id", -1)
+                val alert = store.get(id)
+                // The athan plays only when the ringer is on, as the phone's own alert sound would.
+                val ringerOn = context.getSystemService(AudioManager::class.java).ringerMode == AudioManager.RINGER_MODE_NORMAL
+                val action = PrayerAlertRules.decide(
+                    alert, intent.getLongExtra("generation", -1), store.generation(), now,
+                    fullFileExists = alert?.fullPath?.let { File(it).isFile } == true,
+                    canStartFull = PrayerNotificationsPlugin.exact(context) && ringerOn,
+                )
+                if (action == AlertAction.IGNORE || alert == null || !store.remove(id)) return@execute
+                when (action) {
+                    AlertAction.PLAY_FULL -> if (!startFull(context, alert)) post(context, alert)
+                    AlertAction.POST -> post(context, alert)
+                    else -> Unit
                 }
             } catch (error: Exception) {
-                // Locked or damaged ciphertext fails closed. Retry future alarms after unlock.
+                // A broken store must not crash the app; the next refill rebuilds it.
             } finally { work.finish() }
         }
+    }
+
+    private fun startFull(context: Context, alert: PrayerAlert): Boolean = try {
+        ContextCompat.startForegroundService(context, Intent(context, AthanPlaybackService::class.java)
+            .putExtra("id", alert.id).putExtra("kind", alert.kind).putExtra("title", alert.title)
+            .putExtra("body", alert.body).putExtra("path", alert.fullPath).putExtra("sound", alert.sound))
+        true
+    } catch (error: Exception) {
+        false // e.g. ForegroundServiceStartNotAllowedException: the opening alert is posted instead
     }
 }

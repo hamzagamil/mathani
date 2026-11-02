@@ -1,15 +1,7 @@
 import '../../app/l10n/app_localizations.dart';
+import 'athan_catalogue.dart';
 import 'prayer_models.dart';
 import 'prayer_services.dart';
-
-String? prayerLabelError(AppLocalizations l, String? value) {
-  final text = value?.trim() ?? '';
-  return text.isEmpty ||
-          text.length > 80 ||
-          RegExp(r'[\x00-\x1F\x7F]').hasMatch(text)
-      ? l.prayerLabelError
-      : null;
-}
 
 String prayerName(AppLocalizations l, PrayerKind kind) => switch (kind) {
   PrayerKind.fajr => l.prayerFajr,
@@ -20,36 +12,75 @@ String prayerName(AppLocalizations l, PrayerKind kind) => switch (kind) {
   PrayerKind.isha => l.prayerIsha,
   PrayerKind.qiyam => l.prayerQiyam,
 };
+
 String prayerMethodName(AppLocalizations l, PrayerMethod method) =>
     switch (method) {
       PrayerMethod.muslimWorldLeague => l.prayerMethodMwl,
       PrayerMethod.egyptian => l.prayerMethodEgypt,
-      PrayerMethod.karachi => l.prayerMethodKarachi,
       PrayerMethod.ummAlQura => l.prayerMethodMakkah,
-      PrayerMethod.northAmerica => l.prayerMethodNorthAmerica,
+      PrayerMethod.karachi => l.prayerMethodKarachi,
+      PrayerMethod.isna => l.prayerMethodNorthAmerica,
+      PrayerMethod.dubai => l.prayerMethodDubai,
+      PrayerMethod.kuwait => l.prayerMethodKuwait,
+      PrayerMethod.qatar => l.prayerMethodQatar,
+      PrayerMethod.singapore => l.prayerMethodSingapore,
+      PrayerMethod.turkey => l.prayerMethodTurkey,
+      PrayerMethod.moonsightingCommittee => l.prayerMethodMoonsighting,
     };
+
+String prayerAsrName(AppLocalizations l, AsrSetting asr) => switch (asr) {
+  AsrSetting.standard => l.prayerAsrStandard,
+  AsrSetting.hanafi => l.prayerAsrHanafi,
+};
+
+String prayerRuleName(AppLocalizations l, HighLatitudeRule rule) =>
+    switch (rule) {
+      HighLatitudeRule.middleOfNight => l.prayerMiddleNight,
+      HighLatitudeRule.seventhOfNight => l.prayerSeventhNight,
+    };
+
 String prayerFailureMessage(AppLocalizations l, PrayerFailure reason) =>
     switch (reason) {
       PrayerFailure.locationDenied => l.prayerLocationDenied,
       PrayerFailure.locationUnavailable => l.prayerLocationUnavailable,
       PrayerFailure.timezoneUnresolved => l.prayerTimezoneUnavailable,
+      PrayerFailure.providerUnavailable => l.prayerServiceUnavailable,
       PrayerFailure.offline => l.prayerOffline,
-      PrayerFailure.secureStorageUnavailable => l.prayerStorageUnavailable,
-      PrayerFailure.needsAttention => l.prayerNeedsAttention,
+      PrayerFailure.rateLimited => l.prayerRateLimited,
       PrayerFailure.calculationUnavailable ||
       PrayerFailure.conventionOutOfRange => l.prayerCalculationUnavailable,
-      PrayerFailure.audioUnavailable => l.prayerAudioAbsent,
+      PrayerFailure.audioUnavailable => l.prayerAudioFailed,
       PrayerFailure.notificationsDenied => l.prayerNotificationsDenied,
-      PrayerFailure.exactAlarmDenied => l.prayerExactAlarmLimit,
-      PrayerFailure.modeUnsupported => l.prayerRemindersBlocked,
-      PrayerFailure.schedulePartial ||
-      PrayerFailure.horizonExpired => l.prayerRemindersPartial,
-      _ => l.prayerServiceUnavailable,
     };
-String prayerMadhhabName(AppLocalizations l, PrayerMadhhab madhhab) =>
-    switch (madhhab) {
-      PrayerMadhhab.hanafi => l.prayerHanafi,
-      PrayerMadhhab.shafii => l.prayerShafii,
-      PrayerMadhhab.maliki => l.prayerMaliki,
-      PrayerMadhhab.hanbali => l.prayerHanbali,
-    };
+
+/// A sound's name in the sound list.
+String prayerSoundName(
+  AppLocalizations l,
+  AthanCatalogue catalogue,
+  String sound,
+) => switch (sound) {
+  toneSound => l.prayerSoundTone,
+  silentSound => l.prayerSoundSilent,
+  _ =>
+    catalogue.byId(sound)?.name(arabic: l.localeName == 'ar') ??
+        l.prayerSoundTone,
+};
+
+/// Android notification channel names, one per sound (contracts › Android).
+Map<String, String> prayerChannelNames(
+  AppLocalizations l,
+  AthanCatalogue catalogue,
+) => {
+  for (final sound in catalogue.soundChoices)
+    sound: l.prayerChannelSound(prayerSoundName(l, catalogue, sound)),
+  'qiyam': l.prayerChannelQiyam,
+  'playback': l.prayerChannelAthan,
+  'stop': l.prayerAthanStop,
+};
+
+/// An offset with its sign, e.g. `+5` or `−10`.
+String signedMinutes(int minutes) => minutes > 0
+    ? '+$minutes'
+    : minutes < 0
+    ? '−${-minutes}'
+    : '0';

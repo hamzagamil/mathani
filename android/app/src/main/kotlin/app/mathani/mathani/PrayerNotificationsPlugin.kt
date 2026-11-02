@@ -24,7 +24,8 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.PluginRegistry
 
-/** Owns short OS alerts only. Full/media playback remains disabled pending G01. */
+/** Prayer alerts on Android (specs/009 contracts/prayer-ui-and-reminders.md › Native contract):
+ * one alarm per alert from the app's own store, a channel per sound, and the athan service. */
 class PrayerNotificationsPlugin : FlutterPlugin, ActivityAware, MethodChannel.MethodCallHandler,
     PluginRegistry.RequestPermissionsResultListener {
     private lateinit var context: Context
@@ -32,145 +33,189 @@ class PrayerNotificationsPlugin : FlutterPlugin, ActivityAware, MethodChannel.Me
     private var activity: Activity? = null
     private var binding: ActivityPluginBinding? = null
     private var permissionResult: MethodChannel.Result? = null
+
     companion object {
-        const val DEFAULT_CHANNEL = "mathani.prayer.default.v1"
-        const val QIYAM_CHANNEL = "mathani.prayer.qiyam.v1"
-        const val TAG_PREFIX = "mathani.prayer."
+        const val OPEN_ACTION = "app.mathani.OPEN_PRAYER"
+        const val ALERT_ACTION = "app.mathani.PRAYER_ALERT"
+        const val QIYAM_CHANNEL = "prayer_qiyam_v1"
+        const val PLAYBACK_CHANNEL = "prayer_athan_playback_v1"
         private const val PERMISSION_REQUEST = 7413
-        private var pendingOpen = false
-        private var openChannel: MethodChannel? = null
-        fun noteOpenIntent(intent: Intent?) {
-            if (intent?.action?.startsWith("app.mathani.OPEN_PRAYER.") != true) return
-            pendingOpen = true
-            openChannel?.invokeMethod("notificationOpen", null)
-        }
-        fun supported(event: PrayerAlarmEvent) = event.mode == "opening" &&
-            if (event.kind == "qiyam") event.assetId in setOf("qiyam_tone", "qiyam_tone_inexact")
-            else event.assetId in setOf("system_default", "system_default_inexact")
+        private const val PREFS = "mathani_prayer_settings"
+        private var pendingOpen: Map<String, Any?>? = null
+        private var events: MethodChannel? = null
+
         fun register(engine: FlutterEngine) {
             if (!engine.plugins.has(PrayerNotificationsPlugin::class.java)) engine.plugins.add(PrayerNotificationsPlugin())
         }
-        fun exact(context: Context) = Build.VERSION.SDK_INT < 31 || context.getSystemService(AlarmManager::class.java).canScheduleExactAlarms()
+
+        /** MainActivity hands over the intent it was opened with. */
+        fun noteOpenIntent(intent: Intent?) {
+            if (intent?.action != OPEN_ACTION) return
+            val opened = mapOf("kind" to intent.getStringExtra("kind"), "alertId" to intent.getIntExtra("id", -1))
+            pendingOpen = opened
+            events?.invokeMethod("opened", opened)
+        }
+
+        fun emit(method: String) { events?.invokeMethod(method, null) }
+
+        fun exact(context: Context) =
+            Build.VERSION.SDK_INT < 31 || context.getSystemService(AlarmManager::class.java).canScheduleExactAlarms()
+
         fun granted(context: Context) = NotificationManagerCompat.from(context).areNotificationsEnabled() &&
-            (Build.VERSION.SDK_INT < 33 || ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED)
-        fun alarmIntent(context: Context, event: PrayerAlarmEvent) = Intent(context, PrayerAlarmReceiver::class.java)
-            .setAction("app.mathani.PRAYER.${event.generation}.${event.eventId}")
-            .putExtra("eventId", event.eventId).putExtra("generation", event.generation)
-        fun install(context: Context, events: List<PrayerAlarmEvent>) {
+            (Build.VERSION.SDK_INT < 33 ||
+                ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED)
+
+        fun soundChannel(alert: PrayerAlert) = if (alert.kind == "qiyam") QIYAM_CHANNEL else "prayer_${alert.sound}_v1"
+
+        fun soundUri(context: Context, sound: String): Uri? {
+            val name = if (sound == "tone") "qiyam_tone" else "athan_${sound}_opening"
+            val res = context.resources.getIdentifier(name, "raw", context.packageName)
+            return if (sound == "silent" || res == 0) null
+            else Uri.parse("android.resource://${context.packageName}/$res")
+        }
+
+        private fun alarmIntent(context: Context, id: Int, generation: Long) =
+            PendingIntent.getBroadcast(context, id, Intent(context, PrayerAlarmReceiver::class.java)
+                .setAction(ALERT_ACTION).setData(Uri.parse("mathani-prayer://alert/$id"))
+                .putExtra("id", id).putExtra("generation", generation),
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+
+        /** One alarm per alert; exact when allowed, otherwise Android may delay it (FR-021). */
+        fun install(context: Context, store: PrayerAlarmStore, nowMs: Long): Int {
             val alarms = context.getSystemService(AlarmManager::class.java)
-            val precise = exact(context)
-            events.forEach { event ->
-                if (!supported(event)) return@forEach
-                val pending = PendingIntent.getBroadcast(context, 0, alarmIntent(context, event), PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-                // Inexact installation is permitted only for an acknowledged inexact asset marker.
-                if (precise) alarms.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, event.dueAtMs, pending)
-                else if (event.assetId.endsWith("_inexact")) alarms.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, event.dueAtMs, pending)
-                else throw SecurityException("Exact alarm access unavailable")
+            val generation = store.generation()
+            val future = store.future(nowMs)
+            future.forEach {
+                val pending = alarmIntent(context, it.id, generation)
+                if (exact(context)) alarms.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, it.atUtcMs, pending)
+                else alarms.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, it.atUtcMs, pending)
+            }
+            return future.size
+        }
+
+        fun cancel(context: Context, ids: Collection<Int>) {
+            val alarms = context.getSystemService(AlarmManager::class.java)
+            ids.forEach { id ->
+                PendingIntent.getBroadcast(context, id, Intent(context, PrayerAlarmReceiver::class.java)
+                    .setAction(ALERT_ACTION).setData(Uri.parse("mathani-prayer://alert/$id")),
+                    PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE)?.let { alarms.cancel(it); it.cancel() }
             }
         }
-        fun cancelAlarms(context: Context, events: List<PrayerAlarmEvent>) {
-            val alarms = context.getSystemService(AlarmManager::class.java)
-            events.forEach { event -> PendingIntent.getBroadcast(context, 0, alarmIntent(context, event),
-                PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE)?.let { alarms.cancel(it); it.cancel() } }
-        }
-        fun cancelShown(context: Context) {
-            val manager = context.getSystemService(NotificationManager::class.java)
-            manager.activeNotifications.filter { it.tag?.startsWith(TAG_PREFIX) == true }.forEach { manager.cancel(it.tag, it.id) }
-        }
-        fun ensureChannels(context: Context, defaultName: String, qiyamName: String) {
+
+        /** Channel sounds are fixed once created, so each sound has its own channel. The reader's
+         * channel settings are never overridden. */
+        fun ensureChannels(context: Context, names: Map<String, String>) {
             if (Build.VERSION.SDK_INT < 26) return
             val manager = context.getSystemService(NotificationManager::class.java)
-            val attributes = AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_NOTIFICATION).build()
-            manager.createNotificationChannel(NotificationChannel(DEFAULT_CHANNEL, defaultName, NotificationManager.IMPORTANCE_HIGH))
-            manager.createNotificationChannel(NotificationChannel(QIYAM_CHANNEL, qiyamName, NotificationManager.IMPORTANCE_HIGH).apply {
-                setSound(Uri.parse("android.resource://${context.packageName}/raw/qiyam_tone"), attributes)
-            })
+            val attributes = AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_NOTIFICATION_EVENT)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build()
+            names.forEach { (sound, name) ->
+                when (sound) {
+                    "stop" -> Unit
+                    "qiyam" -> manager.createNotificationChannel(
+                        NotificationChannel(QIYAM_CHANNEL, name, NotificationManager.IMPORTANCE_HIGH).apply {
+                            setSound(soundUri(context, "tone"), attributes)
+                        })
+                    "playback" -> manager.createNotificationChannel(
+                        NotificationChannel(PLAYBACK_CHANNEL, name, NotificationManager.IMPORTANCE_LOW).apply {
+                            setSound(null, null)
+                        })
+                    else -> manager.createNotificationChannel(
+                        NotificationChannel("prayer_${sound}_v1", name, NotificationManager.IMPORTANCE_HIGH).apply {
+                            setSound(soundUri(context, sound), if (sound == "silent") null else attributes)
+                            if (sound == "silent") enableVibration(false)
+                        })
+                }
+            }
+            // The first draft's channels.
+            manager.deleteNotificationChannel("mathani.prayer.default.v1")
+            manager.deleteNotificationChannel("mathani.prayer.qiyam.v1")
         }
+
+        /** Texts the athan service shows, in the app's language, saved with each refill. */
+        fun saveChannelNames(context: Context, names: Map<String, String>) {
+            context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
+                .putString("playbackChannel", names["playback"]).putString("stopLabel", names["stop"]).apply()
+        }
+
+        fun playbackChannelName(context: Context) =
+            context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString("playbackChannel", null) ?: "Athan"
+
+        fun stopLabel(context: Context) =
+            context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString("stopLabel", null) ?: "Stop"
     }
+
     override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         context = binding.applicationContext
         channel = MethodChannel(binding.binaryMessenger, "app.mathani/prayer_notifications")
-        openChannel = channel
+        events = channel
         channel.setMethodCallHandler(this)
     }
+
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
-        if (openChannel === channel) openChannel = null
+        if (events === channel) events = null
     }
-    private fun capabilities(): Map<String, Any> {
-        val manager = context.getSystemService(NotificationManager::class.java)
-        fun blocked(id: String): Boolean = Build.VERSION.SDK_INT >= 26 && manager.getNotificationChannel(id)?.let {
-            it.importance == NotificationManager.IMPORTANCE_NONE || it.sound == null ||
-                it.group?.let { group -> Build.VERSION.SDK_INT >= 28 && manager.getNotificationChannelGroup(group)?.isBlocked == true } == true
-        } == true
-        return mapOf("permissionStatus" to if (granted(context)) "granted" else "denied", "exactAlarmAccess" to exact(context),
-            "dailyRestricted" to blocked(DEFAULT_CHANNEL), "qiyamRestricted" to blocked(QIYAM_CHANNEL))
+
+    private fun status(): Map<String, Any?> {
+        val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        val permission = when {
+            granted(context) -> "granted"
+            Build.VERSION.SDK_INT >= 33 && !prefs.getBoolean("asked", false) -> "notDetermined"
+            else -> "denied"
+        }
+        return mapOf("notifications" to (permission == "granted"), "permission" to permission,
+            "exactAlarms" to if (Build.VERSION.SDK_INT >= 31) exact(context) else null)
     }
+
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         try {
             val store = PrayerAlarmStore(context)
             when (call.method) {
-                "capabilities" -> result.success(capabilities())
-                "takeNotificationOpen" -> { val opened = pendingOpen; pendingOpen = false; result.success(opened) }
-                "requestAuthorization" -> {
+                "status" -> result.success(status())
+                "requestPermission" -> {
                     val current = activity
-                    if (Build.VERSION.SDK_INT >= 33 && current != null && !granted(context)) {
-                        check(permissionResult == null)
+                    if (Build.VERSION.SDK_INT >= 33 && current != null && !granted(context) && permissionResult == null) {
+                        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putBoolean("asked", true).apply()
                         permissionResult = result
                         ActivityCompat.requestPermissions(current, arrayOf(Manifest.permission.POST_NOTIFICATIONS), PERMISSION_REQUEST)
-                    } else result.success(capabilities())
+                    } else result.success(status())
                 }
-                "openSettings", "requestExactAccess" -> {
-                    val exactSettings = call.method == "requestExactAccess" && Build.VERSION.SDK_INT >= 31
+                "openSettings" -> {
+                    val exactSettings = call.argument<Boolean>("exactAlarms") == true && Build.VERSION.SDK_INT >= 31
                     val intent = if (exactSettings) Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM, Uri.parse("package:${context.packageName}"))
                         else Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
-                    context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)); result.success(null)
+                    context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                    result.success(null)
                 }
                 "replace" -> {
-                    check(granted(context))
                     val generation = call.argument<Number>("generation")!!.toLong()
-                    val raw = call.argument<List<Map<String, Any>>>("events")!!
-                    require(raw.size <= 192)
-                    val events = raw.map { item ->
-                        val asset = item["assetId"] as String
-                        require(asset in setOf("system_default", "qiyam_tone", "system_default_inexact", "qiyam_tone_inexact"))
-                        PrayerAlarmEvent(item["eventId"] as String, item["locationId"] as String, generation,
-                            (item["dueAtMs"] as Number).toLong(), (item["expiresAtMs"] as Number).toLong(),
-                            item["kind"] as String, asset, "opening", item["title"] as String, item["body"] as String).also {
-                            require((it.kind == "qiyam") == asset.startsWith("qiyam_tone"))
-                        }
+                    val alerts = call.argument<List<Map<String, Any?>>>("alerts")!!.map {
+                        PrayerAlert((it["id"] as Number).toInt(), it["kind"] as String, (it["atUtcMs"] as Number).toLong(),
+                            it["title"] as String, it["body"] as String, it["sound"] as String,
+                            it["full"] == true, it["fullPath"] as String?)
                     }
-                    require(exact(context) || events.all { it.assetId.endsWith("_inexact") })
-                    val now = System.currentTimeMillis()
-                    val old = store.future(now)
-                    store.replace(generation, events, now)
-                    cancelAlarms(context, old)
-                    ensureChannels(context, call.argument<String>("dailyChannelName")!!, call.argument<String>("qiyamChannelName")!!)
-                    install(context, store.future(System.currentTimeMillis()))
-                    result.success(pending(store))
+                    val names = call.argument<Map<String, String>>("channels") ?: emptyMap()
+                    ensureChannels(context, names)
+                    saveChannelNames(context, names)
+                    cancel(context, store.replace(generation, alerts))
+                    result.success(install(context, store, System.currentTimeMillis()))
                 }
-                "pending" -> result.success(pending(store))
-                "cancelAll" -> {
-                    val events = store.future(System.currentTimeMillis())
-                    store.clearPending(); cancelAlarms(context, events); cancelShown(context); result.success(null)
-                }
-                "stop" -> { cancelShown(context); result.success(null) }
+                "cancelAll" -> { cancel(context, store.clear()); result.success(null) }
+                "takeOpened" -> { result.success(pendingOpen); pendingOpen = null }
                 else -> result.notImplemented()
             }
         } catch (error: Exception) {
-            result.error("notificationsUnavailable", "Prayer notifications need attention", null)
+            result.error("prayerAlerts", error.message, null)
         }
     }
-    private fun pending(store: PrayerAlarmStore) = store.future(System.currentTimeMillis()).filter {
-        supported(it) && (exact(context) || it.assetId.endsWith("_inexact")) &&
-          PendingIntent.getBroadcast(context, 0, alarmIntent(context,it), PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE) != null
-    }.map {
-        mapOf("eventId" to it.eventId, "generation" to it.generation, "dueAtMs" to it.dueAtMs)
-    }
+
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray): Boolean {
         if (requestCode != PERMISSION_REQUEST) return false
-        permissionResult?.success(capabilities()); permissionResult = null; return true
+        permissionResult?.success(status()); permissionResult = null
+        return true
     }
+
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
         this.binding = binding; activity = binding.activity; binding.addRequestPermissionsResultListener(this)
     }
@@ -179,6 +224,6 @@ class PrayerNotificationsPlugin : FlutterPlugin, ActivityAware, MethodChannel.Me
     override fun onDetachedFromActivity() = detach()
     private fun detach() {
         binding?.removeRequestPermissionsResultListener(this); binding = null; activity = null
-        permissionResult?.error("activityUnavailable", "Open Mathani to allow notifications", null); permissionResult = null
+        permissionResult?.success(status()); permissionResult = null
     }
 }

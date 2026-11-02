@@ -6,16 +6,11 @@ enum PrayerFailure {
   timezoneUnresolved,
   providerUnavailable,
   offline,
+  rateLimited,
   calculationUnavailable,
   conventionOutOfRange,
   audioUnavailable,
   notificationsDenied,
-  exactAlarmDenied,
-  modeUnsupported,
-  secureStorageUnavailable,
-  schedulePartial,
-  horizonExpired,
-  needsAttention,
 }
 
 class PrayerException implements Exception {
@@ -28,68 +23,90 @@ class PrayerException implements Exception {
 typedef PrayerClock = DateTime Function();
 DateTime prayerNow() => DateTime.now().toUtc();
 
-abstract interface class PrayerSnapshotStore {
-  Future<String?> read();
-  Future<void> write(String value);
-  Future<void> delete();
-}
-
+/// City search, place resolution and the phone's position (contracts/location-api.md).
 abstract interface class PrayerLocationClient {
-  Future<Map<String, dynamic>> resolve(
-    Map<String, dynamic> candidate,
-    String language,
-  );
-  Future<List<Map<String, dynamic>>> search(String query, String language);
+  /// Detects the phone's approximate position, asking for permission if needed, then resolves it.
   Future<Map<String, dynamic>> detect(String language);
+
+  /// Whether location permission is already granted, checked without prompting.
+  Future<bool> canLocate();
+
+  /// The position without ever prompting: null unless permission is already granted (R4).
+  Future<({double latitude, double longitude})?> passivePosition();
+  Future<Map<String, dynamic>> resolve(
+    double latitude,
+    double longitude,
+    String language, {
+    String source,
+  });
+  Future<List<Map<String, dynamic>>> search(String query, String language);
+
+  /// The internet-based estimate (`GET /api/prayer-location`).
   Future<Map<String, dynamic>> approximate(String language);
   void cancelSearch();
   void dispose();
 }
 
-abstract interface class PrayerNotificationAdapter {
-  Future<ReminderCapability> capabilities();
-  Future<ReminderCapability> requestAuthorization();
-  Future<ReminderCapability> replace(
-    PrayerState state,
-    List<ScheduledReminder> events,
-  );
-  Future<void> cancelLocation(String locationId);
+enum NotificationPermission { granted, denied, notDetermined, unsupported }
+
+/// What the phone allows, read without prompting.
+class AlertStatus {
+  const AlertStatus(this.notifications, {this.exactAlarms});
+  final NotificationPermission notifications;
+
+  /// Android 12+ only; null elsewhere.
+  final bool? exactAlarms;
+}
+
+sealed class PrayerPlatformEvent {
+  const PrayerPlatformEvent();
+}
+
+/// The reader tapped an alert.
+class AlertOpened extends PrayerPlatformEvent {
+  const AlertOpened(this.kind, this.alertId);
+  final PrayerKind? kind;
+  final int? alertId;
+}
+
+/// The Android athan service started while the app process is alive.
+class AthanStarted extends PrayerPlatformEvent {
+  const AthanStarted();
+}
+
+/// Schedules alerts on each platform (contracts/prayer-ui-and-reminders.md).
+abstract interface class PrayerAlertPlatform {
+  Future<AlertStatus> status();
+
+  /// Only called when the reader turns an alert on.
+  Future<AlertStatus> requestPermission();
+  Future<void> openSettings({bool exactAlarms = false});
+
+  /// Replaces every app-owned alert with [alerts]; returns how many are pending.
+  Future<int> replace(List<Alert> alerts, int generation);
   Future<void> cancelAll();
+  Stream<PrayerPlatformEvent> get events;
+
+  /// The alert that launched the app, if any. Asked once, after the first frame.
+  Future<AlertOpened?> takeLaunchOpen();
 }
 
-abstract interface class PrayerNotificationSettings {
-  Future<void> openNotificationSettings({bool exactAlarm = false});
-}
-
-/// Explicitly owns no queue before the notification increment is implemented.
-class NoPrayerNotifications implements PrayerNotificationAdapter {
-  const NoPrayerNotifications();
+/// No alerts at all: desktop and tests.
+class NoPrayerAlerts implements PrayerAlertPlatform {
+  const NoPrayerAlerts();
   @override
-  Future<ReminderCapability> capabilities() async => const ReminderCapability(
-    permissionStatus: 'unsupported',
-    reason: 'modeUnsupported',
-  );
+  Future<AlertStatus> status() async =>
+      const AlertStatus(NotificationPermission.unsupported);
   @override
-  Future<ReminderCapability> requestAuthorization() => capabilities();
+  Future<AlertStatus> requestPermission() => status();
   @override
-  Future<ReminderCapability> replace(
-    PrayerState state,
-    List<ScheduledReminder> events,
-  ) async {
-    if (state.reminders.anyEnabled) {
-      throw const PrayerException(PrayerFailure.modeUnsupported);
-    }
-    return capabilities();
-  }
-
+  Future<void> openSettings({bool exactAlarms = false}) async {}
   @override
-  Future<void> cancelLocation(String locationId) async {}
+  Future<int> replace(List<Alert> alerts, int generation) async => 0;
   @override
   Future<void> cancelAll() async {}
-}
-
-abstract interface class PrayerAudio {
-  Future<void> preview(AthanRecording recording);
-  Future<void> play(ScheduledReminder reminder);
-  Future<void> stop();
+  @override
+  Stream<PrayerPlatformEvent> get events => const Stream.empty();
+  @override
+  Future<AlertOpened?> takeLaunchOpen() async => null;
 }

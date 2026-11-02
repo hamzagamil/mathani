@@ -96,13 +96,41 @@ starts memorization (since specs/006). It requests nothing else.
 
 ## Privacy policy
 
-### Prayer notification increment
+### Prayer times (specs/009)
 
-Prayer times have optional foreground location and notification permissions. Android additionally offers user-granted Alarms & reminders access for precise local alerts and restores future alarms after reboot/unlock; it does not start media playback from boot. Saved prayer locations use a separate encrypted snapshot. Android derived alarm presentation is AES-GCM encrypted with a Keystore key; alarm intents contain only opaque event tokens/generations. Notification text is generic prayer/Qiyam text and contains no coordinates or saved-place label. iOS pending notifications are managed by the OS. These notifications add no push subscription, account, notification server or background location tracking.
+**Not yet in a store release.** Before the first release with prayer times, the answers above, the
+permissions table and the published policy must be updated as listed here. None of it has been
+changed in the store consoles yet.
 
-The generated Qiyam sound is original and bundled; unapproved third-party athan recordings are not included. Standard daily sounds require a separate explicit fallback choice and are not represented as an athan recording. Notification permission/channel/sound settings remain under user control. Native timing and system sound interruption limitations are disclosed in the app.
+What the feature does with data:
 
-The earlier "on-device storage only" description does not describe optional prayer location lookup: explicit city/device-place resolution contacts Mathani/Cloudflare and GeoNames as disclosed in setup, and optional approximate lookup uses connection metadata. Published policy and store form updates remain a separate release requirement; no store account answers or public policy were changed by this implementation.
+- **Location**: approximate (city-level) only, asked when the reader taps "Use my location";
+  never precise or in the background. Android declares only `ACCESS_COARSE_LOCATION`; iOS uses
+  when-in-use authorization with `NSLocationDefaultAccuracyReduced`. Coordinates are rounded to
+  2 decimal places (about 1 km) before they are saved or sent.
+- **Sent off the phone**:
+  - Rounded coordinates go to Mathani's server (`get.mthani.app`, Cloudflare Pages Functions) and
+    on to GeoNames, to find the place name and time zone. This happens once when a place is set,
+    and again only when "My location" has moved more than 10 km.
+  - City search text goes the same way.
+  - The internet-based suggestion reads the city that Cloudflare derives from the connection.
+  - The server keeps and logs nothing (`functions/_lib/prayer-location.js`; responses are
+    `no-store`).
+- **Kept on the phone**: saved places (city-level), calculation and alert settings in `user.db`.
+  The Android alert list is a derived copy, excluded from backups. Everything is deleted with the
+  app, or with "Delete all prayer data".
+- **Notifications**: local only, with no push service, account or server. Android uses exact
+  alarms (Alarms & reminders access, asked in context) and restores them after a reboot. The full
+  athan plays from a `mediaPlayback` foreground service started by the alarm.
+
+Answers to change, for the product owner to confirm:
+
+| Where | Change |
+| --- | --- |
+| Apple App Privacy | Coarse Location is used for App Functionality, not linked to identity, not used for tracking. It is processed in real time only, so Apple's "not collected" rule may still apply. Decide, and add the purpose to the review notes. |
+| Google Play Data safety | Approximate location: collected, processed ephemerally, for app functionality, optional. GeoNames acts as a service provider, which is not "sharing". |
+| Android permissions table | Add `ACCESS_COARSE_LOCATION`, `POST_NOTIFICATIONS`, `SCHEDULE_EXACT_ALARM` and `RECEIVE_BOOT_COMPLETED`. Extend the `mediaPlayback` foreground-service declaration with "plays the athan at prayer time when the reader chose full athan". |
+| Published policy | Replace "on-device storage only" with the location lookup above. |
 
 Both stores require a privacy-policy URL even when no data is collected. The page is
 https://mthani.app/privacypolicy (`privacypolicy.html` in the landing site). It states the above:

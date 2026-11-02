@@ -5,7 +5,21 @@ import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 
+import '../features/prayer_times/prayer_models.dart';
 import '../features/prayer_times/prayer_services.dart';
+
+/// The endpoints' `source` names, as the app calls them (contracts/location-api.md).
+const _sources = {'device': 'location', 'manual': 'search', 'ip': 'estimate'};
+
+/// A place from the endpoints with rounded coordinates and the app's source name.
+Map<String, dynamic> _normalized(Map<String, dynamic> place) => {
+  ...place,
+  if (place['latitude'] is num)
+    'latitude': roundCoordinate((place['latitude'] as num).toDouble()),
+  if (place['longitude'] is num)
+    'longitude': roundCoordinate((place['longitude'] as num).toDouble()),
+  'source': _sources[place['source']] ?? place['source'],
+};
 
 class PrayerLocationService implements PrayerLocationClient {
   PrayerLocationService({Uri? baseUri}) : baseUri = baseUri ?? _defaultBase();
@@ -38,7 +52,7 @@ class PrayerLocationService implements PrayerLocationClient {
       throw const PrayerException(PrayerFailure.locationUnavailable);
     }
     if (_retryAfter?.isAfter(DateTime.now()) ?? false) {
-      throw const PrayerException(PrayerFailure.providerUnavailable);
+      throw const PrayerException(PrayerFailure.rateLimited);
     }
     try {
       final uri = baseUri.resolve(path).replace(queryParameters: query);
@@ -66,6 +80,7 @@ class PrayerLocationService implements PrayerLocationClient {
       if (response.statusCode != 200) {
         final code = (decoded['error'] as Map?)?['code'];
         throw PrayerException(switch (code) {
+          'rateLimited' => PrayerFailure.rateLimited,
           'locationUnavailable' => PrayerFailure.locationUnavailable,
           'timezoneUnresolved' => PrayerFailure.timezoneUnresolved,
           _ => PrayerFailure.providerUnavailable,
@@ -104,7 +119,7 @@ class PrayerLocationService implements PrayerLocationClient {
       );
       if (_disposed || token != _searchGeneration) return [];
       return (result['places'] as List)
-          .map((v) => Map<String, dynamic>.from(v as Map))
+          .map((v) => _normalized(Map<String, dynamic>.from(v as Map)))
           .toList();
     } finally {
       client.close();
@@ -119,24 +134,38 @@ class PrayerLocationService implements PrayerLocationClient {
     _search = null;
   }
 
+  /// Coordinates are rounded to about 1 km before they leave the phone (R4).
   @override
   Future<Map<String, dynamic>> resolve(
-    Map<String, dynamic> candidate,
-    String language,
-  ) => _request(
-    '/api/prayer-resolve',
-    body: {
-      'latitude': candidate['latitude'],
-      'longitude': candidate['longitude'],
-      'source': candidate['source'] ?? 'manual',
-      'lang': language,
-    },
+    double latitude,
+    double longitude,
+    String language, {
+    String source = 'manual',
+  }) async => _normalized(
+    await _request(
+      '/api/prayer-resolve',
+      body: {
+        'latitude': roundCoordinate(latitude),
+        'longitude': roundCoordinate(longitude),
+        'source': source,
+        'lang': language,
+      },
+    ),
   );
+
   @override
-  Future<Map<String, dynamic>> approximate(String language) =>
-      _request('/api/prayer-location');
+  Future<Map<String, dynamic>> approximate(String language) async =>
+      _normalized(await _request('/api/prayer-location'));
+
+  /// Approximate (city-level) accuracy only; never precise or background (FR-006).
+  static const _settings = LocationSettings(
+    accuracy: LocationAccuracy.low,
+    timeLimit: Duration(seconds: 15),
+  );
+
   @override
   Future<Map<String, dynamic>> detect(String language) async {
+    final Position position;
     try {
       if (!await Geolocator.isLocationServiceEnabled()) {
         throw const PrayerException(PrayerFailure.locationUnavailable);
@@ -149,26 +178,46 @@ class PrayerLocationService implements PrayerLocationClient {
           permission == LocationPermission.deniedForever) {
         throw const PrayerException(PrayerFailure.locationDenied);
       }
-      final position = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.medium,
-          timeLimit: Duration(seconds: 15),
-        ),
+      position = await Geolocator.getCurrentPosition(
+        locationSettings: _settings,
       );
-      final result = await resolve({
-        'latitude': position.latitude,
-        'longitude': position.longitude,
-        'source': 'device',
-      }, language);
-      return {
-        ...result,
-        'accuracyMeters': position.accuracy,
-        'approximate': position.accuracy > 1000,
-      };
     } on PrayerException {
       rethrow;
     } on Object {
       throw const PrayerException(PrayerFailure.locationUnavailable);
+    }
+    return resolve(
+      position.latitude,
+      position.longitude,
+      language,
+      source: 'device',
+    );
+  }
+
+  @override
+  Future<bool> canLocate() async {
+    try {
+      final permission = await Geolocator.checkPermission();
+      return permission == LocationPermission.always ||
+          permission == LocationPermission.whileInUse;
+    } on Object {
+      return false;
+    }
+  }
+
+  @override
+  Future<({double latitude, double longitude})?> passivePosition() async {
+    try {
+      if (!await canLocate()) return null;
+      final p = await Geolocator.getCurrentPosition(
+        locationSettings: _settings,
+      );
+      return (
+        latitude: roundCoordinate(p.latitude),
+        longitude: roundCoordinate(p.longitude),
+      );
+    } on Object {
+      return null;
     }
   }
 

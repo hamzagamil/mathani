@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <full-backup-content>
-    <!-- Keystore-encrypted preferences are not portable. Reader SQLite is unaffected. -->
+    <!-- The prayer alert list is derived from user.db and rebuilt by the app; restoring it on
+         another phone would set stale alarms (specs/009 research R7). Reader SQLite is unaffected. -->
     <exclude domain="sharedpref" path="."/>
-    <exclude domain="file" path="prayer/"/>
 </full-backup-content>

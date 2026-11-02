@@ -8,6 +8,7 @@ import '../features/onboarding/onboarding_controller.dart';
 import '../features/onboarding/onboarding_screen.dart';
 import '../features/recitation/recitation_controller.dart';
 import '../features/reader/reader_screen.dart';
+import '../features/prayer_times/prayer_alerts.dart';
 import '../features/prayer_times/prayer_notification_open_host.dart';
 import '../shared/reader_state.dart';
 import 'l10n/app_localizations.dart';
@@ -25,6 +26,7 @@ class MathaniApp extends StatelessWidget {
     this.recitation,
     this.onboarding,
     this.memorization,
+    this.prayer,
   });
 
   final ReaderController controller;
@@ -37,6 +39,9 @@ class MathaniApp extends StatelessWidget {
 
   /// Memorization (specs/006). Null in tests that do not need it: no Memorize button then.
   final MemorizationController? memorization;
+
+  /// Prayer times and their alerts (specs/009). Null in tests that do not need them.
+  final PrayerAlerts? prayer;
 
   static const supportedLocales = [Locale('ar'), Locale('en')];
 
@@ -94,9 +99,13 @@ class MathaniApp extends StatelessWidget {
     final withMemorization = memorization == null
         ? app
         : MemorizationScope(controller: memorization, child: app);
-    final scoped = onboarding == null
+    final prayer = this.prayer;
+    final withPrayer = prayer == null
         ? withMemorization
-        : OnboardingScope(controller: onboarding, child: withMemorization);
+        : PrayerScope(alerts: prayer, child: withMemorization);
+    final scoped = onboarding == null
+        ? withPrayer
+        : OnboardingScope(controller: onboarding, child: withPrayer);
     return ReaderScope(
       controller: controller,
       child: recitation == null

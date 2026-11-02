@@ -25,7 +25,6 @@ class MainActivity : AudioServiceActivity() {
         DeviceChannel.register(this, flutterEngine)
         PrayerNotificationsPlugin.register(flutterEngine)
         PrayerNotificationsPlugin.noteOpenIntent(intent)
-        PrayerMediaBridge.register(flutterEngine, this)
     }
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)

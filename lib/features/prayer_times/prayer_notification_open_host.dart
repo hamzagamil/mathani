@@ -2,22 +2,19 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../platform/prayer_notifications.dart';
+import 'prayer_alerts.dart';
+import 'prayer_services.dart';
 import 'prayer_times_screen.dart';
 
-/// Read-only launch detection after the first frame. No permissions, location or
-/// audio are started here; only an explicit notification tap opens the route.
+/// Opens Prayer Times when the reader taps an alert. Nothing runs before the first frame; normal
+/// launches stay on the reader (FR-020, FR-031).
 class PrayerNotificationOpenHost extends StatefulWidget {
   const PrayerNotificationOpenHost({
     super.key,
     required this.child,
-    this.events,
-    this.takeOpen,
     this.destination,
   });
   final Widget child;
-  final Stream<void>? events;
-  final Future<bool> Function()? takeOpen;
   final WidgetBuilder? destination;
   @override
   State<PrayerNotificationOpenHost> createState() =>
@@ -26,39 +23,34 @@ class PrayerNotificationOpenHost extends StatefulWidget {
 
 class _PrayerNotificationOpenHostState
     extends State<PrayerNotificationOpenHost> {
-  StreamSubscription<void>? _subscription;
+  StreamSubscription<AlertOpened>? _subscription;
   bool _opening = false;
+
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      _subscription = (widget.events ?? prayerNotificationOpens).listen(
-        (_) => unawaited(_open()),
-      );
-      unawaited(_open());
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final hub = mounted ? PrayerScope.maybeOf(context) : null;
+      if (hub == null) return;
+      _subscription = hub.opened.listen((_) => unawaited(_open()));
+      if (await hub.takeLaunchOpen() != null) await _open();
     });
   }
 
   Future<void> _open() async {
+    if (!mounted || _opening || PrayerTimesScreen.hasOpenRoute) return;
+    _opening = true;
     try {
-      final requested = await (widget.takeOpen ?? takePrayerNotificationOpen)();
-      if (!requested || !mounted || _opening || PrayerTimesScreen.hasOpenRoute) {
-        return;
-      }
-      _opening = true;
-      try {
-        await Navigator.of(context).push<void>(
-          MaterialPageRoute(
-            settings: const RouteSettings(name: 'prayer-times-notification'),
-            builder: widget.destination ?? (_) => const PrayerTimesScreen(),
-          ),
-        );
-      } finally {
-        _opening = false;
-      }
+      await Navigator.of(context).push<void>(
+        MaterialPageRoute(
+          settings: const RouteSettings(name: 'prayer-times-notification'),
+          builder: widget.destination ?? (_) => const PrayerTimesScreen(),
+        ),
+      );
     } on Object {
-      /* A missing host/plugin must not block the reader. */
+      /* a missing navigator must not block the reader */
+    } finally {
+      _opening = false;
     }
   }
 

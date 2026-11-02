@@ -1,5 +1,8 @@
 import 'prayer_time_zones.dart';
 
+// Schema 2 of the prayer state (specs/009 data-model.md). City-level places live in user.db,
+// not secure storage (research R6).
+
 enum PrayerKind { fajr, sunrise, dhuhr, asr, maghrib, isha, qiyam }
 
 const dailyPrayers = {
@@ -13,111 +16,195 @@ const dailyPrayers = {
 enum PrayerMethod {
   muslimWorldLeague('muslim_world_league'),
   egyptian('egyptian'),
-  karachi('karachi'),
   ummAlQura('umm_al_qura'),
-  northAmerica('north_america');
+  karachi('karachi'),
+  isna('isna'),
+  dubai('dubai'),
+  kuwait('kuwait'),
+  qatar('qatar'),
+  singapore('singapore'),
+  turkey('turkey'),
+  moonsightingCommittee('moonsighting_committee');
 
   const PrayerMethod(this.id);
   final String id;
 }
 
-enum PrayerMadhhab { hanafi, shafii, maliki, hanbali }
+enum AsrSetting { standard, hanafi }
 
-enum HighLatitudeRule { middleOfNight, seventhOfNight }
+enum HighLatitudeRule {
+  middleOfNight('middle_of_night'),
+  seventhOfNight('seventh_of_night');
 
-enum LocationSource { device, manual, ip }
+  const HighLatitudeRule(this.id);
+  final String id;
 
-enum PrayerAvailability { available, adjusted, unavailable }
-
-enum AthanMode { full, opening }
-
-enum AudioAvailability { absent, downloading, verified, failed }
-
-enum ReminderState { pending, claimed, playing, delivered, cancelled, failed }
-
-enum ReminderClaimOwner { appAudio, systemFallback }
-
-T _enum<T extends Enum>(Iterable<T> values, Object? raw) => values.firstWhere(
-  (v) => v.name == raw,
-  orElse: () => throw const FormatException('Unknown prayer preference'),
-);
-
-class CalculationPreferences {
-  const CalculationPreferences({
-    this.method = PrayerMethod.muslimWorldLeague,
-    this.madhhab = PrayerMadhhab.shafii,
-    this.highLatitudeRule = HighLatitudeRule.middleOfNight,
-    this.conventionVersion = 1,
-  });
-  final PrayerMethod method;
-  final PrayerMadhhab madhhab;
-  final HighLatitudeRule highLatitudeRule;
-  final int conventionVersion;
-  int get asrFactor => madhhab == PrayerMadhhab.hanafi ? 2 : 1;
-  static PrayerMethod suggestion(String country) => switch (country) {
-    'EG' => PrayerMethod.egyptian,
-    'SA' => PrayerMethod.ummAlQura,
-    'PK' || 'BD' => PrayerMethod.karachi,
-    'US' || 'CA' => PrayerMethod.northAmerica,
-    _ => PrayerMethod.muslimWorldLeague,
-  };
-  CalculationPreferences copyWith({
-    PrayerMethod? method,
-    PrayerMadhhab? madhhab,
-    HighLatitudeRule? highLatitudeRule,
-  }) => CalculationPreferences(
-    method: method ?? this.method,
-    madhhab: madhhab ?? this.madhhab,
-    highLatitudeRule: highLatitudeRule ?? this.highLatitudeRule,
-    conventionVersion: conventionVersion,
-  );
-  Map<String, Object?> toJson() => {
-    'method': method.id,
-    'madhhab': madhhab.name,
-    'highLatitudeRule': highLatitudeRule.name,
-    'conventionVersion': conventionVersion,
-  };
-  factory CalculationPreferences.fromJson(Map<String, dynamic> j) {
-    final version = j['conventionVersion'] as int? ?? 1;
-    if (version != 1) {
-      throw const FormatException('Unknown calculation convention');
-    }
-    return CalculationPreferences(
-      method: PrayerMethod.values.firstWhere(
-        (v) => v.id == j['method'],
-        orElse: () => throw const FormatException('Unknown prayer method'),
-      ),
-      madhhab: _enum(PrayerMadhhab.values, j['madhhab']),
-      highLatitudeRule: _enum(HighLatitudeRule.values, j['highLatitudeRule']),
-      conventionVersion: version,
-    );
-  }
+  /// The library's recommendation: one-seventh above 48°, middle of the night otherwise.
+  static HighLatitudeRule recommended(double latitude) =>
+      latitude.abs() > 48 ? seventhOfNight : middleOfNight;
 }
 
-class SavedLocation {
-  SavedLocation({
+enum PlaceSource { location, search, estimate }
+
+enum EventStatus { normal, adjusted, unavailable }
+
+enum Adjustment { highLatitude, offset }
+
+enum AthanLength { opening, full }
+
+enum DownloadStatus { absent, downloading, ready, failed }
+
+/// The value of [PrayerState.current] when the current place is "My location".
+const myLocationKey = 'myLocation';
+const toneSound = 'tone', silentSound = 'silent';
+
+/// Positions are kept to about 1 km (2 decimal places) before they are saved or sent (R4).
+double roundCoordinate(double value) => (value * 100).round() / 100;
+
+T _byName<T extends Enum>(Iterable<T> values, Object? raw) => values.firstWhere(
+  (v) => v.name == raw,
+  orElse: () => throw const FormatException('Unknown prayer value'),
+);
+
+final _controlCharacters = RegExp(r'[\x00-\x1F\x7F]');
+
+/// Whether [value] is a valid place name: 1–80 characters, trimmed, no control characters.
+bool validPlaceName(String value) {
+  final text = value.trim();
+  return text.isNotEmpty &&
+      text.length <= 80 &&
+      !_controlCharacters.hasMatch(text);
+}
+
+class CalculationSettings {
+  CalculationSettings({
+    this.method = PrayerMethod.muslimWorldLeague,
+    this.methodChosen = false,
+    this.asr = AsrSetting.standard,
+    this.highLatitudeRule = HighLatitudeRule.middleOfNight,
+    Map<PrayerKind, int> offsets = const {},
+  }) : offsets = Map.unmodifiable({
+         for (final e in offsets.entries)
+           if (e.value != 0) e.key: e.value,
+       }) {
+    for (final e in this.offsets.entries) {
+      if (!dailyPrayers.contains(e.key) || e.value < -30 || e.value > 30) {
+        throw const FormatException('Invalid prayer offset');
+      }
+    }
+  }
+
+  /// A new place's settings: the country's usual method and the latitude's usual rule.
+  factory CalculationSettings.suggested(String countryCode, double latitude) =>
+      CalculationSettings(
+        method: suggestion(countryCode),
+        highLatitudeRule: HighLatitudeRule.recommended(latitude),
+      );
+
+  final PrayerMethod method;
+
+  /// False while [method] is still the automatic country suggestion (R4).
+  final bool methodChosen;
+  final AsrSetting asr;
+  final HighLatitudeRule highLatitudeRule;
+
+  /// Minutes added to each prayer, −30..30. Missing key = 0.
+  final Map<PrayerKind, int> offsets;
+
+  int offset(PrayerKind kind) => offsets[kind] ?? 0;
+
+  /// The method commonly used in a country (research R2). A suggestion the reader can change.
+  static PrayerMethod suggestion(String countryCode) => switch (countryCode) {
+    'EG' => PrayerMethod.egyptian,
+    'SA' || 'YE' => PrayerMethod.ummAlQura,
+    'AE' => PrayerMethod.dubai,
+    'KW' => PrayerMethod.kuwait,
+    'QA' => PrayerMethod.qatar,
+    'TR' => PrayerMethod.turkey,
+    'SG' || 'MY' || 'BN' || 'ID' => PrayerMethod.singapore,
+    'PK' || 'BD' || 'IN' || 'AF' => PrayerMethod.karachi,
+    'US' || 'CA' => PrayerMethod.isna,
+    'GB' || 'IE' => PrayerMethod.moonsightingCommittee,
+    _ => PrayerMethod.muslimWorldLeague,
+  };
+
+  CalculationSettings copyWith({
+    PrayerMethod? method,
+    bool? methodChosen,
+    AsrSetting? asr,
+    HighLatitudeRule? highLatitudeRule,
+    Map<PrayerKind, int>? offsets,
+  }) => CalculationSettings(
+    method: method ?? this.method,
+    methodChosen: methodChosen ?? this.methodChosen,
+    asr: asr ?? this.asr,
+    highLatitudeRule: highLatitudeRule ?? this.highLatitudeRule,
+    offsets: offsets ?? this.offsets,
+  );
+
+  Map<String, Object?> toJson() => {
+    'method': method.id,
+    'methodChosen': methodChosen,
+    'asr': asr.name,
+    'highLatitudeRule': highLatitudeRule.id,
+    'offsets': {for (final e in offsets.entries) e.key.name: e.value},
+  };
+
+  factory CalculationSettings.fromJson(Map<String, dynamic> j) =>
+      CalculationSettings(
+        method: PrayerMethod.values.firstWhere(
+          (v) => v.id == j['method'],
+          orElse: () => throw const FormatException('Unknown prayer method'),
+        ),
+        methodChosen: j['methodChosen'] as bool? ?? false,
+        asr: _byName(AsrSetting.values, j['asr']),
+        highLatitudeRule: HighLatitudeRule.values.firstWhere(
+          (v) => v.id == j['highLatitudeRule'],
+          orElse: () => throw const FormatException('Unknown latitude rule'),
+        ),
+        offsets: {
+          for (final e in (j['offsets'] as Map? ?? const {}).entries)
+            _byName(PrayerKind.values, e.key): e.value as int,
+        },
+      );
+
+  @override
+  bool operator ==(Object other) =>
+      other is CalculationSettings &&
+      other.method == method &&
+      other.methodChosen == methodChosen &&
+      other.asr == asr &&
+      other.highLatitudeRule == highLatitudeRule &&
+      other.offsets.length == offsets.length &&
+      offsets.entries.every((e) => other.offsets[e.key] == e.value);
+
+  @override
+  int get hashCode => Object.hash(
+    method,
+    methodChosen,
+    asr,
+    highLatitudeRule,
+    Object.hashAllUnordered(offsets.entries.map((e) => (e.key, e.value))),
+  );
+}
+
+class Place {
+  Place({
     required this.id,
-    required String label,
-    required this.latitude,
-    required this.longitude,
+    required String name,
+    required double latitude,
+    required double longitude,
     required this.timezoneId,
     required this.source,
-    required DateTime confirmedAtUtc,
+    required this.calculation,
     this.city = '',
     this.region = '',
     this.countryCode = '',
-    bool approximate = false,
-    this.accuracyMeters,
-    this.geonamesId,
-    this.calculation = const CalculationPreferences(),
-  }) : label = label.trim(),
-       confirmedAtUtc = confirmedAtUtc.toUtc(),
-       approximate = approximate || source == LocationSource.ip {
-    if (id.isEmpty ||
-        this.label.isEmpty ||
-        this.label.length > 80 ||
-        RegExp(r'[\x00-\x1F\x7F]').hasMatch(this.label)) {
-      throw const FormatException('Invalid location label or ID');
+  }) : name = name.trim(),
+       latitude = roundCoordinate(latitude),
+       longitude = roundCoordinate(longitude) {
+    if (id.isEmpty || !validPlaceName(this.name)) {
+      throw const FormatException('Invalid place name or ID');
     }
     if (!latitude.isFinite ||
         latitude < -90 ||
@@ -131,30 +218,48 @@ class SavedLocation {
         !RegExp(r'^[A-Z]{2}$').hasMatch(countryCode)) {
       throw const FormatException('Invalid country');
     }
-    if (accuracyMeters != null &&
-        (!accuracyMeters!.isFinite || accuracyMeters! < 0)) {
-      throw const FormatException('Invalid location accuracy');
-    }
     try {
       prayerTimeZone(timezoneId);
     } on Object {
-      throw const FormatException('Unresolved location timezone');
+      throw const FormatException('Unknown time zone');
     }
   }
-  final String id, label, city, region, countryCode, timezoneId;
+
+  final String id, name, city, region, countryCode, timezoneId;
   final double latitude, longitude;
-  final LocationSource source;
-  final bool approximate;
-  final double? accuracyMeters;
-  final String? geonamesId;
-  final DateTime confirmedAtUtc;
-  final CalculationPreferences calculation;
-  SavedLocation copyWith({
-    String? label,
-    CalculationPreferences? calculation,
-  }) => SavedLocation(
+  final PlaceSource source;
+  final CalculationSettings calculation;
+
+  /// A place from a location endpoint result (contracts/location-api.md › Place object).
+  factory Place.fromResult(
+    Map<String, dynamic> r, {
+    required String id,
+    CalculationSettings? calculation,
+  }) {
+    final latitude = (r['latitude'] as num).toDouble();
+    final longitude = (r['longitude'] as num).toDouble();
+    final city = (r['city'] as String? ?? '').trim();
+    final country = r['countryCode'] as String? ?? '';
+    return Place(
+      id: id,
+      name: city.isNotEmpty
+          ? (city.length > 80 ? city.substring(0, 80) : city)
+          : '${roundCoordinate(latitude)}, ${roundCoordinate(longitude)}',
+      city: city,
+      region: r['region'] as String? ?? '',
+      countryCode: country,
+      latitude: latitude,
+      longitude: longitude,
+      timezoneId: r['timezoneId'] as String,
+      source: _byName(PlaceSource.values, r['source']),
+      calculation:
+          calculation ?? CalculationSettings.suggested(country, latitude),
+    );
+  }
+
+  Place copyWith({String? name, CalculationSettings? calculation}) => Place(
     id: id,
-    label: label ?? this.label,
+    name: name ?? this.name,
     city: city,
     region: region,
     countryCode: countryCode,
@@ -162,15 +267,12 @@ class SavedLocation {
     longitude: longitude,
     timezoneId: timezoneId,
     source: source,
-    confirmedAtUtc: confirmedAtUtc,
-    approximate: approximate,
-    accuracyMeters: accuracyMeters,
-    geonamesId: geonamesId,
     calculation: calculation ?? this.calculation,
   );
+
   Map<String, Object?> toJson() => {
     'id': id,
-    'label': label,
+    'name': name,
     'city': city,
     'region': region,
     'countryCode': countryCode,
@@ -178,255 +280,327 @@ class SavedLocation {
     'longitude': longitude,
     'timezoneId': timezoneId,
     'source': source.name,
-    'approximate': approximate,
-    'accuracyMeters': accuracyMeters,
-    'geonamesId': geonamesId,
-    'confirmedAtUtc': confirmedAtUtc.toIso8601String(),
     'calculation': calculation.toJson(),
   };
-  factory SavedLocation.fromJson(Map<String, dynamic> j) => SavedLocation(
+
+  factory Place.fromJson(Map<String, dynamic> j) => Place(
     id: j['id'] as String,
-    label: j['label'] as String,
+    name: j['name'] as String,
     city: j['city'] as String? ?? '',
     region: j['region'] as String? ?? '',
     countryCode: j['countryCode'] as String? ?? '',
     latitude: (j['latitude'] as num).toDouble(),
     longitude: (j['longitude'] as num).toDouble(),
     timezoneId: j['timezoneId'] as String,
-    source: _enum(LocationSource.values, j['source']),
-    approximate: j['approximate'] as bool? ?? false,
-    accuracyMeters: (j['accuracyMeters'] as num?)?.toDouble(),
-    geonamesId: j['geonamesId'] as String?,
-    confirmedAtUtc: DateTime.parse(j['confirmedAtUtc'] as String),
-    calculation: CalculationPreferences.fromJson(
+    source: _byName(PlaceSource.values, j['source']),
+    calculation: CalculationSettings.fromJson(
       Map<String, dynamic>.from(j['calculation'] as Map),
     ),
   );
 }
 
-class PrayerEvent {
-  const PrayerEvent(
-    this.kind,
-    this.dueAtUtc, {
-    this.availability = PrayerAvailability.available,
-    this.reason,
-    this.adjustmentLabel,
-  });
-  final PrayerKind kind;
-  final DateTime? dueAtUtc;
-  final PrayerAvailability availability;
-  final String? reason, adjustmentLabel;
-}
-
-class DailyPrayerSchedule {
-  DailyPrayerSchedule({
-    required this.locationId,
-    required this.localDate,
-    required this.timezoneId,
-    required List<PrayerEvent> events,
-    required this.fingerprint,
-    required this.generatedAtUtc,
-    this.calculationVersion = 1,
-    this.followingFajrUtc,
-    this.qiyamUtc,
-    this.qiyamReason,
-  }) : events = List.unmodifiable(events);
-  final String locationId, timezoneId, fingerprint;
-  final DateTime localDate, generatedAtUtc;
-  final int calculationVersion;
-  final List<PrayerEvent> events;
-  final DateTime? followingFajrUtc, qiyamUtc;
-  final String? qiyamReason;
-}
-
-class ReminderPreferences {
-  ReminderPreferences({
-    Set<PrayerKind> enabledPrayers = const {},
-    this.selectedAthanId = 'beautiful-adhan',
-    this.requestedMode = AthanMode.opening,
-    this.qiyamEnabled = false,
-    Map<String, int> acknowledgedFallbacks = const {},
-  }) : enabledPrayers = Set.unmodifiable(enabledPrayers),
-       acknowledgedFallbacks = Map.unmodifiable(acknowledgedFallbacks) {
-    if (!dailyPrayers.containsAll(enabledPrayers) || selectedAthanId.isEmpty) {
-      throw const FormatException('Invalid reminder preferences');
+class AlertSettings {
+  AlertSettings({
+    Set<PrayerKind> prayers = const {},
+    this.sound = toneSound,
+    this.athan = AthanLength.opening,
+    this.qiyam = false,
+  }) : prayers = Set.unmodifiable(prayers) {
+    if (!dailyPrayers.containsAll(prayers) ||
+        !RegExp(r'^[a-z0-9_]{1,64}$').hasMatch(sound)) {
+      throw const FormatException('Invalid alert settings');
     }
   }
-  final Set<PrayerKind> enabledPrayers;
-  final String selectedAthanId;
-  final AthanMode requestedMode;
-  final bool qiyamEnabled;
-  final Map<String, int> acknowledgedFallbacks;
-  bool get anyEnabled => enabledPrayers.isNotEmpty || qiyamEnabled;
+
+  /// Prayers with an alert. Never sunrise.
+  final Set<PrayerKind> prayers;
+
+  /// A recitation id, [toneSound] or [silentSound].
+  final String sound;
+  final AthanLength athan;
+  final bool qiyam;
+
+  bool get any => prayers.isNotEmpty || qiyam;
+
+  AlertSettings copyWith({
+    Set<PrayerKind>? prayers,
+    String? sound,
+    AthanLength? athan,
+    bool? qiyam,
+  }) => AlertSettings(
+    prayers: prayers ?? this.prayers,
+    sound: sound ?? this.sound,
+    athan: athan ?? this.athan,
+    qiyam: qiyam ?? this.qiyam,
+  );
+
   Map<String, Object?> toJson() => {
-    'enabledPrayers': enabledPrayers.map((v) => v.name).toList(),
-    'selectedAthanId': selectedAthanId,
-    'requestedMode': requestedMode.name,
-    'qiyamEnabled': qiyamEnabled,
-    'acknowledgedFallbacks': acknowledgedFallbacks,
+    'prayers': [
+      for (final p in PrayerKind.values)
+        if (prayers.contains(p)) p.name,
+    ],
+    'sound': sound,
+    'athan': athan.name,
+    'qiyam': qiyam,
   };
-  factory ReminderPreferences.fromJson(Map<String, dynamic> j) =>
-      ReminderPreferences(
-        enabledPrayers: (j['enabledPrayers'] as List? ?? [])
-            .map((v) => _enum(PrayerKind.values, v))
-            .toSet(),
-        selectedAthanId: j['selectedAthanId'] as String? ?? 'beautiful-adhan',
-        requestedMode: _enum(AthanMode.values, j['requestedMode'] ?? 'opening'),
-        qiyamEnabled: j['qiyamEnabled'] as bool? ?? false,
-        acknowledgedFallbacks: (j['acknowledgedFallbacks'] as Map? ?? {}).map(
-          (k, v) => MapEntry(k as String, v as int),
-        ),
-      );
+
+  factory AlertSettings.fromJson(Map<String, dynamic> j) => AlertSettings(
+    prayers: {
+      for (final v in j['prayers'] as List? ?? const [])
+        _byName(PrayerKind.values, v),
+    },
+    sound: j['sound'] as String? ?? toneSound,
+    athan: _byName(AthanLength.values, j['athan'] ?? 'opening'),
+    qiyam: j['qiyam'] as bool? ?? false,
+  );
 }
 
 class PrayerState {
   PrayerState({
-    this.schemaVersion = 1,
-    this.revision = 0,
+    List<Place> places = const [],
+    this.myLocation,
+    this.current,
+    AlertSettings? alerts,
     this.generation = 0,
-    this.calculationVersion = 1,
-    List<SavedLocation> locations = const [],
-    this.activeLocationId,
-    ReminderPreferences? reminders,
-  }) : locations = List.unmodifiable(locations),
-       reminders = reminders ?? ReminderPreferences() {
-    if (schemaVersion != 1 ||
-        revision < 0 ||
+    this.movedNotice,
+  }) : places = List.unmodifiable(places),
+       alerts = alerts ?? AlertSettings() {
+    final ids = places.map((p) => p.id).toSet();
+    if (ids.length != places.length ||
         generation < 0 ||
-        calculationVersion != 1 ||
-        locations.map((v) => v.id).toSet().length != locations.length ||
-        (activeLocationId != null &&
-            !locations.any((v) => v.id == activeLocationId)) ||
-        (this.reminders.anyEnabled && activeLocationId == null)) {
-      throw const FormatException('Invalid or unsupported prayer snapshot');
+        (myLocation != null && ids.contains(myLocation!.id))) {
+      throw const FormatException('Invalid prayer state');
     }
+    final valid = isSetUp
+        ? (current == myLocationKey
+              ? myLocation != null
+              : ids.contains(current))
+        : current == null;
+    if (!valid) throw const FormatException('Invalid current place');
   }
-  final int schemaVersion, revision, generation, calculationVersion;
-  final List<SavedLocation> locations;
-  final String? activeLocationId;
-  final ReminderPreferences reminders;
-  SavedLocation? get activeLocation => activeLocationId == null
-      ? null
-      : locations.firstWhere((v) => v.id == activeLocationId);
+
+  static const schemaVersion = 2;
+
+  /// Saved places. "My location" is kept apart in [myLocation].
+  final List<Place> places;
+
+  /// The latest "My location" result.
+  final Place? myLocation;
+
+  /// [myLocationKey] or a place id. Null only when not set up.
+  final String? current;
+  final AlertSettings alerts;
+
+  /// Increases on every change that affects alerts; older native alerts are ignored.
+  final int generation;
+
+  /// City to show once in a "Moved to {city}" message.
+  final String? movedNotice;
+
+  bool get isSetUp => places.isNotEmpty || myLocation != null;
+
+  Place? get currentPlace =>
+      current == myLocationKey ? myLocation : placeById(current);
+
+  Place? placeById(String? id) {
+    if (id == null) return null;
+    if (myLocation?.id == id) return myLocation;
+    for (final p in places) {
+      if (p.id == id) return p;
+    }
+    return null;
+  }
+
+  static const _keep = Object();
+
+  PrayerState copyWith({
+    List<Place>? places,
+    Object? myLocation = _keep,
+    Object? current = _keep,
+    AlertSettings? alerts,
+    int? generation,
+    Object? movedNotice = _keep,
+  }) => PrayerState(
+    places: places ?? this.places,
+    myLocation: identical(myLocation, _keep)
+        ? this.myLocation
+        : myLocation as Place?,
+    current: identical(current, _keep) ? this.current : current as String?,
+    alerts: alerts ?? this.alerts,
+    generation: generation ?? this.generation,
+    movedNotice: identical(movedNotice, _keep)
+        ? this.movedNotice
+        : movedNotice as String?,
+  );
+
+  /// The same state with [generation] increased: alerts must be rebuilt.
+  PrayerState bumped() => copyWith(generation: generation + 1);
+
   Map<String, Object?> toJson() => {
     'schemaVersion': schemaVersion,
-    'revision': revision,
+    'places': places.map((p) => p.toJson()).toList(),
+    'myLocation': myLocation?.toJson(),
+    'current': current,
+    'alerts': alerts.toJson(),
     'generation': generation,
-    'calculationVersion': calculationVersion,
-    'locations': locations.map((v) => v.toJson()).toList(),
-    'activeLocationId': activeLocationId,
-    'reminders': reminders.toJson(),
+    'movedNotice': movedNotice,
   };
-  factory PrayerState.fromJson(Map<String, dynamic> j) => PrayerState(
-    schemaVersion: j['schemaVersion'] as int,
-    revision: j['revision'] as int,
-    generation: j['generation'] as int? ?? 0,
-    calculationVersion: j['calculationVersion'] as int? ?? 1,
-    locations: (j['locations'] as List)
-        .map((v) => SavedLocation.fromJson(Map<String, dynamic>.from(v as Map)))
-        .toList(),
-    activeLocationId: j['activeLocationId'] as String?,
-    reminders: ReminderPreferences.fromJson(
-      Map<String, dynamic>.from(j['reminders'] as Map),
-    ),
-  );
+
+  factory PrayerState.fromJson(Map<String, dynamic> j) {
+    if (j['schemaVersion'] != schemaVersion) {
+      throw const FormatException('Unknown prayer schema');
+    }
+    final my = j['myLocation'];
+    return PrayerState(
+      places: [
+        for (final p in j['places'] as List)
+          Place.fromJson(Map<String, dynamic>.from(p as Map)),
+      ],
+      myLocation: my == null
+          ? null
+          : Place.fromJson(Map<String, dynamic>.from(my as Map)),
+      current: j['current'] as String?,
+      alerts: AlertSettings.fromJson(
+        Map<String, dynamic>.from(j['alerts'] as Map? ?? const {}),
+      ),
+      generation: j['generation'] as int? ?? 0,
+      movedNotice: j['movedNotice'] as String?,
+    );
+  }
 }
 
+class PrayerEvent {
+  const PrayerEvent(
+    this.kind,
+    this.atUtc, {
+    this.status = EventStatus.normal,
+    this.adjustedBy = const {},
+    this.reason,
+  });
+  final PrayerKind kind;
+
+  /// Null when [status] is unavailable.
+  final DateTime? atUtc;
+  final EventStatus status;
+  final Set<Adjustment> adjustedBy;
+  final String? reason;
+}
+
+class DaySchedule {
+  DaySchedule({
+    required this.placeId,
+    required this.localDate,
+    required this.timezoneId,
+    required List<PrayerEvent> events,
+    this.qiyamUtc,
+    this.qiyamUnavailableReason,
+  }) : events = List.unmodifiable(events);
+
+  final String placeId, timezoneId;
+
+  /// The date in the place's zone, as a UTC midnight.
+  final DateTime localDate;
+
+  /// Fajr, Sunrise, Dhuhr, Asr, Maghrib, Isha.
+  final List<PrayerEvent> events;
+
+  /// Start of the last third of the night after this day's Maghrib.
+  final DateTime? qiyamUtc;
+  final String? qiyamUnavailableReason;
+
+  PrayerEvent event(PrayerKind kind) =>
+      events.firstWhere((e) => e.kind == kind);
+}
+
+/// One alert handed to the platform (data model → Alert).
+class Alert {
+  const Alert({
+    required this.id,
+    required this.kind,
+    required this.atUtc,
+    required this.title,
+    required this.body,
+    required this.sound,
+    required this.generation,
+    this.full = false,
+    this.fullPath,
+  });
+  final int id;
+  final PrayerKind kind;
+  final DateTime atUtc;
+  final String title, body, sound;
+  final int generation;
+  final bool full;
+
+  /// Android only: the downloaded full recording.
+  final String? fullPath;
+
+  Map<String, Object?> toMap() => {
+    'id': id,
+    'kind': kind.name,
+    'atUtcMs': atUtc.millisecondsSinceEpoch,
+    'title': title,
+    'body': body,
+    'sound': sound,
+    'full': full,
+    'fullPath': fullPath,
+  };
+}
+
+/// A catalogue entry (data model → AthanRecording).
 class AthanRecording {
   const AthanRecording({
     required this.id,
-    required this.titleAr,
-    required this.titleEn,
-    required this.creditedRecorder,
-    required this.sourceUrl,
-    required this.sourceRevision,
-    required this.licenseId,
-    required this.licenseUrl,
-    required this.changeNotice,
-    required this.fullAssetUrl,
-    required this.sha256,
-    required this.expectedBytes,
-    required this.durationMs,
-    required this.encoding,
-    required this.openingAssetId,
+    required this.nameAr,
+    required this.nameEn,
+    required this.reciter,
     required this.openingEndMs,
-    this.openingStartMs = 0,
-    required this.openingDurationMs,
-    required this.platformClipHashes,
-    required this.platformClipEncodings,
-    this.completeRecordingReviewed = false,
-    this.fourTakbirsReviewed = false,
+    required this.fullUrl,
+    required this.fullSha256,
+    required this.fullBytes,
+    required this.fullDurationMs,
+    required this.source,
+    required this.licence,
+    required this.attribution,
   });
-  final String id,
-      titleAr,
-      titleEn,
-      creditedRecorder,
-      sourceUrl,
-      sourceRevision;
-  final String licenseId,
-      licenseUrl,
-      changeNotice,
-      fullAssetUrl,
-      sha256,
-      encoding,
-      openingAssetId;
-  final int expectedBytes,
-      durationMs,
-      openingStartMs,
-      openingEndMs,
-      openingDurationMs;
-  final Map<String, String> platformClipHashes, platformClipEncodings;
-  final bool completeRecordingReviewed, fourTakbirsReviewed;
-  bool get iosShortEligible =>
-      completeRecordingReviewed &&
-      fourTakbirsReviewed &&
-      openingDurationMs > 0 &&
-      openingDurationMs < 30000;
-}
+  final String id, nameAr, nameEn, reciter, fullUrl, fullSha256;
+  final String source, licence, attribution;
+  final int openingEndMs, fullBytes, fullDurationMs;
 
-class ReminderCapability {
-  const ReminderCapability({
-    required this.permissionStatus,
-    this.exactAlarmAccess = false,
-    this.foregroundModes = const {},
-    this.backgroundModes = const {},
-    this.reason,
-    this.recoveryAction,
-    this.channelRestricted,
-    this.restrictedPrayers = const {},
-    this.scheduledThroughUtc,
-    this.appMustReopenByUtc,
-  });
-  final String permissionStatus;
-  final bool exactAlarmAccess;
-  final Set<AthanMode> foregroundModes, backgroundModes;
-  final bool? channelRestricted;
-  final Set<PrayerKind> restrictedPrayers;
-  final String? reason, recoveryAction;
-  final DateTime? scheduledThroughUtc, appMustReopenByUtc;
-}
+  String name({required bool arabic}) => arabic ? nameAr : nameEn;
 
-class ScheduledReminder {
-  const ScheduledReminder({
-    required this.eventId,
-    required this.locationId,
-    required this.generation,
-    required this.kind,
-    required this.dueAtUtc,
-    required this.expiresAtUtc,
-    required this.audioId,
-    required this.mode,
-    required this.deliveryMechanism,
-    this.state = ReminderState.pending,
-    this.claimOwner,
-    this.consumed = false,
-  });
-  final String eventId, locationId, audioId, deliveryMechanism;
-  final int generation;
-  final PrayerKind kind;
-  final DateTime dueAtUtc, expiresAtUtc;
-  final AthanMode mode;
-  final ReminderState state;
-  final ReminderClaimOwner? claimOwner;
-  final bool consumed;
+  factory AthanRecording.fromJson(Map<String, dynamic> j) {
+    final r = AthanRecording(
+      id: j['id'] as String,
+      nameAr: j['nameAr'] as String,
+      nameEn: j['nameEn'] as String,
+      reciter: j['reciter'] as String,
+      openingEndMs: j['openingEndMs'] as int,
+      fullUrl: j['fullUrl'] as String,
+      fullSha256: j['fullSha256'] as String,
+      fullBytes: j['fullBytes'] as int,
+      fullDurationMs: j['fullDurationMs'] as int,
+      source: j['source'] as String,
+      licence: j['licence'] as String,
+      attribution: j['attribution'] as String,
+    );
+    final uri = Uri.tryParse(r.fullUrl);
+    if (!RegExp(r'^[a-z0-9_]{1,64}$').hasMatch(r.id) ||
+        r.id == toneSound ||
+        r.id == silentSound ||
+        r.nameAr.trim().isEmpty ||
+        r.nameEn.trim().isEmpty ||
+        r.openingEndMs <= 0 ||
+        r.openingEndMs >= 30000 ||
+        r.openingEndMs > r.fullDurationMs ||
+        !RegExp(r'^[a-f0-9]{64}$').hasMatch(r.fullSha256) ||
+        r.fullBytes <= 0 ||
+        r.fullBytes > 16 * 1024 * 1024 ||
+        uri == null ||
+        uri.scheme != 'https' ||
+        !const {'get.mthani.app', 'mthani.app'}.contains(uri.host)) {
+      throw const FormatException('Invalid athan recording');
+    }
+    return r;
+  }
 }
