@@ -9,3 +9,15 @@ Downloaded Android manifests/build files confirm local_notifications minSdk24/co
 Size allowances and purposes remain in research R9; actual compressed Android/iOS size deltas have not been measured. Transitive licenses must be included by Flutter's license registry and final attribution review. Public metadata sources: https://pub.dev/api/packages/geolocator and https://pub.dev/api/packages/flutter_local_notifications .
 
 Final native compilation result: Android debug APK built successfully with the resolved lockfile and unchanged API24/target36 configuration. Added test1.31.1 as development-only support because the pinned Flutter browser harness dereferences the application package:test entry. Its transitive package_config resolved from3.0.0 to2.2.0; test_api remains0.7.12. Browser runtime verification remains pending; development harness dependencies are not shipped runtime payloads.
+
+## Rewrite to spec v2 — 2026-11-02
+
+- `flutter_secure_storage 10.3.4` removed from `pubspec.yaml` (T001). Prayer state now lives in
+  `user.db` (`preferences` row `prayer.state`, research R6). `flutter pub get` succeeded.
+- `androidx.media:media:1.7.0` removed from `android/app/build.gradle.kts`; it was used only by
+  the deleted `PrayerMediaBridge` spike. `junit` stays as a test dependency.
+- No package added. `adhan_dart 2.0.1`, `timezone 0.11.2`, `geolocator 14.0.1` and
+  `flutter_local_notifications 22.3.3` are unchanged.
+- T003 was checked and reversed: `timezone/data/latest_10y.dart` has 345 of the 598 zone names
+  in `latest_all.dart`. The 253 missing names are all link zones (e.g. `Europe/Oslo`,
+  `Africa/Accra`), and GeoNames returns them. `latest_all` is kept.

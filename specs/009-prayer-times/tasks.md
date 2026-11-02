@@ -1,252 +1,473 @@
 ---
-description: "Dependency-ordered implementation tasks for prayer times and athan notifications"
+
+description: "Tasks for Prayer Times and Athan (spec rewritten 2026-11-02)"
 ---
 
-# Tasks: Prayer Times and Athan Notifications
+# Tasks: Prayer Times and Athan
 
-**Input**: Design documents in `specs/009-prayer-times/`
+**Input**: Design documents from `specs/009-prayer-times/`. Read [plan.md](./plan.md),
+[spec.md](./spec.md), [research.md](./research.md), [data-model.md](./data-model.md),
+[contracts/location-api.md](./contracts/location-api.md),
+[contracts/prayer-ui-and-reminders.md](./contracts/prayer-ui-and-reminders.md) and
+[quickstart.md](./quickstart.md) before starting a phase.
 
-**Prerequisites**: [plan.md](./plan.md), [spec.md](./spec.md), [research.md](./research.md), [data-model.md](./data-model.md), [UI/reminder contract](./contracts/prayer-ui-and-reminders.md), [location API contract](./contracts/location-api.md), [quickstart.md](./quickstart.md), [follow-ups.md](./follow-ups.md), constitution 2.0.0.
+**Prerequisites**: plan.md and spec.md (required). This replaces the first draft's tasks, which
+are in git history.
 
-**Tests**: Focused test tasks implement the specification's explicit User Scenarios & Testing, SC-001..008 and G01-G05 evidence requirements. This is not a request to add unrelated tests. Test-first ordering applies to the listed behavioural tests; physical-device and usability checks follow implementation. Checked tasks must mean actual completion, not placeholders or unrun validation.
+**Starting point**: Much of the code already exists on `008-web-app` (plan → Source Code marks
+each file KEEP, CHANGE, NEW or DELETE). Tasks below change existing files unless they say
+"create". Do not rewrite working code that a task does not mention.
 
-**Organization**: Setup, shared foundations, US1/US2 (P1), US3/US4 (P2), then cross-cutting acceptance. All tasks are initially unchecked. No implementation/deployment has been performed by task generation.
+**Tests**: The spec's success criteria require automated evidence: SC-002 reference fixtures,
+SC-004 no duplicate or stale alerts, SC-006 Qiyam times. Test tasks are included only for
+those, plus keeping the existing prayer suites passing. Device trials are in
+[quickstart.md](./quickstart.md) and are recorded in `specs/009-prayer-times/validation/`.
+
+**Organization**: Tasks are grouped by user story so each story can be built and tested on its
+own.
 
 ## Format: `[ID] [P?] [Story] Description`
 
-- `[P]` identifies disjoint-file work that can run concurrently only after the dependencies below are complete; it does not authorize skipping prerequisites.
-- Story labels map exactly to spec US1-US4. Shared phases have no story label.
-- Every task names concrete repository-relative file paths; planned new files are intentional. Evidence lives under `specs/009-prayer-times/validation/` and must contain real results.
+- **[P]**: Can run in parallel (different files, no dependency on unfinished tasks).
+- **[Story]**: US1–US6 from spec.md.
 
 ## Path Conventions
 
-Single existing Flutter project: `lib/`, `android/`, `ios/`, `web/`, `test/`, `integration_test/`; bounded Pages endpoints in `functions/api/`. Keep Node tests in `tool/prayer/`, outside Functions routing. Native Kotlin package is `app.mathani.mathani`; published Android application ID is unchanged.
+Single Flutter project:
+- **Dart**: `lib/`, tests in `test/` and `integration_test/`.
+- **Android**: `android/app/src/main/kotlin/app/mathani/mathani/`, JVM tests in
+  `android/app/src/test/kotlin/app/mathani/mathani/`.
+- **iOS**: `ios/Runner/`.
+- **Web**: `web/`; Pages Functions in `functions/` are unchanged.
+- **Localization**: strings in `lib/app/l10n/app_en.arb` and `lib/app/l10n/app_ar.arb`.
+  Regenerate with `flutter gen-l10n` after editing them.
+
+---
 
 ## Phase 1: Setup (Shared Infrastructure)
 
-**Purpose**: Establish a reproducible baseline and the planned platform/configuration boundaries without disturbing existing work.
+**Purpose**: Remove what the new design drops and add the empty catalogue.
 
-- [X] T001 Capture the actual Git branch, existing unrelated edits, platform floors, dependency baseline and available physical-device/toolchain coverage in `specs/009-prayer-times/validation/baseline.md`; use `.specify/feature.json` to retain feature 009 independently of the Git branch and leave unrelated `lib/platform/file_store_web.dart` edits intact.
-
-- [X] T002 Pin adhan_dart 2.0.1, timezone 0.11.2, geolocator 14.0.1, flutter_local_notifications 22.3.3 and flutter_secure_storage 10.3.4 in `pubspec.yaml`/`pubspec.lock`; solve against the pinned SDK, confirm API24/iOS15 and Java17 compatibility, and record dependency/transitive size and license expectations in `specs/009-prayer-times/validation/dependencies.md`; do not silently upgrade platform floors.
-
-- [X] T003 Define development/preview/production API base selection, GEONAMES_USERNAME and allowed-origin binding names in `wrangler.toml` and `tool/prayer/README.md`, with local bindings excluded through `.gitignore`; use same-origin web requests and explicit native development URLs, never committed credentials or demo provider accounts.
+- [X] T001 Remove `flutter_secure_storage` from `pubspec.yaml`, run `flutter pub get`, and record the dependency change in `specs/009-prayer-times/validation/dependencies.md`.
+- [X] T002 [P] Delete the alarm spike:
+  - Delete `android/app/src/main/kotlin/app/mathani/mathani/PrayerMediaBridge.kt` and its `PrayerMediaBridge.register(...)` call in `MainActivity.kt`.
+  - Delete `integration_test/prayer_alarm_spike_test.dart`.
+  - In `lib/main.dart`, remove `prayerAlarmSpikeEnabled`, `initializePrayerAlarmSpike` and `prayerAlarmSpikeRoute`.
+  - In `lib/features/recitation/media_handler.dart`, remove the `PRAYER_ALARM_SPIKE` flag, `_spikeChannel` and `initializePrayerAlarmSpike()`. Keep `pauseMemorizationForPrayer`.
+- [X] T003 [P] In `lib/features/prayer_times/prayer_time_zones.dart`, import `package:timezone/data/latest_10y.dart` instead of `latest_all.dart` (research R11).
+  - *Done 2026-11-02, then reversed:* `latest_10y` lacks 253 link zones (e.g. `Europe/Oslo`) that GeoNames returns, so `latest_all` stays. See research R11 and validation/dependencies.md.
+- [X] T004 [P] Create `assets/prayer/athan_catalogue.json` with `{"version": 1, "recordings": []}` and confirm `assets/prayer/` is listed under `flutter: assets:` in `pubspec.yaml`.
+- [ ] T005 [P] Before any feature change, record the baseline in `specs/009-prayer-times/validation/baseline.md`: Android and iOS release size from `dart run tool/size_check.dart`, and cold start on the Galaxy A15.
 
 ---
 
 ## Phase 2: Foundational (Blocking Prerequisites)
 
-**Purpose**: Shared typed data, secure persistence and reproducible calculation inputs. Complete this phase before any user story. Notification feasibility is deliberately gated within US3, before dependent playback implementation; it does not block the schedule MVP.
+**Purpose**: Schema 2, storage in `user.db`, the platform interface and the app-level
+coordinator. Every story depends on this phase.
 
-- [X] T004 Define PrayerState and SavedLocation in `lib/features/prayer_times/prayer_models.dart`, preserving these model constraints verbatim: schemaVersion "Integer, initially 1; unknown future versions fail safely without overwrite"; revision "Monotonic integer for serialized user changes"; locations "List of SavedLocation, unique IDs"; activeLocationId "Nullable ID referencing an existing confirmed location"; calculationVersion "Version of app convention mapping, timezone data and Ramadan table"; id "Random opaque stable ID; independent of label/coordinates"; label "Trimmed user label, 1-80 characters; no control characters"; city/region/countryCode "Display name, optional region, ISO country code; city/region may be absent for a valid coordinate fix"; coordinates "Finite numbers, latitude -90..90 and longitude -180..180"; timezoneId "Valid resolvable IANA ID; no inferred device-zone fallback"; source "device, manual, ip"; approximate "True for IP and approximate-only device fixes"; accuracyMeters "Optional finite nonnegative device-reported accuracy"; confirmedAtUtc "UTC instant; required for saved/active state"; geonamesId "Optional provider place identifier". Include calculation/reminder relationships, require confirmation before persistence and one confirmed active location before any enabled reminder.
+- [X] T006 Rewrite `lib/features/prayer_times/prayer_models.dart` to the data model's schema 2. The constraints below are quoted from data-model.md:
+  - **`PrayerState`**:
+    - `schemaVersion` (`2`), `places`, `myLocation` (Place or null), `current`, `alerts`, `generation`, `movedNotice`.
+    - `current`: `"myLocation"` or a place `id`. "Must point to an existing place, or to `myLocation` when that is non-null".
+    - A getter `isSetUp` is false when `places` is empty and `myLocation` is null.
+  - **`Place`**:
+    - `id`, `name`, `city`, `region`, `countryCode`, `latitude`, `longitude`, `timezoneId`, `source` (`location`/`search`/`estimate`), `calculation`.
+    - `name`: "1–80 characters, trimmed, no control characters".
+    - `latitude`, `longitude`: "Rounded to 2 decimal places. Range −90..90 and −180..180".
+    - `countryCode`: "ISO 3166-1 alpha-2, or empty".
+    - `timezoneId`: a valid IANA ID.
+  - **`CalculationSettings`**:
+    - `method`: 11 values with ids `muslim_world_league`, `egyptian`, `umm_al_qura`, `karachi`, `isna`, `dubai`, `kuwait`, `qatar`, `singapore`, `turkey`, `moonsighting_committee`.
+    - `methodChosen` (bool), `asr` (`standard`/`hanafi`, default `standard`), `highLatitudeRule` (`middle_of_night`/`seventh_of_night`).
+    - `offsets`: map of the five prayers to int, "Values −30..30 minutes. Missing key = 0".
+  - **`AlertSettings`**:
+    - `prayers`: set of the five prayers, "Never `sunrise`".
+    - `sound`: recitation id, `tone` or `silent`.
+    - `athan`: `opening`/`full`, default `opening`.
+    - `qiyam`: default `false`.
+  - **`Alert`**: `id` (31-bit int), `kind`, `atUtc`, `title`, `body`, `sound`, `full`, `fullPath`, `generation`.
+  - **`DaySchedule` and `PrayerEvent`**: `status` is `normal`/`adjusted`/`unavailable`; `adjustedBy` is a set of `highLatitude` and `offset`; plus `qiyamUtc` and `qiyamUnavailableReason`.
+  - Delete `PrayerMadhhab`, `LocationSource`, `ReminderState`, `ReminderClaimOwner`, `ReminderCapability`, `ScheduledReminder`, `ReminderPreferences` and `acknowledgedFallbacks`. Rename download status to `absent`/`downloading`/`ready`/`failed`.
+  - JSON round-trip: parsing throws `FormatException` on any violated rule.
+- [X] T007 [P] In `lib/data/user_repository.dart`:
+  - Add `Future<String?> readPreference(String key)`, `Future<void> writePreference(String key, String value)` and `Future<void> deletePreference(String key)` on the `preferences` table.
+  - Change `loadStartup()` to query `preferences` with `where: "key != 'prayer.state'"`, so the prayer JSON is never read before the first frame.
+- [X] T008 Rewrite `lib/features/prayer_times/prayer_repository.dart` as `PrayerRepository(UserRepository)` with key `prayer.state`:
+  - `load()` returns an empty (not set up) `PrayerState` when the value is missing, fails to parse, or has an unknown `schemaVersion`.
+  - In those cases it does not overwrite the stored value until the next `save()`.
+  - `save(state)` and `delete()` are serialized through one future chain.
+  - Delete `SecurePrayerSnapshotStore` and all session-only code.
+- [X] T009 Rewrite `lib/features/prayer_times/prayer_services.dart`:
+  - Trim `PrayerFailure` to `locationDenied`, `locationUnavailable`, `timezoneUnresolved`, `providerUnavailable`, `offline`, `rateLimited`, `calculationUnavailable`, `conventionOutOfRange`, `audioUnavailable`, `notificationsDenied`.
+  - Delete `PrayerSnapshotStore` and `NoPrayerNotifications`.
+  - Define `abstract interface class PrayerAlertPlatform`:
+    - `Future<AlertStatus> status()`, returning `notifications` (`granted|denied|notDetermined|unsupported`) and `exactAlarms` (`bool?`), without prompting.
+    - `Future<AlertStatus> requestPermission()`.
+    - `Future<void> openSettings({bool exactAlarms = false})`.
+    - `Future<int> replace(List<Alert> alerts, int generation)`.
+    - `Future<void> cancelAll()`.
+    - `Stream<PrayerPlatformEvent> events`, with `opened(kind, alertId)` and `athanStarted`.
+- [X] T010 Adapt `lib/features/prayer_times/prayer_calculator.dart` to the schema 2 types without changing results for the existing five methods:
+  - Map `asr` to `adhan.Madhab` and `highLatitudeRule` to the existing night-fraction logic.
+  - Return `DaySchedule` with `status`/`adjustedBy`, and keep `qiyamStart`.
+  - Keep the existing polar-day check, Asr correction and Umm al-Qura Ramadan handling.
+- [X] T011 Create `lib/features/prayer_times/prayer_alerts.dart` with an app-scoped, lazily created `PrayerAlerts` coordinator:
+  - Constructor takes `PrayerRepository`, a `PrayerAlertPlatform` factory, a `PrayerCalculator` loader and the location client.
+  - `onAppActive()` is a no-op placeholder that later stories fill in.
+  - A `ChangeNotifier`-free `onStateSaved(PrayerState)` hook.
+  - No work in the constructor.
+- [X] T012 Wire `PrayerAlerts` in `lib/main.dart` and `lib/app/app.dart`:
+  - Call `PrayerAlerts.onAppActive()` from `WidgetsBinding.instance.addPostFrameCallback` on start, and on `AppLifecycleState.resumed`.
+  - Never before the first frame (FR-031, R11).
+  - Expose the instance to `PrayerTimesScreen` the same way existing services are passed.
+- [X] T013 Update `lib/platform/prayer_notifications.dart` (conditional export), `lib/platform/prayer_notifications_io.dart` and `lib/platform/prayer_notifications_web.dart` so each exports a `PrayerAlertPlatform` factory implementing T009's interface.
+  - Keep the existing iOS and Android code paths compiling; their behaviour changes in US4.
+  - Add `clearLegacyPrayerStorage()`: a no-op on io. On web, it removes the `localStorage` entries written by `flutter_secure_storage` 10.3.4's web implementation. Check that package's web source in the pub cache for the exact key names before deleting the package.
+- [X] T014 Rewrite the skeleton of `lib/features/prayer_times/prayer_controller.dart` against schema 2:
+  - Keep `load`/`save` through `PrayerRepository`.
+  - Hold `viewedPlaceId` separately from `state.current`.
+  - Call `PrayerAlerts.onStateSaved` after every save.
+  - Delete acknowledgement, session-only, `needsAttention` and claim code.
+- [X] T015 Make the existing suites compile and pass against schema 2:
+  - Update `test/features/prayer_times/*.dart` and `test/platform/*.dart`.
+  - Delete tests that only cover removed behaviour: secure storage, session-only, acknowledgements, claims.
+  - Add a repository test: unknown `schemaVersion` loads as not set up and the stored value is unchanged until `save`.
+  - Run `flutter analyze` and `flutter test test/features/prayer_times test/platform`.
 
-- [X] T005 Extend CalculationPreferences and DailyPrayerSchedule in `lib/features/prayer_times/prayer_models.dart` using the exact model constraints: "methodId: muslim_world_league, egyptian, karachi, umm_al_qura, north_america."; "madhhabLabel: hanafi, shafii, maliki, hanbali. Derived Asr factor is Hanafi=2; other labels=1. Labels are preserved independently of that grouping."; "highLatitudeRule: middle_of_night or seventh_of_night. Default middle_of_night, explicitly shown; never silently switch rules because a result fails."; "conventionVersion: stable integer tying method offsets, Ramadan handling and rounding to reviewed fixtures."; "localDate (year/month/day in location zone)"; fingerprint "coordinates + preferences + calculator/timezone/Ramadan versions"; events "fajr, sunrise, dhuhr, asr, maghrib, isha"; "status=available/adjusted/unavailable; dueAtUtc nullable; reason code; adjustment label."; "followingFajrUtc and qiyamUtc nullable, Qiyam reason code."; "generatedAtUtc and calculationVersion for invalidation, not freshness based solely on wall-clock age."
-
-- [X] T006 Extend ReminderPreferences and ReminderCapability in `lib/features/prayer_times/prayer_models.dart`, quoting and enforcing "enabledPrayers: set drawn only from fajr/dhuhr/asr/maghrib/isha; initially empty."; "selectedAthanId: stable catalogue ID; default first eligible entry, not proof audio is ready."; "requestedMode: full/opening; initially opening."; "qiyamEnabled: false initially."; "acknowledgedFallbacks: capability-specific disclosure versions, reset if the alternative changes." Include runtime "Permission status, exactAlarmAccess, foregroundModeSupport, backgroundModeSupport, channel/system restrictions when observable, reason and recovery action." and "scheduledThroughUtc and appMustReopenByUtc"; preserve requested intent separately from effective capability and never infer audible delivery or unobservable Focus/silent settings.
-
-- [X] T007 Extend AthanRecording and ScheduledReminder in `lib/features/prayer_times/prayer_models.dart` with catalogue fields "id, titleAr/titleEn, creditedRecorder, sourceUrl, sourceRevision, licenseId/licenseUrl, attribution/change notice."; "fullAssetUrl, SHA-256, expectedBytes, durationMs, encoding."; "openingAssetId, openingEndMs, durationMs, platform clip hashes/encodings."; "completeRecordingReviewed, fourTakbirsReviewed, iosShortEligible (complete four takbirs and duration <30000ms)."; "availability: absent/downloading/verified/failed per full recording and platform clip." Preserve ledger constraints "eventId: deterministic opaque token of location ID + local schedule date + prayer/Qiyam + generation."; "generation: persisted monotonic counter advanced by schedule-affecting changes."; "kind, dueAtUtc, expiresAtUtc, audio ID/mode, effective delivery mechanism."; "state: pending/claimed/playing/delivered/cancelled/failed."; "claimOwner: appAudio/systemFallback; started/consumed token for deduplication."
-
-- [X] T008 Define injectable clock, location client, protected-store and notification/audio interfaces plus the contract's typed failure/recovery states in `lib/features/prayer_times/prayer_services.dart`; keep capabilities queryable without prompting, inputs fakeable and unsupported adapters explicit; do not start plugins, network, audio or location access while constructing services.
-
-- [X] T009 Implement serialized encrypted snapshot load/save/delete and forward-version handling in `lib/features/prayer_times/prayer_repository.dart`; use the planned secure-storage options, this-device native protection and backup exclusions, never write coordinates to user.db or overwrite unreadable ciphertext, retain bookmarks on failure, and expose explicit session-only browser operation under P05 when crypto/persistence is unavailable.
-
-- [X] T010 [P] Generate a compact versioned Ramadan interval asset from pinned MIT HijriDate 2.6.0 data with provenance and range bounds using `tool/prayer/build_ramadan_table.py`, `assets/prayer/ramadan_intervals.json` and `assets/licences/LICENSE-hijridate.txt`; document sunset-aware first/last evening conventions and reproducible commands in `tool/prayer/README.md`, without a runtime Python/calendar dependency.
-
-- [X] T011 [P] Prepare independent PrayTimes fixture generation/provenance in `tool/prayer/build_reference_fixtures.mjs` and `test/fixtures/prayer_times/reference.json`; cover Cairo, Makkah, Karachi, London, Oslo, New York, Los Angeles, Singapore, Jakarta and Sydney with all five methods, both Asr conventions, matched offsets/rounding, DST, Ramadan and polar unavailable cases; pin reference versions and never generate expected results through the production calculator.
-
-**Checkpoint**: Foundation ready. No notification capability or successful device trial is implied by these completed primitives.
-
----
-
-## Phase 3: User Story 1 — See prayer times for my location (Priority: P1) — MVP
-
-**Goal**: A first confirmed location and accurate local schedule through device detection, manual city selection or optional confirmed IP approximation, with offline saved-place use.
-
-**Independent Test**: From fresh prayer state, exercise granted/denied device access, manual disambiguation, confirmed/rejected/failed IP approximation and offline reopening. The six daily events and next prayer must use the confirmed place's date/time zone; no reminder setup is required.
-
-### Tests for User Story 1
-
-These focused tests implement the spec's explicit acceptance scenarios and accuracy/failure criteria. Write them before their corresponding implementation and observe the expected missing-behaviour failures; do not count an unrelated build failure as evidence.
-
-- [X] T012 [P] [US1] Add reference-driven calculation tests in `test/features/prayer_times/prayer_calculator_test.dart` for SC-002: five methods, two Asr factors, explicit adjustment/unavailable states, UTC/location date conversion, Ramadan range/boundaries and next-Fajr rollover; require <=1-minute agreement with T011 fixtures.
-
-- [X] T013 [P] [US1] Add location endpoint contract tests in `tool/prayer/location_api_test.mjs` using injected provider/cf fixtures for validation, CORS/native no-Origin requests, missing timezone/geo, errors, bounded calls/deadlines, no-store and privacy-safe diagnostics; match `specs/009-prayer-times/contracts/location-api.md`.
-
-- [X] T014 [P] [US1] Add setup/controller/repository/widget tests in `test/features/prayer_times/prayer_setup_test.dart` for denied permission, required IP confirmation, stale-search cancellation, restart/offline use, secure-store failure and no reader-startup prompts; include the data-model validation bounds and failed-read non-overwrite behaviour.
-
-- [X] T015 [US1] Implement offline `PrayerCalculator.schedule` and next-prayer/countdown logic in `lib/features/prayer_times/prayer_calculator.dart`; lazily load the full IANA database, preserve library offsets, use selected-location dates and UTC instants, reject nonfinite/polar results, apply versioned Ramadan Isha intervals, and return conventionUnavailable outside table coverage rather than guessing. Exclude sunrise from next-prayer selection.
-
-- [X] T016 [US1] Implement shared request validation, error normalization, CORS/no-store headers, provider allowlist/configuration and abortable bounded calls in `functions/_lib/prayer-location.js`; enforce search q 2-80 characters, ar/en, limit 1-10, resolve JSON <=2 KB, 5-second upstream and 8-second total deadlines, no raw personal-value logs, and the documented HTTP error envelope.
-
-- [X] T017 [P] [US1] Implement `GET /api/prayer-places` in `functions/api/prayer-places.js` after T016; call bounded populated-place GeoNames search once, return region/country attribution, and distinguish selectable from resolvable timezone-missing results without per-keystroke timezone fan-out.
-
-- [X] T018 [P] [US1] Implement `POST /api/prayer-resolve` in `functions/api/prayer-resolve.js` after T016; resolve nearby name and IANA zone in at most two upstream calls, retain submitted coordinates, allow an unnamed valid fix, and reject unresolved time zones without device-zone fallback.
-
-- [X] T019 [P] [US1] Implement explicit `GET /api/prayer-location` in `functions/api/prayer-location.js` after T016; normalize trusted Cloudflare cf metadata to source=ip/approximate=true/requiresConfirmation=true, return unavailable for missing/invalid fields, and never accept a supplied IP or send location to another IP vendor.
-
-- [X] T020 [US1] Implement one-shot geolocator and normalized endpoint client in `lib/platform/prayer_location.dart`; apply timeout/permission handling, 350ms debounced cancellable city searches, explicit API base configuration, missing-zone resolution and privacy disclosures, preserving prior data on failure and requesting no background location access.
-
-- [X] T021 [US1] Implement first-location setup and schedule state in `lib/features/prayer_times/prayer_controller.dart`; keep candidates transient until valid/confirmed, always require explicit IP confirmation, load saved state lazily, expose typed retry/manual/session-only states and offline recomputation, and keep automatic movement tracking absent.
-
-- [X] T022 [US1] Add Arabic/English schedule/setup/error/disclosure strings, GeoNames attribution and accessible time labels in `lib/app/l10n/app_ar.arb` and `lib/app/l10n/app_en.arb`, then regenerate localization output using the existing workflow.
-
-- [X] T023 [US1] Build detection/manual/IP setup, candidate confirmation and disambiguated city search in `lib/features/prayer_times/location_setup_sheet.dart`; retain manual selection after denial, explain precise-coordinate resolution and connection-based approximation before requests, and never save a candidate with unresolved timezone.
-
-- [X] T024 [US1] Build the six-event schedule, location/date/timezone/convention header, adjusted/unavailable states and next-prayer countdown in `lib/features/prayer_times/prayer_times_screen.dart`; use safe areas, inherited theme/locale, scalable typography and phone touch targets.
-
-- [X] T025 [US1] Wire the lazy route-owned prayer controller through `lib/features/settings/settings_screen.dart` and `lib/features/prayer_times/prayer_times_screen.dart`; preserve the Mushaf home/page and existing recitation/memorization scopes, keep startup free of prayer IO/permission prompts, and retain browser PhoneColumn/back behaviour. This implementation adjustment avoids overloading the existing narrow reader toolbar; there is no existing navigation sheet.
-
-- [X] T026 [US1] Update self-geolocation Permissions-Policy and approved same-origin API/audio CSP rules in `web/_headers`; keep other existing security and rendering headers intact, with HTTPS required for device access.
-
-- [X] T027 [US1] Include Pages Functions and bounded `/api/prayer-*` routing in `web/_routes.json` and `tool/web_deploy.mjs`, and bypass these endpoints in `web/sw.js`; preserve static asset deployment/cache behaviour and prevent API failures becoming cached SPA HTML.
-
-- [X] T028 [US1] Add localized foreground-location declarations in `android/app/src/main/AndroidManifest.xml`, `ios/Runner/Info.plist`, `ios/Runner/ar.lproj/InfoPlist.strings` and `ios/Runner/en.lproj/InfoPlist.strings`; keep API24/iOS15 minimums and omit background/always location authorization.
-
-- [X] T029 [US1] Validate GeoNames configuration, ten-city search/resolve, native requests and real cf metadata on an authorized HTTPS preview, recording sanitized G03 evidence in `specs/009-prayer-times/validation/location-services.md`; do not fabricate local cf success or mark the task complete if required account/deployment access is missing.
-
-- [ ] T030 [US1] Implement/run first-location end-to-end cases in `integration_test/prayer_times_test.dart` and record results in `specs/009-prayer-times/validation/us1.md`; run T012-T014 tests, prove GPS denial/manual/IP confirmation and offline restart paths on iOS/Android/web, and verify no unavailable time is displayed as midnight.
-
-**Checkpoint**: US1 MVP is independently demonstrable: setup and valid schedules, including offline saved-place operation, without enabling notification work.
-
----
-
-## Phase 4: User Story 2 — Manage locations and calculation preferences (Priority: P1)
-
-**Goal**: Multiple named places with independent conventions and a single explicit active reminder location.
-
-**Independent Test**: Seed three confirmed places in different time zones, view versus activate each, change methods/madhahib, rename/delete and restart. Preferences persist and inspection never silently changes the active place; reminders may remain disabled.
-
-- [X] T031 [P] [US2] Add saved-place state/repository tests in `test/features/prayer_times/prayer_locations_test.dart` for unique IDs, label bounds, three-place persistence, transient viewed location, replacement/disable confirmation and generation invalidation without losing bookmarks.
-
-- [X] T032 [P] [US2] Add calculation/location sheet tests in `test/features/prayer_times/prayer_preferences_test.dart` for all named methods/four labels, two Asr conventions, overridable regional defaults, high-latitude choices and preservation of manual choices across restart/movement.
-
-- [X] T033 [US2] Extend saved-location CRUD/view/activate actions in `lib/features/prayer_times/prayer_controller.dart`; preserve each location's calculation record, allow at most one active location, distinguish viewed ID from persisted active ID, and prevent failed detection from replacing a manual choice.
-
-- [X] T034 [US2] Extend calculation preference updates in `lib/features/prayer_times/prayer_controller.dart`; apply the data model's explicit country suggestions and visible shafii/middle-of-night defaults, persist labels/convention versions, invalidate derived schedules and advance schedule-affecting revision/generation only after validation.
-
-- [X] T035 [US2] Add location-management/calculation strings and Asr-only explanations in `lib/app/l10n/app_ar.arb` and `lib/app/l10n/app_en.arb`, including active/viewed labels, adjusted rules and destructive-action confirmation; regenerate localization output.
-
-- [X] T036 [US2] Build save/name/rename/view/activate/delete controls and a virtualized location list in `lib/features/prayer_times/locations_sheet.dart`; permit the same city with distinct valid user labels/settings without silently merging identities, and require the defined label validation.
-
-- [X] T037 [US2] Build five-method, four-madhhab-label and middle/seventh-night controls in `lib/features/prayer_times/calculation_sheet.dart`; show current/suggested selections, explain Asr grouping and unavailable results, and preserve explicit user overrides.
-
-- [X] T038 [US2] Integrate active-location badge, picker and calculation sheets into `lib/features/prayer_times/prayer_times_screen.dart`; viewing another place must leave notification intent unchanged, and displayed dates/timezones must follow that viewed place.
-
-- [X] T039 [US2] Implement transactional active/last-place deletion and clear-prayer-data handling in `lib/features/prayer_times/prayer_controller.dart` and `lib/features/prayer_times/prayer_repository.dart`; invalidate the future reminder generation through the injectable scheduler boundary, delete sensitive state and preserve unrelated reader data. The pre-US3 adapter must explicitly have no queued reminders.
-
-- [X] T040 [US2] Refresh viewed/active schedules after resume, midnight and device clock/timezone changes in `lib/features/prayer_times/prayer_controller.dart` and `lib/features/prayer_times/prayer_times_screen.dart`; extend the existing route-owned lifecycle observer instead of introducing prayer IO in `lib/app/app.dart`, retain the location's IANA zone and never initiate location polling or silent travel updates.
-
-- [ ] T041 [US2] Run three-location, five-method, four-label, delete/restart and DST acceptance flows in `integration_test/prayer_times_test.dart`, execute T031-T032 tests and record SC-003/G04 evidence in `specs/009-prayer-times/validation/us2.md`; notification delivery itself is validated in US3.
-
-**Checkpoint**: US1 and US2 work with notifications disabled. US2 can be accepted using seeded places without repeating external location lookup.
+**Checkpoint**: The app builds on Android, iOS and web. Prayer Times opens with an empty state.
+Existing reader, recitation and memorization tests pass.
 
 ---
 
-## Phase 5: User Story 3 — Choose how I hear the athan (Priority: P2)
+## Phase 3: User Story 1 — See today's prayer times where I am (Priority: P1) 🎯 MVP
 
-**Goal**: Five independent daily prayer switches, two named recordings, full/opening choices, safe offline audio and capability-aware native reminders.
+**Goal**: Set a place by approximate location, city search or the suggested estimate. See
+today's six times, the next prayer and a countdown, offline after setup, with previous and next
+day navigation.
 
-**Independent Test**: Seed a confirmed active place, preview/select two recordings and each supported duration, enable/disable prayers, then verify one current-generation reminder, Stop and disclosed fallbacks in foreground/background/locked states. G01/G02 precede dependent production playback; iOS/web exceptions P01-P04 are mandatory.
+**Independent Test**: [quickstart.md](./quickstart.md) scenarios 1.1–1.7.
 
-- [X] T042 [P] [US3] Add scheduler/capability contract tests in `test/features/prayer_times/prayer_scheduler_test.dart` for five-prayer-only switches, requested/effective modes, generation replacement, finite horizon, revoked permissions, <=60-second overdue expiry, fallback acknowledgements and no stale/duplicate event delivery.
+- [X] T016 [P] [US1] Location client changes in `lib/platform/prayer_location.dart`:
+  - Request `LocationAccuracy.low` with `timeLimit: Duration(seconds: 15)`.
+  - Add `double roundCoordinate(double v) => (v * 100).round() / 100`. Apply it to the position before `POST /api/prayer-resolve` and to every returned place.
+  - Drop `accuracyMeters` and `approximate`.
+  - Map endpoint `source` `device`/`manual`/`ip` → `location`/`search`/`estimate`.
+- [X] T017 [P] [US1] Make location approximate-only:
+  - Remove `ACCESS_FINE_LOCATION` from `android/app/src/main/AndroidManifest.xml`.
+  - Add `<key>NSLocationDefaultAccuracyReduced</key><true/>` to `ios/Runner/Info.plist`.
+  - Change the `NSLocationWhenInUseUsageDescription` text in `ios/Runner/Info.plist`, `ios/Runner/en.lproj/InfoPlist.strings` and `ios/Runner/ar.lproj/InfoPlist.strings` to say that only approximate location is used, to set the prayer-times place.
+- [X] T018 [US1] Add first-place actions to `lib/features/prayer_times/prayer_controller.dart`:
+  - `useMyLocation(language)` detects and resolves, then sets `myLocation` with `source: location` and `current = "myLocation"`.
+  - `choosePlace(place)` from a search result or the estimate appends to `places`, sets `current` to its id when not set up, and saves.
+  - New places get `CalculationSettings(method: suggestion(countryCode), methodChosen: false, highLatitudeRule: |lat| > 48 ? seventh_of_night : middle_of_night)`.
+  - Map failures to `locationDenied`/`locationUnavailable`/`offline`/`timezoneUnresolved`/`providerUnavailable`/`rateLimited`. Never prompt for location twice in one session after a denial.
+- [X] T019 [US1] Rebuild `lib/features/prayer_times/location_setup_sheet.dart` as the first-time screen and city search (contract → Screens):
+  - **First-time screen**: one line on why location is used, plus "Use my location" and "Search for a city". No permission request until "Use my location" is tapped.
+  - **Search field**: 350 ms debounce, stale-response discard (existing).
+  - **Results**: city, region and country, with GeoNames attribution.
+  - **Suggested row**: when the sheet opens online and location is denied or unavailable, call `approximate()`. Show a first row "Suggested: {city}, {country} — estimated from your internet connection". Tapping it calls `choosePlace` with `source: estimate`; no separate confirm step (contract location-api → Client changes 2).
+  - **States**: no results, offline, error with retry.
+- [X] T020 [US1] Rebuild the schedule in `lib/features/prayer_times/prayer_times_screen.dart`:
+  - **Not set up**: show T019's first-time screen.
+  - **Header**:
+    - Place name.
+    - Local date with previous and next day arrows; the selected day is screen state.
+    - Method name and Asr setting.
+    - The zone name when `place.timezoneId` differs from the phone's zone.
+  - **Rows**:
+    - Fajr, Sunrise (labelled "not a prayer", no alert control), Dhuhr, Asr, Maghrib, Isha.
+    - Each row shows its time in the place's zone and an "adjusted" or "unavailable" mark.
+  - **Next prayer**: from `nextPrayer`, highlighted with a countdown that updates every second, today only.
+  - **No network calls** on open (FR-004).
+- [X] T021 [P] [US1] Add US1 strings to `lib/app/l10n/app_en.arb` and `lib/app/l10n/app_ar.arb`: first-time copy, search, Suggested row, not-a-prayer label, zone note, day arrows, and failure lines for T018's reasons. Run `flutter gen-l10n`.
+- [X] T022 [P] [US1] Add tests:
+  - `test/features/prayer_times/prayer_setup_test.dart`: rounding to 2 decimals before resolve; source mapping; a denial does not re-prompt.
+  - `test/features/prayer_times/prayer_setup_widget_test.dart`: first-time screen issues no permission call before the tap; Suggested row selects without a confirm step; day arrows change the date; Sunrise has no alert control. Arabic and English at 320×568 with 1.5× text.
+  - *Done 2026-11-02:* these cases are in `test/features/prayer_times/prayer_controller_test.dart` and `prayer_screens_test.dart`.
 
-- [X] T043 [P] [US3] Add catalogue/download/coordinator tests in `test/features/prayer_times/athan_player_test.dart` for hashes/size validation, interrupted downloads, one preview owner, Stop invalidating queued starts, Quran/memorization pause without automatic resume and rejected browser autoplay.
-
-- [X] T044 [P] [US3] Add Android queue/claim tests in `android/app/src/test/kotlin/app/mathani/mathani/PrayerAlarmStoreTest.kt` and required test configuration in `android/app/build.gradle.kts`; prove protected persistence, single-winner audio/fallback claims, cancelled/stale/expired rejection and boot-before-unlock recovery rules without storing coordinates in intents.
-
-- [ ] T045 [US3] Prove G01 with a minimal reusable `android/app/src/main/kotlin/app/mathani/mathani/PrayerMediaBridge.kt`, early single-handler initialization in `lib/features/recitation/media_handler.dart`/`lib/main.dart` and `integration_test/prayer_alarm_spike_test.dart`; verify API24/31+/33+/36 cold-process alarm startup, acknowledgement, foreground deadline, one service/notification and Stop. Record sanitized results in `specs/009-prayer-times/validation/android-headless.md`; retain full mode disabled and revise design/spec if proof fails.
-
-- [ ] T046 [P] [US3] Complete G02 asset preparation in `tool/prayer/prepare_athan.py`, `assets/prayer/athan_catalogue.json`, `assets/athan/`, `android/app/src/main/res/raw/` and `assets/licences/`; human-review the two research source candidates, complete four-takbir boundaries and <30000ms CAF eligibility, preserve revisions/licenses/transformations/hashes, generate a short Qiyam tone and record evidence in `specs/009-prayer-times/validation/athan-assets.md`. Replace unsuitable recordings; never truncate spoken words.
-
-- [ ] T047 [US3] Implement catalogue parsing and atomic full-audio download/verification in `lib/features/prayer_times/athan_catalogue.dart`, reusing existing FileStore/http/crypto; enforce source allowlists, per-variant availability and human-reviewed eligibility, mark only verified assets offlineReady, preserve the last usable selection, and keep complete recordings on demand rather than in the store bundle.
-
-- [X] T048 [US3] Implement Keystore-backed AES-GCM derived queue/presentation storage in `android/app/src/main/kotlin/app/mathani/mathani/PrayerAlarmStore.kt`; preserve atomic event claims, current generation and cancellable start state, keep coordinate-free alarm tokens, avoid undocumented Flutter secure-store internals, and protect native title/location data rather than persisting plaintext plugin scheduling payloads.
-
-- [ ] T049 [US3] Implement production exact-alarm delivery/restore in `android/app/src/main/kotlin/app/mathani/mathani/PrayerAlarmReceiver.kt` and finalize `PrayerMediaBridge.kt` after G01; validate current tokens/due/expiry, acknowledge the single media-handler action, let only a winning fallback post sound, restore future alarms after boot/unlock/clock changes and never start playback from boot or replay a backlog.
-
-- [ ] T050 [US3] Extend the existing single handler with acknowledged `playAthan`/Stop commands and headless-safe initialization in `lib/features/recitation/media_handler.dart` and `lib/main.dart`; reject stale/consumed commands, start without opening Quran databases first, preserve existing Quran media controls and prevent a second audio service/Flutter playback owner.
-
-- [ ] T051 [US3] Implement iOS system scheduling and native facade in `lib/platform/prayer_notifications_io.dart` and `ios/Runner/AppDelegate.swift`; register plugin/delegate safely, prepare eligible CAF files in Library/Sounds, keep next 60 events total, suppress foreground OS sound during app playback, support open-to-play-full and expose P01/P02 limits without indefinite background refresh claims.
-
-- [X] T052 [US3] Register an Activity-independent Android prayer channel/plugin in `android/app/src/main/kotlin/app/mathani/mathani/PrayerNotificationsPlugin.kt`, `MainActivity.kt`, `android/app/src/main/AndroidManifest.xml` and required Gradle setup; expose capabilities/exact-access/replace/cancel/list/stop, add POST_NOTIFICATIONS/SCHEDULE_EXACT_ALARM/boot permissions and safe receiver filters, preserving mediaPlayback declarations without background location or full-screen intents.
-
-- [ ] T053 [US3] Implement browser capability, optional notification and active-page audio behaviour in `lib/platform/prayer_notifications_web.dart` and conditional `lib/platform/prayer_notifications.dart`; handle permission/autoplay rejection, expiry/suspension and explicit Play, show P03/mobile alternatives and never claim closed-page precise custom athan.
-
-- [X] T054 [US3] Implement shared idempotent reconciliation in `lib/features/prayer_times/prayer_reminder_scheduler.dart`; commit current-generation intent, cancel obsolete queues, install only valid future daily events, verify actual pending state before reporting ready, cap Android at 30 days/iOS at 60 total, and expose partial/blocked/scheduled-through status with retry and P04 disclosures.
-
-- [ ] T055 [US3] Implement shared app-controlled preview/full/opening playback in `lib/features/prayer_times/athan_player.dart` against the single handler; pause Quran and memorization before taking ownership, suppress overlapping previews/system foreground sounds, respect selected clip boundaries, expose Stop and never automatically resume interrupted activity.
-
-- [X] T056 [US3] Wire persisted daily switches, requested mode/recording, acknowledgement versions and effective permissions into `lib/features/prayer_times/prayer_controller.dart`/`prayer_repository.dart`; keep choices after denial, prevent unsupported full mode from appearing active, and require acknowledged fallback or leave delivery blocked.
-
-- [X] T057 [US3] Add Arabic/English notification, recording attribution, offline-readiness, platform-limit, exact-access, scheduled-through and Stop strings in `lib/app/l10n/app_ar.arb` and `lib/app/l10n/app_en.arb`, then regenerate localization output without changing unrelated reader copy.
-
-- [X] T058 [US3] Build five prayer toggles, named previews, full/opening options and capability-aware readiness/permission/recovery UI in `lib/features/prayer_times/reminder_settings.dart`; exclude sunrise, retain all-disabled defaults, distinguish requested/effective modes and expose P01-P04 before activation.
-
-- [ ] T059 [US3] Wire reminder settings, notification-open routes and launch/resume/locale/permission/audio-readiness reconciliation in `lib/features/prayer_times/prayer_times_screen.dart`, `lib/features/prayer_times/prayer_controller.dart` and `lib/app/app.dart`; preserve lazy first-frame behaviour and serialize refresh against user changes.
-
-- [X] T060 [US3] Integrate real native cancel/reconcile with location activation/deletion and calculation changes in `lib/features/prayer_times/prayer_controller.dart` and `lib/features/prayer_times/prayer_reminder_scheduler.dart`; replace the pre-notification empty adapter, invalidate stale queued starts and confirm last-place/clear-all removes both protected state and pending alerts.
-
-- [ ] T061 [US3] Implement bounded recording-specific short fallback channels and silent app-audio media notification handling in `android/app/src/main/kotlin/app/mathani/mathani/PrayerNotificationsPlugin.kt`/`PrayerAlarmReceiver.kt` and `lib/platform/prayer_notifications_io.dart`; respect immutable user channel settings, never recreate channels to bypass them, and label any accepted inexact fallback accurately.
-
-- [ ] T062 [US3] Register short assets/catalogue in `pubspec.yaml`, host versioned full recordings via existing `tool/web_deploy.mjs`, and apply required audio allowlists/cache behaviour in `web/_headers`/`web/sw.js`; prepare native offline clips without bundling full files or changing unrelated FileStore work.
-
-- [ ] T063 [US3] Add and run foreground/background/locked/process-absent, offline-audio, permission-revocation, Stop/fallback-race, horizon and active-Quran scenarios in `integration_test/prayer_times_test.dart` plus native tests; record observed iOS system-sound interruption limits and P01-P04 acceptance in `specs/009-prayer-times/validation/us3-platforms.md` without claiming unsupported states passed.
-
-- [ ] T064 [US3] Run T042-T044 automated checks, recheck G01/G02 after integration and record the story acceptance/capability matrix in `specs/009-prayer-times/validation/us3.md`; block completed status for missing two-recording proof or unsupported Android full playback until the design/spec exception is explicitly resolved.
-
-**Checkpoint**: Daily reminders are independently acceptable with Qiyam off. Full Android capability remains gated by measured cold-process proof; iOS/browser boundaries stay visible.
+**Checkpoint**: US1 works alone. Run quickstart 1.1–1.7 on one Android phone and one iPhone and
+record the results in `specs/009-prayer-times/validation/us1.md`.
 
 ---
 
-## Phase 6: User Story 4 — Receive an optional Qiyam reminder (Priority: P2)
+## Phase 4: User Story 2 — Use the calculation my community follows (Priority: P1)
 
-**Goal**: Independently enabled, clearly labelled short Qiyam reminder at the start of the last third of the night.
+**Goal**: 11 methods with country suggestions, the two-choice Asr setting, high-latitude rules
+and per-prayer offsets, saved per place.
 
-**Independent Test**: Seed a valid Maghrib/next-day Fajr pair and active location, enable Qiyam with all five daily toggles off, verify one displayed/scheduled reminder, then disable it and confirm daily preferences are unchanged.
+**Independent Test**: [quickstart.md](./quickstart.md) scenarios 2.1–2.5.
 
-- [X] T065 [P] [US4] Add Qiyam calculation tests in `test/features/prayer_times/qiyam_calculator_test.dart` for cross-midnight/DST elapsed durations, rounding, invalid boundaries and local delivery date; require the displayed/scheduled instant to agree with the specified boundary within one minute.
+- [X] T023 [US2] Extend `lib/features/prayer_times/prayer_calculator.dart` (research R2, data model → order of computation):
+  - Map all 11 methods to `adhan.CalculationMethodParameters` presets: `muslimWorldLeague`, `egyptian`, `ummAlQura`, `karachi`, `northAmerica`, `dubai`, `kuwait`, `qatar`, `singapore`, `turkiye`, `moonsightingCommittee`.
+  - After the existing high-latitude cap and Asr correction, re-apply `params.methodAdjustments` to Fajr, Asr and Isha. Those values are overwritten, so their built-in minute offsets are otherwise lost.
+  - Then add the place's `offsets` (−30..30 min) to the five prayers and round to the minute.
+  - Set `adjustedBy.offset` on any prayer with a non-zero offset.
+  - Compute Qiyam from Maghrib and the next day's Fajr *after* offsets.
+  - Bump the fingerprint `convention` to 2.
+- [X] T024 [P] [US2] Replace `CalculationSettings.suggestion(countryCode)` in `lib/features/prayer_times/prayer_models.dart` with the R2 table:
+  - EG→egyptian; SA, YE→umm_al_qura; AE→dubai; KW→kuwait; QA→qatar; TR→turkey.
+  - SG, MY, BN, ID→singapore; PK, BD, IN, AF→karachi; US, CA→isna; GB, IE→moonsighting_committee.
+  - Anything else→muslim_world_league.
+- [ ] T025 [P] [US2] Collect official timetable samples (research R3) into `tool/prayer/official_timetables.json`:
+  - Two dates each (one in summer or a daylight-saving date) for Dubai (IACAD), Kuwait City (Awqaf), Doha (Qatar Awqaf), Singapore (MUIS), Istanbul (Diyanet) and London (moonsighting.com).
+  - Store per sample: city, coordinates, method, Asr setting, date, the six times and the source URL with the date it was fetched.
+  - Document the procedure in `tool/prayer/README.md`.
+- [ ] T026 [US2] Extend `test/features/prayer_times/prayer_calculator_test.dart`:
+  - The existing 10-city fixtures still pass for the five original methods, both Asr settings and the daylight-saving and high-latitude cases.
+  - Every sample in `tool/prayer/official_timetables.json` is within 1 minute.
+  - Offsets of +5 and −30 move only the target prayer and mark it adjusted.
+  - The default high-latitude rule is `seventh_of_night` above 48° (SC-002).
+  - *2026-11-02:* everything except the official-timetable samples passes (`prayer_calculator_test.dart`). Waiting on T025.
+- [X] T027 [US2] Add `updateCalculation(placeId, {method, asr, highLatitudeRule, offsets})` to `lib/features/prayer_times/prayer_controller.dart`:
+  - Setting `method` sets `methodChosen = true`.
+  - Increment `generation` when the place is current.
+  - Save. Offsets are clamped to −30..30.
+- [X] T028 [US2] Rebuild `lib/features/prayer_times/calculation_sheet.dart` for the viewed place:
+  - 11 methods, with the country suggestion labelled "Suggested".
+  - Asr choice "Standard (Shafi'i, Maliki, Hanbali)" / "Hanafi", with the note "changes Asr only".
+  - Two high-latitude rules, each with a one-line explanation.
+  - Five offset steppers (−30..+30, step 1, long-press repeat).
+  - The schedule behind updates live.
+  - 48 dp / 44 pt targets and semantic labels with values.
+- [X] T029 [P] [US2] Add US2 strings (11 method names, Asr labels and note, rule explanations, offset labels) to `lib/app/l10n/app_en.arb` and `lib/app/l10n/app_ar.arb`, then run `flutter gen-l10n`.
 
-- [X] T066 [P] [US4] Add Qiyam preference/UI/scheduler tests in `test/features/prayer_times/qiyam_reminder_test.dart` for default off, enablement with daily prayers off, independent cancellation, no obligatory athan and recomputation after active-place/settings changes.
-
-- [X] T067 [US4] Implement Qiyam derivation in `lib/features/prayer_times/prayer_calculator.dart` using the model rule "qiyamUtc = maghribUtc + 2*(fajrUtc-maghribUtc)/3, rounded consistently to the displayed minute."; "Require positive valid boundaries." and "No valid boundaries means no Qiyam event." Preserve its actual local delivery date and avoid the calculator package's differing convenience night interval.
-
-- [X] T068 [US4] Add independent Qiyam enable/disable transitions in `lib/features/prayer_times/prayer_controller.dart` and `prayer_repository.dart`; enforce "qiyamEnabled: false initially.", require confirmed active location and valid effective permission, and leave daily prayer preferences unchanged.
-
-- [X] T069 [US4] Extend event generation and native reconciliation in `lib/features/prayer_times/prayer_reminder_scheduler.dart` to enqueue exactly one Qiyam per valid night using the generated short tone, share the finite total horizon, cancel only Qiyam when disabled and suppress invalid-boundary nights with an explicit reason.
-
-- [X] T070 [US4] Add Arabic/English last-third explanation, distinct Qiyam label, unavailable-boundary reason and upcoming local date/time strings in `lib/app/l10n/app_ar.arb` and `lib/app/l10n/app_en.arb`, then regenerate localization output.
-
-- [X] T071 [US4] Add independent Qiyam controls and upcoming date/time to `lib/features/prayer_times/reminder_settings.dart` and `prayer_times_screen.dart`; display the reminder instant before activation and never present Qiyam as a sixth obligatory-prayer athan.
-
-- [ ] T072 [US4] Run T065-T066 and Qiyam device/offline/location-change acceptance in `integration_test/prayer_times_test.dart`, recording SC-005 and independent-toggle results in `specs/009-prayer-times/validation/us4.md`; exercise missing night boundaries and one-alert/no-backlog behaviour.
-
-**Checkpoint**: All four stories are functional subject to the final evidence gates; Qiyam can be verified independently of enabled daily athans.
+**Checkpoint**: US1 + US2 make a releasable schedule-only feature. Record quickstart 2.1–2.5 in
+`specs/009-prayer-times/validation/us2.md`.
 
 ---
 
-## Phase 7: Polish & Cross-Cutting Concerns
+## Phase 5: User Story 3 — Keep the right place when I travel or save places (Priority: P2)
 
-**Purpose**: Required release evidence across all desired stories. Do not mark implementation complete by treating absent physical-device access, a missing provider binding or a user study as a passing check.
+**Goal**: "My location" follows the reader when the app opens. Saved places can be viewed
+without changing alerts. Delete flows are safe.
 
-- [ ] T073 Update location/coordinate-sharing, IP approximation, retention/deletion, local audio, browser storage and notification-limit disclosures in `docs/store/privacy.md`, `docs/release.md` and `ios/Runner/PrivacyInfo.xcprivacy` where applicable; prepare consistent store privacy/Data safety changes without claiming no infrastructure retention or publishing account changes.
+**Independent Test**: [quickstart.md](./quickstart.md) scenarios 3.1–3.5.
 
-- [ ] T074 [P] Register all dependency/calendar/audio licenses, GeoNames attribution and changed-recording credits in `docs/licences.md`, `assets/licences/` and `lib/features/settings/about_section.dart`; verify names are recorder attributions rather than invented reciter identities and no unconfirmed audio source is shipped.
+- [X] T030 [US3] Add place management to `lib/features/prayer_times/prayer_controller.dart`:
+  - `viewPlace(id)` changes screen state only.
+  - `usePlace(id)` and `useMyLocation()` set `current`, increment `generation` and save.
+  - `renamePlace(id, name)`: 1–80 characters, trimmed, no control characters. Increment `generation` only when the place is current.
+  - `deletePlace(id, {String? replacementId, bool alertsOff = false})`: deleting the current place requires a replacement or `alertsOff`. Removing the last place with no `myLocation` returns to not set up, with all alerts off.
+  - `deleteAllPrayerData()` deletes `prayer.state` and calls `PrayerAlertPlatform.cancelAll()`. It keeps recitation downloads.
+- [X] T031 [US3] Implement the "My location" refresh in `PrayerAlerts.onAppActive()` in `lib/features/prayer_times/prayer_alerts.dart` (research R4). It runs only when `current == "myLocation"`:
+  1. Skip if the last refresh was under 30 minutes ago (in-memory).
+  2. Check permission with `Geolocator.checkPermission()`, never request. Skip unless it is granted.
+  3. Get a low-accuracy position and round it.
+  4. If it is more than 10 km from `myLocation`, call resolve.
+  5. On success, replace `myLocation`:
+     - Keep its `calculation`.
+     - If `methodChosen` is false, replace `method` with the new country's suggestion.
+     - If the city changed, set `movedNotice` to the city.
+     - Increment `generation` and save.
+  6. On any failure, keep the previous place silently.
+- [X] T032 [P] [US3] Add tests for T031 in `test/features/prayer_times/prayer_locations_test.dart`:
+  - Moved 5 km: no resolve call.
+  - Moved 15 km: resolve, then replace and set `movedNotice`.
+  - Offline: unchanged.
+  - Permission not granted: no prompt and no call.
+  - `methodChosen` true keeps the method; false switches it to the new country's suggestion.
+  - Fixed city current: no refresh.
+- [X] T033 [US3] Rebuild `lib/features/prayer_times/locations_sheet.dart`:
+  - "My location" row with a refresh action, then saved places with name, city and country; the current place is marked.
+  - Tapping a row calls `viewPlace`. A "Use this place" button appears while viewing a non-current place.
+  - Rename and delete. Deleting the current place opens a dialog to pick a replacement or turn alerts off.
+  - "Add a place" opens T019's search in add mode.
+  - The list is a `ListView.builder`.
+- [X] T034 [US3] In `lib/features/prayer_times/prayer_times_screen.dart`:
+  - Show the viewed place's schedule in its own zone, with a "Viewing — alerts follow {current}" note when it is not current.
+  - Show a one-time "Moved to {city}" banner when `movedNotice` is set, and clear it after it is shown.
+- [X] T035 [P] [US3] Add US3 strings (My location, Use this place, viewing note, moved banner, delete dialog, rename) to `lib/app/l10n/app_en.arb` and `lib/app/l10n/app_ar.arb`, then run `flutter gen-l10n`.
 
-- [ ] T075 Execute the SC-004 timed matrix from `specs/009-prayer-times/quickstart.md`, recording at least 30 trials per supported playback mode per mobile platform in `specs/009-prayer-times/validation/notification-timing.md`; require >=95% start within 60 seconds, correct recitation/duration and zero stale/duplicate alerts, explicitly listing P01-P04 rather than omitting unsupported states as passes.
+**Checkpoint**: Record quickstart 3.1–3.5 in `specs/009-prayer-times/validation/us3.md`.
 
-- [ ] T076 Complete G04 independent fixture and persistence/recovery coverage through `test/features/prayer_times/` and `integration_test/prayer_times_test.dart`, with results in `specs/009-prayer-times/validation/correctness-recovery.md`; require every available result within one minute across the full method/city matrix and verify DST/Ramadan/polar/midnight/restart/delete/clock cases.
+---
 
-- [ ] T077 Audit G03/P05 endpoint/log/cache/storage protection in `tool/prayer/location_api_test.mjs`, `test/platform/prayer_notifications_web_test.dart` and `specs/009-prayer-times/validation/privacy-security.md`; exercise missing grants, broken crypto, private browsing/eviction, no-Origin native calls, blocked origins, invalid input/upstream hosts, no-store/SPA bypass and protected native queue/title data.
+## Phase 6: User Story 4 — Get an athan alert at prayer time (Priority: P2)
 
-- [ ] T078 Validate Arabic/English RTL, dark mode, large fonts, safe areas, 44pt/48dp targets, VoiceOver/TalkBack and supported-browser capability copy in `integration_test/prayer_times_test.dart` and `specs/009-prayer-times/validation/accessibility-browser.md`; include system-owned sound/Stop boundaries and horizon expiry announcements.
+**Goal**: Per-prayer alerts that fire locked or closed, through reboots, for 7+ days, with no
+duplicates or stale alerts. Sound is the opening takbirat clip, the tone or silent.
 
-- [ ] T079 Add/run schedule-scrolling profile coverage in `integration_test/prayer_times_perf_test.dart`, reuse `integration_test/paging_perf_test.dart` and `test_driver/perf_driver.dart`, and record cold-start/frame/tap/network/battery observations in `specs/009-prayer-times/validation/performance.md`; meet <=2s startup on Galaxy A15/iPhone SE2, 60fps and <=100ms feedback without startup location/network/plugin work.
+**Independent Test**: [quickstart.md](./quickstart.md) scenarios 4.1–4.9. If no recording is
+cleared yet (research R10), test with "Simple tone".
 
-- [ ] T080 Measure Android/iOS release build deltas with the existing `tool/size_check.dart` against `docs/size_baseline.json`, record per-dependency/asset growth in `specs/009-prayer-times/validation/size.md` and update `docs/release.md`; explain >1MB growth in review and never pass --approved or alter baselines to manufacture approval. Remove temporary spike assets/dead paths and keep only used dependencies.
+- [X] T036 [US4] Implement `buildAlerts(PrayerState state, DateTime nowUtc, PrayerCalculator calc, AthanCatalogue catalogue, AppLocalizations l10n)` in `lib/features/prayer_times/prayer_alerts.dart`, moving the reusable parts of `prayer_reminder_scheduler.dart`. It returns the next 60 alerts (data model → Alert):
+  - Only the current place, and only prayers in `alerts.prayers`. Never Sunrise. Skip `unavailable` events.
+  - `id` = 31-bit hash of (place id, local date, kind), stable across refills.
+  - Title is the prayer name; body is the time and the place name, localized.
+  - `sound`: `alerts.sound`, or `tone` when that recitation is not in the catalogue.
+  - `generation` from the state.
+  - Delete `lib/features/prayer_times/prayer_reminder_scheduler.dart`.
+- [X] T037 [US4] Implement refill in `lib/features/prayer_times/prayer_alerts.dart`:
+  - `onStateSaved` and `onAppActive` call `buildAlerts`, then `platform.replace(alerts, generation)`. When no prayer is enabled or the state is not set up, they call `platform.cancelAll()`.
+  - Refills are serialized; the latest state wins.
+  - Exposes the last `AlertStatus` and pending count for the Alerts sheet.
+- [X] T038 [P] [US4] Add `test/features/prayer_times/prayer_alerts_test.dart` (SC-004):
+  - At most 60 alerts, all in the future.
+  - Sunrise is never included; unavailable events are skipped.
+  - Ids are stable across two builds.
+  - Changing method or place and rebuilding yields no stale id with an old time.
+  - The generation increases.
+  - An empty `prayers` set gives `cancelAll`.
+- [X] T039 [US4] Simplify `android/app/src/main/kotlin/app/mathani/mathani/PrayerAlarmStore.kt` to plain `SharedPreferences` JSON:
+  - Store the current `generation` and the list of `{id, kind, atUtcMs, title, body, sound, full, fullPath}`.
+  - Delete the Keystore AES-GCM code, claim and consume states, and first-unlock gating.
+  - Operations: `replace(generation, alerts)`, `get(id)`, `remove(id)`, `future(nowMs)`, `clear()`.
+- [X] T040 [US4] Rework `android/app/src/main/kotlin/app/mathani/mathani/PrayerNotificationsPlugin.kt` to the contract's method channel `app.mathani/prayer_notifications`:
+  - **`status`** and **`requestPermission`**: `POST_NOTIFICATIONS` on API 33+; `canScheduleExactAlarms()` on API 31+.
+  - **`openSettings`**: app notification settings, or `ACTION_REQUEST_SCHEDULE_EXACT_ALARM` when `exactAlarms` is true.
+  - **`replace`**:
+    - Store the list, cancel `PendingIntent`s for ids no longer present, and set one alarm per alert.
+    - Use `setExactAndAllowWhileIdle` when exact alarms are allowed, otherwise `setAndAllowWhileIdle`.
+    - Return the count.
+  - **`cancelAll`**.
+  - **Channels**, created on first use: `prayer_<sound>_v1` with sound `res/raw/athan_<id>_opening` or `res/raw/qiyam_tone`, `prayer_silent_v1` with no sound, and the existing Qiyam channel.
+  - **Events**: emit `opened {kind, alertId}` when `MainActivity` is launched from an alert intent.
+- [X] T041 [US4] Rework `android/app/src/main/kotlin/app/mathani/mathani/PrayerAlarmReceiver.kt`:
+  - **On an alarm**:
+    - Load the alert from the store. Ignore it if missing, from an older generation, or more than 15 minutes late (`now - atUtcMs > 15 * 60_000`).
+    - Otherwise post the notification on its sound channel with a content intent to `MainActivity` carrying the alert id and kind, then `remove(id)`.
+  - **On `BOOT_COMPLETED`, `TIME_SET`, `TIMEZONE_CHANGED` and `SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED`**: re-set alarms for `future(now)` only.
+- [X] T042 [P] [US4] Rewrite `android/app/src/test/kotlin/app/mathani/mathani/PrayerAlarmStoreTest.kt` and add `PrayerAlarmReceiverTest.kt`, testing the receiver's decision logic extracted as a pure function:
+  - Store replace removes old ids.
+  - An older generation is ignored.
+  - 14 minutes late posts; 16 minutes late is dropped.
+  - Boot restore sets only future alerts.
+  - A delivered alert is removed, so it never posts twice.
+- [X] T043 [US4] Rework the io adapter in `lib/platform/prayer_notifications_io.dart`:
+  - **Android**: delegate to the method channel from T040.
+  - **iOS**, through `flutter_local_notifications`:
+    - Initialize without permission requests; `requestPermission()` asks for alert and sound.
+    - `replace()` cancels app-owned pending ids not in the list. It then calls `zonedSchedule` for each alert at its absolute UTC time (`tz.UTC`) with `DarwinNotificationDetails(sound: 'athan_<id>_opening.caf' | 'qiyam_tone.caf' | null for silent)`, then reads pending requests back and returns the count.
+    - Cap at 60.
+  - Map plugin notification responses to `opened` events.
+  - Remove the Library/Sounds copy from `rootBundle` (T044 bundles the files).
+  - *Done 2026-11-02:* Dart analysis passes. Not built or run on iOS: no Mac or iPhone was available.
+- [X] T044 [US4] Bundle iOS sounds natively:
+  - Add `ios/Runner/qiyam_tone.caf` (moved from `assets/prayer/qiyam_tone.caf`) to the Runner target's Copy Bundle Resources in `ios/Runner.xcodeproj/project.pbxproj`.
+  - Remove `assets/prayer/qiyam_tone.caf` and its pubspec entry, so Android no longer ships the CAF.
+  - Confirm `android/app/src/main/res/raw/qiyam_tone.wav` is listed in `res/raw/prayer_keep.xml`.
+  - *Done 2026-11-02:* the Xcode project edit has not been built.
+- [X] T045 [P] [US4] Adapt the web adapter in `lib/platform/prayer_notifications_page.dart` and `lib/platform/prayer_notifications_web.dart` to `replace(alerts, generation)`:
+  - Keep the in-memory timers, browser notification when permitted and the tone or opening sound through `AthanPlayer`.
+  - Do not replay missed alerts on revisit. Show "Play athan" when autoplay is blocked.
+- [X] T046 [US4] Update `lib/features/prayer_times/athan_catalogue.dart`:
+  - Load `assets/prayer/athan_catalogue.json` (data model → AthanRecording).
+  - Expose `soundChoices`: the recitations, then `tone` and `silent`.
+  - `preview(choice)` plays the opening span for a recitation (`openingEndMs`) or the tone, through `AthanPlayer`.
+- [X] T047 [US4] Add alert actions to `lib/features/prayer_times/prayer_controller.dart`:
+  - `setPrayerAlert(kind, enabled)`: on the first enable while `status().notifications` is `notDetermined`, call `requestPermission()` first. If it is denied, keep the choice.
+  - `setSound(choice)`.
+  - Each saves with `generation++`.
+- [X] T048 [US4] Rebuild `lib/features/prayer_times/reminder_settings.dart` as the Alerts sheet (contract → Screens):
+  - Five switches with no Sunrise, and an "Alerts follow {place}" line.
+  - Status lines: "Notifications blocked" + Open settings; Android "Exact alarms off — alerts may be a few minutes late" + Allow.
+  - Sound list: recitations, Simple tone and Silent, each with preview and Stop. One preview at a time; closing the sheet stops it.
+  - Announce status changes to screen readers.
+- [X] T049 [US4] In `lib/features/prayer_times/prayer_notification_open_host.dart`, handle `PrayerAlertPlatform.events` `opened` by pushing one `PrayerTimesScreen` route after the first frame. Keep the existing duplicate-route guard.
+- [X] T050 [P] [US4] Add US4 strings (alert titles and bodies per prayer, Alerts sheet labels, status lines, sound names) to `lib/app/l10n/app_en.arb` and `lib/app/l10n/app_ar.arb`, then run `flutter gen-l10n`.
 
-- [ ] T081 Run SC-001/SC-007 representative Arabic/English and screen-reader usability tasks and record participant counts/results in `specs/009-prayer-times/validation/usability.md`; require >=90% confirmed setup within two minutes and >=90% unassisted recitation/mode/Qiyam completion, including denied-location users, without fabricated study results.
+**Checkpoint**: With the tone, the feature is releasable through US4. Run quickstart 4.1–4.9 on an
+Android phone (API 33+) and an iPhone, including the 20-alert timing trial and the 7-day and
+reboot checks. Record them in `specs/009-prayer-times/validation/us4.md`.
 
-- [ ] T082 Run the complete applicable `specs/009-prayer-times/quickstart.md` suite plus existing reader/recitation/memorization regressions; consolidate evidence links and actual pass/fail/blocked outcomes in `specs/009-prayer-times/validation/summary.md` and update `specs/009-prayer-times/follow-ups.md` for G01-G05/P01-P05. Require both mobile platforms and the supported-browser matrix, keep missing evidence open, and do not mark release readiness from code-only tests.
+---
+
+## Phase 7: User Story 5 — Hear the full athan (Priority: P3)
+
+**Goal**: Full athan plays in full on Android even when locked. On iPhone and web it plays in the
+app (open, or after tapping the alert). It always has Stop, and Quran recitation pauses without
+resuming.
+
+**Independent Test**: [quickstart.md](./quickstart.md) scenarios 5.1–5.5. Needs at least one
+catalogue recording with cleared rights (research R10).
+
+- [X] T051 [US5] Create `android/app/src/main/kotlin/app/mathani/mathani/AthanPlaybackService.kt`, a foreground service of type `mediaPlayback`:
+  - `onStartCommand(alertId, title, body, fullPath)` calls `startForeground` with an ongoing notification on a silent `prayer_athan_playback_v1` channel. The notification has a Stop action and a content intent to `MainActivity`.
+  - Request `AUDIOFOCUS_GAIN` with `USAGE_ALARM`/`CONTENT_TYPE_SONIFICATION`, then play `fullPath` with `MediaPlayer`.
+  - On completion, Stop, error or any focus loss: release the player, abandon focus and `stopSelf()`.
+  - Send `athanStarted` through `PrayerNotificationsPlugin` if a Flutter engine is attached.
+  - Declare it in `android/app/src/main/AndroidManifest.xml` with `android:foregroundServiceType="mediaPlayback"` and `android:exported="false"`.
+- [X] T052 [US5] In `android/app/src/main/kotlin/app/mathani/mathani/PrayerAlarmReceiver.kt`, when an alert has `full = true`, `File(fullPath).exists()`, and exact alarms are allowed (or API < 31), start `AthanPlaybackService` with `ContextCompat.startForegroundService` instead of posting.
+  - On `ForegroundServiceStartNotAllowedException`, or when those conditions fail, post the opening-clip notification as in T041.
+  - Extend `PrayerAlarmReceiverTest.kt` for these branches.
+- [X] T053 [US5] Set `full` and `fullPath` in `lib/features/prayer_times/prayer_alerts.dart`:
+  - `full` is true only when `alerts.athan == full` and `AthanDownloads.availabilityOf(recording) == ready`.
+  - `fullPath` is the downloaded file's absolute path, Android only.
+  - On iOS, full-mode alerts use `DarwinNotificationDetails(presentSound: false)` in T043's `replace()`.
+- [X] T054 [US5] Add the in-app full athan to `lib/features/prayer_times/prayer_alerts.dart`:
+  - While the app is active on iOS or web and the next alert is `full`, keep a `Timer` for it.
+  - When it fires, call `AthanPlayer.playFull(recording)`, which pauses Quran recitation and memorization and never resumes them.
+  - Cancel the timer on `AppLifecycleState.paused` and on refill.
+- [X] T055 [US5] When `opened` arrives for a full-mode alert with a ready recording on iOS or web, call `AthanPlayer.playFull` after pushing Prayer Times, in `lib/features/prayer_times/prayer_notification_open_host.dart`. On Android, `athanStarted` pauses memorization through `RecitationMediaHandler.pauseMemorizationForPrayer`, wired in `lib/main.dart`.
+  - *Done 2026-11-02:* `athanStarted` reaches `PrayerAlerts`, which calls `MemorizationController.pause` directly. `RecitationMediaHandler.pauseMemorizationForPrayer` was removed with the spike.
+- [X] T056 [US5] Add athan length to `lib/features/prayer_times/reminder_settings.dart`:
+  - "Opening takbirat" / "Full athan", with the platform line from the contract (Android, iPhone or web).
+  - When full is selected and the recording is not downloaded: a download row using `AthanDownloads.prepareFull` with progress and retry, plus the line "Until downloaded, alerts play the opening".
+  - A Stop button stays visible while an app-played athan is playing.
+  - Add `setAthanLength(mode)` to `lib/features/prayer_times/prayer_controller.dart` (`generation++`, save).
+- [X] T057 [P] [US5] Add US5 strings (athan length labels, the three platform lines, download states, Stop) to `lib/app/l10n/app_en.arb` and `lib/app/l10n/app_ar.arb`, then run `flutter gen-l10n`.
+- [ ] T058 [US5] When rights are cleared for each recording (research R10), add it:
+  1. Run `tool/prayer/prepare_athan.py` to produce `android/app/src/main/res/raw/athan_<id>_opening.ogg` and `ios/Runner/athan_<id>_opening.caf` (under 30 000 ms, ending after the fourth "Allahu akbar").
+  2. Add the CAF to Copy Bundle Resources in `ios/Runner.xcodeproj/project.pbxproj`.
+  3. Add the entry, with `fullUrl`/`fullSha256`/`fullBytes`/`source`/`licence`/`attribution`, to `assets/prayer/athan_catalogue.json`.
+  4. Upload the full file to the web host's static assets.
+  5. Add attribution to `docs/licences.md`.
+  - Do not add any recording whose rights are unconfirmed.
+
+**Checkpoint**: Record quickstart 5.1–5.5 in `specs/009-prayer-times/validation/us5.md`.
+
+---
+
+## Phase 8: User Story 6 — Get a Qiyam reminder (Priority: P3)
+
+**Goal**: An optional nightly tone at the start of the last third of the night, separate from
+prayer alerts.
+
+**Independent Test**: [quickstart.md](./quickstart.md) scenarios 6.1–6.4.
+
+- [X] T059 [US6] Add Qiyam to `buildAlerts` in `lib/features/prayer_times/prayer_alerts.dart`:
+  - When `alerts.qiyam` is true, add an alert with `kind: qiyam` and `sound: tone` at each night's `qiyamUtc`.
+  - Skip nights where it is null.
+  - Count Qiyam within the 60-alert cap.
+  - On Android it uses the existing Qiyam channel (T040).
+  - Extend `test/features/prayer_times/prayer_alerts_test.dart`: Qiyam on adds one per night; off removes only Qiyam ids.
+- [X] T060 [P] [US6] Update `test/features/prayer_times/qiyam_calculator_test.dart` for SC-006. Five places or dates, with Qiyam computed after offsets, must match Maghrib + ⅔ × (next Fajr − Maghrib) within 1 minute. A night with an unavailable boundary gives null and a reason.
+- [X] T061 [US6] Add `setQiyam(bool)` to `lib/features/prayer_times/prayer_controller.dart` (save, `generation++`). In `lib/features/prayer_times/reminder_settings.dart`, add the Qiyam switch:
+  - Separate from the five prayers and off by default.
+  - Shows tonight's local time, the one-line "start of the last third of the night, from Maghrib to Fajr" explanation, and the unavailable reason when there is one.
+  - Asks for notification permission on first enable, as in T047.
+- [X] T062 [P] [US6] Add US6 strings to `lib/app/l10n/app_en.arb` and `lib/app/l10n/app_ar.arb`, then run `flutter gen-l10n`.
+
+**Checkpoint**: Record quickstart 6.1–6.4 in `specs/009-prayer-times/validation/us6.md`.
+
+---
+
+## Phase 9: Polish & Cross-Cutting Concerns
+
+- [X] T063 [P] Remove strings no longer referenced (first-draft acknowledgement, secure-storage, horizon and P0x copy) from `lib/app/l10n/app_en.arb` and `lib/app/l10n/app_ar.arb`. Delete or trim `lib/features/prayer_times/prayer_copy.dart`. Run `flutter gen-l10n` and `flutter analyze`.
+- [X] T064 [P] Update `docs/store/privacy.md` (research R12):
+  - Approximate location only, sent to Mathani's server and GeoNames to find the place name and time zone; nothing kept on the server.
+  - No precise or background location.
+  - Alerts are local notifications; no encrypted-snapshot wording.
+  - List the App Privacy and Data safety answers that must change before submission.
+- [ ] T065 Update `integration_test/prayer_times_test.dart` to cover search → schedule → enable one alert with the tone → pending count > 0 → delete place → pending count 0. Run it on one Android device and one iOS device.
+  - *2026-11-02:* rewritten in `integration_test/prayer_times_test.dart`. Not run: no Android or iOS device is connected.
+- [ ] T066 Measure and record in `specs/009-prayer-times/validation/summary.md`:
+  - Android and iOS size delta against T005's baseline (`dart run tool/size_check.dart`); explain anything over 1 MB.
+  - Cold start on the Galaxy A15 and iPhone SE, with alerts on and "My location" current (≤ 2 s).
+  - `integration_test/paging_perf_test.dart` in profile mode (60 fps).
+- [ ] T067 Accessibility pass (quickstart Q2): every story with TalkBack and with VoiceOver, in Arabic and English, at the largest text size. Fix clipped text and missing semantic labels in the prayer screens. Record the results in `specs/009-prayer-times/validation/summary.md`.
+- [ ] T068 Run the web checks (quickstart W1–W2):
+  - Build with `flutter build web --wasm --release --no-web-resources-cdn`.
+  - Prepare with `node tool/web_deploy.mjs --prepare-only`.
+  - Test locally with `npx wrangler@4 pages dev build/web`.
+  - Confirm `clearLegacyPrayerStorage()` removed the old entries.
+  - Record the results.
+  - Deploy only when the user asks.
+  - *2026-11-02:* the web build and `--prepare-only` passed. The browser checks with `wrangler pages dev` are not done.
+- [X] T069 Final run of `flutter analyze`, `flutter test`, `node --test tool/prayer/location_api_test.mjs` and the Android JVM tests. Consolidate pass, fail and blocked outcomes, plus open items (recording rights, store privacy answers), in `specs/009-prayer-times/validation/summary.md`. Missing device evidence stays marked open.
+  - *Done 2026-11-02:* outcomes are in `validation/summary.md`. Device evidence stays open.
 
 ---
 
@@ -254,99 +475,90 @@ These focused tests implement the spec's explicit acceptance scenarios and accur
 
 ### Phase dependencies
 
+- **Setup (Phase 1)**: none.
+- **Foundational (Phase 2)**: needs Setup. Blocks all stories.
+- **US1 (Phase 3)**: needs Foundational. This is the MVP.
+- **US2 (Phase 4)**: needs Foundational; its UI shows on US1's schedule screen (T020). The
+  calculator and fixture tasks (T023–T026) can run alongside US1.
+- **US3 (Phase 5)**: needs US1 (place setup and search).
+- **US4 (Phase 6)**: needs Foundational and a place from US1. Independent of US2 and US3.
+- **US5 (Phase 7)**: needs US4 (alert list, receiver, Alerts sheet). Real audio needs R10.
+- **US6 (Phase 8)**: needs US4 (alert list and Alerts sheet). It can be done before US5, as the
+  plan's delivery order suggests.
+- **Polish (Phase 9)**: after the stories being released.
+
+### Within each story
+
+Models and calculator → controller actions → platform code → UI → strings → story tests and
+quickstart checkpoint.
+
+### Key task dependencies
+
+- T006 → T008, T010, T014. T009 → T011, T013. T007 → T008. T011 → T012.
+- T016 → T018 → T019, T020.
+- T023 → T026. T025 → T026. T027 → T028.
+- T030 → T033. T031 → T032. T031 → T034.
+- T036 → T037 → T038. T039 → T040 → T041 → T042. T043 needs T044. T046 → T048. T047 → T048.
+- T051 → T052. T053 → T054 → T055.
+- T059 → T061.
+
+---
+
+## Parallel Examples
+
 ```text
-Phase 1 Setup (T001-T003)
-    |
-Phase 2 Foundations (T004-T011)
-    |
-US1 Schedule/setup (T012-T030) ----> independently demonstrable MVP
-    |
-US2 Saved places/preferences (T031-T041)
-    |
-US3 Daily athan reminders (T042-T064)
-    |     G01: T045 -> native/full/headless production work
-    |     G02: T046 -> verified catalogue/clip-dependent production work
-    |
-US4 Independent Qiyam reminder (T065-T072)
-    |
-Polish and release evidence (T073-T082)
+# Phase 1, together:
+T002 Delete the alarm spike (Dart and Kotlin files)
+T003 Switch time zones to latest_10y
+T004 Create the empty athan catalogue
+T005 Record the size and cold-start baseline
+
+# Phase 2, after T006:
+T007 user_repository preference helpers     | T009 PrayerAlertPlatform interface
+
+# US1, together:
+T016 Location client rounding and low accuracy
+T017 Manifest and Info.plist approximate location
+T021 US1 strings
+T022 US1 tests (after T018–T020 land)
+
+# US2, alongside US1 once Phase 2 is done:
+T024 Country suggestion table
+T025 Official timetable samples
+
+# US4, together:
+T038 Alert-list tests (Dart)                | T042 Store and receiver tests (Kotlin)
+T045 Web adapter                            | T050 US4 strings
 ```
 
-All stories require foundations. This app's real shared controller/state dependencies mean the integrated stories follow the order above; do not claim that whole stories editing the same files are independent parallel work. Their acceptance remains independently runnable with seeded valid state: US2 need not repeat provider lookup, US3 can use one seeded location, and US4 can run with every daily toggle off.
-
-### Within-phase dependencies
-
-Notification/Qiyam focus (2026-10-30): the user's explicit implementation focus permits the independent short-native route (P06/P07) and original Qiyam tone while full playback/recording gates remain open. T052/T054/T058/T060 and T065-T071 can complete against this supported path. This does not satisfy T045/G01, T046/G02 or close T049/T050/T051/T061/T062/T063/T064/T072 acceptance. Native full playback and uncleared recitation assets remain disabled; only a separately acknowledged standard-sound alternative is offered.
-
-- T001 establishes the baseline; T002 and T003 complete setup. T004-T007 extend the same model file sequentially, then T008 defines service boundaries and T009 implements persistence. T010 and T011 are independent foundational work after setup and may proceed alongside the sequential model/storage track. All T004-T011 must finish before US1.
-- US1 test tasks T012-T014 precede corresponding behaviour. T015 depends on the model, Ramadan table and reference fixtures. T016 creates shared endpoint helpers; only then run T017-T019 concurrently. T020 consumes these contracts; T021 needs the calculator, repository and location client. T022 localization precedes T023/T024 widgets. T025 integrates the UI. T026-T028 may be implemented after their relevant contracts but must be serialized where they touch shared build/config files; T029 requires deployed/configured endpoint work, and T030 requires the complete story.
-- US2 tests T031/T032 can be authored together. T033/T034 extend the same controller sequentially. T035 localization precedes the T036/T037 sheets. T038 integrates them, T039 binds deletion/invalidation and T040 lifecycle refresh; T041 validates the increment.
-- US3 tests T042-T044 are disjoint. T045 (G01) and T046 (G02) can proceed concurrently after the required shared/test scaffolding. T047 requires verified asset metadata from T046. T048 precedes T049; T049/T050 depend on the successful T045 route. Never enable full scheduled Android playback on a failed/unrun G01.
-- T051/T052/T053 implement platform adapters against the established facade/model; T051 also needs eligible clips and T052 the native queue/receiver. Their separate-file work may be scheduled concurrently only once those prerequisites exist; common facade/Gradle ownership must be coordinated. T054 integrates adapters. T055 requires the single handler and verified catalogue. T056 needs effective scheduling/audio outcomes; T057 strings precede T058 settings. T059-T062 integrate lifecycle/deletion/channels/assets without concurrent writes to shared files. T063/T064 accept the story.
-- US4 tests T065/T066 are disjoint. T067 uses the existing calculator; T068/T069 serialize controller/repository/scheduler changes. T070 strings precede T071 UI; T072 verifies the full increment. Use the G02 tone rather than adding another Qiyam audio subsystem.
-- Polish follows all four stories. T073 and T074 can be worked independently in the listed files. Measurements T075-T081 require finished implementation and actual provider/device/study access. T082 closes G01-G05 only after evidence exists. Documentation may be drafted earlier, but no validation result may be prefilled as passed.
-
-### Requirement and gate coverage
-
-| Requirement / outcome | Primary implementation and acceptance tasks |
-| --- | --- |
-| FR-001/002/010/011, SC-002 | T005, T010-T012, T015, T024, T030, T034, T037, T076 |
-| FR-003/004/005 | T013/T014, T016-T023, T026-T030, T077 |
-| FR-006/007, SC-003 | T004/T009, T031-T041, T060, T076 |
-| FR-008/009 | T005, T011/T012, T015, T032/T034/T035/T037, T041, T076 |
-| FR-012/013/014 | T006/T007, T042-T047, T050-T058, T063/T064, T075 |
-| FR-015/016, SC-004 | T042/T044/T045, T048-T054, T059-T064, T075 |
-| FR-017 | T043/T045, T049/T050/T055, T063/T064 |
-| FR-018/020 | T009/T014/T015/T030, T043/T046/T047/T062/T063 |
-| FR-019, SC-005 | T065-T072 |
-| FR-021/022 | T022-T028, T035, T051-T053/T057/T058, T070/T071, T078 |
-| FR-023 | T004/T009, T013/T014/T016, T039/T044/T048, T073/T077 |
-| FR-024, SC-008 | T008/T025/T040/T059, T079/T080 |
-| SC-001/007 | T030/T072, T078/T081 |
-| SC-006 | T013/T014/T030/T032/T042/T043/T063/T066, T077/T078 |
-| P01/P02/P03/P04/P05 | T009/T026, T042/T051/T053/T054/T057/T058/T063, T073/T077/T078/T082 |
-| G01 Android headless feasibility | T044/T045, T048-T050/T063/T064, T075/T082 |
-| G02 licensed/eligible audio | T046/T047/T062/T064/T074/T082 |
-| G03 location operations/privacy | T013/T016-T020/T026-T030/T073/T077/T082 |
-| G04 correctness/recovery | T009-T015/T031-T041/T042/T044/T063/T065-T072/T076/T077/T082 |
-| G05 complete product evidence | T073-T082 |
-
-## Parallel Examples per User Story
-
-These are scheduling examples, not additional checkbox tasks. Parallelize only after the specified predecessors are complete.
-
-- **US1**: After foundations, author T012 calculator, T013 endpoint and T014 setup tests in their separate files. After T016, implement T017 city search, T018 coordinate resolution and T019 approximate location concurrently; integrate through T020 afterward.
-- **US2**: Author T031 state tests and T032 sheet tests concurrently. After T033-T035, T036 location management and T037 calculation selection are separate widget files and can run together; T038 owns their shared screen integration.
-- **US3**: Author T042 scheduler, T043 player and T044 native-store tests concurrently. After scaffolding, run T045 Android feasibility and T046 catalogue preparation concurrently in disjoint files. Once verified dependencies exist, iOS T051 and web T053 are separate adapter work; do not race T049/T050 or shared facade edits.
-- **US4**: Author T065 calculation tests and T066 reminder tests concurrently. Calculation T067 and localization T070 touch different files and may proceed together after test contracts are agreed; T071 waits for localized copy and T068/T069 state/scheduler behaviour.
+---
 
 ## Implementation Strategy
 
-### MVP first
+### MVP first (US1 + US2)
 
-Complete setup, foundations and US1, then validate the first-location schedule on iOS/Android/web. This MVP includes detection, manual search, optional confirmed approximation, correct timezone/convention handling and offline saved-place schedules. It does not require an enabled notification service. Use T030 evidence before treating the MVP as demonstrated; a production release still requires applicable cross-cutting checks.
+1. Phase 1 → Phase 2 (the app builds, with Prayer Times empty).
+2. US1: a schedule from location, search or the suggested estimate. Validate quickstart 1.x.
+3. US2: methods, Asr and offsets. Validate quickstart 2.x.
+4. **Stop and release-check**: a schedule-only Prayer Times with no notification permission at all.
 
 ### Incremental delivery
 
-Add US2's saved-place/convention controls, verify with seeded locations, then prove G01/G02 before implementing dependent notification capability. Complete US3 with Qiyam off. Add US4 independently of daily toggle selections. Finally collect the full release matrix; P01-P05 remain visible product limitations, not unfinished code to hide.
+1. US3: travel and saved places.
+2. US4: alerts with the tone. This can ship before any recording is cleared.
+3. US6: Qiyam.
+4. US5: full athan, plus recordings as their rights clear (T058).
 
-### Evidence and blocker handling
+Each step runs its quickstart checkpoint on one Android phone and one iPhone before the next.
 
-Implementation may prepare fixtures, code and executable checks without target devices/provider credentials, but must leave the corresponding acceptance task incomplete with a concrete reason in its evidence file. Never fake physical iOS results on Windows, a passing user study, licensed audio review, provider coverage or an Android cold-process proof. A failed G01 requires explicit plan/spec revision before shipping a further Android capability exception. Keep follow-up IDs and requirement-quality checklist ownership intact.
-
-## Task Summary
-
-| Phase | Tasks | Count |
-| --- | --- | --- |
-| Setup | T001-T003 | 3 |
-| Foundations | T004-T011 | 8 |
-| US1 (P1, MVP) | T012-T030 | 19 |
-| US2 (P1) | T031-T041 | 11 |
-| US3 (P2) | T042-T064 | 23 |
-| US4 (P2) | T065-T072 | 8 |
-| Polish / cross-cutting | T073-T082 | 10 |
-| **Total** | **T001-T082** | **82** |
+---
 
 ## Notes
 
-Every checkbox is initially open and follows the required ID/optional-parallel/required-story-label/path format. Task IDs are execution-order identifiers; the dependency rules above take precedence for optional parallel work. User-story checkpoints are acceptance milestones, not permission requests to stop authorized work. Do not modify unrelated work, add speculative features, bypass system/user notification settings or mark required evidence complete without running the checks.
+- Work is currently on `008-web-app`. Moving it to its own `009-prayer-times` branch is the user's
+  decision (plan → Open items). These tasks do not switch branches.
+- Do not commit, deploy or upload to stores unless the user asks.
+- A checked task means the work is done and its checks ran. A mocked test or a compile is not a
+  device result. Device outcomes go in `validation/`.
+- `functions/` (location endpoints) must not change. `tool/prayer/location_api_test.mjs` should
+  keep passing untouched.

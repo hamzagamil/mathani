@@ -1,7 +1,7 @@
-﻿# Specification Quality Checklist: Prayer Times and Athan Notifications
+﻿# Specification Quality Checklist: Prayer Times and Athan
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning
-**Created**: 2026-10-29
+**Created**: 2026-10-29 | **Rewritten**: 2026-11-02
 **Feature**: [spec.md](../spec.md)
 
 ## Content Quality
@@ -31,9 +31,14 @@
 
 ## Notes
 
-- Reviewed all 16 criteria on 2026-10-29. No unresolved requirements-quality findings or clarification markers remain. Checked states describe specification quality, not completed implementation.
-- Stories 1-2 cover FR-001 through FR-011 and FR-020; Story 3 covers FR-012 through FR-018; Story 4 covers FR-019. Cross-platform, accessibility, privacy and performance requirements FR-021 through FR-024 are covered by edge cases and SC-001, SC-006 through SC-008 alongside the stories.
-- Assumptions explicitly define one notification location, four opening takbirs, last-third Qiyam with a reminder sound, and one shared daily-prayer recitation selection.
-- FR-014 through FR-015 and FR-022 make playback feasibility and tracked platform exceptions planning dependencies, without claiming full background athan has been verified.
-- No extensions.yml was present during pre-execution checks. The project's PowerShell template resolver selected .specify/templates/spec-template.md after the specify executable failed to resolve its launcher script.
-- Planning review on 2026-10-29 recorded bounded platform exceptions P01-P05 in the specification and follow-ups.md. They qualify full background playback, system-sound control, browser delivery/storage and finite reminder horizons. The quality checklist remains satisfied; G01-G05 are still required implementation/release evidence, not completed tests.
+- Reviewed against the rewritten spec on 2026-11-02.
+- Story coverage: US1 covers FR-001 to FR-009; US2 covers FR-011 to FR-016; US3 covers FR-009 and
+  FR-010; US4 covers FR-017 to FR-023; US5 covers FR-024 to FR-026; US6 covers FR-027.
+  FR-028 to FR-032 apply across stories and are measured by SC-001, SC-007 and SC-008.
+- Two items depend on decisions recorded under Assumptions, not on missing information: the
+  iPhone 30-second alert limit (accepted parity gap for US5) and treating city-level position as
+  not sensitive (constitution secure-storage rule).
+- Open dependency: two athan recordings with redistribution rights (blocks FR-019 only).
+- Plan, research, data model, contracts and quickstart were regenerated from this spec on
+  2026-11-02, and follow-ups.md was removed. tasks.md still describes the first draft until
+  /speckit-tasks runs. validation/ keeps earlier evidence as history.
