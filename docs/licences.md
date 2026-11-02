@@ -19,6 +19,7 @@ must show every attribution marked **required**.
 | KFGQPC Uthmanic Script HAFS | Quran text (production, preferred) | **Proprietary**: no reproduction or modification without written approval from KFGQPC | **Dependency D1**: not bundled until written approval is received |
 | Amiri Quran | Quran text (fallback; used until D1 is resolved) | SIL Open Font License 1.1 | Ship the OFL text; do not sell the font by itself |
 | KFGQPC Madinah Mushaf page fonts, edition V2 (1421 AH), one per page (`assets/qcf/`) | Printed lettering of the Mushaf layout, the default (specs/002, User Story 4) | **Proprietary**, as above | **Dependency D3**: bundled unmodified; requires written approval |
+| KFGQPC surah header font `QCF_SurahHeader_COLOR` (`assets/qcf/surah_headers.ttf.gz`), via QUL font resource 458 | Surah headers of the Mushaf layout: the printed frame and name, one glyph per surah | **Proprietary**, as above ("King Fahad Complex, All rights reserved") | **Dependency D3**: bundled unmodified (gzip-compressed); same approval as the page fonts |
 | IBM Plex Sans Arabic (Regular, Medium, SemiBold, Bold) | Interface text, Arabic and Latin | SIL Open Font License 1.1 | Ship the OFL text |
 
 ## Recitations

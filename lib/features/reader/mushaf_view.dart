@@ -246,6 +246,7 @@ class _MushafPageItemState extends State<_MushafPageItem> {
             details: MushafPageDetails.of(quran, page.number),
             printedGlyphs: cached.glyphs,
             printedFamily: cached.family,
+            surahHeaderFamily: cached.headerFamily,
             printedSpaceEm: quran.printedSpaceEm,
           ),
         ),
@@ -256,10 +257,13 @@ class _MushafPageItemState extends State<_MushafPageItem> {
 
 /// A page ready to draw: its lines, and for the printed lettering its glyphs and loaded font.
 class _CachedPage {
-  const _CachedPage(this.page, [this.glyphs, this.family]);
+  const _CachedPage(this.page, {this.glyphs, this.family, this.headerFamily});
   final MushafPage page;
   final Map<int, String>? glyphs;
   final String? family;
+
+  /// The surah header font, when the page has a surah title and the font loaded.
+  final String? headerFamily;
 }
 
 /// Small LRU cache of page data, with prefetching of the neighbouring pages so a page turn
@@ -303,9 +307,28 @@ class _PageCache {
   }
 
   Future<_CachedPage> _fetch(int page) async {
-    if (!printed) return _CachedPage(await _quran.page(page));
+    if (!printed) {
+      final lines = await _quran.page(page);
+      return _CachedPage(lines, headerFamily: await _headers(lines));
+    }
     final (lines, family) = await (_quran.page(page, printed: true), PrintedFonts.load(page)).wait;
-    return _CachedPage(lines, await _quran.printedGlyphs(lines), family);
+    return _CachedPage(
+      lines,
+      glyphs: await _quran.printedGlyphs(lines),
+      family: family,
+      headerFamily: await _headers(lines),
+    );
+  }
+
+  /// The printed surah header font for a page with a surah title, in either lettering. Without
+  /// it the header is drawn as a plain frame, so a failed load never blocks the page.
+  static Future<String?> _headers(MushafPage page) async {
+    if (!page.lines.any((l) => l.type == LineType.surahName)) return null;
+    try {
+      return await PrintedFonts.loadHeaders();
+    } catch (_) {
+      return null;
+    }
   }
 
   void prefetchAround(int page) {

@@ -9,6 +9,7 @@ import '../../shared/numerals.dart';
 import '../../shared/quran_text.dart';
 import 'kashida.dart';
 import 'page_geometry.dart';
+import 'surah_header_glyphs.dart';
 import 'surah_header_painter.dart';
 
 /// Colours the renderer needs, taken from the theme's semantic tokens.
@@ -99,6 +100,10 @@ class MushafPageDetails {
   int get hashCode => Object.hash(surahName, juz);
 }
 
+/// Width of a surah header glyph, and the height of its ink, in em of the header font.
+const _headerAdvanceEm = 3.302;
+const _headerInkEm = 0.40;
+
 /// One page of the page-faithful Mushaf layout (001 research R4): 15 line slots, words shaped
 /// once into cached [TextPainter]s, `ayah` lines filled like print by kashida with normal word
 /// gaps (specs/002-print-like-mushaf-page/contracts/page-typesetting.md) or centred, surah
@@ -123,6 +128,7 @@ class MushafPageRenderer extends LeafRenderObjectWidget {
     this.printedGlyphs,
     this.printedFamily,
     this.printedSpaceEm = 0,
+    this.surahHeaderFamily,
   });
 
   final MushafPage page;
@@ -154,6 +160,10 @@ class MushafPageRenderer extends LeafRenderObjectWidget {
 
   /// Gap between printed words, in em of the page font.
   final double printedSpaceEm;
+
+  /// The King Fahd Complex surah header font: each title is drawn as its printed header glyph.
+  /// Null draws the plain frame with the name.
+  final String? surahHeaderFamily;
 
   @override
   RenderMushafPage createRenderObject(BuildContext context) => RenderMushafPage(this);
@@ -209,6 +219,7 @@ class RenderMushafPage extends RenderBox {
         old.font != next.font ||
         old.details != next.details ||
         old.printedFamily != next.printedFamily ||
+        old.surahHeaderFamily != next.surahHeaderFamily ||
         !identical(old.printedGlyphs, next.printedGlyphs)) {
       _disposePainters();
       markNeedsLayout();
@@ -524,6 +535,29 @@ class RenderMushafPage extends RenderBox {
   }
 
   void _paintSurahHeader(Canvas canvas, _LinePlacement line, PageGeometry geometry) {
+    final surah = line.line.surah;
+    final family = _config.surahHeaderFamily;
+    if (family != null && surah != null && surah >= 1 && surah <= surahHeaderGlyphs.length) {
+      // The glyph's ink spans 98% of its advance and 40% of the font size, centred on the
+      // baseline: fill the text block's width, at most 90% of the line's height.
+      final fontSize = math.min(
+        geometry.textBlock.width / _headerAdvanceEm,
+        line.height * 0.9 / _headerInkEm,
+      );
+      final p = _painter(
+        String.fromCharCode(surahHeaderGlyphs[surah - 1]),
+        TextStyle(
+          fontFamily: family,
+          fontSize: fontSize,
+          color: _config.palette.accentInk,
+          height: 1,
+        ),
+      );
+      final baseline = p.computeDistanceToActualBaseline(TextBaseline.alphabetic);
+      p.paint(canvas, Offset((size.width - p.width) / 2, line.top + line.height / 2 - baseline));
+      p.dispose();
+      return;
+    }
     final rect = Rect.fromLTWH(
       geometry.textBlock.left,
       line.top + line.height * 0.12,

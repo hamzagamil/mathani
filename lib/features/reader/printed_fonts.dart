@@ -41,11 +41,32 @@ class PrintedFonts {
         }
       }();
 
+  /// The King Fahd Complex surah header font: each surah's printed header, frame and name in one
+  /// glyph (surah_header_glyphs.dart). Loaded the first time a page with a surah title is shown.
+  static const headerFamily = 'qcf_surah_headers';
+  static const headerAsset = 'assets/qcf/surah_headers.ttf.gz';
+  static Future<String>? _headers;
+
+  /// Loads and registers the surah header font once; completes with its family. A failed load is
+  /// forgotten, so the next call tries again.
+  static Future<String> loadHeaders({AssetBundle? bundle}) => _headers ??= () async {
+        try {
+          final data = await (bundle ?? rootBundle).load(headerAsset);
+          final bytes = await gunzip(data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes));
+          await (FontLoader(headerFamily)..addFont(Future.value(ByteData.sublistView(bytes)))).load();
+          return headerFamily;
+        } catch (_) {
+          _headers = null;
+          rethrow;
+        }
+      }();
+
   /// Forgets loads in progress. Tests call it between tests, whose loads cannot finish once the
   /// test that started them has ended.
   @visibleForTesting
   static void reset() {
     _loading.clear();
     _loaded.clear();
+    _headers = null;
   }
 }
