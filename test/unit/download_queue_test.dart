@@ -111,6 +111,22 @@ void main() {
     fetcher.dispose();
   });
 
+  test('downloads of a reciter no longer in the catalogue are deleted by the scan', () async {
+    final fetcher = newFetcher();
+    // 'sudais' was in the catalogue until 1.5.3; nothing can list or delete it any more.
+    await writeValid(await fetcher.downloadFile('sudais', 108, 1), 1000);
+    final kawthar = await quran.recordingBytes('husary', 108);
+    await writeValid(await fetcher.downloadFile('husary', 108, 1), kawthar[0]);
+
+    final queue = newQueue(fetcher);
+    await queue.ensureScanned();
+    final root = TempStore(temp).file(await fetcher.downloadFile('husary', 108, 1)).parent.parent.parent;
+    expect(Directory('${root.path}/sudais').existsSync(), isFalse);
+    expect(queue.stateOf('husary', 108), isNotNull, reason: 'a kept reciter is untouched');
+    queue.dispose();
+    fetcher.dispose();
+  });
+
   test('all ayat but no basmala is not complete, and resuming fetches only the basmala',
       () async {
     final fetcher = newFetcher();

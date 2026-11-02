@@ -128,7 +128,12 @@ class DownloadQueue with WidgetsBindingObserver {
         for (final reciterDir in await store.list(StoreRoot.support, fetcher.downloadsRoot)) {
           if (!reciterDir.isDir) continue;
           final reciter = reciterDir.path.split('/').last;
-          if (_reciter(reciter) == null) continue;
+          if (_reciter(reciter) == null) {
+            // A reciter no longer in the catalogue: nothing can list or delete its surahs, so
+            // their space is freed here.
+            await store.deleteDir(StoreRoot.support, reciterDir.path);
+            continue;
+          }
           for (final surahDir in await store.list(StoreRoot.support, reciterDir.path)) {
             if (!surahDir.isDir) continue;
             final surah = int.tryParse(surahDir.path.split('/').last);

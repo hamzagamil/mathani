@@ -46,7 +46,7 @@ void main() {
     expect(ids('الحصري'), unorderedEquals(['husary', 'husary_mujawwad', 'husary_muallim']));
     expect(ids('حصري'), unorderedEquals(['husary', 'husary_mujawwad', 'husary_muallim']));
     expect(ids('husary'), hasLength(3));
-    expect(ids('ابو بكر'), ['shatri'], reason: 'أ and ا match');
+    expect(ids('احمد'), ['neana'], reason: 'أ and ا match');
     expect(ids('عبد الباسط'), unorderedEquals(['abdulbasit_murattal', 'abdulbasit_mujawwad']));
     expect(ids('zzz'), isEmpty);
   });

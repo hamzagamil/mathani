@@ -14,7 +14,7 @@ void main() {
     // The 004 reciters come first, then the catalogue added in specs/006, in `sort` order.
     final ids = [for (final r in quran.reciters) r.id];
     expect(ids.take(2), ['husary', 'minshawy']);
-    expect(ids, hasLength(46));
+    expect(ids, hasLength(25));
     expect(ids.toSet(), hasLength(ids.length));
     expect(reader.preferences.reciter, 'husary');
     expect(quran.reciterOrDefault(reader.preferences.reciter)!.id, 'husary');
