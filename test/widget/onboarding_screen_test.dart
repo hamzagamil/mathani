@@ -97,12 +97,12 @@ void main() {
       await pumpApp(tester);
       expect(find.byType(OnboardingScreen), findsOneWidget);
       expect(find.byType(ReaderScreen), findsNothing);
-      expect(find.text('الخطوة ١ من ٤'), findsOneWidget);
+      expect(find.text('الخطوة ١ من ٣'), findsOneWidget);
       expect(find.text('السابق'), findsNothing, reason: 'no Back on the first step');
 
       await next(tester);
       expect(onboarding.step, OnboardingStep.theme);
-      expect(find.text('الخطوة ٢ من ٤'), findsOneWidget);
+      expect(find.text('الخطوة ٢ من ٣'), findsOneWidget);
       await tapText(tester, 'السابق');
       expect(onboarding.step, OnboardingStep.language);
       await finish(tester);
@@ -110,7 +110,7 @@ void main() {
 
     testWidgets('English progress', (tester) async {
       await pumpApp(tester, language: LanguagePref.en);
-      expect(find.text('Step 1 of 4'), findsOneWidget);
+      expect(find.text('Step 1 of 3'), findsOneWidget);
       await finish(tester);
     });
 
@@ -190,26 +190,13 @@ void main() {
       await finish(tester);
     });
 
-    testWidgets('flowing adds the text size step, which sets the size of a real ayah',
-        (tester) async {
+    testWidgets('no layout or text size choice: they are in Settings only', (tester) async {
       await pumpApp(tester, language: LanguagePref.en);
       await tapText(tester, 'Next');
       await tapText(tester, 'Next');
-      await tapText(tester, 'Flowing text');
-      expect(reader.layout, ReadingLayout.flowing);
-      expect(find.text('Step 3 of 5'), findsOneWidget);
-      await tapText(tester, 'Next');
-      expect(onboarding.step, OnboardingStep.textSize);
-      final slider = tester.widget<Slider>(find.byType(Slider));
-      expect((slider.min, slider.max), (18, 34));
-      await tester.drag(find.byType(Slider), const Offset(120, 0));
-      await settle(tester, 2);
-      final size = reader.preferences.flowFontSize;
-      expect(size, greaterThan(24));
-      final quran = tester.widget<Text>(find.byWidgetPredicate(
-          (w) => w is Text && w.style?.fontFamily == 'QuranText'));
-      expect(quran.style!.fontSize, size.toDouble());
-      expect(quran.data, contains('ٱلْحَمْدُ'));
+      expect(onboarding.step, OnboardingStep.reciter);
+      expect(find.text('Step 3 of 3'), findsOneWidget);
+      expect(find.text('Flowing text'), findsNothing);
       await finish(tester);
     });
 
@@ -217,7 +204,7 @@ void main() {
         (tester) async {
       await pumpApp(tester);
       final semantics = tester.ensureSemantics();
-      for (var i = 0; i < 3; i++) {
+      for (var i = 0; i < 2; i++) {
         await next(tester);
       }
       expect(onboarding.step, OnboardingStep.reciter);
@@ -232,7 +219,7 @@ void main() {
 
     testWidgets('a sample plays and stops from its button', (tester) async {
       await pumpApp(tester);
-      for (var i = 0; i < 3; i++) {
+      for (var i = 0; i < 2; i++) {
         await next(tester);
       }
       await tester.tap(find.byTooltip('استمع إلى مقطع, محمود خليل الحصري'));
@@ -248,7 +235,7 @@ void main() {
     testWidgets('offline: a note, and the samples are disabled; choosing still works',
         (tester) async {
       await pumpApp(tester, network: 'none');
-      for (var i = 0; i < 3; i++) {
+      for (var i = 0; i < 2; i++) {
         await next(tester);
       }
       expect(find.text('تحتاج المقاطع إلى اتصال بالإنترنت، ويمكنك الاختيار دونها.'), findsOneWidget);
@@ -277,7 +264,7 @@ void main() {
       await finish(tester);
     });
 
-    for (final steps in [1, 2, 3]) {
+    for (final steps in [1, 2]) {
       testWidgets('Skip on setup step ${steps + 1} lands on the reader', (tester) async {
         await pumpApp(tester);
         for (var i = 0; i < steps; i++) {
@@ -300,7 +287,7 @@ void main() {
 
     testWidgets('Skip during a sample stops it', (tester) async {
       await pumpApp(tester);
-      for (var i = 0; i < 3; i++) {
+      for (var i = 0; i < 2; i++) {
         await next(tester);
       }
       await tester.tap(find.byTooltip('استمع إلى مقطع, محمود خليل الحصري'));
@@ -336,7 +323,7 @@ void main() {
     testWidgets('after the preferences, three gesture stops for the Mushaf layout',
         (tester) async {
       await pumpApp(tester);
-      for (var i = 0; i < 4; i++) {
+      for (var i = 0; i < 3; i++) {
         await next(tester);
       }
       expect(onboarding.step, OnboardingStep.turnPages);
@@ -354,7 +341,7 @@ void main() {
 
     testWidgets('the flowing layout gets its own texts', (tester) async {
       await pumpApp(tester, seed: (p) => p.copyWith(layout: ReadingLayout.flowing));
-      for (var i = 0; i < 5; i++) {
+      for (var i = 0; i < 3; i++) {
         await next(tester);
       }
       expect(onboarding.step, OnboardingStep.turnPages);
@@ -370,7 +357,7 @@ void main() {
           const FakeAccessibilityFeatures(disableAnimations: true);
       addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
       await pumpApp(tester);
-      for (var i = 0; i < 4; i++) {
+      for (var i = 0; i < 3; i++) {
         await next(tester);
       }
       expect(onboarding.step, OnboardingStep.turnPages);

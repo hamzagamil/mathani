@@ -74,15 +74,15 @@ void main() {
     expect(reader.user.bookmarksOnPage(reader.page), isNotEmpty);
   });
 
-  testWidgets('7 and 10: layout toggle keeps the ayah; language switch is live', (tester) async {
+  testWidgets('7 and 10: a layout switch keeps the ayah; language switch is live', (tester) async {
     await launch(tester);
     const target = AyahRef(3, 92);
     reader.jumpTo(target, highlight: false);
     await tester.pumpAndSettle();
-    await tapToolbar(tester, MathaniIcons.flowing);
+    reader.updatePreferences(reader.preferences.copyWith(layout: ReadingLayout.flowing));
     await tester.pumpAndSettle();
     expect(reader.anchor, target);
-    await tapToolbar(tester, MathaniIcons.mushaf);
+    reader.updatePreferences(reader.preferences.copyWith(layout: ReadingLayout.mushaf));
     await tester.pumpAndSettle();
     expect(reader.anchor, target);
 

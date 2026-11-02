@@ -45,31 +45,31 @@ void main() {
     await settle(tester);
   }
 
-  testWidgets('layout toggle keeps the same ayah both ways (FR-003, SC-010)', (tester) async {
+  testWidgets('switching the layout in Settings keeps the same ayah both ways (FR-003, SC-010)', (tester) async {
     await pumpApp(tester);
     const target = AyahRef(3, 92); // mid-page ayah, start of juz 4
     reader.jumpTo(target, highlight: false);
     await settle(tester);
     final mushafPage = reader.page;
 
-    await tapToolbar(tester, MathaniIcons.flowing); // to flowing
+    reader.updatePreferences(reader.preferences.copyWith(layout: ReadingLayout.flowing)); // to flowing, as Settings does
     await settle(tester, 10);
     expect(reader.layout, ReadingLayout.flowing);
     expect(reader.page, mushafPage);
     expect(reader.anchor, target);
     await shoot(tester, 'flowing_24_ar');
 
-    await tapToolbar(tester, MathaniIcons.mushaf); // back to Mushaf pages
+    reader.updatePreferences(reader.preferences.copyWith(layout: ReadingLayout.mushaf)); // back to Mushaf pages
     await settle(tester);
     expect(reader.layout, ReadingLayout.mushaf);
     expect(reader.page, mushafPage);
     expect(reader.anchor, target);
 
     // A second round trip must not drift.
-    await tapToolbar(tester, MathaniIcons.flowing);
+    reader.updatePreferences(reader.preferences.copyWith(layout: ReadingLayout.flowing));
     await settle(tester, 10);
     expect(reader.anchor, target);
-    await tapToolbar(tester, MathaniIcons.mushaf);
+    reader.updatePreferences(reader.preferences.copyWith(layout: ReadingLayout.mushaf));
     await settle(tester);
     expect(reader.anchor, target);
   });

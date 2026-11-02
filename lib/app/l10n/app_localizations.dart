@@ -332,18 +332,6 @@ abstract class AppLocalizations {
   /// **'Flowing text'**
   String get layoutFlowing;
 
-  /// No description provided for @switchToFlowing.
-  ///
-  /// In en, this message translates to:
-  /// **'Switch to flowing text'**
-  String get switchToFlowing;
-
-  /// No description provided for @switchToMushaf.
-  ///
-  /// In en, this message translates to:
-  /// **'Switch to Mushaf pages'**
-  String get switchToMushaf;
-
   /// No description provided for @themeSetting.
   ///
   /// In en, this message translates to:
@@ -846,30 +834,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'How should the Mushaf look?'**
   String get onboardingThemeTitle;
-
-  /// No description provided for @onboardingLayoutTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'How would you like to read?'**
-  String get onboardingLayoutTitle;
-
-  /// No description provided for @onboardingLayoutMushafHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Pages as printed in the Madinah Mushaf'**
-  String get onboardingLayoutMushafHint;
-
-  /// No description provided for @onboardingLayoutFlowingHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Continuous text you can enlarge'**
-  String get onboardingLayoutFlowingHint;
-
-  /// No description provided for @onboardingTextSizeTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose the text size'**
-  String get onboardingTextSizeTitle;
 
   /// No description provided for @onboardingReciterTitle.
   ///

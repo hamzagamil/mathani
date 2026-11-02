@@ -39,9 +39,6 @@ void main() {
   }
 
   void walkTo(OnboardingStep step) {
-    if (step == OnboardingStep.textSize) {
-      reader.updatePreferences(reader.preferences.copyWith(layout: ReadingLayout.flowing));
-    }
     expect(c.steps, contains(step));
     while (c.step != step) {
       c.next();
@@ -51,7 +48,7 @@ void main() {
   onboardingTest('a first run starts at the language step', (tester) async {
     expect(c.step, OnboardingStep.language);
     expect(c.phase, OnboardingPhase.setup);
-    expect(c.progress, (1, 4));
+    expect(c.progress, (1, 3));
   });
 
   onboardingTest('once done, the onboarding does not start', (tester) async {
@@ -65,7 +62,6 @@ void main() {
     expect(c.step, OnboardingStep.language);
     c.next();
     expect(c.step, OnboardingStep.theme);
-    c.next();
     c.next();
     expect(c.step, OnboardingStep.reciter);
     c.next();
@@ -108,7 +104,7 @@ void main() {
   onboardingTest('closed midway: the next launch starts again at the language step, with the '
       'choices kept (FR-003)', (tester) async {
     reader.updatePreferences(reader.preferences.copyWith(theme: ThemePref.night));
-    walkTo(OnboardingStep.layout);
+    walkTo(OnboardingStep.reciter);
     await flush(tester);
     final (anchor, saved) = (await tester.runAsync(reader.user.loadStartup))!;
     final relaunched = ReaderController(
@@ -120,19 +116,13 @@ void main() {
     relaunched.dispose();
   });
 
-  onboardingTest('the layout step adds text size after it for flowing, and removes it for Mushaf',
-      (tester) async {
-    walkTo(OnboardingStep.layout);
+  onboardingTest('a flowing layout set in Settings adds no setup step', (tester) async {
     reader.updatePreferences(reader.preferences.copyWith(layout: ReadingLayout.flowing));
-    expect(c.step, OnboardingStep.layout);
-    expect(c.progress, (3, 5));
-    c.next();
-    expect(c.step, OnboardingStep.textSize);
-    c.back();
-    reader.updatePreferences(reader.preferences.copyWith(layout: ReadingLayout.mushaf));
-    expect(c.step, OnboardingStep.layout);
-    c.next();
-    expect(c.step, OnboardingStep.reciter);
+    expect(c.steps.where((s) => s.kind == StepKind.setup), [
+      OnboardingStep.language,
+      OnboardingStep.theme,
+      OnboardingStep.reciter,
+    ]);
   });
 
   onboardingTest('a replay is the tour only and never touches onboardingDone', (tester) async {

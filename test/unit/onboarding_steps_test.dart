@@ -4,19 +4,16 @@ import 'package:mathani/features/onboarding/onboarding_steps.dart';
 /// The step sequence (specs/005-app-onboarding/data-model.md › Step sequence).
 void main() {
   List<OnboardingStep> steps({
-    bool flowing = false,
     bool hasReciters = true,
     bool hasPlayer = true,
     bool replay = false,
   }) =>
-      onboardingSteps(
-          flowing: flowing, hasReciters: hasReciters, hasPlayer: hasPlayer, replay: replay);
+      onboardingSteps(hasReciters: hasReciters, hasPlayer: hasPlayer, replay: replay);
 
-  test('Mushaf layout with recitations: setup, gestures, buttons', () {
+  test('with recitations: setup, gestures, buttons; the layout is chosen in Settings only', () {
     expect(steps(), const [
       OnboardingStep.language,
       OnboardingStep.theme,
-      OnboardingStep.layout,
       OnboardingStep.reciter,
       OnboardingStep.turnPages,
       OnboardingStep.controls,
@@ -26,12 +23,6 @@ void main() {
       OnboardingStep.player,
       OnboardingStep.settings,
     ]);
-  });
-
-  test('the flowing layout adds text size right after the layout', () {
-    final s = steps(flowing: true);
-    expect(s.indexOf(OnboardingStep.textSize), s.indexOf(OnboardingStep.layout) + 1);
-    expect(steps().contains(OnboardingStep.textSize), isFalse);
   });
 
   test('no catalogue drops the reciter; no recitations drops the player', () {
@@ -47,9 +38,8 @@ void main() {
 
   test('progress counts setup steps and tour stops separately', () {
     final mushaf = steps();
-    expect(progressOf(mushaf, OnboardingStep.language), (1, 4));
-    expect(progressOf(mushaf, OnboardingStep.reciter), (4, 4));
-    expect(progressOf(steps(flowing: true), OnboardingStep.textSize), (4, 5));
+    expect(progressOf(mushaf, OnboardingStep.language), (1, 3));
+    expect(progressOf(mushaf, OnboardingStep.reciter), (3, 3));
     expect(progressOf(mushaf, OnboardingStep.turnPages), (1, 7));
     expect(progressOf(mushaf, OnboardingStep.ayahActions), (3, 7));
     expect(progressOf(mushaf, OnboardingStep.surahIndex), (4, 7));
@@ -58,7 +48,7 @@ void main() {
   });
 
   test('kinds', () {
-    expect(OnboardingStep.textSize.kind, StepKind.setup);
+    expect(OnboardingStep.reciter.kind, StepKind.setup);
     expect(OnboardingStep.controls.kind, StepKind.gesture);
     expect(OnboardingStep.player.kind, StepKind.button);
   });

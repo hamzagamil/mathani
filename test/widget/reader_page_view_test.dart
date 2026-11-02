@@ -106,7 +106,7 @@ void main() {
 
   testWidgets('the flowing layout keeps its bars; leaving restores the system bars', (tester) async {
     await pumpApp(tester);
-    await tester.tap(find.byIcon(MathaniIcons.flowing));
+    reader.updatePreferences(reader.preferences.copyWith(layout: ReadingLayout.flowing));
     await settle(tester);
     expect(find.byType(AppBar).hitTestable(), findsOneWidget);
     expect(controlsShown(tester), isTrue);

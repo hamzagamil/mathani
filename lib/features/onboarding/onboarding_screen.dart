@@ -137,8 +137,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   static String _title(OnboardingStep step, AppLocalizations l10n) => switch (step) {
         OnboardingStep.language => l10n.onboardingLanguageTitle,
         OnboardingStep.theme => l10n.onboardingThemeTitle,
-        OnboardingStep.layout => l10n.onboardingLayoutTitle,
-        OnboardingStep.textSize => l10n.onboardingTextSizeTitle,
         OnboardingStep.reciter => l10n.onboardingReciterTitle,
         OnboardingStep.turnPages => l10n.tourTurnPagesTitle,
         OnboardingStep.controls => l10n.tourControlsTitle,
@@ -223,8 +221,6 @@ class _StepPage extends StatelessWidget {
     final body = switch (step) {
       OnboardingStep.language => const LanguageStep(),
       OnboardingStep.theme => const ThemeStep(),
-      OnboardingStep.layout => const LayoutStep(),
-      OnboardingStep.textSize => const TextSizeStep(),
       OnboardingStep.reciter => const ReciterStep(),
       _ => _GestureStop(
           step: step,

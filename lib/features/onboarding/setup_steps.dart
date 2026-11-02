@@ -12,9 +12,7 @@ import '../../app/theme/tokens.dart';
 import '../../data/models.dart';
 import '../../platform/device.dart';
 import '../../shared/mathani_icons.dart';
-import '../../shared/numerals.dart';
 import '../../shared/reader_state.dart';
-import '../reader/flowing_view.dart';
 import '../recitation/recitation_controller.dart';
 import '../recitation/reciter_sheet.dart';
 import 'tour_illustration.dart';
@@ -194,118 +192,6 @@ class ThemeStep extends StatelessWidget {
           title: l10n.themeNight,
           selected: current == ThemePref.night,
           onTap: () => choose(ThemePref.night),
-        ),
-      ],
-    );
-  }
-}
-
-class LayoutStep extends StatelessWidget {
-  const LayoutStep({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final reader = ReaderScope.of(context);
-    final l10n = AppLocalizations.of(context);
-    final current = reader.layout;
-    void choose(ReadingLayout l) => _set(reader, (p) => p.copyWith(layout: l));
-    return Column(
-      children: [
-        TourIllustration(layout: current),
-        const SizedBox(height: Space.s4),
-        _ChoiceCard(
-          icon: MathaniIcons.mushaf,
-          title: l10n.layoutMushaf,
-          subtitle: l10n.onboardingLayoutMushafHint,
-          selected: current == ReadingLayout.mushaf,
-          onTap: () => choose(ReadingLayout.mushaf),
-        ),
-        _ChoiceCard(
-          icon: MathaniIcons.flowing,
-          title: l10n.layoutFlowing,
-          subtitle: l10n.onboardingLayoutFlowingHint,
-          selected: current == ReadingLayout.flowing,
-          onTap: () => choose(ReadingLayout.flowing),
-        ),
-      ],
-    );
-  }
-}
-
-/// The flowing text size, with Al-Fatiha 1–3 set at that size (Story 1 AS5).
-class TextSizeStep extends StatefulWidget {
-  const TextSizeStep({super.key});
-
-  @override
-  State<TextSizeStep> createState() => _TextSizeStepState();
-}
-
-class _TextSizeStepState extends State<TextSizeStep> {
-  String? _sample;
-
-  @override
-  void initState() {
-    super.initState();
-    final quran = ReaderScope.read(context).quran;
-    unawaited(quran.flowingPage(1).then((page) {
-      if (!mounted) return;
-      setState(() => _sample = [
-            for (final (_, words) in page.take(3)) flowingAyahText(words, quran.font),
-          ].join());
-    }));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final reader = ReaderScope.of(context);
-    final colors = MathaniColors.of(context);
-    final locale = Localizations.localeOf(context);
-    final size = reader.preferences.flowFontSize;
-    final sample = _sample;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: Slider(
-                min: ReaderPreferences.minFlowFontSize.toDouble(),
-                max: ReaderPreferences.maxFlowFontSize.toDouble(),
-                divisions: ReaderPreferences.maxFlowFontSize - ReaderPreferences.minFlowFontSize,
-                value: size.toDouble(),
-                label: formatNumber(size, locale),
-                onChanged: (v) => _set(reader, (p) => p.copyWith(flowFontSize: v.round())),
-              ),
-            ),
-            SizedBox(
-              width: 40,
-              child: Text(
-                formatNumber(size, locale),
-                textAlign: TextAlign.center,
-                style: TypeScale.titleSm.copyWith(color: colors.accentInk),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: Space.s2),
-        DecoratedBox(
-          decoration: BoxDecoration(
-            color: colors.surfaceRaised,
-            borderRadius: BorderRadius.circular(Radii.md),
-            border: Border.all(color: colors.line),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(Space.s4),
-            child: sample == null
-                // Fixed height until the words load, so nothing jumps.
-                ? SizedBox(height: size * 2.0 * 3)
-                : Text(
-                    sample,
-                    textDirection: TextDirection.rtl,
-                    textAlign: TextAlign.justify,
-                    style: flowingTextStyle(colors, size.toDouble()),
-                  ),
-          ),
         ),
       ],
     );

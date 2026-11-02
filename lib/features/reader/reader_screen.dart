@@ -441,14 +441,6 @@ class _ReaderToolbar extends StatelessWidget {
                   tooltip: l10n.openSearch,
                   onPressed: () => push(const SearchScreen()),
                 ),
-                IconButton(
-                  icon: Icon(mushaf ? MathaniIcons.flowing : MathaniIcons.mushaf),
-                  tooltip: mushaf ? l10n.switchToFlowing : l10n.switchToMushaf,
-                  // One tap; the new layout opens at the same ayah (FR-003, SC-010).
-                  onPressed: () => reader.updatePreferences(reader.preferences.copyWith(
-                    layout: mushaf ? ReadingLayout.flowing : ReadingLayout.mushaf,
-                  )),
-                ),
                 // Listen (specs/004): from this page, or from the top ayah in the flowing layout. The
                 // recitation bar takes its place while a recitation is on.
                 if (recitation != null && recitation.session == null && !memorizing)

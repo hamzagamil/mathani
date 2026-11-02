@@ -3,7 +3,6 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 
-import '../../data/models.dart';
 import '../../shared/reader_state.dart';
 import '../recitation/recitation_controller.dart';
 import 'onboarding_steps.dart';
@@ -17,7 +16,6 @@ class OnboardingController extends ChangeNotifier {
   OnboardingController({required this.reader, this.recitation, this.hasMemorize = false})
       : _step = reader.preferences.onboardingDone ? null : OnboardingStep.language {
     _steps = _computeSteps();
-    reader.addListener(_onReaderChanged);
   }
 
   final ReaderController reader;
@@ -52,20 +50,11 @@ class OnboardingController extends ChangeNotifier {
   }
 
   List<OnboardingStep> _computeSteps() => onboardingSteps(
-        flowing: reader.layout == ReadingLayout.flowing,
         hasReciters: recitation != null && reader.quran.reciters.isNotEmpty,
         hasPlayer: recitation != null,
         hasMemorize: hasMemorize,
         replay: _replay,
       );
-
-  /// The layout step adds or removes the text size step (data-model › Validation).
-  void _onReaderChanged() {
-    final steps = _computeSteps();
-    if (steps.length == _steps.length) return;
-    _steps = steps;
-    notifyListeners();
-  }
 
   void _go(OnboardingStep step) {
     if (_step == OnboardingStep.reciter && step != OnboardingStep.reciter) _stopSample();
@@ -128,11 +117,6 @@ class OnboardingController extends ChangeNotifier {
     if (r != null) unawaited(r.stopPreview());
   }
 
-  @override
-  void dispose() {
-    reader.removeListener(_onReaderChanged);
-    super.dispose();
-  }
 }
 
 /// Provides the [OnboardingController] and rebuilds dependents on change.

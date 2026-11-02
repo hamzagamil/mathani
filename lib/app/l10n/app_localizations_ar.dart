@@ -162,12 +162,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get layoutFlowing => 'نص متصل';
 
   @override
-  String get switchToFlowing => 'اعرض النص المتصل';
-
-  @override
-  String get switchToMushaf => 'اعرض صفحات المصحف';
-
-  @override
   String get themeSetting => 'المظهر';
 
   @override
@@ -481,18 +475,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get onboardingThemeTitle => 'كيف تحب أن يبدو المصحف؟';
-
-  @override
-  String get onboardingLayoutTitle => 'كيف تحب أن تقرأ؟';
-
-  @override
-  String get onboardingLayoutMushafHint => 'الصفحات كما طُبعت في مصحف المدينة';
-
-  @override
-  String get onboardingLayoutFlowingHint => 'نص متصل يمكنك تكبير خطه';
-
-  @override
-  String get onboardingTextSizeTitle => 'اختر حجم الخط';
 
   @override
   String get onboardingReciterTitle => 'لمن تحب أن تستمع؟';

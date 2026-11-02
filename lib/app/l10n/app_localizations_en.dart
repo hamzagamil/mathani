@@ -160,12 +160,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get layoutFlowing => 'Flowing text';
 
   @override
-  String get switchToFlowing => 'Switch to flowing text';
-
-  @override
-  String get switchToMushaf => 'Switch to Mushaf pages';
-
-  @override
   String get themeSetting => 'Theme';
 
   @override
@@ -473,19 +467,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingThemeTitle => 'How should the Mushaf look?';
-
-  @override
-  String get onboardingLayoutTitle => 'How would you like to read?';
-
-  @override
-  String get onboardingLayoutMushafHint =>
-      'Pages as printed in the Madinah Mushaf';
-
-  @override
-  String get onboardingLayoutFlowingHint => 'Continuous text you can enlarge';
-
-  @override
-  String get onboardingTextSizeTitle => 'Choose the text size';
 
   @override
   String get onboardingReciterTitle => 'Whom would you like to listen to?';
