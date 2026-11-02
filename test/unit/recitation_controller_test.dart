@@ -75,6 +75,27 @@ void main() {
       }
     });
 
+    recitationTest('a surah opened mid-page starts at its own basmala, not the page start',
+        (tester) async {
+      final quran = reader.quran;
+      // Az-Zalzalah begins on a page that opens with the end of Al-Bayyinah.
+      const zalzalah = AyahRef(99, 1);
+      final page = quran.pageOf(zalzalah);
+      expect(quran.ayahsStartingOnPage(page).first.ref.surah, 98);
+      c.playFromPage(page, anchor: zalzalah);
+      await settle(tester);
+      expect(session().item, const RecitedItem.basmala(99));
+
+      // An anchor that is just the page's first ayah (a page turn) keeps the page start, and one
+      // on another page is ignored.
+      for (final anchor in [quran.firstAyahOnPage(page).ref, const AyahRef(2, 255)]) {
+        await c.stop();
+        c.playFromPage(page, anchor: anchor);
+        await settle(tester);
+        expect(session().item.ref, quran.ayahsStartingOnPage(page).first.ref);
+      }
+    });
+
     recitationTest('ayah 1 of a surah starts at its basmala; Al-Fatiha and At-Tawbah do not',
         (tester) async {
       c.playFrom(const AyahRef(2, 1));

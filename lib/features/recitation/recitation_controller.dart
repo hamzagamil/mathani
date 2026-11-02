@@ -149,8 +149,15 @@ class RecitationController extends ChangeNotifier with WidgetsBindingObserver {
   // --- Starting ------------------------------------------------------------------------------
 
   /// Starts at the first ayah that begins on [page], or the ayah continuing onto it when none
-  /// begins there (FR-006).
-  Future<void> playFromPage(int page) {
+  /// begins there (FR-006). An [anchor] the reader was taken to on this page (a surah opened from
+  /// the index, a search result, a bookmark) is where it starts instead, so a surah that begins
+  /// mid-page is recited from its own start, not from the end of the surah before it.
+  Future<void> playFromPage(int page, {AyahRef? anchor}) {
+    if (anchor != null &&
+        quran.pageOf(anchor) == page &&
+        anchor != quran.firstAyahOnPage(page).ref) {
+      return playFrom(anchor);
+    }
     final starting = quran.ayahsStartingOnPage(page);
     final ref = starting.isNotEmpty ? starting.first.ref : quran.firstAyahOnPage(page).ref;
     return playFrom(ref);

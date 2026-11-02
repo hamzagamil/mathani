@@ -441,15 +441,16 @@ class _ReaderToolbar extends StatelessWidget {
                   tooltip: l10n.openSearch,
                   onPressed: () => push(const SearchScreen()),
                 ),
-                // Listen (specs/004): from this page, or from the top ayah in the flowing layout. The
-                // recitation bar takes its place while a recitation is on.
+                // Listen (specs/004): from this page (or the ayah the reader was taken to on it), or
+                // from the top ayah in the flowing layout. The recitation bar takes its place while a
+                // recitation is on.
                 if (recitation != null && recitation.session == null && !memorizing)
                   IconButton(
                     key: targets.listen,
                     icon: const Icon(MathaniIcons.play),
                     tooltip: l10n.listen,
                     onPressed: () => mushaf
-                        ? recitation.playFromPage(reader.page)
+                        ? recitation.playFromPage(reader.page, anchor: reader.anchor)
                         : recitation.playFrom(reader.anchor),
                   ),
                 // Memorize (specs/006): from this page; the memorization bar takes its place during

@@ -11,7 +11,7 @@ first `play`.
 | Member | Behaviour |
 | --- | --- |
 | `session` | `RecitationSession?` (data model). `null` means no bar is shown. |
-| `playFromPage(int page)` | Starts at the first ayah that **begins** on `page`. On page 1 that is 1:1. A page with no ayah starting on it starts at the first ayah shown on it. |
+| `playFromPage(int page, {AyahRef? anchor})` | Starts at the first ayah that **begins** on `page`. On page 1 that is 1:1. A page with no ayah starting on it starts at the first ayah shown on it. An `anchor` on `page` that is not its first ayah (the reader was taken there from the surah index, search or a bookmark) is where it starts instead, so a surah that begins mid-page starts at its own basmala. |
 | `playFrom(AyahRef ref)` | Starts at `ref`, or at its basmala when `ref.ayah == 1` and the surah has one (FR-006, FR-008). |
 | `pause()`, `resume()` | Update the state at once, before the platform call returns (FR-011). |
 | `next()`, `previous()` | Move by the item order. They work while paused (and stay paused). Taps within 300 ms are merged. |
