@@ -31,7 +31,7 @@ import 'src/sources.dart' show outputDb, outputVersion, sha256Of, sourcesDir;
 const _probe = 100.0;
 const _edition = 'kfgqpc-v2-1421';
 
-/// A line narrower than this share of the target is centred, as in print (surah ends, pages 1-2).
+/// A surah's last line narrower than this share of the target is centred, as in print.
 const _centreBelow = 0.85;
 
 void main() {
@@ -46,7 +46,14 @@ void main() {
 
     // Our non-ayah lines in Mushaf order: the V2 edition has the same titles and basmalas in the
     // same order, only sometimes on the previous page.
-    final ourLines = db.select('SELECT page, line, type, surah FROM mushaf_lines ORDER BY page, line');
+    final ourLines =
+        db.select('SELECT page, line, type, surah, first_word_id, last_word_id, centered FROM mushaf_lines ORDER BY page, line');
+    // Lines the source layout centres, by their words: the V2 line with the same words is centred.
+    final sourceCentred = {
+      for (final r in ourLines)
+        if (r['type'] == 'ayah' && r['centered'] == 1) (r['first_word_id'] as int, r['last_word_id'] as int),
+    };
+    final surahEnds = {for (final r in db.select('SELECT MAX(id) AS id FROM words GROUP BY surah')) r['id'] as int};
     final lineCount = <int, int>{};
     for (final r in ourLines) {
       lineCount[r['page'] as int] = math.max(lineCount[r['page'] as int] ?? 0, r['line'] as int);
@@ -147,9 +154,15 @@ void main() {
     String at(double q) => (sorted[((sorted.length - 1) * q).round()].value / _probe).toStringAsFixed(2);
     print('line widths (em): p5 ${at(.05)}, p50 ${at(.5)}, p95 ${at(.95)}, p99 ${at(.99)}, '
         'widest ${sorted.reversed.take(5).map((e) => '${e.key.$1}:${e.key.$2}=${(e.value / _probe).toStringAsFixed(1)}').join(' ')}');
+    // Print centres pages 1-2, the lines the source layout centres, and a surah's last line when
+    // it is short. Any other line is justified, however few its words: centring by width alone
+    // centred 49 ordinary lines in mid-page (e.g. 79:14, 81:5, 294:5, 335:5, 416:3).
     for (final row in rows.where((r) => r[2] == 'ayah')) {
-      final w = natural[(row[0]! as int, row[1]! as int)]!;
-      if (w < target * _centreBelow) row[3] = 1;
+      final page = row[0]! as int, first = row[4]! as int, last = row[5]! as int;
+      final short = natural[(page, row[1]! as int)]! < target * _centreBelow;
+      if (page <= 2 || sourceCentred.contains((first, last)) || (surahEnds.contains(last) && short)) {
+        row[3] = 1;
+      }
     }
 
     db.execute('DROP TABLE IF EXISTS replica_lines');
