@@ -180,6 +180,13 @@ class _MushafPageItemState extends State<_MushafPageItem> {
     final head = quran.firstAyahOnPage(page.number);
     final recited = RecitationScope.maybeOf(context)?.recited;
     final memorization = MemorizationScope.maybeOf(context);
+    // No mutashabih colour while memorizing: the session has its own marks (specs/010 R4).
+    final similar = memorization != null && memorization.active ? null : reader.similar;
+    final linked = similar?.linkedOnPage([
+      for (final line in page.lines)
+        for (final w in line.words) w.ref,
+    ]) ?? const <AyahRef>[];
+    final locale = Localizations.localeOf(context);
 
     final onTapPage = widget.onTapPage;
     void pick(Offset globalPosition) {
@@ -194,11 +201,16 @@ class _MushafPageItemState extends State<_MushafPageItem> {
       if (ref != null && !inSession) widget.onAyahLongPress!(ref);
     }
 
+    final pageLabel = l10n.pageSemantics(
+      toEasternArabic(page.number),
+      quran.surahList[head.surah - 1].nameAr,
+    );
     return Semantics(
-      label: l10n.pageSemantics(
-        toEasternArabic(page.number),
-        quran.surahList[head.surah - 1].nameAr,
-      ),
+      // Screen readers hear which ayat on the page have similar ayat (specs/010 FR-004).
+      label: linked.isEmpty
+          ? pageLabel
+          : '$pageLabel. ${l10n.similarOnPage(linked.map((r) => formatNumber(r.ayah, locale))
+              .join(locale.languageCode == 'ar' ? '، ' : ', '))}',
       customSemanticsActions: {
         CustomSemanticsAction(label: l10n.showControls): ?onTapPage,
       },
@@ -227,6 +239,7 @@ class _MushafPageItemState extends State<_MushafPageItem> {
               recited: colors.recited,
               hint: colors.hint,
               mistake: colors.mistake,
+              similar: colors.similar,
             ),
             quarterStartWords: widget.cache.quarterStartWords(page.number),
             sajdahEndWords: widget.cache.sajdahEndWords(page.number),
@@ -243,6 +256,7 @@ class _MushafPageItemState extends State<_MushafPageItem> {
                     expected: memorization.expected,
                     revision: memorization.revision,
                   ),
+            similar: similar,
             details: MushafPageDetails.of(quran, page.number),
             printedGlyphs: cached.glyphs,
             printedFamily: cached.family,

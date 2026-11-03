@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import '../data/models.dart';
 import '../data/quran_repository.dart';
 import '../data/user_repository.dart';
+import '../features/mutashabihat/mutashabihat_content.dart';
 
 /// Single source of truth for where the reader is (research R6): the anchor ayah, the page on
 /// screen, the reading layout and preferences, the selected ayah and a transient highlight.
@@ -14,6 +15,7 @@ class ReaderController extends ChangeNotifier with WidgetsBindingObserver {
     required this.user,
     required AyahRef anchor,
     required this._preferences,
+    this.similar = Mutashabihat.empty,
   }) : _anchor = quran.tryAyah(anchor)?.ref ?? const AyahRef(1, 1) {
     _page = quran.pageOf(_anchor);
     WidgetsBinding.instance.addObserver(this);
@@ -24,6 +26,9 @@ class ReaderController extends ChangeNotifier with WidgetsBindingObserver {
 
   final QuranRepository quran;
   final UserRepository user;
+
+  /// Linked ayat and their explanations (specs/010).
+  final Mutashabihat similar;
 
   AyahRef _anchor;
   int _page = 1;

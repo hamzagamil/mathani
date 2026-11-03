@@ -24,6 +24,7 @@ class MathaniColors extends ThemeExtension<MathaniColors> {
     required this.recited,
     required this.hint,
     required this.mistake,
+    required this.similar,
     required this.line,
     required this.focusRing,
     required this.focusRingOnBar,
@@ -47,6 +48,7 @@ class MathaniColors extends ThemeExtension<MathaniColors> {
         recited: SemanticColors.recited.of(b),
         hint: SemanticColors.hint.of(b),
         mistake: SemanticColors.mistake.of(b),
+        similar: SemanticColors.similar.of(b),
         line: SemanticColors.line.of(b),
         focusRing: SemanticColors.focusRing.of(b),
         focusRingOnBar: SemanticColors.focusRingOnBar.of(b),
@@ -69,6 +71,7 @@ class MathaniColors extends ThemeExtension<MathaniColors> {
   final Color recited;
   final Color hint; // a hinted word in memorization (specs/006)
   final Color mistake; // the number of an ayah with a mistake (specs/006)
+  final Color similar; // an ayah with similar ayat (specs/010)
   final Color line;
   final Color focusRing;
   final Color focusRingOnBar;

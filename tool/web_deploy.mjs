@@ -53,6 +53,13 @@ function prepare() {
   }
   writeFileSync(join(web, '_routes.json'), readFileSync(join(repo, 'web', '_routes.json')));
 
+  // No release with a bad Mutashabihat reference (specs/010 FR-016).
+  try {
+    execSync('dart run tool/check_mutashabihat.dart', { cwd: repo, stdio: 'inherit' });
+  } catch {
+    fail('Mutashabihat content has errors: fix assets/mutashabihat/mutashabihat.md');
+  }
+
   // The version the build reports must be the one being released (FR-029).
   const pubspec = readFileSync(join(repo, 'pubspec.yaml'), 'utf8').match(/^version:\s*(\S+)/m)[1];
   const built = JSON.parse(readFileSync(join(web, 'version.json'), 'utf8'));

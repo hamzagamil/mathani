@@ -566,6 +566,13 @@ class AppLocalizationsAr extends AppLocalizations {
       'اضغط مطولاً على آية لتستمع منها أو تحفظها أو تنسخها أو تشاركها.';
 
   @override
+  String get tourSimilarTitle => 'المتشابه';
+
+  @override
+  String get tourSimilarBody =>
+      'الآيات المكتوبة باللون الأخضر لها آيات تشبهها في مواضع أخرى من القرآن، وقد تشتبه على الحافظ. اضغط مطولًا على إحداها واختر «عرض المتشابه» لترى الآيات معًا مع شرح الفرق بينها.';
+
+  @override
   String get tourIndexTitle => 'الفهرس';
 
   @override
@@ -1253,4 +1260,36 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get prayerRateLimited =>
       'عمليات بحث كثيرة الآن. أعد المحاولة بعد دقيقة.';
+
+  @override
+  String get showSimilar => 'عرض المتشابه';
+
+  @override
+  String get similarTitle => 'المتشابه';
+
+  @override
+  String get similarThisAyah => 'هذه الآية';
+
+  @override
+  String get similarClose => 'إغلاق';
+
+  @override
+  String similarGroup(String n) {
+    return 'المجموعة $n';
+  }
+
+  @override
+  String similarOpenAyah(String ref) {
+    return '$ref، افتحها في المصحف';
+  }
+
+  @override
+  String similarAyahSemantics(String n) {
+    return 'الآية $n، لها متشابه';
+  }
+
+  @override
+  String similarOnPage(String list) {
+    return 'فيها متشابه: الآيات $list';
+  }
 }

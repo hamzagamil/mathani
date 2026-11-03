@@ -557,6 +557,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Press and hold an ayah to play from it, bookmark, copy or share it.';
 
   @override
+  String get tourSimilarTitle => 'Similar ayat';
+
+  @override
+  String get tourSimilarBody =>
+      'Ayat in green have similar ayat elsewhere in the Quran, which are easy to mix up when memorizing. Press and hold one and choose “Show similar ayat” to see them together, with an explanation of the difference.';
+
+  @override
   String get tourIndexTitle => 'Index';
 
   @override
@@ -1252,4 +1259,36 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get prayerRateLimited =>
       'Too many searches right now. Try again in a minute.';
+
+  @override
+  String get showSimilar => 'Show similar ayat';
+
+  @override
+  String get similarTitle => 'Similar ayat';
+
+  @override
+  String get similarThisAyah => 'This ayah';
+
+  @override
+  String get similarClose => 'Close';
+
+  @override
+  String similarGroup(String n) {
+    return 'Group $n';
+  }
+
+  @override
+  String similarOpenAyah(String ref) {
+    return '$ref, open in the Mushaf';
+  }
+
+  @override
+  String similarAyahSemantics(String n) {
+    return 'Ayah $n, has similar ayat';
+  }
+
+  @override
+  String similarOnPage(String list) {
+    return 'Similar ayat on this page: $list';
+  }
 }

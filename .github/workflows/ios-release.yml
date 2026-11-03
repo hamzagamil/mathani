@@ -33,6 +33,9 @@ jobs:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
       - run: flutter pub get
+      # No release with a bad Mutashabihat reference (specs/010 FR-016).
+      - name: Check Mutashabihat content
+        run: dart run tool/check_mutashabihat.dart
 
       - name: Install distribution certificate and provisioning profile
         env:

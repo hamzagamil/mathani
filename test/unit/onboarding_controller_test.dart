@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mathani/data/models.dart';
+import 'package:mathani/features/mutashabihat/mutashabihat_content.dart';
 import 'package:mathani/features/onboarding/onboarding_controller.dart';
 import 'package:mathani/features/onboarding/onboarding_steps.dart';
 import 'package:mathani/features/recitation/recitation_controller.dart';
@@ -21,9 +22,10 @@ void main() {
       tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 100)));
 
   void onboardingTest(String name, Future<void> Function(WidgetTester tester) body,
-      {bool onboarded = false, Object? skip}) {
+      {bool onboarded = false, Object? skip, Mutashabihat similar = Mutashabihat.empty}) {
     testWidgets(name, skip: skip != null, (tester) async {
-      reader = (await tester.runAsync(() => openTestReader(onboarded: onboarded)))!;
+      reader = (await tester.runAsync(
+          () => openTestReader(onboarded: onboarded, similar: similar)))!;
       (recitation, engine, _) = openTestRecitation(reader);
       c = OnboardingController(reader: reader, recitation: recitation, hasMemorize: true);
       await body(tester);
@@ -81,7 +83,8 @@ void main() {
       await flush(tester);
       final (_, saved) = (await tester.runAsync(reader.user.loadStartup))!;
       expect(saved.onboardingDone, isTrue);
-    });
+      // The coloured-ayat stop is there only with Mutashabihat content (specs/010).
+    }, similar: step == OnboardingStep.similarAyat ? quickstartMutashabihat() : Mutashabihat.empty);
   }
 
   onboardingTest('done on the last stop ends it and remembers it', (tester) async {

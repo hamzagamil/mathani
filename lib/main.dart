@@ -9,6 +9,7 @@ import 'data/quran_repository.dart';
 import 'data/user_repository.dart';
 import 'features/memorization/asr_model.dart';
 import 'features/memorization/memorization_controller.dart';
+import 'features/mutashabihat/mutashabihat_loader.dart';
 import 'features/onboarding/onboarding_controller.dart';
 import 'features/prayer_times/prayer_alerts.dart';
 import 'features/prayer_times/prayer_repository.dart';
@@ -28,7 +29,9 @@ Future<void> runMathani() async {
   await initDatabases();
   // Both databases open in parallel on phones; no network and no background work at startup. In
   // browsers they open one at a time, and the Quran database is fetched only on a first visit or
-  // a new version (specs/008 research R4).
+  // a new version (specs/008 research R4). The Mutashabihat content file loads alongside them, so
+  // linked ayat are coloured on the first page (specs/010 research R3).
+  final similarLoad = loadMutashabihat();
   final (quran, user) = parallelDatabaseOpen
       ? await (QuranRepository.open(), UserRepository.open()).wait
       : (await QuranRepository.open(), await UserRepository.open());
@@ -38,6 +41,7 @@ Future<void> runMathani() async {
     user: user,
     anchor: anchor,
     preferences: preferences,
+    similar: await similarLoad,
   );
   // Recitations (specs/004): nothing here touches the network, audio or disk before the first
   // frame; the fetcher and player start on the first play.

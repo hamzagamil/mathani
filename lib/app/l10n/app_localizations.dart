@@ -991,6 +991,18 @@ abstract class AppLocalizations {
   /// **'Press and hold an ayah to play from it, bookmark, copy or share it.'**
   String get tourAyahBody;
 
+  /// Onboarding stop that explains the coloured ayat (specs/010).
+  ///
+  /// In en, this message translates to:
+  /// **'Similar ayat'**
+  String get tourSimilarTitle;
+
+  /// No description provided for @tourSimilarBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Ayat in green have similar ayat elsewhere in the Quran, which are easy to mix up when memorizing. Press and hold one and choose “Show similar ayat” to see them together, with an explanation of the difference.'**
+  String get tourSimilarBody;
+
   /// No description provided for @tourIndexTitle.
   ///
   /// In en, this message translates to:
@@ -2184,6 +2196,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Too many searches right now. Try again in a minute.'**
   String get prayerRateLimited;
+
+  /// Long-press action for an ayah linked to similar ayat (specs/010)
+  ///
+  /// In en, this message translates to:
+  /// **'Show similar ayat'**
+  String get showSimilar;
+
+  /// No description provided for @similarTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Similar ayat'**
+  String get similarTitle;
+
+  /// No description provided for @similarThisAyah.
+  ///
+  /// In en, this message translates to:
+  /// **'This ayah'**
+  String get similarThisAyah;
+
+  /// No description provided for @similarClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get similarClose;
+
+  /// Chip that switches between the groups of an ayah in several groups
+  ///
+  /// In en, this message translates to:
+  /// **'Group {n}'**
+  String similarGroup(String n);
+
+  /// Screen reader label of a similar ayah in the overlay
+  ///
+  /// In en, this message translates to:
+  /// **'{ref}, open in the Mushaf'**
+  String similarOpenAyah(String ref);
+
+  /// Screen reader label of the end marker of an ayah that has similar ayat
+  ///
+  /// In en, this message translates to:
+  /// **'Ayah {n}, has similar ayat'**
+  String similarAyahSemantics(String n);
+
+  /// Added to the page label when the page has ayat with similar ayat
+  ///
+  /// In en, this message translates to:
+  /// **'Similar ayat on this page: {list}'**
+  String similarOnPage(String list);
 }
 
 class _AppLocalizationsDelegate

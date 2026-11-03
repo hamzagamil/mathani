@@ -74,6 +74,7 @@ Every upload needs a new build number: bump `+build` in `pubspec.yaml`, or set t
 ## Release builds
 
 ```powershell
+dart run tool/check_mutashabihat.dart   # must print OK (specs/010); CI and the web deploy run it too
 flutter build appbundle --release --obfuscate --split-debug-info=symbols/android
 flutter build ipa --release --obfuscate --split-debug-info=symbols/ios   # macOS CI
 ```
@@ -127,6 +128,8 @@ Pages limits (free plan): 20,000 files per deployment and 25 MiB per file. The b
 ## Release checklist
 
 - [ ] `dart run tool/verify_quran.dart` prints PASS; record the `quran.db` SHA-256 below.
+- [ ] `dart run tool/check_mutashabihat.dart` prints OK, and `assets/mutashabihat/mutashabihat.md`
+      holds only the owner's real groups (no quickstart fixtures; specs/010).
 - [ ] D1 (KFGQPC font) and D2 (QUL data) resolved in `docs/licences.md`.
 - [ ] Download size grows by no more than 1 MB over `docs/size_baseline.json` on each platform, or
       the growth is explained and approved (`size-approved` label); then update the baseline with

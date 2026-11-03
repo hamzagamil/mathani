@@ -11,6 +11,7 @@ import '../../shared/numerals.dart';
 import '../../shared/reader_state.dart';
 import '../memorization/memorization_controller.dart';
 import '../memorization/range_sheet.dart';
+import '../mutashabihat/similar_sheet.dart';
 import '../recitation/recitation_controller.dart';
 
 /// Text for copying or sharing an ayah, exactly as in contracts/ui-screens.md (FR-021):
@@ -26,17 +27,19 @@ String formatAyahForShare(List<Word> words, Surah surah, int ayah, {required boo
   return '﴿$text﴾\n$reference';
 }
 
-/// Long-press actions for an ayah: play from it (specs/004), memorize from it (specs/006), copy,
-/// share and bookmark (FR-020). The ayah stays
-/// highlighted while the sheet is open.
+/// Long-press actions for an ayah: show its similar ayat (specs/010), play from it (specs/004),
+/// memorize from it (specs/006), copy, share and bookmark (FR-020). The ayah stays
+/// highlighted while the sheet is open, and while the similar-ayat overlay it leads to is open.
 Future<void> showAyahActions(BuildContext context, AyahRef ref) async {
   final reader = ReaderScope.read(context);
   reader.select(ref);
-  await showModalBottomSheet<void>(
+  final showSimilar = await showModalBottomSheet<bool>(
     context: context,
     showDragHandle: true,
     builder: (_) => _AyahActionsSheet(ayah: ref, screen: context),
   );
+  // Opened once this sheet is closed, so the selection carries over to the overlay.
+  if (showSimilar == true && context.mounted) await showSimilarSheet(context, ref);
   reader.select(null);
 }
 
@@ -86,6 +89,12 @@ class _AyahActionsSheet extends StatelessWidget {
               style: TypeScale.titleSm.copyWith(color: colors.accentInk),
             ),
           ),
+          if (reader.similar.isLinked(ayah))
+            ListTile(
+              leading: const Icon(MathaniIcons.similar),
+              title: Text(l10n.showSimilar),
+              onTap: () => Navigator.of(context).pop(true),
+            ),
           if (recitation != null)
             ListTile(
               leading: const Icon(MathaniIcons.play),

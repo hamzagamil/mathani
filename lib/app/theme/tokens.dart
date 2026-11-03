@@ -45,6 +45,10 @@ abstract final class SemanticColors {
   static const hint = ThemedColor(Color(0xFF456967), Color(0xFF86AFAB));
   // A mistake: a darker terracotta, so it reads on cream as well as on the night page.
   static const mistake = ThemedColor(Color(0xFFA4482B), Color(0xFFE89A7C));
+  // Derived for specs/010 (not yet in the brand guide): text of an ayah that has similar ayat.
+  // Emerald, chosen by the owner (2026-11-03) as clearer than the first gold-brown: it reads apart
+  // from the navy and cream text; contrast checked in test/unit/similar_colour_test.dart.
+  static const similar = ThemedColor(Color(0xFF146B3F), Color(0xFF6FD3A0));
   static const line = ThemedColor(Color(0xFFD9CCB5), Color(0xFF2B3D59));
   static const focusRing = ThemedColor(Color(0xFF183159), Color(0xFFD9BD82));
   static const focusRingOnBar = ThemedColor(Color(0xFFBA9757), Color(0xFFD9BD82));

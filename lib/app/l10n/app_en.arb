@@ -398,6 +398,11 @@
   "tourControlsFlowing": "The controls stay at the top and bottom. In the Mushaf pages layout, tap the page to show them.",
   "tourAyahTitle": "Ayah actions",
   "tourAyahBody": "Press and hold an ayah to play from it, bookmark, copy or share it.",
+  "tourSimilarTitle": "Similar ayat",
+  "@tourSimilarTitle": {
+    "description": "Onboarding stop that explains the coloured ayat (specs/010)."
+  },
+  "tourSimilarBody": "Ayat in green have similar ayat elsewhere in the Quran, which are easy to mix up when memorizing. Press and hold one and choose “Show similar ayat” to see them together, with an explanation of the difference.",
   "tourIndexTitle": "Index",
   "tourIndexBody": "Surahs, ajza' and your bookmarks. Go anywhere from here.",
   "tourSearchTitle": "Search",
@@ -698,5 +703,48 @@
   "prayerTimezoneUnavailable": "This place's time zone couldn't be found. Choose another city.",
   "prayerServiceUnavailable": "Couldn't reach the place service. Try again later.",
   "prayerOffline": "You need a connection for this. Saved places still work offline.",
-  "prayerRateLimited": "Too many searches right now. Try again in a minute."
+  "prayerRateLimited": "Too many searches right now. Try again in a minute.",
+  "showSimilar": "Show similar ayat",
+  "@showSimilar": {
+    "description": "Long-press action for an ayah linked to similar ayat (specs/010)"
+  },
+  "similarTitle": "Similar ayat",
+  "similarThisAyah": "This ayah",
+  "similarClose": "Close",
+  "similarGroup": "Group {n}",
+  "@similarGroup": {
+    "description": "Chip that switches between the groups of an ayah in several groups",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "similarOpenAyah": "{ref}, open in the Mushaf",
+  "@similarOpenAyah": {
+    "description": "Screen reader label of a similar ayah in the overlay",
+    "placeholders": {
+      "ref": {
+        "type": "String"
+      }
+    }
+  },
+  "similarAyahSemantics": "Ayah {n}, has similar ayat",
+  "@similarAyahSemantics": {
+    "description": "Screen reader label of the end marker of an ayah that has similar ayat",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "similarOnPage": "Similar ayat on this page: {list}",
+  "@similarOnPage": {
+    "description": "Added to the page label when the page has ayat with similar ayat",
+    "placeholders": {
+      "list": {
+        "type": "String"
+      }
+    }
+  }
 }

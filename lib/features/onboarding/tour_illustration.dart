@@ -20,7 +20,8 @@ class TourIllustration extends StatefulWidget {
 
   final ReadingLayout layout;
 
-  /// [OnboardingStep.turnPages], [OnboardingStep.controls] or [OnboardingStep.ayahActions].
+  /// [OnboardingStep.turnPages], [OnboardingStep.controls], [OnboardingStep.ayahActions] or
+  /// [OnboardingStep.similarAyat].
   final OnboardingStep? gesture;
 
   @override
@@ -104,7 +105,7 @@ class _MiniScreenPainter extends CustomPainter {
       switch (gesture) {
         OnboardingStep.turnPages => 0.3,
         OnboardingStep.controls => 0.4,
-        OnboardingStep.ayahActions => 0.7,
+        OnboardingStep.ayahActions || OnboardingStep.similarAyat => 0.7,
         _ => 0,
       };
 
@@ -121,6 +122,8 @@ class _MiniScreenPainter extends CustomPainter {
         _controls(canvas, size);
       case OnboardingStep.ayahActions:
         _ayahActions(canvas, size);
+      case OnboardingStep.similarAyat:
+        _similarAyat(canvas, size);
       default:
         _content(canvas, size, Offset.zero);
         if (!_mushaf) _bars(canvas, size, 1);
@@ -157,7 +160,9 @@ class _MiniScreenPainter extends CustomPainter {
     return Rect.fromLTRB(left, y, area.right - inset, y + step * 0.32);
   }
 
-  void _content(Canvas canvas, Size size, Offset offset, {double scroll = 0, int? selected}) {
+  /// [similar]: lines drawn in the mutashabih colour (specs/010).
+  void _content(Canvas canvas, Size size, Offset offset,
+      {double scroll = 0, int? selected, Set<int> similar = const {}}) {
     canvas.save();
     canvas.translate(offset.dx, offset.dy);
     final area = _area(size);
@@ -174,6 +179,7 @@ class _MiniScreenPainter extends CustomPainter {
     canvas.save();
     canvas.clipRect(area);
     final ink = Paint()..color = colors.ink.withValues(alpha: 0.35);
+    final linked = Paint()..color = colors.similar;
     final marker = Paint()..color = colors.accent;
     final step = _lineStep(size);
     final first = (scroll / step).floor();
@@ -184,8 +190,8 @@ class _MiniScreenPainter extends CustomPainter {
             RRect.fromRectAndRadius(line.inflate(step * 0.22), const Radius.circular(3)),
             Paint()..color = colors.selected);
       }
-      canvas.drawRRect(
-          RRect.fromRectAndRadius(line, Radius.circular(line.height / 2)), ink);
+      canvas.drawRRect(RRect.fromRectAndRadius(line, Radius.circular(line.height / 2)),
+          similar.contains(i) ? linked : ink);
       if (!_mushaf && i % 3 == 1) {
         canvas.drawCircle(Offset(line.left - step * 0.3, line.center.dy), step * 0.18, marker);
       }
@@ -263,6 +269,55 @@ class _MiniScreenPainter extends CustomPainter {
     if (t >= 0.1 && t < 0.95) _dot(canvas, at, ring: _segment(t, 0.1, 0.35));
     final rise = Curves.easeOut.transform(_segment(t, 0.4, 0.55));
     if (rise > 0 && t < 0.95) _sheet(canvas, size, rise);
+  }
+
+  /// An ayah in the mutashabih colour; press and hold it, and the similar-ayat overlay rises.
+  void _similarAyat(Canvas canvas, Size size) {
+    final t = _t;
+    const line = 6;
+    final selected = t >= 0.35 && t < 0.95;
+    _content(canvas, size, Offset.zero, selected: selected ? line : null, similar: const {5, 6});
+    if (!_mushaf) _bars(canvas, size, 1);
+    final at = _lineRect(size, line).center;
+    if (t >= 0.1 && t < 0.95) _dot(canvas, at, ring: _segment(t, 0.1, 0.35));
+    final rise = Curves.easeOut.transform(_segment(t, 0.4, 0.55));
+    if (rise > 0 && t < 0.95) _overlay(canvas, size, rise);
+  }
+
+  /// The similar-ayat overlay: two ayah cards above, the explanation in the bottom third.
+  void _overlay(Canvas canvas, Size size, double rise) {
+    final h = size.height * 0.78;
+    final rect = Rect.fromLTWH(0, size.height - h * rise, size.width, h);
+    canvas.drawRRect(
+        RRect.fromRectAndCorners(rect,
+            topLeft: const Radius.circular(10), topRight: const Radius.circular(10)),
+        Paint()..color = colors.surfaceRaised);
+    canvas.drawLine(rect.topLeft, rect.topRight, Paint()..color = colors.line);
+    final pad = size.width * 0.08;
+    final ink = Paint()..color = colors.ink.withValues(alpha: 0.35);
+    final bar = size.height * 0.018;
+    void lines(double top, int count, double left, double right) {
+      for (var i = 0; i < count; i++) {
+        final y = top + i * bar * 2.2;
+        final end = i == count - 1 ? left + (right - left) * 0.35 : left;
+        canvas.drawRRect(
+            RRect.fromRectAndRadius(Rect.fromLTRB(end, y, right, y + bar), Radius.circular(bar / 2)),
+            ink);
+      }
+    }
+
+    final cardH = h * 0.24;
+    // The pressed ayah first, as in the overlay.
+    for (final (i, fill) in [colors.selected, colors.surface].indexed) {
+      final top = rect.top + h * 0.08 + i * (cardH + h * 0.04);
+      final card = Rect.fromLTWH(pad, top, size.width - 2 * pad, cardH);
+      canvas.drawRRect(RRect.fromRectAndRadius(card, const Radius.circular(6)), Paint()..color = fill);
+      lines(card.top + cardH * 0.28, 2, card.left + pad * 0.6, card.right - pad * 0.6);
+    }
+    final divider = rect.top + h * 0.66;
+    canvas.drawLine(
+        Offset(pad, divider), Offset(size.width - pad, divider), Paint()..color = colors.line);
+    lines(divider + h * 0.07, 3, pad, size.width - pad);
   }
 
   void _sheet(Canvas canvas, Size size, double rise) {

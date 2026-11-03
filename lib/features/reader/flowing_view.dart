@@ -365,6 +365,10 @@ class _FlowingPageState extends State<_FlowingPage> {
     final colors = MathaniColors.of(context);
     final quran = reader.quran;
     final style = flowingTextStyle(colors, widget.fontSize);
+    // No mutashabih colour while memorizing: the session has its own marks (specs/010 R4).
+    final similar = memorization != null && memorization.active ? null : reader.similar;
+    final l10n = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context);
     _disposeRecognizers();
 
     // Split into runs at surah starts; each run is one paragraph after its surah header.
@@ -399,13 +403,31 @@ class _FlowingPageState extends State<_FlowingPage> {
           _recognizers.add(recognizer);
         }
         final s = flowingAyahText(words, quran.font);
-        spans.add(inSession
-            ? _memorizationSpan(context, memorization, ayah.ref, words, quran.font, background)
-            : TextSpan(
-                text: s,
+        if (inSession) {
+          spans.add(
+              _memorizationSpan(context, memorization, ayah.ref, words, quran.font, background));
+        } else if ((similar?.isLinked(ayah.ref) ?? false) && words.last.isAyahEnd) {
+          // A linked ayah (specs/010): in the mutashabih colour, and its end marker tells screen
+          // readers it has similar ayat. Same text as below, so text positions don't move.
+          final end = '${ayahEndGlyphs(words.last.text, quran.font)} ';
+          spans.add(TextSpan(
+            style: TextStyle(color: colors.similar, backgroundColor: background),
+            children: [
+              TextSpan(text: s.substring(0, s.length - end.length), recognizer: recognizer),
+              TextSpan(
+                text: end,
                 recognizer: recognizer,
-                style: background == null ? null : TextStyle(backgroundColor: background),
-              ));
+                semanticsLabel: l10n.similarAyahSemantics(formatNumber(ayah.ayah, locale)),
+              ),
+            ],
+          ));
+        } else {
+          spans.add(TextSpan(
+            text: s,
+            recognizer: recognizer,
+            style: background == null ? null : TextStyle(backgroundColor: background),
+          ));
+        }
         length += s.length;
       }
       paragraphs.add(_Paragraph(key, starts));
