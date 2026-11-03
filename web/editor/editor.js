@@ -30,6 +30,12 @@ function h(tag, attrs = {}, ...children) {
 }
 
 const $ = (id) => document.getElementById(id);
+
+/** Replaces [el]'s content. Unlike replaceChildren, empty slots (null, false) and nested lists
+ *  are skipped and flattened rather than shown as text. */
+function fill(el, ...children) {
+  el.replaceChildren(...children.flat(Infinity).filter((c) => c !== null && c !== undefined && c !== false));
+}
 const arabicDigits = (n) => String(n).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[d]);
 const westernDigits = (s) => s.replace(/[٠-٩]/g, (d) => '0123456789'['٠١٢٣٤٥٦٧٨٩'.indexOf(d)]);
 const when = (ms) => new Date(ms).toLocaleString('ar-EG', { dateStyle: 'medium', timeStyle: 'short' });
@@ -146,7 +152,7 @@ function notAnEditor(email) {
   $('actions').hidden = true;
   $('layout').classList.add('has-view');
   $('list-pane').replaceChildren();
-  $('view').replaceChildren(
+  fill($('view'), 
     h('h1', {}, 'لا يمكنك التعديل'),
     h('p', {}, `هذا البريد (${email}) ليس من المحررين. اطلب من صاحب التطبيق إضافتك.`),
     h('a', { class: 'button', href: '/cdn-cgi/access/logout' }, 'خروج'),
@@ -165,7 +171,7 @@ function route() {
   if (hash === 'history') return historyView();
   if (hash.startsWith('version-')) return versionView(Number(hash.slice(8)));
   if (hash === 'editors' && state.me.isOwner) return editorsView();
-  view.replaceChildren(h('p', { class: 'muted' }, 'اختر مجموعة من القائمة، أو أنشئ مجموعة جديدة.'));
+  fill(view, h('p', { class: 'muted' }, 'اختر مجموعة من القائمة، أو أنشئ مجموعة جديدة.'));
   renderList();
 }
 
@@ -203,7 +209,7 @@ function renderList() {
       $('search').setSelectionRange(state.search.length, state.search.length);
     },
   });
-  pane.replaceChildren(
+  fill(pane, 
     search,
     h('label', { class: 'filter' },
       h('input', {
@@ -227,7 +233,7 @@ function firstUse() {
   $('layout').classList.add('has-view');
   const view = $('view');
   if (!state.me.isOwner) {
-    view.replaceChildren(h('h1', {}, 'لم يُستورد المحتوى بعد'),
+    fill(view, h('h1', {}, 'لم يُستورد المحتوى بعد'),
       h('p', {}, 'يستورد صاحب التطبيق المحتوى الحالي أولًا، ثم يمكنك التعديل.'));
     return;
   }
@@ -248,7 +254,7 @@ function firstUse() {
       route();
     },
   }, 'استيراد المحتوى الحالي');
-  view.replaceChildren(
+  fill(view, 
     h('h1', {}, 'لا يوجد محتوى بعد'),
     h('p', {}, 'يبدأ المحرر من المحتوى الموجود في التطبيق الآن، ويصبح هو الإصدار الأول.'),
     button,
@@ -276,7 +282,7 @@ async function groupForm(id) {
   await loadQuran();
   const saved = id ? state.groups.find((g) => g.id === id) : null;
   if (id && !saved) {
-    $('view').replaceChildren(back(), h('p', {}, 'لم تعد هذه المجموعة موجودة.'));
+    fill($('view'), back(), h('p', {}, 'لم تعد هذه المجموعة موجودة.'));
     return;
   }
   renderList();
@@ -313,7 +319,7 @@ async function groupForm(id) {
     };
     addInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); add(); } });
 
-    view.replaceChildren(
+    fill(view, 
       back(),
       h('h1', {}, saved ? refsLabel(saved.ayat) : 'مجموعة جديدة'),
       saved ? h('p', { class: 'muted small' },
@@ -451,7 +457,7 @@ async function publishView(note) {
       failed(p);
     },
   }, 'نشر الآن');
-  view.replaceChildren(
+  fill(view, 
     back(),
     h('h1', {}, 'النشر'),
     state.published ? h('p', { class: 'muted' },
@@ -473,7 +479,7 @@ async function publishView(note) {
 async function historyView() {
   const r = await api('GET', 'versions');
   if (r.status !== 200) return failed(r);
-  $('view').replaceChildren(
+  fill($('view'), 
     back(),
     h('h1', {}, 'السجل'),
     h('ul', { class: 'versions' }, r.body.versions.map((v) => h('li', {},
@@ -509,7 +515,7 @@ async function versionView(number) {
         },
       }, 'نعم، استعده'),
       h('button', { class: 'quiet', onclick: () => { confirmBox.hidden = true; } }, 'إلغاء')));
-  $('view').replaceChildren(
+  fill($('view'), 
     h('a', { class: 'button quiet', href: '#history' }, '→ السجل'),
     h('h1', {}, `الإصدار ${arabicDigits(v.number)}`),
     h('p', { class: 'muted' }, `${when(v.publishedAt)} · ${v.publishedBy}`),
@@ -540,7 +546,7 @@ async function editorsView() {
     if (res.body?.error === 'email') return say('اكتب بريدًا صحيحًا غير بريدك.');
     failed(res);
   };
-  $('view').replaceChildren(
+  fill($('view'), 
     back(),
     h('h1', {}, 'المحررون'),
     h('p', {}, 'يدخل المحرر بالبريد نفسه عبر رمز يصله بالبريد، ويعدّل وينشر مثلك. أنت وحدك تضيف المحررين وتزيلهم.'),
