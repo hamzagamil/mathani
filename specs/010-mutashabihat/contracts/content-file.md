@@ -44,6 +44,13 @@ Every line after the heading, up to the next `##` heading or the end of the file
 - Lines starting with `###` or more hashes are explanation text, not headings.
 - One ayah can appear in several groups, each with its own explanation (spec User Story 4).
 
+### Version line (specs/011)
+
+Since the online editor (specs/011), this file is produced from the editor and pulled into the
+repository before each release (`dart run tool/pull_mutashabihat.dart`). Its preamble starts with
+`<!-- version: N -->`, the published version number. The app compares it with any version it
+downloaded and uses the newer one. A file without the line counts as version 0.
+
 ## Checks
 
 The tool prints one line per problem and exits with code 1 if there is any error.

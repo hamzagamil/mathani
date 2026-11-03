@@ -29,6 +29,12 @@ jobs:
       # The owner's Mutashabihat content: no release with a bad reference (specs/010 FR-016).
       - name: Check Mutashabihat content
         run: dart run tool/check_mutashabihat.dart
+      # The editor's functions (specs/011); node:sqlite needs Node 22.5 or later.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Mutashabihat editor functions
+        run: node --test tool/mutashabihat/*.test.mjs
 
   android:
     name: Android build, size and emulator tests

@@ -15,7 +15,7 @@ class ReaderController extends ChangeNotifier with WidgetsBindingObserver {
     required this.user,
     required AyahRef anchor,
     required this._preferences,
-    this.similar = Mutashabihat.empty,
+    this._similar = Mutashabihat.empty,
   }) : _anchor = quran.tryAyah(anchor)?.ref ?? const AyahRef(1, 1) {
     _page = quran.pageOf(_anchor);
     WidgetsBinding.instance.addObserver(this);
@@ -27,8 +27,18 @@ class ReaderController extends ChangeNotifier with WidgetsBindingObserver {
   final QuranRepository quran;
   final UserRepository user;
 
-  /// Linked ayat and their explanations (specs/010).
-  final Mutashabihat similar;
+  /// Linked ayat and their explanations (specs/010), replaced when a newer version is downloaded
+  /// (specs/011).
+  Mutashabihat get similar => _similar;
+  Mutashabihat _similar;
+
+  /// Uses [next] from now on: the pages recolour at once, and an open similar-ayat overlay keeps
+  /// what it opened with (specs/011 FR-015).
+  void replaceSimilar(Mutashabihat next) {
+    if (identical(next, _similar)) return;
+    _similar = next;
+    notifyListeners();
+  }
 
   AyahRef _anchor;
   int _page = 1;

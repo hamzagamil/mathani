@@ -74,6 +74,8 @@ Every upload needs a new build number: bump `+build` in `pubspec.yaml`, or set t
 ## Release builds
 
 ```powershell
+dart run tool/pull_mutashabihat.dart    # the latest content published from the editor (specs/011)
+git commit -am "chore(content): mutashabihat vN"   # when the pull changed the file, so the release rebuilds from git
 dart run tool/check_mutashabihat.dart   # must print OK (specs/010); CI and the web deploy run it too
 flutter build appbundle --release --obfuscate --split-debug-info=symbols/android
 flutter build ipa --release --obfuscate --split-debug-info=symbols/ios   # macOS CI
@@ -125,11 +127,30 @@ To roll back, open Cloudflare dashboard › Workers & Pages › mthani-web › D
 Pages limits (free plan): 20,000 files per deployment and 25 MiB per file. The build has about
 680 files; the largest is sherpa-onnx's WebAssembly at about 15 MB.
 
+## Mutashabihat editor (specs/011)
+
+The owner and the editors they add edit the Mutashabihat content at
+https://get.mthani.app/editor/. Apps download each published version within hours, without a
+release; releases bundle the latest one (above).
+
+- **Storage:** Cloudflare D1 database `mthani-mutashabihat`, bound as `DB` in `wrangler.toml`.
+  Schema: `functions/_lib/mutashabihat-schema.sql` (apply with
+  `npx wrangler@4 d1 execute mthani-mutashabihat --remote --file functions/_lib/mutashabihat-schema.sql`).
+- **Sign-in:** a Cloudflare Access application (Zero Trust › Access › Applications) covers
+  `/editor` and `/api/editor` on get.mthani.app and the pages.dev hostnames, with One-time PIN for
+  everyone. The functions decide who may edit: `OWNER_EMAIL` in `wrangler.toml`, plus the
+  editors the owner adds in the editor. `ACCESS_TEAM_DOMAIN` and `ACCESS_AUD` come from that
+  application.
+- **Undo a bad publish:** in the editor, «السجل», open the earlier version, «استعادة هذا الإصدار».
+  Apps pick it up like any other update.
+- **Tests:** `node --test tool/mutashabihat/*.test.mjs` (CI runs them).
+
 ## Release checklist
 
 - [ ] `dart run tool/verify_quran.dart` prints PASS; record the `quran.db` SHA-256 below.
-- [ ] `dart run tool/check_mutashabihat.dart` prints OK, and `assets/mutashabihat/mutashabihat.md`
-      holds only the owner's real groups (no quickstart fixtures; specs/010).
+- [ ] `dart run tool/pull_mutashabihat.dart` brought in the latest published content, committed, and
+      `dart run tool/check_mutashabihat.dart` prints OK. Record the content version (the
+      `<!-- version: N -->` line) in the release log (specs/011).
 - [ ] D1 (KFGQPC font) and D2 (QUL data) resolved in `docs/licences.md`.
 - [ ] Download size grows by no more than 1 MB over `docs/size_baseline.json` on each platform, or
       the growth is explained and approved (`size-approved` label); then update the baseline with

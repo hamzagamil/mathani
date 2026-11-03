@@ -62,7 +62,9 @@ self.addEventListener('message', (event) => {
 self.addEventListener('fetch', (event) => {
   const request = event.request;
   const url = new URL(request.url);
-  if (url.pathname.startsWith('/api/prayer-')) return;
+  // The API (prayer places, Mutashabihat content) and the editor always go to the network
+  // (specs/011 research R5).
+  if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/editor')) return;
   if (request.method !== 'GET' || url.origin !== self.location.origin) return;
   if (request.headers.has('range')) return;
   if (request.mode === 'navigate') {
