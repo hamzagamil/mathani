@@ -9,7 +9,7 @@ PRAYER_ALLOWED_ORIGINS = "https://get.mthani.app,https://read.mthani.app"
 # Mutashabihat editor (specs/011). Not secrets: tokens are checked against Access's public keys.
 # The owner manages editors; ACCESS_* come from the Access application (quickstart › Setup 4).
 OWNER_EMAIL = "hamzagamil@gmail.com"
-ACCESS_TEAM_DOMAIN = "whatsserv.cloudflareaccess.com"
+ACCESS_TEAM_DOMAIN = "mthani.cloudflareaccess.com"
 ACCESS_AUD = "03b7536fcf315ea507c5f74cdae03d886d686f3074a132e7b31f64b26932909f"
 
 # Mutashabihat drafts, versions and editors (specs/011 data-model.md).
