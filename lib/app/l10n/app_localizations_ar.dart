@@ -1253,4 +1253,36 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get prayerRateLimited =>
       'عمليات بحث كثيرة الآن. أعد المحاولة بعد دقيقة.';
+
+  @override
+  String get showSimilar => 'عرض المتشابه';
+
+  @override
+  String get similarTitle => 'المتشابه';
+
+  @override
+  String get similarThisAyah => 'هذه الآية';
+
+  @override
+  String get similarClose => 'إغلاق';
+
+  @override
+  String similarGroup(String n) {
+    return 'المجموعة $n';
+  }
+
+  @override
+  String similarOpenAyah(String ref) {
+    return '$ref، افتحها في المصحف';
+  }
+
+  @override
+  String similarAyahSemantics(String n) {
+    return 'الآية $n، لها متشابه';
+  }
+
+  @override
+  String similarOnPage(String list) {
+    return 'فيها متشابه: الآيات $list';
+  }
 }

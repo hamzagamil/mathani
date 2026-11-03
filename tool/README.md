@@ -11,6 +11,7 @@ dart run tool/verify_quran.dart --release         # integrity checks; must print
 dart run tool/build_recitation_manifest.dart     # recitations: size of every ayah file (network, ~5–20 min)
 dart run tool/add_recitations.dart               # recitations: reciters + sizes into quran.db
 flutter test tool/font_spike_test.dart            # font coverage + page images in build/font_spike/
+dart run tool/check_mutashabihat.dart             # Mutashabihat content (specs/010); must print OK
 ```
 
 ### Until the QUL files are downloaded (development only)

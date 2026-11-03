@@ -43,6 +43,9 @@ abstract final class MathaniIcons {
   static const minus = IconData(0xe11c, fontFamily: _family);
   static const plus = IconData(0xe13d, fontFamily: _family);
 
+  // Mutashabihat (specs/010).
+  static const similar = IconData(0xe359, fontFamily: _family); // git-compare
+
   // Media controls (specs/004). They keep their left-to-right form in Arabic, as media players
   // do everywhere: play points right, and previous/next follow the timeline, not the text.
   static const play = IconData(0xe13c, fontFamily: _family);

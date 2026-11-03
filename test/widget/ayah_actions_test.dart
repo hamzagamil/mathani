@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mathani/app/app.dart';
 import 'package:mathani/data/models.dart';
+import 'package:mathani/features/mutashabihat/mutashabihat_content.dart';
 import 'package:mathani/features/reader/mushaf_page_renderer.dart';
 import 'package:mathani/features/recitation/recited_item.dart';
 import 'package:mathani/shared/reader_state.dart';
@@ -34,10 +35,10 @@ void main() {
     }
   }
 
-  Future<void> pumpApp(WidgetTester tester) async {
+  Future<void> pumpApp(WidgetTester tester, {Mutashabihat similar = Mutashabihat.empty}) async {
     await tester.runAsync(() async {
       await loadAppFonts();
-      reader = await openTestReader();
+      reader = await openTestReader(similar: similar);
     });
     reader.updatePreferences(reader.preferences.copyWith(language: LanguagePref.ar));
     tester.view.physicalSize = const Size(720, 1560);
@@ -171,5 +172,59 @@ void main() {
     await tester.pumpWidget(const SizedBox());
     recitation.dispose();
     await tester.pump(const Duration(seconds: 2));
+  });
+
+  // specs/010: «عرض المتشابه» only for linked ayat, first in the list; it opens the overlay with the
+  // ayah still selected, and closing the overlay clears it.
+  testWidgets('Mushaf: a linked ayah offers «عرض المتشابه»; an unlinked one does not',
+      (tester) async {
+    await pumpApp(tester, similar: parseMutashabihat('## 1:2 2:35\nشرح الصلة').$1);
+    reader.jumpTo(const AyahRef(1, 1), highlight: false);
+    await settle(tester);
+    final box = tester.renderObject<RenderMushafPage>(find.byType(MushafPageRenderer).first);
+    Offset pointOn(AyahRef ref) {
+      for (var y = 0.0; y < box.size.height; y += 6) {
+        for (var x = box.size.width * 0.2; x < box.size.width * 0.8; x += 12) {
+          if (box.ayahAt(Offset(x, y)) == ref) return box.localToGlobal(Offset(x, y));
+        }
+      }
+      throw StateError('$ref not found');
+    }
+
+    await tester.longPressAt(pointOn(const AyahRef(1, 3)));
+    await settle(tester);
+    expect(find.text('انسخ'), findsOneWidget);
+    expect(find.text('عرض المتشابه'), findsNothing);
+    await tester.tap(find.text('انسخ'));
+    await settle(tester);
+
+    await tester.longPressAt(pointOn(const AyahRef(1, 2)));
+    await settle(tester);
+    final tiles = tester.widgetList<ListTile>(find.byType(ListTile)).toList();
+    expect((tiles.first.title! as Text).data, 'عرض المتشابه');
+    await tester.tap(find.text('عرض المتشابه'));
+    await settle(tester);
+    expect(find.text('انسخ'), findsNothing, reason: 'the actions sheet closes');
+    expect(find.text('هذه الآية'), findsOneWidget);
+    expect(find.text('شرح الصلة'), findsOneWidget);
+    expect(reader.selected, const AyahRef(1, 2), reason: 'still selected under the overlay');
+
+    await tester.tap(find.byTooltip('إغلاق'));
+    await settle(tester);
+    expect(find.text('هذه الآية'), findsNothing);
+    expect(reader.selected, isNull);
+  });
+
+  testWidgets('Flowing: a linked ayah offers «عرض المتشابه»', (tester) async {
+    await pumpApp(tester,
+        similar: parseMutashabihat('## 1:1 1:2 1:3 1:4 1:5 1:6 1:7\nشرح').$1);
+    reader.updatePreferences(reader.preferences.copyWith(layout: ReadingLayout.flowing));
+    reader.jumpTo(const AyahRef(1, 1), highlight: false);
+    await settle(tester, 10);
+    final quranParagraph = find.byWidgetPredicate(
+        (w) => w is RichText && w.textAlign == TextAlign.justify);
+    await tester.longPress(quranParagraph.first);
+    await settle(tester);
+    expect(find.text('عرض المتشابه'), findsOneWidget);
   });
 }

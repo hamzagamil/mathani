@@ -26,6 +26,9 @@ jobs:
       - name: Verify Quran text
         if: hashFiles('assets/db/quran.db') != ''
         run: dart run tool/verify_quran.dart --db-only
+      # The owner's Mutashabihat content: no release with a bad reference (specs/010 FR-016).
+      - name: Check Mutashabihat content
+        run: dart run tool/check_mutashabihat.dart
 
   android:
     name: Android build, size and emulator tests

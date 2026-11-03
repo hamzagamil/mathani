@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mathani/app/theme/app_theme.dart';
 import 'package:mathani/data/models.dart';
+import 'package:mathani/features/mutashabihat/mutashabihat_content.dart';
 import 'package:mathani/features/reader/ayah_actions.dart';
 import 'package:mathani/features/reader/mushaf_page_renderer.dart';
 import 'package:mathani/shared/reader_state.dart';
@@ -30,9 +31,11 @@ void main() {
     accentInk: colors.accentInk,
     highlight: colors.secondarySoft,
     selection: colors.selected,
+    similar: colors.similar,
   );
 
-  Widget page(MushafPage p, double width, double height) => Directionality(
+  Widget page(MushafPage p, double width, double height, {Mutashabihat? similar}) =>
+      Directionality(
         textDirection: TextDirection.rtl,
         child: Center(
           child: SizedBox(
@@ -44,6 +47,7 @@ void main() {
               targetEm: reader.quran.justifyTargetEm,
               font: reader.quran.font,
               palette: palette,
+              similar: similar,
               details: MushafPageDetails.of(reader.quran, p.number),
             ),
           ),
@@ -164,6 +168,36 @@ void main() {
         final source = [for (final x in words) if (!x.isAyahEnd) x.text].join(' ');
         expect(text, startsWith('﴿$source﴾'), reason: 'copy of $ref is the source text');
       }
+    }
+  });
+
+  // specs/010 US2: every word of a linked ayah, its end mark included, is drawn in the mutashabih
+  // colour, kashida or not; the others in ink; none while memorizing (similar: null).
+  testWidgets('linked ayat are drawn in the mutashabih colour', (tester) async {
+    useLargeWindow(tester);
+    final similar = parseMutashabihat('## 2:35 7:19\nشرح').$1;
+    final p = pages[reader.quran.pageOf(const AyahRef(2, 35)) - 1];
+    final words = [for (final line in p.lines) ...line.words];
+    final linked = words.where((w) => w.ref == const AyahRef(2, 35)).toList();
+    final others = words.where((w) => w.ref != const AyahRef(2, 35)).toList();
+    expect(linked.where((w) => w.isAyahEnd), hasLength(1));
+    expect(others, isNotEmpty);
+
+    for (final width in [320.0, 390.0]) {
+      await tester.pumpWidget(page(p, width, _height, similar: similar));
+      final box = tester.renderObject<RenderMushafPage>(find.byType(MushafPageRenderer));
+      for (final w in linked) {
+        expect(box.colorOfWord(w.id), colors.similar, reason: '${w.ref} word ${w.id} at $width');
+      }
+      for (final w in others) {
+        expect(box.colorOfWord(w.id), anyOf(colors.ink, isNull), reason: '${w.ref} word ${w.id}');
+      }
+    }
+
+    await tester.pumpWidget(page(p, 390, _height));
+    final box = tester.renderObject<RenderMushafPage>(find.byType(MushafPageRenderer));
+    for (final w in linked) {
+      expect(box.colorOfWord(w.id), anyOf(colors.ink, isNull), reason: 'no content, no colour');
     }
   });
 }

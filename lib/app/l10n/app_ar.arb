@@ -346,5 +346,13 @@
   "prayerTimezoneUnavailable": "تعذّر تحديد المنطقة الزمنية لهذا المكان. اختر مدينة أخرى.",
   "prayerServiceUnavailable": "تعذّر الوصول إلى خدمة الأماكن. أعد المحاولة لاحقًا.",
   "prayerOffline": "يلزم اتصال لهذا. تظل الأماكن المحفوظة متاحة دون اتصال.",
-  "prayerRateLimited": "عمليات بحث كثيرة الآن. أعد المحاولة بعد دقيقة."
+  "prayerRateLimited": "عمليات بحث كثيرة الآن. أعد المحاولة بعد دقيقة.",
+  "showSimilar": "عرض المتشابه",
+  "similarTitle": "المتشابه",
+  "similarThisAyah": "هذه الآية",
+  "similarClose": "إغلاق",
+  "similarGroup": "المجموعة {n}",
+  "similarOpenAyah": "{ref}، افتحها في المصحف",
+  "similarAyahSemantics": "الآية {n}، لها متشابه",
+  "similarOnPage": "فيها متشابه: الآيات {list}"
 }

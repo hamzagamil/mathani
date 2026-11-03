@@ -58,6 +58,8 @@ flutter:
     - assets/images/
     # King Fahd Complex page fonts, one per page, gzip-compressed (specs/002, User Story 4).
     - assets/qcf/
+    # Mutashabihat content written by the owner (specs/010).
+    - assets/mutashabihat/
     # Licences shown on the open-source licences page (registerAssetLicences).
     - assets/fonts/OFL-IBMPlexSansArabic.txt
     - assets/fonts/OFL-AmiriQuran.txt

@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mathani/data/quran_repository.dart';
 import 'package:mathani/data/user_repository.dart';
+import 'package:mathani/features/mutashabihat/mutashabihat_content.dart';
 import 'package:mathani/features/reader/printed_fonts.dart';
 import 'package:mathani/features/recitation/reciter_sheet.dart';
 import 'package:mathani/shared/reader_state.dart';
@@ -30,8 +31,11 @@ Future<void> loadAppFonts() async {
 
 /// Opens the real repositories against the bundled quran.db, using SQLite through FFI and a
 /// fresh temporary user database. [onboarded]: the first-run onboarding is already done
-/// (specs/005), so the app opens on the reader.
-Future<ReaderController> openTestReader({bool onboarded = true}) async {
+/// (specs/005), so the app opens on the reader. [similar]: Mutashabihat content (specs/010).
+Future<ReaderController> openTestReader({
+  bool onboarded = true,
+  Mutashabihat similar = Mutashabihat.empty,
+}) async {
   PrintedFonts.reset(); // font loads from a previous test can never finish
   sqfliteFfiInit();
   databaseFactory = databaseFactoryFfi;
@@ -41,8 +45,13 @@ Future<ReaderController> openTestReader({bool onboarded = true}) async {
   final (anchor, loaded) = await user.loadStartup();
   final prefs = onboarded ? loaded.copyWith(onboardingDone: true) : loaded;
   if (onboarded) await user.savePreferences(prefs);
-  return ReaderController(quran: quran, user: user, anchor: anchor, preferences: prefs);
+  return ReaderController(
+      quran: quran, user: user, anchor: anchor, preferences: prefs, similar: similar);
 }
+
+/// The quickstart groups (specs/010 quickstart.md), parsed.
+Mutashabihat quickstartMutashabihat() =>
+    parseMutashabihat(File('test/fixtures/mutashabihat/quickstart.md').readAsStringSync()).$1;
 
 /// Taps a reader toolbar button. In the Mushaf layout the controls hide while reading
 /// (specs/002-print-like-mushaf-page), so the page is tapped first to bring them back.

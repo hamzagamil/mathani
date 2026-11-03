@@ -7,6 +7,7 @@ import '../../data/models.dart';
 import '../../data/quran_repository.dart';
 import '../../shared/numerals.dart';
 import '../../shared/quran_text.dart';
+import '../mutashabihat/mutashabihat_content.dart';
 import 'kashida.dart';
 import 'page_geometry.dart';
 import 'surah_header_glyphs.dart';
@@ -23,6 +24,7 @@ class MushafPalette {
     this.recited = const Color(0x00000000),
     this.hint = const Color(0x00000000),
     this.mistake = const Color(0x00000000),
+    this.similar = const Color(0x00000000),
   });
 
   final Color ink;
@@ -32,6 +34,7 @@ class MushafPalette {
   final Color recited; // the ayah being recited (specs/004)
   final Color hint; // a hinted word in memorization (specs/006)
   final Color mistake; // the ayah-end mark of an ayah with a mistake (specs/006)
+  final Color similar; // the text of an ayah with similar ayat (specs/010)
 
   @override
   bool operator ==(Object other) =>
@@ -42,10 +45,12 @@ class MushafPalette {
       other.selection == selection &&
       other.recited == recited &&
       other.hint == hint &&
-      other.mistake == mistake;
+      other.mistake == mistake &&
+      other.similar == similar;
 
   @override
-  int get hashCode => Object.hash(ink, accentInk, highlight, selection, recited, hint, mistake);
+  int get hashCode =>
+      Object.hash(ink, accentInk, highlight, selection, recited, hint, mistake, similar);
 }
 
 /// What a memorization session hides and marks on the page (specs/006 research R13). Words keep
@@ -124,6 +129,7 @@ class MushafPageRenderer extends LeafRenderObjectWidget {
     this.recited,
     this.recitedBasmala,
     this.marks,
+    this.similar,
     this.details,
     this.printedGlyphs,
     this.printedFamily,
@@ -149,6 +155,9 @@ class MushafPageRenderer extends LeafRenderObjectWidget {
 
   /// Memorization marks while a session exists (specs/006).
   final WordMarks? marks;
+
+  /// Linked ayat, drawn in [MushafPalette.similar] (specs/010). Null while memorizing.
+  final Mutashabihat? similar;
 
   /// Surah and juz printed at the top of the page, with the page number at the bottom (FR-009).
   final MushafPageDetails? details;
@@ -201,7 +210,9 @@ class RenderMushafPage extends RenderBox {
 
   ({_Detail surah, _Detail juz, _Detail page})? _details;
   final Map<int, TextPainter> _wordPainters = {}; // natural shape, by word id
-  final Map<String, TextPainter> _stretchedPainters = {}; // with kashida, by display string
+  // With kashida, by display string and whether its ayah is linked (specs/010): the same string
+  // can be in a linked and an unlinked ayah.
+  final Map<(bool, String), TextPainter> _stretchedPainters = {};
   final List<_LinePlacement> _placements = [];
 
   /// Join points depend only on the text, so they are shared by every page and size.
@@ -217,6 +228,7 @@ class RenderMushafPage extends RenderBox {
     if (!identical(old.page, next.page) ||
         old.palette != next.palette ||
         old.font != next.font ||
+        !identical(old.similar, next.similar) ||
         old.details != next.details ||
         old.printedFamily != next.printedFamily ||
         old.surahHeaderFamily != next.surahHeaderFamily ||
@@ -230,6 +242,17 @@ class RenderMushafPage extends RenderBox {
         old.marks != next.marks) {
       markNeedsPaint();
     }
+  }
+
+  /// The text colour [wordId] is drawn in, or null when it is not on this page (specs/010 tests).
+  @visibleForTesting
+  Color? colorOfWord(int wordId) {
+    for (final line in _placements) {
+      for (final w in line.words) {
+        if (w.word.id == wordId) return w.painter.text?.style?.color;
+      }
+    }
+    return null;
   }
 
   /// Smallest per-line shrink factor on this page (1 = no line shrunk). Layout tests use it to
@@ -295,6 +318,9 @@ class RenderMushafPage extends RenderBox {
       fontSize: geometry.fontSize,
       color: _config.palette.ink,
     );
+    // Linked ayat get their colour here, at layout, not as a layer per word (specs/010 R5).
+    final similarStyle = style.copyWith(color: _config.palette.similar);
+    bool linked(Word w) => _config.similar?.isLinked(w.ref) ?? false;
     double widthOf(String text) {
       final p = _painter(text, style);
       final w = p.width;
@@ -329,7 +355,8 @@ class RenderMushafPage extends RenderBox {
         for (final w in line.words)
           // A printed word whose glyph is drawn by the word before it («بَعْدَ مَا») takes no room.
           if (printed == null || (printed[w.id] ?? '').isNotEmpty)
-            _PlacedWord(w, _wordPainters.putIfAbsent(w.id, () => _painter(_display(w), style))),
+            _PlacedWord(w, _wordPainters.putIfAbsent(
+                w.id, () => _painter(_display(w), linked(w) ? similarStyle : style))),
       ];
       final gaps = math.max(0, placed.length - 1);
       final naturalWidths = [for (final p in placed) p.painter.width];
@@ -359,9 +386,11 @@ class RenderMushafPage extends RenderBox {
         for (var k = 0; k < placed.length; k++) {
           final counts = j.tatweels[k];
           final text = withKashida(placed[k].word.text, counts);
+          final isLinked = linked(placed[k].word);
           placed[k].painter = counts.isEmpty
               ? _wordPainters[placed[k].word.id]!
-              : _stretchedPainters.putIfAbsent(text, () => _painter(text, style));
+              : _stretchedPainters.putIfAbsent(
+                  (isLinked, text), () => _painter(text, isLinked ? similarStyle : style));
         }
         words = placed.fold<double>(0, (s, p) => s + p.painter.width);
         final count = j.tatweelCount;
