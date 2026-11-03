@@ -444,10 +444,10 @@ takes effect on the editor's next request (FR-001, FR-002, FR-002a).
   `node --test tool/mutashabihat/*.test.mjs`. All must pass.
 - [X] T045 In `specs/010-mutashabihat/contracts/content-file.md`, note the `<!-- version: N -->`
   preamble line and that the editor (specs/011) now produces the file.
-- [ ] T046 Create the D1 database and apply the schema with wrangler (quickstart › Setup 1–3),
+- [X] T046 Create the D1 database and apply the schema with wrangler (quickstart › Setup 1–3),
   and put the real `database_id` in `wrangler.toml`. This creates a Cloudflare resource:
   confirm with the owner first.
-- [ ] T047 Owner: create the Access application (quickstart › Setup 4) and give
+- [X] T047 Owner: create the Access application (quickstart › Setup 4) and give
   `ACCESS_TEAM_DOMAIN` and `ACCESS_AUD`, to put in `wrangler.toml`.
 - [ ] T048 Deploy the web app (a production deploy: the owner runs it or approves it), sign in
   and import (quickstart › Setup 5), then run E1–E6 and record them in

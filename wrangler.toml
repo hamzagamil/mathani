@@ -9,12 +9,11 @@ PRAYER_ALLOWED_ORIGINS = "https://get.mthani.app,https://read.mthani.app"
 # Mutashabihat editor (specs/011). Not secrets: tokens are checked against Access's public keys.
 # The owner manages editors; ACCESS_* come from the Access application (quickstart › Setup 4).
 OWNER_EMAIL = "hamzagamil@gmail.com"
-ACCESS_TEAM_DOMAIN = ""
-ACCESS_AUD = ""
+ACCESS_TEAM_DOMAIN = "whatsserv.cloudflareaccess.com"
+ACCESS_AUD = "03b7536fcf315ea507c5f74cdae03d886d686f3074a132e7b31f64b26932909f"
 
-# Mutashabihat drafts, versions and editors (specs/011 data-model.md). Enabled once the database
-# exists (specs/011 tasks T046); until then the editor and content functions answer 503.
-# [[d1_databases]]
-# binding = "DB"
-# database_name = "mthani-mutashabihat"
-# database_id = "<from: npx wrangler@4 d1 create mthani-mutashabihat>"
+# Mutashabihat drafts, versions and editors (specs/011 data-model.md).
+[[d1_databases]]
+binding = "DB"
+database_name = "mthani-mutashabihat"
+database_id = "d52eccee-04be-4981-ab9d-6c7a9fe91d9f"
