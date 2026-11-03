@@ -43,6 +43,14 @@ void main() {
       expect(content.groups.single.explanation, 'سطر أول\nسطر ثان\n\n### فقرة');
     });
 
+    test('the version line before the first group (specs/011)', () {
+      expect(parseMutashabihat('<!-- version: 12 -->\n# t\n## 2:35 7:19\nشرح').$1.version, 12);
+      expect(parseMutashabihat('## 2:35 7:19\nشرح').$1.version, 0);
+      expect(parseMutashabihat('## 2:35 7:19\n<!-- version: 9 -->\nشرح').$1.version, 0,
+          reason: 'inside an explanation it is text');
+      expect(Mutashabihat.empty.version, 0);
+    });
+
     test('Windows line endings', () {
       final (content, problems) = parseMutashabihat('## 2:35 7:19\r\nشرح\r\n\r\nثان\r\n');
       expect(problems, isEmpty);

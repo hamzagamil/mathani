@@ -12,6 +12,9 @@ dart run tool/build_recitation_manifest.dart     # recitations: size of every ay
 dart run tool/add_recitations.dart               # recitations: reciters + sizes into quran.db
 flutter test tool/font_spike_test.dart            # font coverage + page images in build/font_spike/
 dart run tool/check_mutashabihat.dart             # Mutashabihat content (specs/010); must print OK
+dart run tool/pull_mutashabihat.dart              # latest content published from the editor (specs/011)
+dart run tool/build_editor_quran.dart             # the editor's ayah texts; run by tool/web_deploy.mjs
+node --test tool/mutashabihat/*.test.mjs          # the editor's Functions (specs/011)
 ```
 
 ### Until the QUL files are downloaded (development only)

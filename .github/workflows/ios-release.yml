@@ -33,6 +33,9 @@ jobs:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
       - run: flutter pub get
+      # The latest content published from the editor (specs/011 FR-018), then the content check.
+      - name: Pull published Mutashabihat content
+        run: dart run tool/pull_mutashabihat.dart
       # No release with a bad Mutashabihat reference (specs/010 FR-016).
       - name: Check Mutashabihat content
         run: dart run tool/check_mutashabihat.dart

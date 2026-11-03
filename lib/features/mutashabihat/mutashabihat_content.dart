@@ -28,16 +28,22 @@ class MutashabihGroup {
 
 /// The loaded content file: valid groups in file order, and which ayat they link.
 class Mutashabihat {
-  Mutashabihat(this.groups) : _index = _indexOf(groups);
+  Mutashabihat(this.groups, {this.version = 0}) : _index = _indexOf(groups);
 
   const Mutashabihat._empty()
       : groups = const [],
+        version = 0,
         _index = const {};
 
   /// No content: nothing is coloured and the action never appears (FR-019).
   static const empty = Mutashabihat._empty();
 
   final List<MutashabihGroup> groups;
+
+  /// The published version this content came from (specs/011), from the file's
+  /// «<!-- version: N -->» line; 0 for a file without one.
+  final int version;
+
   final Map<AyahRef, List<int>> _index;
 
   static Map<AyahRef, List<int>> _indexOf(List<MutashabihGroup> groups) {
@@ -87,6 +93,7 @@ class ContentProblem {
 final _reference = RegExp(r'^(\d+):(\d+)$');
 final _separators = RegExp(r'[\s,،]+');
 final _blankLines = RegExp(r'\n[ \t]*(\n[ \t]*)+');
+final _versionLine = RegExp(r'^<!-- version: (\d+) -->$');
 
 /// Arabic-Indic and Eastern Arabic-Indic digits to Western ones.
 String _westernDigits(String s) => s.replaceAllMapped(RegExp('[٠-٩۰-۹]'), (m) {
@@ -148,6 +155,7 @@ String _westernDigits(String s) => s.replaceAllMapped(RegExp('[٠-٩۰-۹]'), (m
 
   int? headingLine;
   String? heading;
+  var version = 0;
   final body = <String>[];
   for (var i = 0; i < lines.length; i++) {
     final l = lines[i].trimRight();
@@ -158,9 +166,12 @@ String _westernDigits(String s) => s.replaceAllMapped(RegExp('[٠-٩۰-۹]'), (m
       body.clear();
     } else if (heading != null) {
       body.add(l);
+    } else {
+      // Lines before the first group are notes for the owner, and the version line (specs/011).
+      final m = _versionLine.firstMatch(l);
+      if (m != null) version = int.parse(m[1]!);
     }
-    // Lines before the first group are notes for the owner.
   }
   if (heading != null) addGroup(headingLine!, heading, body);
-  return (Mutashabihat(groups), problems);
+  return (Mutashabihat(groups, version: version), problems);
 }

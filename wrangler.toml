@@ -6,3 +6,14 @@ compatibility_date = "2026-10-29"
 # Public provider account identifier; no password or API secret is stored here.
 GEONAMES_USERNAME = "mthani"
 PRAYER_ALLOWED_ORIGINS = "https://get.mthani.app,https://read.mthani.app"
+# Mutashabihat editor (specs/011). Not secrets: tokens are checked against Access's public keys.
+# The owner manages editors; ACCESS_* come from the Access application (quickstart › Setup 4).
+OWNER_EMAIL = "hamzagamil@gmail.com"
+ACCESS_TEAM_DOMAIN = "whatsserv.cloudflareaccess.com"
+ACCESS_AUD = "03b7536fcf315ea507c5f74cdae03d886d686f3074a132e7b31f64b26932909f"
+
+# Mutashabihat drafts, versions and editors (specs/011 data-model.md).
+[[d1_databases]]
+binding = "DB"
+database_name = "mthani-mutashabihat"
+database_id = "d52eccee-04be-4981-ab9d-6c7a9fe91d9f"

@@ -60,6 +60,22 @@ function prepare() {
     fail('Mutashabihat content has errors: fix assets/mutashabihat/mutashabihat.md');
   }
 
+  // The release carries the latest content published from the editor (specs/011 FR-018).
+  try {
+    execSync('dart run tool/pull_mutashabihat.dart --check build/web/assets/assets/mutashabihat/mutashabihat.md',
+      { cwd: repo, stdio: 'inherit' });
+  } catch {
+    fail('the bundled Mutashabihat content is older than the published one, or it cannot be checked');
+  }
+
+  // The Mutashabihat editor's ayah texts (specs/011 research R8); the page itself is web/editor/.
+  if (!existsSync(join(web, 'editor', 'index.html'))) fail('no build/web/editor: build again');
+  try {
+    execSync('dart run tool/build_editor_quran.dart', { cwd: repo, stdio: 'inherit' });
+  } catch {
+    fail('could not write build/web/editor/quran.json');
+  }
+
   // The version the build reports must be the one being released (FR-029).
   const pubspec = readFileSync(join(repo, 'pubspec.yaml'), 'utf8').match(/^version:\s*(\S+)/m)[1];
   const built = JSON.parse(readFileSync(join(web, 'version.json'), 'utf8'));

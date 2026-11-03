@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 
 import '../features/prayer_times/prayer_models.dart';
 import '../features/prayer_times/prayer_services.dart';
+import 'api_base.dart';
 
 /// The endpoints' `source` names, as the app calls them (contracts/location-api.md).
 const _sources = {'device': 'location', 'manual': 'search', 'ip': 'estimate'};
@@ -22,25 +22,13 @@ Map<String, dynamic> _normalized(Map<String, dynamic> place) => {
 };
 
 class PrayerLocationService implements PrayerLocationClient {
-  PrayerLocationService({Uri? baseUri}) : baseUri = baseUri ?? _defaultBase();
+  PrayerLocationService({Uri? baseUri}) : baseUri = baseUri ?? apiBase();
   final Uri baseUri;
   http.Client? _search;
   final _client = http.Client();
   int _searchGeneration = 0;
   bool _disposed = false;
   DateTime? _retryAfter;
-  static Uri _defaultBase() {
-    const override = String.fromEnvironment('PRAYER_API_BASE');
-    final uri = override.isNotEmpty
-        ? Uri.parse(override)
-        : Uri.parse(kIsWeb ? Uri.base.origin : 'https://get.mthani.app');
-    if (uri.scheme != 'https' &&
-        !(uri.scheme == 'http' &&
-            ['localhost', '127.0.0.1'].contains(uri.host))) {
-      throw ArgumentError('Prayer API must use HTTPS');
-    }
-    return uri;
-  }
 
   Future<Map<String, dynamic>> _request(
     String path, {

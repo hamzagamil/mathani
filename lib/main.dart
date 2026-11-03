@@ -10,6 +10,7 @@ import 'data/user_repository.dart';
 import 'features/memorization/asr_model.dart';
 import 'features/memorization/memorization_controller.dart';
 import 'features/mutashabihat/mutashabihat_loader.dart';
+import 'features/mutashabihat/mutashabihat_updater.dart';
 import 'features/onboarding/onboarding_controller.dart';
 import 'features/prayer_times/prayer_alerts.dart';
 import 'features/prayer_times/prayer_repository.dart';
@@ -73,8 +74,14 @@ Future<void> runMathani() async {
     pauseQuran: recitation.pause,
     pauseMemorization: memorization.pause,
   );
+  // Mutashabihat content updates (specs/011 R5): after the first frame and on resume, at most
+  // every 6 hours, never blocking reading.
+  final mutashabihat = MutashabihatUpdater(reader: controller);
   AppLifecycleListener(
-    onResume: () => unawaited(prayer.onAppActive()),
+    onResume: () {
+      unawaited(prayer.onAppActive());
+      unawaited(mutashabihat.check());
+    },
     onHide: prayer.onAppInactive,
   );
   runApp(MathaniApp(
@@ -89,5 +96,6 @@ Future<void> runMathani() async {
   WidgetsBinding.instance.addPostFrameCallback((_) {
     unawaited(AsrModel.removeOtherVersions());
     unawaited(prayer.onAppActive());
+    unawaited(mutashabihat.check());
   });
 }
