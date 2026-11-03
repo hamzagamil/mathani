@@ -20,7 +20,7 @@ The explanation is shown as written, in Arabic, in both interfaces (FR-012).
 
 ## Colour
 
-`SemanticColors.similar`: day `#7A4E12`, night `#E2B866` ([research R4](../research.md#r4-the-mutashabih-colour)).
+`SemanticColors.similar`: day `#146B3F`, night `#6FD3A0` ([research R4](../research.md#r4-the-mutashabih-colour)).
 Exposed as `MathaniColors.similar` and `MushafPalette.similar`.
 
 | Situation | Linked ayah drawn in |

@@ -12,7 +12,7 @@ The owner writes groups of similar ayat and their explanations in one Markdown f
 `assets/mutashabihat/mutashabihat.md`, which ships inside the app and the web app. The app loads
 it at startup, alongside the databases.
 
-- **Colour**: every linked ayah is drawn in a new gold-brown `similar` colour on the Mushaf page
+- **Colour**: every linked ayah is drawn in a new emerald `similar` colour on the Mushaf page
   and in the flowing layout. During a memorization session nothing is coloured.
 - **Action and overlay**: long-pressing a linked ayah adds «عرض المتشابه» to the actions sheet.
   It opens a bottom-sheet overlay: the ayah and its similar ayat in the top two thirds, the

@@ -90,8 +90,11 @@ an isolate (more than this needs).
 
 | Theme | Value | Contrast with page | Notes |
 | --- | --- | --- | --- |
-| Day | `#7A4E12` (deep gold-brown) | ≈ 6.0:1 on `#F2EADD` | Warm, so it stands apart from the navy text `#183159`. Darker and more saturated than `accentInk` `#755728`. |
-| Night | `#E2B866` (bright gold) | ≈ 9.3:1 on `#0E1A2E` | More saturated than the cream text `#EDE4D3`. |
+| Day | `#146B3F` (emerald) | ≈ 5.5:1 on `#F2EADD` | Far in hue from the navy text `#183159`. |
+| Night | `#6FD3A0` (light emerald) | ≈ 9.5:1 on `#0E1A2E` | Far in hue from the cream text `#EDE4D3`. |
+
+The first values were a gold-brown (`#7A4E12` / `#E2B866`). On 2026-11-03 the owner compared it
+with red, emerald and purple on both pages and chose emerald as the clearest.
 
 A unit test (`test/unit/similar_colour_test.dart`, like `recited_colour_test.dart`) requires:
 - at least 4.5:1 contrast with the page in both themes;

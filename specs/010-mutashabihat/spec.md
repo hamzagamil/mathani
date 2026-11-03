@@ -31,6 +31,12 @@ the app's core differentiator. It has three parts:
   release. An online editor that updates readers without a release is a later feature.
 - Q: Should the overlay highlight the words that differ between the ayat? → A: No. The overlay
   shows whole ayat, and the owner's explanation describes the differences.
+- Q: The seed content linked ayat that a source quotes only as context (the ayah before or after
+  the mutashabih). What is linked and coloured? → A: Only the mutashabih ayat themselves, whole.
+  Context ayat are neither linked nor coloured (FR-014).
+- Q: Which colour? → A: Emerald green, chosen from four candidates as the clearest.
+- Q: How do readers learn what the colour means? → A: A stop in the onboarding tour (FR-021),
+  also shown once to readers who finished the onboarding before.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -223,7 +229,8 @@ only in the second group and check that only the second group shows.
 **Content and authoring**
 
 - **FR-014**: A group MUST hold two or more distinct ayat and one non-empty explanation. An ayah
-  MAY belong to several groups.
+  MAY belong to several groups. A group holds only the ayat that carry the mutashabih, not ayat a
+  source quotes as context around it.
 - **FR-015**: The owner MUST create, edit and delete groups in a single content file kept with the
   app, readable and editable as text, with the explanation written in Arabic as it should appear.
   Readers MUST NOT be able to change the content.
@@ -240,6 +247,12 @@ only in the second group and check that only the second group shows.
 **Platforms**
 
 - **FR-020**: The feature MUST work the same on iOS 15.0+, Android 7.0 (API 24)+ and the web app.
+
+**Onboarding**
+
+- **FR-021**: When there is content, the onboarding tour MUST include a stop after the ayah
+  actions that says what the coloured ayat mean and how to open «عرض المتشابه». Readers who
+  finished the onboarding before MUST see this stop once, on their next launch.
 
 ### Key Entities
 

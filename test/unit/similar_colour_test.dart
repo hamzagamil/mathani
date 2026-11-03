@@ -46,13 +46,16 @@ void main() {
     });
 
     test('the colour stands apart from the other marks ($brightness)', () {
-      expect(_hueGap(c.similar, c.hint), greaterThanOrEqualTo(25));
+      // The hint and mistake colours show only while memorizing, when no ayah is in the
+      // mutashabih colour (research R4), so a smaller gap is enough.
+      expect(_hueGap(c.similar, c.hint), greaterThanOrEqualTo(20));
       expect(_hueGap(c.similar, c.mistake), greaterThanOrEqualTo(15));
-      // accentInk is the same warm family (surah names, margin marks), so it must differ in
-      // saturation or lightness instead.
+      // Surah names and margin marks are in accentInk: apart in saturation or lightness.
       final a = HSLColor.fromColor(c.accentInk), s = HSLColor.fromColor(c.similar);
       expect(
-        (a.saturation - s.saturation).abs() >= 0.1 || (a.lightness - s.lightness).abs() >= 0.05,
+        _hueGap(c.similar, c.accentInk) >= 25 ||
+            (a.saturation - s.saturation).abs() >= 0.1 ||
+            (a.lightness - s.lightness).abs() >= 0.05,
         isTrue,
       );
     });

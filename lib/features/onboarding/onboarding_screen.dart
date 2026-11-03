@@ -141,6 +141,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         OnboardingStep.turnPages => l10n.tourTurnPagesTitle,
         OnboardingStep.controls => l10n.tourControlsTitle,
         OnboardingStep.ayahActions => l10n.tourAyahTitle,
+        OnboardingStep.similarAyat => l10n.tourSimilarTitle,
         OnboardingStep.surahIndex => l10n.tourIndexTitle,
         OnboardingStep.search => l10n.tourSearchTitle,
         OnboardingStep.player => l10n.tourPlayerTitle,
@@ -228,6 +229,7 @@ class _StepPage extends StatelessWidget {
             OnboardingStep.turnPages =>
               mushaf ? l10n.tourTurnPagesMushaf : l10n.tourTurnPagesFlowing,
             OnboardingStep.controls => mushaf ? l10n.tourControlsMushaf : l10n.tourControlsFlowing,
+            OnboardingStep.similarAyat => l10n.tourSimilarBody,
             _ => l10n.tourAyahBody,
           },
           layout: reader.layout,

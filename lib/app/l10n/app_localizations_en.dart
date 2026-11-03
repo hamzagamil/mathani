@@ -557,6 +557,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Press and hold an ayah to play from it, bookmark, copy or share it.';
 
   @override
+  String get tourSimilarTitle => 'Similar ayat';
+
+  @override
+  String get tourSimilarBody =>
+      'Ayat in green have similar ayat elsewhere in the Quran, which are easy to mix up when memorizing. Press and hold one and choose “Show similar ayat” to see them together, with an explanation of the difference.';
+
+  @override
   String get tourIndexTitle => 'Index';
 
   @override

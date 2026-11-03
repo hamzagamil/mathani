@@ -991,6 +991,18 @@ abstract class AppLocalizations {
   /// **'Press and hold an ayah to play from it, bookmark, copy or share it.'**
   String get tourAyahBody;
 
+  /// Onboarding stop that explains the coloured ayat (specs/010).
+  ///
+  /// In en, this message translates to:
+  /// **'Similar ayat'**
+  String get tourSimilarTitle;
+
+  /// No description provided for @tourSimilarBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Ayat in green have similar ayat elsewhere in the Quran, which are easy to mix up when memorizing. Press and hold one and choose “Show similar ayat” to see them together, with an explanation of the difference.'**
+  String get tourSimilarBody;
+
   /// No description provided for @tourIndexTitle.
   ///
   /// In en, this message translates to:

@@ -398,6 +398,11 @@
   "tourControlsFlowing": "The controls stay at the top and bottom. In the Mushaf pages layout, tap the page to show them.",
   "tourAyahTitle": "Ayah actions",
   "tourAyahBody": "Press and hold an ayah to play from it, bookmark, copy or share it.",
+  "tourSimilarTitle": "Similar ayat",
+  "@tourSimilarTitle": {
+    "description": "Onboarding stop that explains the coloured ayat (specs/010)."
+  },
+  "tourSimilarBody": "Ayat in green have similar ayat elsewhere in the Quran, which are easy to mix up when memorizing. Press and hold one and choose “Show similar ayat” to see them together, with an explanation of the difference.",
   "tourIndexTitle": "Index",
   "tourIndexBody": "Surahs, ajza' and your bookmarks. Go anywhere from here.",
   "tourSearchTitle": "Search",

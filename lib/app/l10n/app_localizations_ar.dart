@@ -566,6 +566,13 @@ class AppLocalizationsAr extends AppLocalizations {
       'اضغط مطولاً على آية لتستمع منها أو تحفظها أو تنسخها أو تشاركها.';
 
   @override
+  String get tourSimilarTitle => 'المتشابه';
+
+  @override
+  String get tourSimilarBody =>
+      'الآيات المكتوبة باللون الأخضر لها آيات تشبهها في مواضع أخرى من القرآن، وقد تشتبه على الحافظ. اضغط مطولًا على إحداها واختر «عرض المتشابه» لترى الآيات معًا مع شرح الفرق بينها.';
+
+  @override
   String get tourIndexTitle => 'الفهرس';
 
   @override

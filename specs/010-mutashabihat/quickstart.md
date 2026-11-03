@@ -45,7 +45,7 @@ Undo the change afterwards.
 2. Switch to the flowing layout, then to the night theme. **Expect**: the same ayat are coloured,
    readable and clearly different from normal text.
    - **Owner**: confirm or adjust the two colour values here.
-3. Long-press 2:35. **Expect**: the selection background shows behind gold-brown text. Play from
+3. Long-press 2:35. **Expect**: the selection background shows behind green text. Play from
    2:34 and watch the recitation highlight pass over 2:35. Open 2:35 from search. **Expect**: the
    jump highlight shows, with the text still coloured.
 4. Start a memorization session on 2:30–2:40. **Expect**: no ayah on the page is coloured. End the

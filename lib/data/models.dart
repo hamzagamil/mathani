@@ -266,6 +266,7 @@ class ReaderPreferences {
     this.lettering = Lettering.printed,
     this.reciter = Reciter.defaultId,
     this.onboardingDone = false,
+    this.similarIntroSeen = false,
     this.mistakeSignal = MistakeSignal.vibrate,
   });
 
@@ -288,6 +289,9 @@ class ReaderPreferences {
   /// The first-run onboarding was finished or skipped (specs/005, FR-002).
   final bool onboardingDone;
 
+  /// The coloured-ayat stop was seen, in the onboarding or once after updating (specs/010).
+  final bool similarIntroSeen;
+
   /// Vibration, sound or neither when memorization detects a mistake (specs/006 FR-015).
   final MistakeSignal mistakeSignal;
 
@@ -300,6 +304,7 @@ class ReaderPreferences {
     Lettering? lettering,
     String? reciter,
     bool? onboardingDone,
+    bool? similarIntroSeen,
     MistakeSignal? mistakeSignal,
   }) =>
       ReaderPreferences(
@@ -311,6 +316,7 @@ class ReaderPreferences {
         lettering: lettering ?? this.lettering,
         reciter: reciter ?? this.reciter,
         onboardingDone: onboardingDone ?? this.onboardingDone,
+        similarIntroSeen: similarIntroSeen ?? this.similarIntroSeen,
         mistakeSignal: mistakeSignal ?? this.mistakeSignal,
       );
 }

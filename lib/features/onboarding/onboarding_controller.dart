@@ -15,6 +15,13 @@ enum OnboardingPhase { none, setup, gestures, buttons }
 class OnboardingController extends ChangeNotifier {
   OnboardingController({required this.reader, this.recitation, this.hasMemorize = false})
       : _step = reader.preferences.onboardingDone ? null : OnboardingStep.language {
+    // Readers who finished the onboarding before the coloured ayat existed see that one stop
+    // once (specs/010).
+    if (_step == null && hasSimilar && !reader.preferences.similarIntroSeen) {
+      _replay = true;
+      _only = const [OnboardingStep.similarAyat];
+      _step = OnboardingStep.similarAyat;
+    }
     _steps = _computeSteps();
   }
 
@@ -26,12 +33,18 @@ class OnboardingController extends ChangeNotifier {
 
   OnboardingStep? _step;
   bool _replay = false;
+
+  /// A replay of these stops only, instead of the whole tour.
+  List<OnboardingStep>? _only;
   late List<OnboardingStep> _steps;
 
   /// Null: not onboarding.
   OnboardingStep? get step => _step;
   bool get replay => _replay;
   List<OnboardingStep> get steps => _steps;
+
+  /// Mutashabihat content is loaded: the tour explains the coloured ayat (specs/010).
+  bool get hasSimilar => reader.similar.groups.isNotEmpty;
 
   OnboardingPhase get phase => switch (_step?.kind) {
         null => OnboardingPhase.none,
@@ -49,10 +62,13 @@ class OnboardingController extends ChangeNotifier {
     return s == null ? (0, 0) : progressOf(_steps, s);
   }
 
-  List<OnboardingStep> _computeSteps() => onboardingSteps(
+  List<OnboardingStep> _computeSteps() =>
+      _only ??
+      onboardingSteps(
         hasReciters: recitation != null && reader.quran.reciters.isNotEmpty,
         hasPlayer: recitation != null,
         hasMemorize: hasMemorize,
+        hasSimilar: hasSimilar,
         replay: _replay,
       );
 
@@ -94,11 +110,16 @@ class OnboardingController extends ChangeNotifier {
   void _finish() {
     if (_step == null) return;
     _stopSample();
-    if (!_replay) {
-      reader.updatePreferences(reader.preferences.copyWith(onboardingDone: true));
+    final sawSimilar = _steps.contains(OnboardingStep.similarAyat);
+    if (!_replay || sawSimilar) {
+      reader.updatePreferences(reader.preferences.copyWith(
+        onboardingDone: _replay ? null : true,
+        similarIntroSeen: sawSimilar ? true : null,
+      ));
     }
     _step = null;
     _replay = false;
+    _only = null;
     _steps = _computeSteps();
     notifyListeners();
   }
