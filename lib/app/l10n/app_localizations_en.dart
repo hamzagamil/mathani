@@ -23,6 +23,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String pagesLabel(String first, String second) {
+    return 'Pages $first–$second';
+  }
+
+  @override
   String pageSemantics(String page, String surah) {
     return 'Page $page, Surah $surah';
   }
@@ -287,6 +292,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get printedLetteringHint =>
       'The Madinah Mushaf\'s lettering as printed by the King Fahd Complex. Turn off for the built-in font.';
+
+  @override
+  String get twoPagesSetting => 'Two pages when there is room';
+
+  @override
+  String get twoPagesHint =>
+      'Shows two facing pages, like an open Mushaf, when the screen is wide enough.';
 
   @override
   String get listen => 'Listen';

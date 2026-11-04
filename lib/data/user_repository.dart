@@ -152,6 +152,8 @@ class UserRepository extends ChangeNotifier {
       similarIntroSeen:
           switch (p['similar_intro_seen']) { 'true' => true, _ => d.similarIntroSeen },
       mistakeSignal: pick(MistakeSignal.values, p['mistake_signal'], d.mistakeSignal),
+      // Missing before specs/012: on by default.
+      twoPages: switch (p['two_pages']) { 'false' => false, _ => d.twoPages },
     );
   }
 
@@ -179,6 +181,7 @@ class UserRepository extends ChangeNotifier {
       'onboarding_done': '${p.onboardingDone}',
       'similar_intro_seen': '${p.similarIntroSeen}',
       'mistake_signal': p.mistakeSignal.name,
+      'two_pages': '${p.twoPages}',
     }.entries) {
       batch.insert('preferences', {'key': entry.key, 'value': entry.value},
           conflictAlgorithm: ConflictAlgorithm.replace);

@@ -42,7 +42,10 @@ so they are not a backup: keep the offline copy too.
 ## iOS signing (CI)
 
 iOS builds and signing run on macOS CI (`.github/workflows/ios-release.yml`, started by hand
-from the Actions tab), because the developer machine is Windows. It builds a signed `.ipa` and
+from the Actions tab), because the developer machine is Windows. iOS builds use Xcode 27 (the
+iOS 27 SDK): built with an older SDK, the app runs at phone size on the iPhone Duo's inner screen
+and never shows two pages (specs/012 research R5). The iOS jobs run on GitHub's `xcode-27` runner
+image (a preview, whose default is a released Xcode 27) and fail if the selected Xcode is not 27. It builds a signed `.ipa` and
 keeps it as a downloadable Actions artifact. Enable the workflow's
 `upload_to_testflight` input explicitly to upload it to App Store Connect/TestFlight;
 the default is build-only.

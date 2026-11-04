@@ -26,6 +26,43 @@ class PageGeometry {
   /// Smallest side margin, as a fraction of the width; holds the hizb-quarter and sajdah marks.
   static const markerMarginFraction = 0.045;
 
+  /// Two facing pages need each page's text to be at least this share of one page's on the same
+  /// screen (specs/012 research R1)…
+  static const spreadMinShare = 0.7;
+
+  /// …and a text block at least this wide, in logical pixels.
+  static const spreadMinBlockWidth = 240.0;
+
+  /// Number of two-page spreads: 1–2, 3–4, … 603–604.
+  static const spreadCount = 302;
+
+  /// Width of the text block on a page of [width] × [height].
+  static double blockWidth(double width, double height) => math.max(
+      0.0,
+      math.min(width * (1 - 2 * markerMarginFraction),
+          height / (blockRatio * (1 + 2 * bandLines / linesPerPage))));
+
+  /// Whether a screen (or browser window) of [area] shows two facing Mushaf pages: each keeps at
+  /// least [spreadMinShare] of the one-page text size and a [spreadMinBlockWidth] block (specs/012
+  /// FR-001). It takes the whole screen, so system bars and docked bars coming and going never
+  /// flip it, and it depends on the size only, never on the device.
+  static bool spreadFits(Size area) {
+    final two = blockWidth(area.width / 2, area.height);
+    return two >= spreadMinBlockWidth &&
+        two >= spreadMinShare * blockWidth(area.width, area.height);
+  }
+
+  /// The narrowest page on which the text block reaches its full size for [height]: wider pages
+  /// only add margin. Two of these side by side make the web's two-page column (specs/012 R7).
+  static double fullPageWidth(double height) =>
+      blockWidth(double.infinity, height) / (1 - 2 * markerMarginFraction);
+
+  /// The right-hand (odd) page of the spread that holds [page].
+  static int spreadRightPage(int page) => page.isOdd ? page : page - 1;
+
+  /// Index of the spread that holds [page], from 0 to [spreadCount] − 1.
+  static int spreadIndex(int page) => (page - 1) ~/ 2;
+
   static PageGeometry? _cached;
   static double _cachedTarget = 0;
 

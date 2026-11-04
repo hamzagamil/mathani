@@ -22,6 +22,18 @@
       }
     }
   },
+  "pagesLabel": "Pages {first}–{second}",
+  "@pagesLabel": {
+    "description": "Reader header: the two facing Mushaf pages on a wide screen (specs/012). Numbers are pre-formatted.",
+    "placeholders": {
+      "first": {
+        "type": "String"
+      },
+      "second": {
+        "type": "String"
+      }
+    }
+  },
   "pageSemantics": "Page {page}, Surah {surah}",
   "@pageSemantics": {
     "description": "Screen-reader label for a Mushaf page.",
@@ -222,6 +234,11 @@
   },
   "printedLetteringSetting": "Printed Mushaf lettering",
   "printedLetteringHint": "The Madinah Mushaf's lettering as printed by the King Fahd Complex. Turn off for the built-in font.",
+  "twoPagesSetting": "Two pages when there is room",
+  "@twoPagesSetting": {
+    "description": "Settings switch, shown only on screens wide enough for two Mushaf pages (specs/012 FR-017)."
+  },
+  "twoPagesHint": "Shows two facing pages, like an open Mushaf, when the screen is wide enough.",
   "listen": "Listen",
   "@listen": {
     "description": "Reader toolbar: start the recitation from this page (specs/004)."

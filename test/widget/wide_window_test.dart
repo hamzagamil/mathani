@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mathani/app/app.dart';
+import 'package:mathani/data/models.dart';
+import 'package:mathani/features/onboarding/onboarding_controller.dart';
+import 'package:mathani/features/reader/mushaf_view.dart';
+import 'package:mathani/features/reader/page_geometry.dart';
+import 'package:mathani/shared/reader_state.dart';
+
+import '../support/harness.dart';
 
 /// The centred phone column on wide browser windows (specs/008 T025, FR-012, research R13).
 void main() {
@@ -47,6 +54,66 @@ void main() {
     final sheet = tester.getRect(find.byType(BottomSheet));
     expect(sheet.left, greaterThanOrEqualTo(720 - phoneColumnWidth / 2));
     expect(sheet.right, lessThanOrEqualTo(720 + phoneColumnWidth / 2));
+  });
+
+  group('two facing pages widen the column (specs/012 R7)', () {
+    late ReaderController reader;
+
+    Future<void> pumpReader(WidgetTester tester, Size size, ReaderPreferences prefs,
+        {bool onboarding = false}) async {
+      reader = (await tester.runAsync(() => openTestReader(onboarded: !onboarding)))!;
+      reader.updatePreferences(prefs);
+      tester.view
+        ..physicalSize = size
+        ..devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final app = MaterialApp(
+          builder: (context, child) => PhoneColumn(child: child!),
+          home: Builder(
+            builder: (context) => Text('width ${MediaQuery.sizeOf(context).width.round()} '
+                'screen ${ScreenArea.sizeOf(context).width.round()}'),
+          ),
+        );
+      await tester.pumpWidget(ReaderScope(
+        controller: reader,
+        child: onboarding
+            ? OnboardingScope(controller: OnboardingController(reader: reader), child: app)
+            : app,
+      ));
+    }
+
+    testWidgets('as wide as two full pages, within the window', (tester) async {
+      await pumpReader(tester, const Size(1440, 900), const ReaderPreferences());
+      final full = 2 * PageGeometry.fullPageWidth(900);
+      expect(full, greaterThan(2 * phoneColumnWidth));
+      expect(find.text('width ${full.round()} screen 1440'), findsOneWidget);
+    });
+
+    testWidgets('the onboarding setup keeps the phone column', (tester) async {
+      await pumpReader(tester, const Size(1440, 900), const ReaderPreferences(), onboarding: true);
+      expect(find.text('width 480 screen 1440'), findsOneWidget);
+    });
+
+    testWidgets('never narrower than two phone columns', (tester) async {
+      await pumpReader(tester, const Size(1440, 700), const ReaderPreferences());
+      expect(find.text('width ${(2 * phoneColumnWidth).round()} screen 1440'), findsOneWidget);
+    });
+
+    testWidgets('never wider than the window', (tester) async {
+      await pumpReader(tester, const Size(1000, 1000), const ReaderPreferences());
+      expect(PageGeometry.spreadFits(const Size(1000, 1000)), isTrue);
+      expect(find.text('width 1000 screen 1000'), findsOneWidget);
+    });
+
+    testWidgets('one page: the setting off, or the flowing layout', (tester) async {
+      await pumpReader(tester, const Size(1440, 900), const ReaderPreferences(twoPages: false));
+      expect(find.text('width 480 screen 1440'), findsOneWidget);
+      reader.updatePreferences(const ReaderPreferences(layout: ReadingLayout.flowing));
+      await tester.pump();
+      expect(find.text('width 480 screen 1440'), findsOneWidget);
+      await tester.pump(const Duration(seconds: 1)); // the preference save
+      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+    });
   });
 
   testWidgets('a phone-width window is left as it is', (tester) async {
