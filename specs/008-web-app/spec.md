@@ -218,7 +218,8 @@ the installed app, and confirm it starts and shows those pages.
 - **FR-012**: On windows wider than a phone, the web app MUST show the phone layout in a centred
   column at a comfortable reading size, with the space around it in the app's background colour;
   sheets and dialogs MUST stay within that column. A layout adapted to wide screens (for example
-  two Mushaf pages side by side) is a separate, later feature.
+  two Mushaf pages side by side) is a separate, later feature. *(Since specs/012, the column
+  widens to hold two facing Mushaf pages when the window has room for them: specs/012 FR-016.)*
 
 **Data kept in the browser**
 

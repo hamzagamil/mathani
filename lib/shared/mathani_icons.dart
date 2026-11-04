@@ -7,6 +7,7 @@ abstract final class MathaniIcons {
 
   static const mushaf = IconData(0xe05f, fontFamily: _family); // book-open
   static const flowing = IconData(0xe54b, fontFamily: _family); // book-text
+  static const twoPages = IconData(0xe098, fontFamily: _family); // columns-2
   static const index = IconData(0xe106, fontFamily: _family); // list
   static const search = IconData(0xe151, fontFamily: _family);
   static const settings = IconData(0xe154, fontFamily: _family);

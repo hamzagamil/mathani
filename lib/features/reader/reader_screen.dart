@@ -29,6 +29,7 @@ import '../settings/settings_screen.dart';
 import 'ayah_actions.dart';
 import 'flowing_view.dart';
 import 'mushaf_view.dart';
+import 'page_geometry.dart';
 
 /// Home screen: the Mushaf (page or flowing layout), a header showing the current surah, juz
 /// and page (FR-008), and a bottom toolbar within one-handed reach (constitution II). Toolbar
@@ -254,11 +255,17 @@ class _ReaderScreenState extends State<ReaderScreen> {
 
   /// Keyboard use in browsers and on desktops (specs/008 FR-009, research R12): the arrow and
   /// page keys turn pages in the Mushaf's direction (← is the next page, as in a printed Mushaf),
-  /// and space plays or pauses the recitation. Escape closes sheets through Flutter's own
-  /// dismiss shortcut.
+  /// two at a time when two pages show (specs/012), and space plays or pauses the recitation.
+  /// Escape closes sheets through Flutter's own dismiss shortcut.
   Widget _withKeys(Widget scaffold) {
     void turn(int delta) {
       final reader = ReaderScope.read(context);
+      if (showsSpread(context)) {
+        final right = PageGeometry.spreadRightPage(reader.page);
+        final target = (right + 2 * delta).clamp(1, QuranRepository.pageCount - 1);
+        if (target != right) reader.jumpToPage(target);
+        return;
+      }
       final page = (reader.page + delta).clamp(1, QuranRepository.pageCount);
       if (page == reader.page) return;
       if (reader.layout == ReadingLayout.flowing) {
@@ -327,6 +334,11 @@ class _ReaderHeader extends StatelessWidget implements PreferredSizeWidget {
     final locale = Localizations.localeOf(context);
     final english = locale.languageCode == 'en';
     final theme = Theme.of(context);
+    // Both page numbers when two facing pages show (specs/012 FR-012).
+    final right = PageGeometry.spreadRightPage(reader.page);
+    final pages = showsSpread(context)
+        ? l10n.pagesLabel(formatNumber(right, locale), formatNumber(right + 1, locale))
+        : l10n.pageLabel(formatNumber(reader.page, locale));
 
     return AppBar(
       automaticallyImplyLeading: false,
@@ -341,8 +353,7 @@ class _ReaderHeader extends StatelessWidget implements PreferredSizeWidget {
           ),
           // Interface numbers follow the language (contracts/ui-screens.md › Direction rules).
           Text(
-            '${l10n.juzLabel(formatNumber(head.juz, locale))} · '
-            '${l10n.pageLabel(formatNumber(reader.page, locale))}',
+            '${l10n.juzLabel(formatNumber(head.juz, locale))} · $pages',
             style: TypeScale.caption.copyWith(
               fontFamily: TypeScale.uiFamily,
               color: colors.inkOnBar.withValues(alpha: 0.8),
@@ -356,6 +367,8 @@ class _ReaderHeader extends StatelessWidget implements PreferredSizeWidget {
 
 /// Bookmarks the current page, or removes the bookmarks on it. Filled when the page has one
 /// (the page indicator, FR-014). A page bookmark is stored against the first ayah on the page.
+/// When two facing pages show, it looks at both, and bookmarks the reader's page (specs/012
+/// FR-013).
 class _BookmarkToggle extends StatelessWidget {
   const _BookmarkToggle();
 
@@ -367,7 +380,10 @@ class _BookmarkToggle extends StatelessWidget {
     return ListenableBuilder(
       listenable: reader.user,
       builder: (context, _) {
-        final onPage = reader.user.bookmarksOnPage(reader.page);
+        final right = PageGeometry.spreadRightPage(reader.page);
+        final onPage = showsSpread(context)
+            ? [...reader.user.bookmarksOnPage(right), ...reader.user.bookmarksOnPage(right + 1)]
+            : reader.user.bookmarksOnPage(reader.page);
         final marked = onPage.isNotEmpty;
         return IconButton(
           icon: Icon(marked ? MathaniIcons.bookmarked : MathaniIcons.bookmark),

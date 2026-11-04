@@ -1,5 +1,8 @@
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:math' as math;
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import '../data/models.dart';
@@ -7,6 +10,8 @@ import '../features/memorization/memorization_controller.dart';
 import '../features/onboarding/onboarding_controller.dart';
 import '../features/onboarding/onboarding_screen.dart';
 import '../features/recitation/recitation_controller.dart';
+import '../features/reader/mushaf_view.dart';
+import '../features/reader/page_geometry.dart';
 import '../features/reader/reader_screen.dart';
 import '../features/prayer_times/prayer_alerts.dart';
 import '../features/prayer_times/prayer_notification_open_host.dart';
@@ -15,7 +20,7 @@ import 'l10n/app_localizations.dart';
 import 'theme/app_theme.dart';
 
 /// In a browser window wider than this, the app is shown in a centred phone-width column
-/// (specs/008 FR-012, research R13); a layout made for wide screens is a later feature.
+/// (specs/008 FR-012, research R13). The column widens for two facing Mushaf pages (specs/012).
 const wideWindowMin = 600.0;
 const phoneColumnWidth = 480.0;
 
@@ -88,7 +93,10 @@ class MathaniApp extends StatelessWidget {
           // Around the Navigator, so sheets, dialogs and snack bars stay inside the column.
           builder: kIsWeb
               ? (context, child) => PhoneColumn(child: child!)
-              : null,
+              : (context, child) {
+                  syncOrientation(MediaQuery.sizeOf(context));
+                  return child!;
+                },
           home: const PrayerNotificationOpenHost(child: _Home()),
         );
       },
@@ -118,6 +126,10 @@ class MathaniApp extends StatelessWidget {
 /// The app in a centred column of [phoneColumnWidth] when the window is wider than
 /// [wideWindowMin], told through [MediaQuery] that its screen is that column, so every screen and
 /// the Mushaf page are laid out as on a phone. Narrower windows get the child as it is.
+///
+/// While the Mushaf shows two facing pages ([showsSpread]), the column is as wide as two
+/// full-size pages, within the window (specs/012 FR-016, research R7). Below it, [ScreenArea]
+/// keeps the window's size, which decides one or two pages.
 class PhoneColumn extends StatelessWidget {
   const PhoneColumn({super.key, required this.child});
 
@@ -127,18 +139,21 @@ class PhoneColumn extends StatelessWidget {
   Widget build(BuildContext context) {
     final media = MediaQuery.of(context);
     if (media.size.width <= wideWindowMin) return child;
+    final height = media.size.height;
+    final width = showsSpread(context)
+        ? math.min(media.size.width,
+            math.max(2 * phoneColumnWidth, 2 * PageGeometry.fullPageWidth(height)))
+        : phoneColumnWidth;
     return ColoredBox(
       color: Theme.of(context).scaffoldBackgroundColor,
       child: Center(
         child: SizedBox(
-          width: phoneColumnWidth,
-          height: media.size.height,
+          width: width,
+          height: height,
           child: ClipRect(
             child: MediaQuery(
-              data: media.copyWith(
-                size: Size(phoneColumnWidth, media.size.height),
-              ),
-              child: child,
+              data: media.copyWith(size: Size(width, height)),
+              child: ScreenArea(size: media.size, child: child),
             ),
           ),
         ),
@@ -146,6 +161,25 @@ class PhoneColumn extends StatelessWidget {
     );
   }
 }
+
+bool? _portraitOnly;
+
+/// On Android, portrait on phones and folded foldables, and any orientation on large screens
+/// (shortest side 600 dp or more), so an open foldable can be held either way (specs/012
+/// research R6). The manifest keeps phones in portrait from launch. iOS keeps its Info.plist
+/// orientations, which the iPhone Duo's inner screen ignores. Calls the platform only on a change.
+void syncOrientation(Size screen) {
+  if (kIsWeb || defaultTargetPlatform != TargetPlatform.android || screen.isEmpty) return;
+  final portrait = screen.shortestSide < 600;
+  if (portrait == _portraitOnly) return;
+  _portraitOnly = portrait;
+  SystemChrome.setPreferredOrientations(
+      portrait ? const [DeviceOrientation.portraitUp] : const []);
+}
+
+/// Forgets the last orientation sent, so a test sees the next call.
+@visibleForTesting
+void resetOrientationSync() => _portraitOnly = null;
 
 /// The onboarding while it is on a setup step or gesture stop, otherwise the reader (which lays
 /// the button hints over itself) (specs/005 contracts/onboarding-flow.md › App shell).

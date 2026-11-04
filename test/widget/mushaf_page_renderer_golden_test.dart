@@ -87,4 +87,33 @@ void main() {
       }, tags: ['golden']);
     }
   }
+
+  // Two facing pages, 49 on the right and 50 on the left, as on an open iPhone Duo (specs/012).
+  testWidgets('golden spread 49–50 at 890 dp', (tester) async {
+    final (right, left) = (await tester.runAsync(
+        () async => (await reader.quran.page(49), await reader.quran.page(50))))!;
+    const size = Size(890, 582);
+    tester.view.physicalSize = size * 2;
+    tester.view.devicePixelRatio = 2;
+    addTearDown(tester.view.reset);
+    Widget half(MushafPage p) => Expanded(
+          child: ColoredBox(
+            color: colors.surface,
+            child: MushafPageRenderer(
+              page: p,
+              surahNames: {for (final s in reader.quran.surahList) s.number: s.nameAr},
+              targetEm: reader.quran.justifyTargetEm,
+              font: reader.quran.font,
+              palette: palette,
+              details: MushafPageDetails.of(reader.quran, p.number),
+            ),
+          ),
+        );
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.rtl,
+      child: Row(key: const ValueKey('spread'), children: [half(right), half(left)]),
+    ));
+    await expectLater(
+        find.byKey(const ValueKey('spread')), matchesGoldenFile('goldens/spread_49_890.png'));
+  }, tags: ['golden']);
 }

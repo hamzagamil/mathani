@@ -77,6 +77,24 @@ class ReaderController extends ChangeNotifier with WidgetsBindingObserver {
     notifyListeners();
   }
 
+  /// The Mushaf layout settled on the two facing pages [rightPage] and [rightPage] + 1 (specs/012
+  /// FR-010). The reader's page stays one page: kept when it is already on the spread, else the
+  /// page of the selected or highlighted ayah when that is on the spread, else the right page.
+  void onMushafSpreadShown(int rightPage) {
+    if (_page == rightPage || _page == rightPage + 1) return;
+    final keep = _selected ?? _highlighted;
+    final keepPage = keep == null ? null : quran.pageOf(keep);
+    if (keep != null && (keepPage == rightPage || keepPage == rightPage + 1)) {
+      _page = keepPage!;
+      _anchor = keep;
+    } else {
+      _page = rightPage;
+      _anchor = quran.firstAyahOnPage(rightPage).ref;
+    }
+    _scheduleSave();
+    notifyListeners();
+  }
+
   /// The flowing layout scrolled; [topAyah] is the first ayah visible at the top.
   void onFlowingTopAyah(AyahRef topAyah) {
     if (topAyah == _anchor) return;
@@ -163,6 +181,10 @@ class ReaderScope extends InheritedNotifier<ReaderController> {
 
   static ReaderController of(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<ReaderScope>()!.notifier!;
+
+  /// The controller, when there is one above [context].
+  static ReaderController? maybeOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<ReaderScope>()?.notifier;
 
   /// Access without subscribing to changes (event handlers).
   static ReaderController read(BuildContext context) =>

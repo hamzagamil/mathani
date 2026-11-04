@@ -10,6 +10,7 @@ import '../../shared/reader_state.dart';
 import '../onboarding/onboarding_controller.dart';
 import '../recitation/recitation_settings.dart';
 import '../prayer_times/prayer_times_screen.dart';
+import '../reader/mushaf_view.dart';
 import 'about_section.dart';
 
 /// Reading layout, theme, flowing text size, keep-screen-on and language. Every change applies
@@ -144,6 +145,22 @@ class SettingsScreen extends StatelessWidget {
                 value: prefs.lettering == Lettering.printed,
                 onChanged: (v) =>
                     set((p) => p.copyWith(lettering: v ? Lettering.printed : Lettering.builtin)),
+              ),
+            ),
+          // Only where two facing pages fit, so phones never show a switch that does nothing
+          // (specs/012 FR-017).
+          if (spreadFitsScreen(context))
+            Padding(
+              padding: const EdgeInsets.only(top: Space.s3),
+              child: SwitchListTile(
+                secondary: const Icon(MathaniIcons.twoPages),
+                title: Text(l10n.twoPagesSetting),
+                subtitle: Text(
+                  l10n.twoPagesHint,
+                  style: TypeScale.caption.copyWith(color: colors.inkMuted),
+                ),
+                value: prefs.twoPages,
+                onChanged: (v) => set((p) => p.copyWith(twoPages: v)),
               ),
             ),
           Padding(

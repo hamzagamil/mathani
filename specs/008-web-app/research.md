@@ -342,6 +342,9 @@ app in Chrome. It swaps in a WebAssembly SQLite and a browser gunzip. What it ca
     page-size calculation all see a phone.
   - Outside the column is the theme's background colour.
   - Resizing keeps the reader's anchor: the page stays the same, as after rotation today.
+  - *Since specs/012 (research R7):* while the Mushaf shows two facing pages, the column is
+    `min(W, max(960, 2 × full page width))` wide, and `ScreenArea` passes the window's size down
+    for the one-or-two-pages decision.
 - **Rationale**: the clarified answer. One layout, nothing new to design, and the Mushaf page
   geometry already scales to the column.
 - **Alternatives considered**: scaling the phone layout up. Text would be too large on a

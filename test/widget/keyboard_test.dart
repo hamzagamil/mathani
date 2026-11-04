@@ -19,15 +19,16 @@ void main() {
     }
   }
 
-  Future<RecitationController> pumpApp(WidgetTester tester) async {
+  Future<RecitationController> pumpApp(WidgetTester tester,
+      {Size size = const Size(720, 1560), double ratio = 2}) async {
     await tester.runAsync(() async {
       await loadAppFonts();
       reader = await openTestReader();
     });
     reader.updatePreferences(reader.preferences.copyWith(language: LanguagePref.ar));
     final (recitation, _, _) = openTestRecitation(reader);
-    tester.view.physicalSize = const Size(720, 1560);
-    tester.view.devicePixelRatio = 2;
+    tester.view.physicalSize = size;
+    tester.view.devicePixelRatio = ratio;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(MathaniApp(controller: reader, recitation: recitation));
     await settle(tester);
@@ -61,6 +62,33 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await settle(tester);
     expect(reader.page, 1);
+  });
+
+  testWidgets('with two facing pages, the keys turn two pages (specs/012)', (tester) async {
+    await pumpApp(tester, size: const Size(1440, 900), ratio: 1);
+    reader.jumpToPage(50);
+    await settle(tester);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await settle(tester);
+    expect(reader.page, 51, reason: 'from 49–50 to 51–52');
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await settle(tester);
+    expect(reader.page, 49);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await settle(tester);
+    expect(reader.page, 47);
+
+    reader.jumpToPage(604);
+    await settle(tester);
+    await tester.sendKeyEvent(LogicalKeyboardKey.pageDown);
+    await settle(tester);
+    expect(reader.page, 604, reason: 'nothing after 603–604');
+    reader.jumpToPage(2);
+    await settle(tester);
+    await tester.sendKeyEvent(LogicalKeyboardKey.pageUp);
+    await settle(tester);
+    expect(reader.page, 2, reason: 'nothing before 1–2');
+    await tester.pump(const Duration(seconds: 3));
   });
 
   testWidgets('space pauses and resumes the recitation', (tester) async {

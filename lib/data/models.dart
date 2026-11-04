@@ -268,6 +268,7 @@ class ReaderPreferences {
     this.onboardingDone = false,
     this.similarIntroSeen = false,
     this.mistakeSignal = MistakeSignal.vibrate,
+    this.twoPages = true,
   });
 
   static const minFlowFontSize = 18;
@@ -295,6 +296,9 @@ class ReaderPreferences {
   /// Vibration, sound or neither when memorization detects a mistake (specs/006 FR-015).
   final MistakeSignal mistakeSignal;
 
+  /// Two facing pages in the Mushaf layout when the screen has room for them (specs/012 FR-017).
+  final bool twoPages;
+
   ReaderPreferences copyWith({
     ReadingLayout? layout,
     ThemePref? theme,
@@ -306,6 +310,7 @@ class ReaderPreferences {
     bool? onboardingDone,
     bool? similarIntroSeen,
     MistakeSignal? mistakeSignal,
+    bool? twoPages,
   }) =>
       ReaderPreferences(
         layout: layout ?? this.layout,
@@ -318,5 +323,6 @@ class ReaderPreferences {
         onboardingDone: onboardingDone ?? this.onboardingDone,
         similarIntroSeen: similarIntroSeen ?? this.similarIntroSeen,
         mistakeSignal: mistakeSignal ?? this.mistakeSignal,
+        twoPages: twoPages ?? this.twoPages,
       );
 }

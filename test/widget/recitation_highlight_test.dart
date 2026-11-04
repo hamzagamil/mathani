@@ -25,7 +25,8 @@ void main() {
     }
   }
 
-  Future<void> pumpApp(WidgetTester tester, {required Lettering lettering}) async {
+  Future<void> pumpApp(WidgetTester tester,
+      {required Lettering lettering, Size size = const Size(390, 845)}) async {
     await tester.runAsync(() async {
       await loadAppFonts();
       reader = await openTestReader();
@@ -35,7 +36,7 @@ void main() {
     reader.updatePreferences(
         reader.preferences.copyWith(language: LanguagePref.ar, lettering: lettering));
     (recitation, _, _) = openTestRecitation(reader);
-    tester.view.physicalSize = const Size(780, 1690);
+    tester.view.physicalSize = size * 2;
     tester.view.devicePixelRatio = 2;
     addTearDown(tester.view.reset);
     tester.binding.defaultBinaryMessenger
@@ -138,6 +139,36 @@ void main() {
       isTrue,
       reason: 'the basmala row is shaded',
     );
+    await finish(tester);
+  });
+
+  testWidgets('two facing pages: following does not turn within the spread (specs/012 FR-009)',
+      (tester) async {
+    await pumpApp(tester, lettering: Lettering.builtin, size: const Size(890, 626));
+    final quran = reader.quran;
+    double? index() => tester.widget<PageView>(find.byType(PageView)).controller!.page;
+
+    await tester.runAsync(() => recitation.playFrom(quran.ayahsStartingOnPage(101).last.ref));
+    await settle(tester);
+    expect(reader.page, 101);
+    final spread = index();
+
+    // Onto the left page: no turn, and still following.
+    recitation.next();
+    await settle(tester);
+    expect(quran.pageOf(recitation.session!.item.ref), 102);
+    expect(reader.page, 102);
+    expect(index(), spread);
+    expect(recitation.session!.following, isTrue);
+
+    // Past the left page: the next spread.
+    while (quran.pageOf(recitation.session!.item.ref) < 103) {
+      recitation.next();
+      await settle(tester, 2);
+    }
+    await settle(tester);
+    expect(index(), spread! + 1);
+    expect(recitation.session!.following, isTrue);
     await finish(tester);
   });
 }

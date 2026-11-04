@@ -116,6 +116,12 @@ abstract class AppLocalizations {
   /// **'Page {number}'**
   String pageLabel(String number);
 
+  /// Reader header: the two facing Mushaf pages on a wide screen (specs/012). Numbers are pre-formatted.
+  ///
+  /// In en, this message translates to:
+  /// **'Pages {first}–{second}'**
+  String pagesLabel(String first, String second);
+
   /// Screen-reader label for a Mushaf page.
   ///
   /// In en, this message translates to:
@@ -528,6 +534,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The Madinah Mushaf\'s lettering as printed by the King Fahd Complex. Turn off for the built-in font.'**
   String get printedLetteringHint;
+
+  /// Settings switch, shown only on screens wide enough for two Mushaf pages (specs/012 FR-017).
+  ///
+  /// In en, this message translates to:
+  /// **'Two pages when there is room'**
+  String get twoPagesSetting;
+
+  /// No description provided for @twoPagesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Shows two facing pages, like an open Mushaf, when the screen is wide enough.'**
+  String get twoPagesHint;
 
   /// Reader toolbar: start the recitation from this page (specs/004).
   ///

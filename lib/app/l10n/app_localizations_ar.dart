@@ -23,6 +23,11 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String pagesLabel(String first, String second) {
+    return 'صفحة $first–$second';
+  }
+
+  @override
   String pageSemantics(String page, String surah) {
     return 'الصفحة $page، سورة $surah';
   }
@@ -296,6 +301,13 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get printedLetteringHint =>
       'حروف مصحف المدينة كما طبعها مجمع الملك فهد. أطفئه لاستخدام الخط المدمج.';
+
+  @override
+  String get twoPagesSetting => 'عرض صفحتين عند الاتساع';
+
+  @override
+  String get twoPagesHint =>
+      'تظهر صفحتان متقابلتان حين تتسع الشاشة لهما، كالمصحف المفتوح.';
 
   @override
   String get listen => 'استمع';

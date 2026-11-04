@@ -12,11 +12,45 @@ import '../memorization/memorization_controller.dart';
 import '../onboarding/onboarding_controller.dart';
 import '../recitation/recitation_controller.dart';
 import 'mushaf_page_renderer.dart';
+import 'page_geometry.dart';
 import 'paper_sheet.dart';
 import 'printed_fonts.dart';
 
+/// The size of the whole screen, or of the browser window around the web's phone column
+/// (specs/012 research R1, R7). `PhoneColumn` provides it, since it narrows [MediaQuery];
+/// elsewhere the [MediaQuery] size is the screen.
+class ScreenArea extends InheritedWidget {
+  const ScreenArea({super.key, required this.size, required super.child});
+
+  final Size size;
+
+  static Size sizeOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<ScreenArea>()?.size ?? MediaQuery.sizeOf(context);
+
+  @override
+  bool updateShouldNotify(ScreenArea oldWidget) => oldWidget.size != size;
+}
+
+/// Whether the screen has room for two facing Mushaf pages (specs/012 FR-001), whatever the
+/// layout and the setting: Settings offers the switch only then (FR-017).
+bool spreadFitsScreen(BuildContext context) => PageGeometry.spreadFits(ScreenArea.sizeOf(context));
+
+/// Whether the Mushaf shows two facing pages: the Mushaf layout, the setting on, and room for
+/// them. The one place this is decided, so the view, the header, the bookmark button, the
+/// keyboard and the web column always agree (specs/012 contracts/two-page-ui.md › Decision).
+bool showsSpread(BuildContext context) {
+  final reader = ReaderScope.maybeOf(context);
+  return reader != null &&
+      reader.layout == ReadingLayout.mushaf &&
+      reader.preferences.twoPages &&
+      spreadFitsScreen(context);
+}
+
 /// The 604-page Mushaf layout. Always right-to-left, so the next page lies to the left and the
 /// reader swipes from left to right to move forward (FR-004), in both interface languages.
+///
+/// When [showsSpread], it shows two facing pages, 1–2 to 603–604, the odd page on the right, and
+/// a swipe turns both (specs/012). Otherwise it shows one page, exactly as before.
 class MushafView extends StatefulWidget {
   const MushafView({super.key, this.onAyahLongPress, this.onTapPage, this.onPageTurned});
 
@@ -35,19 +69,18 @@ class MushafView extends StatefulWidget {
 
 class _MushafViewState extends State<MushafView> {
   late final ReaderController _reader = ReaderScope.read(context);
-  late final PageController _pages = PageController(initialPage: _reader.page - 1);
   late _PageCache _cache = _PageCache(_reader.quran, printed: _printed(_reader));
   late int _handledJump = _reader.jumpSerial;
+
+  /// The controller of the current mode's [PageView], replaced when the mode changes.
+  PageController? _pages;
+
+  /// Whether the current mode is two facing pages (specs/012).
+  bool _spread = false;
 
   /// Set around the page jump that follows the recitation, so it does not hide the reader
   /// controls the way a page turn does (specs/004 recitation-playback › Following).
   bool _followJumpInFlight = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _cache.prefetchAround(_reader.page);
-  }
 
   /// Whether pages use the printed lettering (the setting, when the page fonts are bundled).
   static bool _printed(ReaderController r) =>
@@ -55,50 +88,114 @@ class _MushafViewState extends State<MushafView> {
 
   @override
   void dispose() {
-    _pages.dispose();
+    _pages?.dispose();
     super.dispose();
+  }
+
+  /// The [PageView] index that shows [page] in the current mode.
+  int _indexOf(int page) => _spread ? PageGeometry.spreadIndex(page) : page - 1;
+
+  /// Loads the pages on screen and their neighbours, so a turn never shows an empty frame.
+  void _prefetch(int page) => _spread
+      ? _cache.prefetchSpread(PageGeometry.spreadRightPage(page))
+      : _cache.prefetchAround(page);
+
+  /// The controller for one or two pages, made at the reader's page when the mode changes. The
+  /// keyed [PageView] is replaced, which cancels a swipe in progress, and a new controller reports
+  /// no page change, so the reader's place is kept (specs/012 FR-011).
+  PageController _controllerFor(bool spread, ReaderController reader) {
+    final current = _pages;
+    if (current != null && _spread == spread) return current;
+    _spread = spread;
+    var page = reader.page;
+    if (current != null) {
+      // The old view still holds it until this frame is built.
+      WidgetsBinding.instance.addPostFrameCallback((_) => current.dispose());
+      // From two pages to one: the page of the selected or highlighted ayah when it is on the
+      // spread, else the reader's page (FR-010, FR-011).
+      final keep = reader.selected ?? reader.highlighted;
+      final keepPage = keep == null ? null : reader.quran.pageOf(keep);
+      if (!spread &&
+          keepPage != null &&
+          keepPage != page &&
+          PageGeometry.spreadRightPage(keepPage) == PageGeometry.spreadRightPage(page)) {
+        page = keepPage;
+        WidgetsBinding.instance.addPostFrameCallback((_) => reader.onMushafPageShown(keepPage));
+      }
+    }
+    _prefetch(page);
+    return _pages = PageController(initialPage: _indexOf(page));
   }
 
   @override
   Widget build(BuildContext context) {
     final reader = ReaderScope.of(context);
     if (_printed(reader) != _cache.printed) {
-      _cache = _PageCache(reader.quran, printed: _printed(reader))..prefetchAround(reader.page);
+      _cache = _PageCache(reader.quran, printed: _printed(reader));
+      if (_pages != null) _prefetch(reader.page);
     }
+    final pages = _controllerFor(showsSpread(context), reader);
     // No page turns under the onboarding's button hints; the latest jump applies when they end
     // (specs/005, FR-017a).
     if (reader.jumpSerial != _handledJump && !OnboardingScope.holdsReaderOf(context)) {
       _handledJump = reader.jumpSerial;
-      final target = reader.page - 1;
+      // With two pages, a jump to the other page of the spread on screen does not turn
+      // (specs/012 FR-009).
+      final target = _indexOf(reader.page);
       final follow = RecitationScope.read(context)?.followSerial == reader.jumpSerial;
-      _cache.prefetchAround(reader.page);
+      _prefetch(reader.page);
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (_pages.hasClients && _pages.page?.round() != target) {
+        if (!identical(pages, _pages)) return; // the mode changed: the new view opens at the page
+        if (pages.hasClients && pages.page?.round() != target) {
           _followJumpInFlight = follow;
-          _pages.jumpToPage(target); // onPageChanged runs inside this call
+          pages.jumpToPage(target); // onPageChanged runs inside this call
           _followJumpInFlight = false;
         }
       });
     }
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: PageView.builder(
-        controller: _pages,
-        itemCount: QuranRepository.pageCount,
-        allowImplicitScrolling: true, // keeps n±1 laid out (SC-002)
-        onPageChanged: (i) {
-          _cache.prefetchAround(i + 1);
-          reader.onMushafPageShown(i + 1);
-          if (!_followJumpInFlight) widget.onPageTurned?.call();
-        },
-        itemBuilder: (context, i) => _MushafPageItem(
-          key: ValueKey((_cache.printed, i)),
-          page: i + 1,
+    Widget page(int number, {required bool bindingOnRight}) => _MushafPageItem(
+          key: ValueKey((_cache.printed, number - 1)),
+          page: number,
+          bindingOnRight: bindingOnRight,
           cache: _cache,
           onAyahLongPress: widget.onAyahLongPress,
           onTapPage: widget.onTapPage,
-        ),
-      ),
+        );
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: _spread
+          ? PageView.builder(
+              key: const ValueKey(true),
+              controller: pages,
+              itemCount: PageGeometry.spreadCount,
+              allowImplicitScrolling: true, // keeps the neighbouring spreads laid out (SC-004)
+              onPageChanged: (i) {
+                final right = 2 * i + 1;
+                _cache.prefetchSpread(right);
+                reader.onMushafSpreadShown(right);
+                if (!_followJumpInFlight) widget.onPageTurned?.call();
+              },
+              // Right to left: the odd page on the right, the binding shades meeting in the middle.
+              itemBuilder: (context, i) => Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(child: page(2 * i + 1, bindingOnRight: false)),
+                  Expanded(child: page(2 * i + 2, bindingOnRight: true)),
+                ],
+              ),
+            )
+          : PageView.builder(
+              key: const ValueKey(false),
+              controller: pages,
+              itemCount: QuranRepository.pageCount,
+              allowImplicitScrolling: true, // keeps n±1 laid out (SC-002)
+              onPageChanged: (i) {
+                _cache.prefetchAround(i + 1);
+                reader.onMushafPageShown(i + 1);
+                if (!_followJumpInFlight) widget.onPageTurned?.call();
+              },
+              itemBuilder: (context, i) => page(i + 1, bindingOnRight: (i + 1).isOdd),
+            ),
     );
   }
 }
@@ -107,12 +204,17 @@ class _MushafPageItem extends StatefulWidget {
   const _MushafPageItem({
     super.key,
     required this.page,
+    required this.bindingOnRight,
     required this.cache,
     this.onAyahLongPress,
     this.onTapPage,
   });
 
   final int page;
+
+  /// Side of the binding shade: the right for an odd page shown alone, the inner edge in a
+  /// spread (specs/012 FR-006).
+  final bool bindingOnRight;
   final _PageCache cache;
   final void Function(AyahRef ref)? onAyahLongPress;
   final VoidCallback? onTapPage;
@@ -155,7 +257,7 @@ class _MushafPageItemState extends State<_MushafPageItem> {
         behavior: HitTestBehavior.opaque,
         onTap: reader.selected != null ? () => reader.select(null) : widget.onTapPage,
         child: PaperSheet(
-          bindingOnRight: widget.page.isOdd,
+          bindingOnRight: widget.bindingOnRight,
           child: !_failed
               ? const SizedBox.expand()
               : Center(
@@ -224,7 +326,7 @@ class _MushafPageItemState extends State<_MushafPageItem> {
         onSecondaryTapUp:
             widget.onAyahLongPress == null ? null : (d) => pick(d.globalPosition),
         child: PaperSheet(
-          bindingOnRight: page.number.isOdd,
+          bindingOnRight: widget.bindingOnRight,
           child: MushafPageRenderer(
             key: _rendererKey,
             page: page,
@@ -345,8 +447,15 @@ class _PageCache {
     }
   }
 
-  void prefetchAround(int page) {
-    for (final p in [page, page + 1, page - 1, page + 2, page - 2]) {
+  void prefetchAround(int page) => _prefetch([page, page + 1, page - 1, page + 2, page - 2]);
+
+  /// The spread from the odd page [right] and the spreads either side: six pages, within
+  /// [_capacity] (specs/012 research R2).
+  void prefetchSpread(int right) =>
+      _prefetch([right, right + 1, right + 2, right + 3, right - 1, right - 2]);
+
+  void _prefetch(List<int> pages) {
+    for (final p in pages) {
       if (p >= 1 && p <= QuranRepository.pageCount) load(p).ignore(); // the page shows errors
     }
   }

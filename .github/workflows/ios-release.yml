@@ -28,6 +28,13 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
+      # The iOS 27 SDK lets the app fill the iPhone Duo's inner screen (specs/012 research R5).
+      - name: Select Xcode 27
+        run: |
+          XCODE=$(ls -d /Applications/Xcode_27*.app 2>/dev/null | sort -V | tail -1)
+          if [ -z "$XCODE" ]; then echo "::error::Xcode 27 is not on this runner image"; exit 1; fi
+          sudo xcode-select -s "$XCODE"
+          xcodebuild -version
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
