@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mathani/app/app.dart';
 import 'package:mathani/data/models.dart';
+import 'package:mathani/features/onboarding/onboarding_controller.dart';
 import 'package:mathani/features/reader/mushaf_view.dart';
 import 'package:mathani/features/reader/page_geometry.dart';
 import 'package:mathani/shared/reader_state.dart';
@@ -58,22 +59,26 @@ void main() {
   group('two facing pages widen the column (specs/012 R7)', () {
     late ReaderController reader;
 
-    Future<void> pumpReader(WidgetTester tester, Size size, ReaderPreferences prefs) async {
-      reader = (await tester.runAsync(openTestReader))!;
+    Future<void> pumpReader(WidgetTester tester, Size size, ReaderPreferences prefs,
+        {bool onboarding = false}) async {
+      reader = (await tester.runAsync(() => openTestReader(onboarded: !onboarding)))!;
       reader.updatePreferences(prefs);
       tester.view
         ..physicalSize = size
         ..devicePixelRatio = 1;
       addTearDown(tester.view.reset);
-      await tester.pumpWidget(ReaderScope(
-        controller: reader,
-        child: MaterialApp(
+      final app = MaterialApp(
           builder: (context, child) => PhoneColumn(child: child!),
           home: Builder(
             builder: (context) => Text('width ${MediaQuery.sizeOf(context).width.round()} '
                 'screen ${ScreenArea.sizeOf(context).width.round()}'),
           ),
-        ),
+        );
+      await tester.pumpWidget(ReaderScope(
+        controller: reader,
+        child: onboarding
+            ? OnboardingScope(controller: OnboardingController(reader: reader), child: app)
+            : app,
       ));
     }
 
@@ -82,6 +87,11 @@ void main() {
       final full = 2 * PageGeometry.fullPageWidth(900);
       expect(full, greaterThan(2 * phoneColumnWidth));
       expect(find.text('width ${full.round()} screen 1440'), findsOneWidget);
+    });
+
+    testWidgets('the onboarding setup keeps the phone column', (tester) async {
+      await pumpReader(tester, const Size(1440, 900), const ReaderPreferences(), onboarding: true);
+      expect(find.text('width 480 screen 1440'), findsOneWidget);
     });
 
     testWidgets('never narrower than two phone columns', (tester) async {

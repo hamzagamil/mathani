@@ -140,7 +140,10 @@ class PhoneColumn extends StatelessWidget {
     final media = MediaQuery.of(context);
     if (media.size.width <= wideWindowMin) return child;
     final height = media.size.height;
-    final width = showsSpread(context)
+    // The onboarding's setup steps and gesture stops cover the reader: they keep the phone column.
+    final phase = OnboardingScope.maybeOf(context)?.phase;
+    final onboarding = phase == OnboardingPhase.setup || phase == OnboardingPhase.gestures;
+    final width = !onboarding && showsSpread(context)
         ? math.min(media.size.width,
             math.max(2 * phoneColumnWidth, 2 * PageGeometry.fullPageWidth(height)))
         : phoneColumnWidth;
