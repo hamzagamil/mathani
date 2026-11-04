@@ -25,16 +25,15 @@ env:
 jobs:
   testflight:
     name: Build signed iOS package
-    runs-on: macos-latest
+    runs-on: xcode-27
     steps:
       - uses: actions/checkout@v4
       # The iOS 27 SDK lets the app fill the iPhone Duo's inner screen (specs/012 research R5).
-      - name: Select Xcode 27
+      # The xcode-27 runner image (a GitHub preview) defaults to a released Xcode 27.
+      - name: Check Xcode 27
         run: |
-          XCODE=$(ls -d /Applications/Xcode_27*.app 2>/dev/null | sort -V | tail -1)
-          if [ -z "$XCODE" ]; then echo "::error::Xcode 27 is not on this runner image"; exit 1; fi
-          sudo xcode-select -s "$XCODE"
           xcodebuild -version
+          xcodebuild -version | grep -q '^Xcode 27\.' || { echo "::error::Xcode 27 is not selected"; exit 1; }
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
