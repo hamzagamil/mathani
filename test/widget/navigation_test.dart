@@ -63,10 +63,20 @@ void main() {
     await tester.tap(find.text('الأجزاء'));
     await settle(tester);
     await shoot(tester, 'index_ajza_ar');
-    await tester.tap(find.textContaining('ربع الحزب ١ ·'));
-    await settle(tester);
+
+    // The row carries a long opening of the ayah, verbatim, and never cuts it mid-word.
     final q2 = reader.quran.divisionList.firstWhere(
         (d) => d.kind == DivisionKind.hizbQuarter && d.number == 2);
+    final ayahWords = (await tester.runAsync(() => reader.quran.wordsOf(q2.start)))!;
+    final expected = [for (final w in ayahWords) if (!w.isAyahEnd) w.text].take(30).join(' ');
+    expect(q2.openingWords, expected);
+    expect(q2.openingWords.split(' ').length, greaterThan(4));
+    final row = tester.widget<Text>(find.text(q2.openingWords));
+    expect(row.overflow, TextOverflow.clip);
+    expect(row.maxLines, 1);
+
+    await tester.tap(find.textContaining('ربع الحزب ١ ·'));
+    await settle(tester);
     expect(reader.anchor, q2.start);
   });
 

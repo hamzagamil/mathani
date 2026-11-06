@@ -268,7 +268,7 @@ void main(List<String> args) {
   String opening(_Ayah a) => [
         for (var id = a.firstWordId; id <= a.lastWordId; id++)
           if (!words[id - 1].isAyahEnd && !isMarkOnly(words[id - 1].text)) words[id - 1].text,
-      ].take(4).join(' ');
+      ].take(30).join(' '); // enough to fill a row of the Ajza' index on a wide window
   for (final (kind, refs) in [('juz', meta.juzs), ('hizb_quarter', meta.quarters)]) {
     for (final r in refs) {
       final a = ayahIndex['${r.sura}:${r.aya}']!;

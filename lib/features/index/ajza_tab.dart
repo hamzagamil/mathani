@@ -101,8 +101,10 @@ class _QuarterRow extends StatelessWidget {
       title: Text(
         division.openingWords,
         textDirection: TextDirection.rtl,
+        // As many whole words as the row fits: clipping at a line break never cuts a word of the
+        // Quran text the way an ellipsis would.
         maxLines: 1,
-        overflow: TextOverflow.ellipsis,
+        overflow: TextOverflow.clip,
         style: TypeScale.quranCard.copyWith(color: colors.ink, fontSize: 18, height: 2.2),
       ),
       subtitle: Text(
