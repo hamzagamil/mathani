@@ -28,7 +28,7 @@ void main(List<String> args) {
     (words['${r['surah']}:${r['ayah']}'] ??= []).add(r['text_uthmani'] as String);
   }
   words.forEach((ref, w) => ayat[ref] = w.join(' '));
-  db.dispose();
+  db.close();
   if (ayat.length != 6236) {
     stderr.writeln('Expected 6236 ayat, found ${ayat.length}.');
     exit(1);
