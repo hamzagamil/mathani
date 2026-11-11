@@ -1,7 +1,7 @@
 name: mathani
 description: "Mathani (مثاني): read the Quran in Uthmani script."
 publish_to: 'none'
-version: 1.6.0+23
+version: 1.7.0+24
 
 environment:
   sdk: ^3.13.5
