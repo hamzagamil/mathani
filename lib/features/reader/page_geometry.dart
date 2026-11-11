@@ -8,6 +8,9 @@ import 'dart:ui' show Rect, Size;
 /// screen allows and centred; whatever space is left becomes margins. Line spacing never grows
 /// to fill a tall screen. Above and below the block are bands for the page details (surah, juz,
 /// page number); the hizb and sajdah marks sit in the margin beside it.
+///
+/// On a phone turned sideways the page is given the screen's width and [scrollPageHeight], so
+/// the block is as wide as the screen allows and the page scrolls (specs/013).
 class PageGeometry {
   PageGeometry._(this.size, this.textBlock, this.fontSize, this.lineHeight, this.headerBand,
       this.footerBand);
@@ -56,6 +59,15 @@ class PageGeometry {
   /// only add margin. Two of these side by side make the web's two-page column (specs/012 R7).
   static double fullPageWidth(double height) =>
       blockWidth(double.infinity, height) / (1 - 2 * markerMarginFraction);
+
+  /// Height of the scrolling page on a sideways phone (specs/013 research R5): a page of
+  /// [width] whose text block is limited by the width, with both bands and one more line of
+  /// paper, so the page details do not touch the screen's edge.
+  static double scrollPageHeight(double width) {
+    final block = math.max(0.0, width * (1 - 2 * markerMarginFraction));
+    final line = block * blockRatio / linesPerPage;
+    return block * blockRatio + (2 * bandLines + 1) * line;
+  }
 
   /// The right-hand (odd) page of the spread that holds [page].
   static int spreadRightPage(int page) => page.isOdd ? page : page - 1;

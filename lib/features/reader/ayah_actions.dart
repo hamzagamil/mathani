@@ -76,8 +76,9 @@ class _AyahActionsSheet extends StatelessWidget {
         ..showSnackBar(SnackBar(content: Text(message), duration: const Duration(seconds: 2)));
     }
 
+    // Scrolls when the sheet is shorter than its actions: a phone turned sideways (specs/013).
     return SafeArea(
-      child: Column(
+      child: SingleChildScrollView(child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -146,7 +147,7 @@ class _AyahActionsSheet extends StatelessWidget {
           ),
           const SizedBox(height: Space.s2),
         ],
-      ),
+      )),
     );
   }
 }

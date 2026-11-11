@@ -1,4 +1,4 @@
-
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 
@@ -11,6 +11,7 @@ import '../../shared/reader_state.dart';
 import '../memorization/memorization_controller.dart';
 import '../onboarding/onboarding_controller.dart';
 import '../recitation/recitation_controller.dart';
+import '../recitation/recited_item.dart';
 import 'mushaf_page_renderer.dart';
 import 'page_geometry.dart';
 import 'paper_sheet.dart';
@@ -46,11 +47,24 @@ bool showsSpread(BuildContext context) {
       spreadFitsScreen(context);
 }
 
+/// Whether the Mushaf page is drawn at the screen's full width and scrolls up and down: a phone
+/// turned sideways (specs/013 research R4). Never where two pages fit, whatever the setting, and
+/// never in a browser. It reads the whole screen, so bars coming and going never flip it. The
+/// one place this is decided.
+bool scrollsPage(BuildContext context) {
+  if (kIsWeb) return false;
+  final reader = ReaderScope.maybeOf(context);
+  if (reader == null || reader.layout != ReadingLayout.mushaf) return false;
+  final screen = ScreenArea.sizeOf(context);
+  return screen.width > screen.height && !PageGeometry.spreadFits(screen);
+}
+
 /// The 604-page Mushaf layout. Always right-to-left, so the next page lies to the left and the
 /// reader swipes from left to right to move forward (FR-004), in both interface languages.
 ///
-/// When [showsSpread], it shows two facing pages, 1–2 to 603–604, the odd page on the right, and
-/// a swipe turns both (specs/012). Otherwise it shows one page, exactly as before.
+/// It has three forms. When [showsSpread], two facing pages, 1–2 to 603–604, the odd page on the
+/// right, and a swipe turns both (specs/012). When [scrollsPage], one page at the screen's full
+/// width, which scrolls up and down (specs/013). Otherwise one whole page.
 class MushafView extends StatefulWidget {
   const MushafView({super.key, this.onAyahLongPress, this.onTapPage, this.onPageTurned});
 
@@ -160,6 +174,7 @@ class _MushafViewState extends State<MushafView> {
           cache: _cache,
           onAyahLongPress: widget.onAyahLongPress,
           onTapPage: widget.onTapPage,
+          onScrolledByReader: widget.onPageTurned,
         );
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -208,6 +223,7 @@ class _MushafPageItem extends StatefulWidget {
     required this.cache,
     this.onAyahLongPress,
     this.onTapPage,
+    this.onScrolledByReader,
   });
 
   final int page;
@@ -218,6 +234,10 @@ class _MushafPageItem extends StatefulWidget {
   final _PageCache cache;
   final void Function(AyahRef ref)? onAyahLongPress;
   final VoidCallback? onTapPage;
+
+  /// Called when the reader starts scrolling the sideways page: hides the controls, like a
+  /// page turn.
+  final VoidCallback? onScrolledByReader;
 
   @override
   State<_MushafPageItem> createState() => _MushafPageItemState();
@@ -246,9 +266,100 @@ class _MushafPageItemState extends State<_MushafPageItem> {
     });
   }
 
+  /// The sideways page's scroll position (specs/013). Unused while the whole page shows.
+  final _scroll = ScrollController();
+
+  /// The follow target last brought on screen, so each is handled once.
+  Object? _followed;
+
+  /// Whether the sideways page has been on screen with its text: later follows animate.
+  bool _shown = false;
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final reader = ReaderScope.of(context);
+    final page = _buildPage(context, reader);
+    if (!scrollsPage(context)) {
+      _followed = null;
+      _shown = false;
+      return page;
+    }
+    _syncScroll(context, reader);
+    return LayoutBuilder(
+      builder: (context, constraints) => NotificationListener<ScrollStartNotification>(
+        onNotification: (n) {
+          if (n.dragDetails != null) widget.onScrolledByReader?.call();
+          return false;
+        },
+        child: SingleChildScrollView(
+          controller: _scroll,
+          // Stops at the page's top and bottom (FR-008); a bounce would fight the page swipe.
+          physics: const ClampingScrollPhysics(),
+          child: SizedBox(
+            height: PageGeometry.scrollPageHeight(constraints.maxWidth),
+            // A scroll replays the page's picture instead of painting it again.
+            child: RepaintBoundary(child: page),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Keeps the sideways page where the reader expects it: at its top when it is not the page
+  /// being read (FR-009), and with the recited, jumped-to or expected ayah on screen when it is
+  /// (FR-011, contracts/reader-ui.md › Following).
+  void _syncScroll(BuildContext context, ReaderController reader) {
+    if (reader.page != widget.page) {
+      _followed = null;
+      _shown = false;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _scroll.hasClients && _scroll.offset != 0) _scroll.jumpTo(0);
+      });
+      return;
+    }
+    if (_page == null) return; // nothing to scroll to until the page has loaded
+    final recited = RecitationScope.maybeOf(context)?.recited;
+    final memorization = MemorizationScope.maybeOf(context);
+    final Object? target = recited ??
+        reader.highlighted ??
+        (memorization != null && memorization.active ? memorization.expected : null);
+    final animate = _shown;
+    WidgetsBinding.instance.addPostFrameCallback((_) => _shown = mounted);
+    if (target == _followed) return;
+    _followed = target;
+    if (target == null) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final box = _rendererKey.currentContext?.findRenderObject();
+      if (!mounted || box is! RenderMushafPage || !_scroll.hasClients) return;
+      final rect = switch (target) {
+        RecitedItem(isBasmala: true, :final surah) => box.basmalaRect(surah),
+        RecitedItem(:final ref) => box.ayahRect(ref),
+        AyahRef() => box.ayahRect(target),
+        _ => null,
+      };
+      if (rect == null) return;
+      final position = _scroll.position;
+      final top = position.pixels, bottom = top + position.viewportDimension;
+      if (rect.top >= top && rect.bottom <= bottom) return;
+      // One line of the page above the ayah.
+      final line = (position.maxScrollExtent + position.viewportDimension) /
+          (PageGeometry.linesPerPage + 2 * PageGeometry.bandLines + 1);
+      final to = (rect.top - line).clamp(0.0, position.maxScrollExtent);
+      if (animate) {
+        _scroll.animateTo(to, duration: const Duration(milliseconds: 200), curve: Curves.easeOut);
+      } else {
+        _scroll.jumpTo(to);
+      }
+    });
+  }
+
+  Widget _buildPage(BuildContext context, ReaderController reader) {
     final cached = _page;
     if (cached == null) {
       // Blank paper while the page (and its printed font) loads; taps still work.

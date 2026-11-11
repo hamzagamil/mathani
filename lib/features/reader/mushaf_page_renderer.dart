@@ -109,6 +109,12 @@ class MushafPageDetails {
 const _headerAdvanceEm = 3.302;
 const _headerInkEm = 0.40;
 
+/// Share of the glyph's width that its ink spans, centred.
+const _headerInkShare = 0.98;
+
+/// Clear paper kept between a header glyph and the page details beside it, in line heights.
+const _headerAir = 0.16;
+
 /// One page of the page-faithful Mushaf layout (001 research R4): 15 line slots, words shaped
 /// once into cached [TextPainter]s, `ayah` lines filled like print by kashida with normal word
 /// gaps (specs/002-print-like-mushaf-page/contracts/page-typesetting.md) or centred, surah
@@ -280,6 +286,53 @@ class RenderMushafPage extends RenderBox {
       }
     }
     return true;
+  }
+
+  /// The ink of each surah header on the page and its line slot, for the typesetting tests
+  /// (specs/013 contracts/reader-ui.md › Surah header).
+  @visibleForTesting
+  List<({Rect ink, Rect slot})> get surahHeaderRects {
+    final geometry = _geometry;
+    if (geometry == null) return const [];
+    return [
+      for (final line in _placements)
+        if (line.line.type == LineType.surahName)
+          (
+            ink: _hasHeaderGlyph(line)
+                ? Rect.fromCenter(
+                    center: Offset(size.width / 2, line.top + line.height / 2),
+                    width: _headerFontSize(geometry) * _headerAdvanceEm * _headerInkShare,
+                    height: _headerFontSize(geometry) * _headerInkEm,
+                  )
+                : _headerFrame(line, geometry),
+            slot: Rect.fromLTWH(
+                geometry.textBlock.left, line.top, geometry.textBlock.width, line.height),
+          ),
+    ];
+  }
+
+  /// Where [ref]'s words are on this page, or null when it has none here: what the sideways
+  /// page scrolls to (specs/013 FR-011).
+  Rect? ayahRect(AyahRef ref) {
+    Rect? rect;
+    for (final line in _placements) {
+      for (final w in line.words) {
+        if (w.word.ref != ref) continue;
+        final r = line.wordRect(w);
+        rect = rect?.expandToInclude(r) ?? r;
+      }
+    }
+    return rect;
+  }
+
+  /// The basmala line of [surah] on this page, or null.
+  Rect? basmalaRect(int surah) {
+    for (final line in _placements) {
+      if (line.line.type == LineType.basmallah && line.line.surah == surah) {
+        return Rect.fromLTWH(0, line.top, size.width, line.height);
+      }
+    }
+    return null;
   }
 
   /// The ayah under [localPosition], for long-press selection (FR-020).
@@ -467,9 +520,20 @@ class RenderMushafPage extends RenderBox {
       color: _config.palette.accentInk,
     );
     final header = geometry.headerBand, footer = geometry.footerBand;
+    // A header glyph on the first or last line is a little taller than its line (specs/013
+    // research R2): the details beside it move away by that much and a little air, so that
+    // the letters' tails never touch its frame (FR-026).
+    final lines = _config.page.lines;
+    double clearOf(MushafLine? line) =>
+        line != null && line.type == LineType.surahName && _config.surahHeaderFamily != null
+            ? math.max(0.0, _headerFontSize(geometry) * _headerInkEm - geometry.lineHeight) / 2 +
+                geometry.lineHeight * _headerAir
+            : 0;
+    final lift = clearOf(lines.firstOrNull), drop = clearOf(lines.lastOrNull);
     _Detail detail(String text, double Function(double width) left, Rect band) {
       final p = _painter(text, style);
-      return _Detail(text, p, Offset(left(p.width), band.center.dy - p.height / 2));
+      final shift = identical(band, header) ? -lift : drop;
+      return _Detail(text, p, Offset(left(p.width), band.center.dy - p.height / 2 + shift));
     }
 
     _details = (
@@ -563,21 +627,36 @@ class RenderMushafPage extends RenderBox {
     }
   }
 
-  void _paintSurahHeader(Canvas canvas, _LinePlacement line, PageGeometry geometry) {
+  /// Whether [line]'s title is drawn as its printed header glyph, not the plain frame.
+  bool _hasHeaderGlyph(_LinePlacement line) {
     final surah = line.line.surah;
-    final family = _config.surahHeaderFamily;
-    if (family != null && surah != null && surah >= 1 && surah <= surahHeaderGlyphs.length) {
-      // The glyph's ink spans 98% of its advance and 40% of the font size, centred on the
-      // baseline: fill the text block's width, at most 90% of the line's height.
-      final fontSize = math.min(
-        geometry.textBlock.width / _headerAdvanceEm,
-        line.height * 0.9 / _headerInkEm,
+    return _config.surahHeaderFamily != null &&
+        surah != null &&
+        surah >= 1 &&
+        surah <= surahHeaderGlyphs.length;
+  }
+
+  /// The header glyph's size: its ink is as wide as the text block, from side to side
+  /// (specs/013 FR-025). That makes it about 5% taller than the line, inside the clear space
+  /// around it (research R2).
+  double _headerFontSize(PageGeometry geometry) =>
+      geometry.textBlock.width / (_headerAdvanceEm * _headerInkShare);
+
+  Rect _headerFrame(_LinePlacement line, PageGeometry geometry) => Rect.fromLTWH(
+        geometry.textBlock.left,
+        line.top + line.height * 0.12,
+        geometry.textBlock.width,
+        line.height * 0.76,
       );
+
+  void _paintSurahHeader(Canvas canvas, _LinePlacement line, PageGeometry geometry) {
+    if (_hasHeaderGlyph(line)) {
+      // The glyph's ink is centred on its baseline.
       final p = _painter(
-        String.fromCharCode(surahHeaderGlyphs[surah - 1]),
+        String.fromCharCode(surahHeaderGlyphs[line.line.surah! - 1]),
         TextStyle(
-          fontFamily: family,
-          fontSize: fontSize,
+          fontFamily: _config.surahHeaderFamily,
+          fontSize: _headerFontSize(geometry),
           color: _config.palette.accentInk,
           height: 1,
         ),
@@ -587,13 +666,7 @@ class RenderMushafPage extends RenderBox {
       p.dispose();
       return;
     }
-    final rect = Rect.fromLTWH(
-      geometry.textBlock.left,
-      line.top + line.height * 0.12,
-      geometry.textBlock.width,
-      line.height * 0.76,
-    );
-    paintSurahFrame(canvas, rect, _config.palette.accentInk);
+    paintSurahFrame(canvas, _headerFrame(line, geometry), _config.palette.accentInk);
     final name = _config.surahNames[line.line.surah] ?? '';
     _paintCentered(canvas, line, 'سُورَةُ $name', geometry.fontSize * 0.8, _config.palette.accentInk);
   }

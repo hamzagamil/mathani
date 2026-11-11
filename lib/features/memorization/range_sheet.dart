@@ -220,8 +220,9 @@ class _RangeSheetState extends State<_RangeSheet> {
       );
     }
 
+    // Scrolls when the sheet is shorter than its content: a phone turned sideways (specs/013).
     return SafeArea(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: EdgeInsets.fromLTRB(
             Space.s4, 0, Space.s4, Space.s4 + MediaQuery.viewInsetsOf(context).bottom),
         child: Column(

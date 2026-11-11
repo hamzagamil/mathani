@@ -20,12 +20,12 @@ void main() {
     }
   }
 
-  Future<void> pumpApp(WidgetTester tester) async {
+  Future<void> pumpApp(WidgetTester tester, {LanguagePref language = LanguagePref.ar}) async {
     await tester.runAsync(() async {
       await loadAppFonts();
       reader = await openTestReader(similar: quickstartMutashabihat());
     });
-    reader.updatePreferences(reader.preferences.copyWith(language: LanguagePref.ar));
+    reader.updatePreferences(reader.preferences.copyWith(language: language));
     tester.view.physicalSize = const Size(720, 1560);
     tester.view.devicePixelRatio = 2;
     addTearDown(tester.view.reset);
@@ -122,7 +122,7 @@ void main() {
     expect(find.text('سورة الأعراف، الآية ١٩'), findsOneWidget);
     expect(find.text('نص تجريبي: الفقرة الأولى من شرح المجموعة الأولى.'), findsOneWidget);
 
-    await tester.tap(find.widgetWithText(ChoiceChip, '٢'));
+    await tester.tap(find.byType(ChoiceChip).at(1));
     await settle(tester);
     expect(find.text('سورة الأعراف، الآية ١٩'), findsNothing);
     expect(find.text('سورة طه، الآية ١١٧'), findsOneWidget);
@@ -136,5 +136,97 @@ void main() {
     await open(tester, const AyahRef(20, 117));
     expect(find.byType(ChoiceChip), findsNothing);
     expect(find.text('سورة البقرة، الآية ٣٥'), findsOneWidget);
+  });
+
+  group('tabs named by the shared wording (specs/013 US3)', () {
+    const pressed = AyahRef(2, 35);
+
+    Future<List<String>> labelsOf(WidgetTester tester, String Function(int) number) async =>
+        (await tester.runAsync(() => similarTabLabels(
+            reader.quran, pressed, reader.similar.groupsOf(pressed), number)))!;
+
+    Text textOf(WidgetTester tester, int chip) => tester.widget<Text>(find
+        .descendant(of: find.byType(ChoiceChip).at(chip), matching: find.byType(Text))
+        .first);
+
+    testWidgets('each tab shows its wording on one line, the first selected', (tester) async {
+      await pumpApp(tester);
+      final labels = await labelsOf(tester, (n) => '#$n');
+      expect(labels, hasLength(2));
+      expect(labels.any((l) => l.startsWith('#')), isFalse, reason: 'wording, not numbers');
+      expect(labels.toSet(), hasLength(2));
+
+      await open(tester, pressed);
+      final sheet = tester.getRect(find.byType(SimilarSheet));
+      for (var i = 0; i < 2; i++) {
+        final text = textOf(tester, i);
+        expect(text.data, labels[i]);
+        expect(text.maxLines, 1);
+        expect(text.textDirection, TextDirection.rtl);
+        final chip = tester.getRect(find.byType(ChoiceChip).at(i));
+        expect(chip.left, greaterThanOrEqualTo(sheet.left));
+        expect(chip.right, lessThanOrEqualTo(sheet.right));
+        expect(chip.height, greaterThanOrEqualTo(48));
+        expect(tester.widget<ChoiceChip>(find.byType(ChoiceChip).at(i)).selected, i == 0);
+      }
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('screen readers hear the wording and the selected tab', (tester) async {
+      final handle = tester.ensureSemantics();
+      await pumpApp(tester);
+      final labels = await labelsOf(tester, (n) => '#$n');
+      await open(tester, pressed);
+      for (var i = 0; i < 2; i++) {
+        final node = tester.getSemantics(find.byType(ChoiceChip).at(i));
+        expect(node.label, labels[i]);
+        expect(node.flagsCollection.isButton, isTrue);
+        expect(node.flagsCollection.isSelected.toBoolOrNull(), i == 0);
+      }
+      handle.dispose();
+    });
+
+    testWidgets('the wording stays right-to-left in the English interface', (tester) async {
+      await pumpApp(tester, language: LanguagePref.en);
+      await open(tester, pressed);
+      expect(textOf(tester, 0).textDirection, TextDirection.rtl);
+      expect(textOf(tester, 1).textDirection, TextDirection.rtl);
+    });
+
+    testWidgets('many long tabs wrap; every one can be tapped; a number tab is «Group n»',
+        (tester) async {
+      final handle = tester.ensureSemantics();
+      await pumpApp(tester);
+      final groups = reader.similar.groupsOf(pressed);
+      final six = [for (var i = 0; i < 6; i++) groups[i % 2]];
+      const long = 'وَقُلْنَا يَـٰٓـَٔادَمُ ٱسْكُنْ أَنتَ وَزَوْجُكَ ٱلْجَنَّةَ…';
+      final labels = [for (var i = 0; i < 5; i++) '$long (${i + 1})', '٦'];
+      showModalBottomSheet<void>(
+        context: tester.element(find.byType(MushafPageRenderer).first),
+        isScrollControlled: true,
+        useSafeArea: true,
+        builder: (_) => FractionallySizedBox(
+          heightFactor: 0.92,
+          child: SimilarSheet(ayah: pressed, groups: six, labels: labels),
+        ),
+      );
+      await settle(tester);
+      expect(tester.takeException(), isNull);
+      expect(find.byType(ChoiceChip), findsNWidgets(6));
+      final tops = {
+        for (var i = 0; i < 6; i++) tester.getRect(find.byType(ChoiceChip).at(i)).top,
+      };
+      expect(tops.length, greaterThan(1), reason: 'more than one row');
+      for (var i = 5; i >= 0; i--) {
+        await tester.tap(find.byType(ChoiceChip).at(i));
+        await settle(tester, 1);
+        expect(tester.widget<ChoiceChip>(find.byType(ChoiceChip).at(i)).selected, isTrue);
+      }
+      expect(tester.getSemantics(find.byType(ChoiceChip).at(5)).label, 'المجموعة ٦');
+      handle.dispose();
+      await tester.tap(find.byTooltip('إغلاق'));
+      await settle(tester);
+      await tester.pump(const Duration(seconds: 3));
+    });
   });
 }

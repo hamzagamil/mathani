@@ -2,7 +2,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import '../data/models.dart';
@@ -91,12 +90,7 @@ class MathaniApp extends StatelessWidget {
           localeListResolutionCallback: (deviceLocales, _) =>
               resolveLocale(prefs.language, deviceLocales),
           // Around the Navigator, so sheets, dialogs and snack bars stay inside the column.
-          builder: kIsWeb
-              ? (context, child) => PhoneColumn(child: child!)
-              : (context, child) {
-                  syncOrientation(MediaQuery.sizeOf(context));
-                  return child!;
-                },
+          builder: kIsWeb ? (context, child) => PhoneColumn(child: child!) : null,
           home: const PrayerNotificationOpenHost(child: _Home()),
         );
       },
@@ -164,25 +158,6 @@ class PhoneColumn extends StatelessWidget {
     );
   }
 }
-
-bool? _portraitOnly;
-
-/// On Android, portrait on phones and folded foldables, and any orientation on large screens
-/// (shortest side 600 dp or more), so an open foldable can be held either way (specs/012
-/// research R6). The manifest keeps phones in portrait from launch. iOS keeps its Info.plist
-/// orientations, which the iPhone Duo's inner screen ignores. Calls the platform only on a change.
-void syncOrientation(Size screen) {
-  if (kIsWeb || defaultTargetPlatform != TargetPlatform.android || screen.isEmpty) return;
-  final portrait = screen.shortestSide < 600;
-  if (portrait == _portraitOnly) return;
-  _portraitOnly = portrait;
-  SystemChrome.setPreferredOrientations(
-      portrait ? const [DeviceOrientation.portraitUp] : const []);
-}
-
-/// Forgets the last orientation sent, so a test sees the next call.
-@visibleForTesting
-void resetOrientationSync() => _portraitOnly = null;
 
 /// The onboarding while it is on a setup step or gesture stop, otherwise the reader (which lays
 /// the button hints over itself) (specs/005 contracts/onboarding-flow.md › App shell).
