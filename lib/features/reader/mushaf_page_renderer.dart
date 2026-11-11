@@ -216,6 +216,9 @@ class RenderMushafPage extends RenderBox {
 
   ({_Detail surah, _Detail juz, _Detail page})? _details;
   final Map<int, TextPainter> _wordPainters = {}; // natural shape, by word id
+
+  /// The font size the cached word painters were shaped at.
+  double? _shapedFontSize;
   // With kashida, by display string and whether its ayah is linked (specs/010): the same string
   // can be in a linked and an unlinked ayah.
   final Map<(bool, String), TextPainter> _stretchedPainters = {};
@@ -249,6 +252,13 @@ class RenderMushafPage extends RenderBox {
       markNeedsPaint();
     }
   }
+
+  /// The font sizes the words on the page are drawn at: one value, the page's (specs/013 tests).
+  @visibleForTesting
+  Set<double?> get wordFontSizes => {
+        for (final line in _placements)
+          for (final w in line.words) w.painter.text?.style?.fontSize,
+      };
 
   /// The text colour [wordId] is drawn in, or null when it is not on this page (specs/010 tests).
   @visibleForTesting
@@ -360,6 +370,12 @@ class RenderMushafPage extends RenderBox {
     size = constraints.biggest;
     final page = _config.page;
     final geometry = _geometry = PageGeometry.of(size, _config.targetEm);
+    // The words are shaped once and kept. At another text size (the phone turned, a foldable
+    // opened) they are shaped again, or they would keep their old size on the new page.
+    if (geometry.fontSize != _shapedFontSize) {
+      _disposePainters();
+      _shapedFontSize = geometry.fontSize;
+    }
     final block = geometry.textBlock;
     // Pages with fewer lines (1 and 2) keep the same spacing, centred in the block.
     final slots = math.max(PageGeometry.linesPerPage, page.lines.length);

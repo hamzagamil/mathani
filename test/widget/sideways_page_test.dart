@@ -105,12 +105,19 @@ void main() {
       (tester) async {
     await pumpApp(tester, upright);
     final before = boxOf(tester, 50).geometry!.textBlock.width;
+    final beforeFont = boxOf(tester, 50).geometry!.fontSize;
+    final overGapBefore = boxOf(tester, 50).lineReports.where((l) => l.overGap).length;
+    expect(boxOf(tester, 50).wordFontSizes, {beforeFont});
     expect(scrollViewOf(50), findsNothing);
     setScreen(tester, sideways);
     await settle(tester);
     final box = boxOf(tester, 50);
     expect(box.geometry!.textBlock.width / before, greaterThanOrEqualTo(1.7));
     expect(box.allLinesFit, isTrue);
+    // The words themselves are larger, not the same words spread over a wider line.
+    expect(box.wordFontSizes, {box.geometry!.fontSize});
+    expect(box.geometry!.fontSize / beforeFont, greaterThanOrEqualTo(1.7));
+    expect(box.lineReports.where((l) => l.overGap).length, lessThanOrEqualTo(overGapBefore));
     // Inside the safe areas: nothing under the camera cut-outs.
     final page = tester.getRect(rendererOf(50));
     expect(page.left, greaterThanOrEqualTo(44));
@@ -166,6 +173,8 @@ void main() {
     setScreen(tester, upright);
     await settle(tester);
     expect(reader.page, 300);
+    expect(boxOf(tester, 300).wordFontSizes, {boxOf(tester, 300).geometry!.fontSize},
+        reason: 'back to the upright size');
     expect(scrollViewOf(300), findsNothing);
     expect(tester.getRect(rendererOf(300)).height, lessThanOrEqualTo(upright.height));
     expect(tester.takeException(), isNull);
