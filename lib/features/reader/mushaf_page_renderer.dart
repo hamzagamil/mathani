@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart' show setEquals;
 import 'package:flutter/widgets.dart';
 
 import '../../app/theme/tokens.dart';
@@ -25,6 +26,7 @@ class MushafPalette {
     this.hint = const Color(0x00000000),
     this.mistake = const Color(0x00000000),
     this.similar = const Color(0x00000000),
+    this.khatmaMark = const Color(0x00000000),
   });
 
   final Color ink;
@@ -35,6 +37,7 @@ class MushafPalette {
   final Color hint; // a hinted word in memorization (specs/006)
   final Color mistake; // the ayah-end mark of an ayah with a mistake (specs/006)
   final Color similar; // the text of an ayah with similar ayat (specs/010)
+  final Color khatmaMark; // where a wird or a group part ends (specs/014)
 
   @override
   bool operator ==(Object other) =>
@@ -46,11 +49,12 @@ class MushafPalette {
       other.recited == recited &&
       other.hint == hint &&
       other.mistake == mistake &&
-      other.similar == similar;
+      other.similar == similar &&
+      other.khatmaMark == khatmaMark;
 
   @override
-  int get hashCode =>
-      Object.hash(ink, accentInk, highlight, selection, recited, hint, mistake, similar);
+  int get hashCode => Object.hash(
+      ink, accentInk, highlight, selection, recited, hint, mistake, similar, khatmaMark);
 }
 
 /// What a memorization session hides and marks on the page (specs/006 research R13). Words keep
@@ -130,6 +134,7 @@ class MushafPageRenderer extends LeafRenderObjectWidget {
     required this.palette,
     this.quarterStartWords = const {},
     this.sajdahEndWords = const {},
+    this.endMarks = const {},
     this.selected,
     this.highlighted,
     this.recited,
@@ -150,6 +155,11 @@ class MushafPageRenderer extends LeafRenderObjectWidget {
   final MushafPalette palette;
   final Set<int> quarterStartWords; // word ids that begin a hizb quarter
   final Set<int> sajdahEndWords; // word ids that end a sajdah ayah
+
+  /// Ayah-end word ids where one of the reader's readings ends (specs/014 research R5): the sign
+  /// is drawn in [MushafPalette.khatmaMark], with a small triangle in the end-side margin. A
+  /// change repaints only.
+  final Set<int> endMarks;
   final AyahRef? selected;
   final AyahRef? highlighted;
 
@@ -248,10 +258,29 @@ class RenderMushafPage extends RenderBox {
         old.highlighted != next.highlighted ||
         old.recited != next.recited ||
         old.recitedBasmala != next.recitedBasmala ||
-        old.marks != next.marks) {
+        old.marks != next.marks ||
+        !setEquals(old.endMarks, next.endMarks)) {
       markNeedsPaint();
     }
   }
+
+  /// The colour [wordId] is tinted with when painted, or null (specs/014 tests).
+  @visibleForTesting
+  Color? tintOfWord(int wordId) {
+    for (final line in _placements) {
+      for (final w in line.words) {
+        if (w.word.id == wordId) return _tintOf(w);
+      }
+    }
+    return null;
+  }
+
+  /// Where the end-of-reading triangles are drawn, one per marked line (specs/014 tests).
+  @visibleForTesting
+  List<Rect> get endMarkRects => [
+        for (final line in _placements)
+          if (_endsHere(line)) _endMarkRect(line, _geometry!),
+      ];
 
   /// The font sizes the words on the page are drawn at: one value, the page's (specs/013 tests).
   @visibleForTesting
@@ -586,25 +615,23 @@ class RenderMushafPage extends RenderBox {
       );
     }
     final marks = _config.marks;
+    if (_endsHere(line)) {
+      // Where a reading ends: a small triangle in the end-side (left) margin, on that line, so
+      // the end is clear without colour too (specs/014 research R5).
+      final r = _endMarkRect(line, geometry);
+      canvas.drawPath(
+        Path()
+          ..moveTo(r.left, r.top)
+          ..lineTo(r.right, r.center.dy)
+          ..lineTo(r.left, r.bottom)
+          ..close(),
+        Paint()..color = palette.khatmaMark,
+      );
+    }
     for (final w in line.words) {
       final y = line.top + (line.height - w.painter.height * line.scale) / 2;
-      // Memorization: hidden words leave their place empty; hinted words and the marks of the
-      // expected ayah or an ayah with a mistake are tinted.
-      Color? tint;
-      var hidden = false;
-      if (marks != null) {
-        if (w.word.isAyahEnd) {
-          tint = marks.mistake(w.word.ref)
-              ? palette.mistake
-              : w.word.ref == marks.expected
-                  ? palette.accentInk
-                  : null;
-        } else if (marks.hidden(w.word.id)) {
-          hidden = true;
-        } else if (marks.hinted(w.word.id)) {
-          tint = palette.hint;
-        }
-      }
+      final tint = _tintOf(w);
+      final hidden = marks != null && !w.word.isAyahEnd && marks.hidden(w.word.id);
       if (tint != null) {
         canvas.saveLayer(line.wordRect(w).inflate(geometry.fontSize * 0.2),
             Paint()..colorFilter = ColorFilter.mode(tint, BlendMode.srcIn));
@@ -641,6 +668,42 @@ class RenderMushafPage extends RenderBox {
         p.dispose();
       }
     }
+  }
+
+  /// The colour a word is tinted with. Memorization: hinted words, and the marks of the expected
+  /// ayah or an ayah with a mistake. Otherwise the ayah-end sign where a reading ends.
+  Color? _tintOf(_PlacedWord w) {
+    final marks = _config.marks;
+    final palette = _config.palette;
+    if (marks != null) {
+      if (w.word.isAyahEnd) {
+        return marks.mistake(w.word.ref)
+            ? palette.mistake
+            : w.word.ref == marks.expected
+                ? palette.accentInk
+                : null;
+      }
+      return !marks.hidden(w.word.id) && marks.hinted(w.word.id) ? palette.hint : null;
+    }
+    return _config.endMarks.contains(w.word.id) ? palette.khatmaMark : null;
+  }
+
+  /// Whether a reading ends on [line]. Never during memorization (FR-041).
+  bool _endsHere(_LinePlacement line) {
+    final ends = _config.endMarks;
+    if (ends.isEmpty || _config.marks != null || line.line.type != LineType.ayah) return false;
+    return line.line.words.any((w) => ends.contains(w.id));
+  }
+
+  /// The end-of-reading triangle: centred in the end-side margin, on [line].
+  Rect _endMarkRect(_LinePlacement line, PageGeometry geometry) {
+    final side = geometry.fontSize * 0.36;
+    final margin = geometry.textBlock.left;
+    return Rect.fromCenter(
+      center: Offset(margin / 2, line.top + line.height / 2),
+      width: math.min(side, margin * 0.8),
+      height: side,
+    );
   }
 
   /// Whether [line]'s title is drawn as its printed header glyph, not the plain frame.

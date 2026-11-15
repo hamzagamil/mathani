@@ -13,6 +13,9 @@ import '../../shared/mathani_icons.dart';
 import '../../shared/numerals.dart';
 import '../../shared/reader_state.dart';
 import '../index/index_screen.dart';
+import '../khatma/khatma_controller.dart';
+import '../khatma/khatma_screen.dart';
+import '../khatma/reader_khatma_row.dart';
 import '../memorization/memorization_bar.dart';
 import '../memorization/memorization_controller.dart';
 import '../memorization/memorization_score.dart';
@@ -164,15 +167,20 @@ class _ReaderScreenState extends State<ReaderScreen> {
           setState(() => _controlsVisible = true);
         });
       }
+      final onScreen = (reader.page, reader.page);
       return _withTour(Scaffold(
         backgroundColor: colors.surface,
         appBar: const _ReaderHeader(),
         bottomNavigationBar: docked
             ? Column(mainAxisSize: MainAxisSize.min, children: [
+                ReaderKhatmaRows(pages: onScreen),
                 _ReaderToolbar(safeBottom: false, targets: _targets),
                 bar,
               ])
-            : _ReaderToolbar(targets: _targets),
+            : Column(mainAxisSize: MainAxisSize.min, children: [
+                ReaderKhatmaRows(pages: onScreen),
+                _ReaderToolbar(targets: _targets),
+              ]),
         body: SafeArea(
           top: false,
           child: Padding(
@@ -221,7 +229,12 @@ class _ReaderScreenState extends State<ReaderScreen> {
             child: _Overlay(
               visible: show,
               hiddenOffset: const Offset(0, 1),
-              child: _ReaderToolbar(safeBottom: !docked, targets: _targets),
+              // The Done row sits in the controls, so it never covers text while reading
+              // (specs/014 research R6).
+              child: Column(mainAxisSize: MainAxisSize.min, children: [
+                ReaderKhatmaRows(pages: pagesOnScreen(context, reader)),
+                _ReaderToolbar(safeBottom: !docked, targets: _targets),
+              ]),
             ),
           ),
         ],
@@ -235,6 +248,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
   Widget _withTour(Widget scaffold) {
     final onboarding = OnboardingScope.maybeOf(context);
     final touring = onboarding?.holdsReader ?? false;
+    scaffold = KhatmaEventListener(child: scaffold);
     return PopScope(
       canPop: !touring,
       onPopInvokedWithResult: (didPop, _) {
@@ -298,6 +312,13 @@ class _ReaderScreenState extends State<ReaderScreen> {
   }
 }
 
+/// The pages on screen: the reader's page, or both facing pages (specs/012).
+PagesOnScreen pagesOnScreen(BuildContext context, ReaderController reader) {
+  if (!showsSpread(context)) return (reader.page, reader.page);
+  final right = PageGeometry.spreadRightPage(reader.page);
+  return (right, right + 1);
+}
+
 /// Slides [child] in and out of view; while hidden it takes no taps and is not announced.
 class _Overlay extends StatelessWidget {
   const _Overlay({required this.visible, required this.hiddenOffset, required this.child});
@@ -352,11 +373,18 @@ class _ReaderHeader extends StatelessWidget implements PreferredSizeWidget {
             overflow: TextOverflow.ellipsis,
           ),
           // Interface numbers follow the language (contracts/ui-screens.md › Direction rules).
-          Text(
-            '${l10n.juzLabel(formatNumber(head.juz, locale))} · $pages',
-            style: TypeScale.caption.copyWith(
-              fontFamily: TypeScale.uiFamily,
-              color: colors.inkOnBar.withValues(alpha: 0.8),
+          // Inside a wird or a group part, the pages left (specs/014 FR-011); the line shrinks
+          // to fit and never wraps.
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              '${l10n.juzLabel(formatNumber(head.juz, locale))} · $pages'
+              '${pagesLeftSuffix(context, pagesOnScreen(context, reader).$1)}',
+              maxLines: 1,
+              style: TypeScale.caption.copyWith(
+                fontFamily: TypeScale.uiFamily,
+                color: colors.inkOnBar.withValues(alpha: 0.8),
+              ),
             ),
           ),
         ],
@@ -411,7 +439,32 @@ class _BookmarkToggle extends StatelessWidget {
   }
 }
 
-/// Reader actions: index, search, layout toggle, bookmark, settings.
+/// The toolbar's buttons, spread evenly; when they do not fit at their minimum size (44 pt on
+/// iPhone, 48 dp on Android), the row scrolls sideways and no button shrinks (specs/014 R6).
+class _ToolbarRow extends StatelessWidget {
+  const _ToolbarRow({required this.children});
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    // Each button is exactly the platform's minimum target, not the padded 48 of Material.
+    final theme = Theme.of(context);
+    return Theme(
+      data: theme.copyWith(materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
+      child: LayoutBuilder(builder: (context, constraints) {
+        if (children.length * minTouchTarget <= constraints.maxWidth) {
+          return Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: children);
+        }
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(mainAxisSize: MainAxisSize.min, children: children),
+        );
+      }),
+    );
+  }
+}
+
+/// Reader actions: index, search, listen, memorize, khatma, bookmark, settings.
 class _ReaderToolbar extends StatelessWidget {
   const _ReaderToolbar({this.safeBottom = true, required this.targets});
 
@@ -442,8 +495,7 @@ class _ReaderToolbar extends StatelessWidget {
           decoration: BoxDecoration(border: Border(top: BorderSide(color: colors.line))),
           child: IconTheme(
             data: IconThemeData(color: colors.ink),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            child: _ToolbarRow(
               children: [
                 IconButton(
                   key: targets.index,
@@ -477,6 +529,14 @@ class _ReaderToolbar extends StatelessWidget {
                     icon: const Icon(MathaniIcons.memorize),
                     tooltip: l10n.memorize,
                     onPressed: () => showMemorizeSheet(context),
+                  ),
+                // Khatma (specs/014): before the bookmark, one tap to the Khatma screen (FR-009).
+                if (KhatmaScope.maybeOf(context) != null)
+                  IconButton(
+                    key: targets.khatma,
+                    icon: const Icon(MathaniIcons.khatma),
+                    tooltip: l10n.khatmaTitle,
+                    onPressed: () => push(const KhatmaScreen()),
                   ),
                 const _BookmarkToggle(),
                 IconButton(

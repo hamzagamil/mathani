@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Group khatma links open the app (specs/014 research R16), verified through
+	     https://get.mthani.app/.well-known/apple-app-site-association. -->
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:get.mthani.app</string>
+	</array>
+</dict>
+</plist>

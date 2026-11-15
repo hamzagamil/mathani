@@ -1,0 +1,10 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["YJBH85NYZU.com.mthani.app"],
+        "components": [{ "/": "/k/*", "comment": "A group khatma (specs/014)" }]
+      }
+    ]
+  }
+}

@@ -27,7 +27,7 @@ void main() {
       reader = (await tester.runAsync(
           () => openTestReader(onboarded: onboarded, similar: similar)))!;
       (recitation, engine, _) = openTestRecitation(reader);
-      c = OnboardingController(reader: reader, recitation: recitation, hasMemorize: true);
+      c = OnboardingController(reader: reader, recitation: recitation, hasMemorize: true, hasKhatma: true);
       await body(tester);
       c.dispose();
       await recitation.stop();
@@ -69,7 +69,7 @@ void main() {
     c.next();
     expect(c.step, OnboardingStep.turnPages);
     expect(c.phase, OnboardingPhase.gestures);
-    expect(c.progress, (1, 8)); // 3 gestures and 5 buttons, Memorize among them (specs/006)
+    expect(c.progress, (1, 9)); // 3 gestures and 6 buttons, Memorize (specs/006) and Khatma (specs/014) among them
     c.back();
     expect(c.step, OnboardingStep.reciter);
   });

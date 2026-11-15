@@ -35,6 +35,20 @@ class PrayerAlarmReceiver : BroadcastReceiver() {
                 .setAutoCancel(true).build()
             context.getSystemService(NotificationManager::class.java).notify("mathani.prayer", alert.id, notification)
         }
+
+        /** A khatma reminder (specs/014): its own channel, the phone's default sound (FR-026). */
+        fun postReminder(context: Context, alert: PrayerAlert) {
+            val notification = NotificationCompat.Builder(context, PrayerNotificationsPlugin.REMINDER_CHANNEL)
+                .setSmallIcon(R.drawable.ic_stat_recitation)
+                .setContentTitle(alert.title).setContentText(alert.body)
+                .setStyle(NotificationCompat.BigTextStyle().bigText(alert.body))
+                .setContentIntent(openIntent(context, alert))
+                .setCategory(NotificationCompat.CATEGORY_REMINDER)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setAutoCancel(true).build()
+            context.getSystemService(NotificationManager::class.java)
+                .notify(PrayerNotificationsPlugin.REMINDER_TAG, alert.id, notification)
+        }
     }
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -43,9 +57,24 @@ class PrayerAlarmReceiver : BroadcastReceiver() {
             try {
                 val store = PrayerAlarmStore(context)
                 val now = System.currentTimeMillis()
+                if (intent.action == PrayerNotificationsPlugin.REMINDER_ACTION) {
+                    val reminders = PrayerAlarmStore(context, PrayerAlarmStore.REMINDER_FILE)
+                    val id = intent.getIntExtra("id", -1)
+                    val reminder = reminders.get(id)
+                    val action = PrayerAlertRules.decide(
+                        reminder, intent.getLongExtra("generation", -1), reminders.generation(), now,
+                        fullFileExists = false, canStartFull = false)
+                    if (action == AlertAction.POST && reminder != null && reminders.remove(id)) {
+                        postReminder(context, reminder)
+                    } else if (action == AlertAction.DROP) reminders.remove(id)
+                    return@execute
+                }
                 if (intent.action != PrayerNotificationsPlugin.ALERT_ACTION) {
-                    // Boot, unlock, update, clock or exact-alarm changes: future alerts only.
+                    // Boot, unlock, update, clock or exact-alarm changes: future alerts only, of
+                    // both files.
                     PrayerNotificationsPlugin.install(context, store, now)
+                    PrayerNotificationsPlugin.install(
+                        context, PrayerAlarmStore(context, PrayerAlarmStore.REMINDER_FILE), now, reminder = true)
                     return@execute
                 }
                 val id = intent.getIntExtra("id", -1)

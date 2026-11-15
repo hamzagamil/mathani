@@ -12,12 +12,29 @@ import 'models.dart';
 class UserRepository extends ChangeNotifier {
   UserRepository._(this._db);
 
-  static const _schemaVersion = 1;
+  static const _schemaVersion = 3;
 
   /// The prayer-times state, one JSON value in `preferences` (specs/009 data-model.md).
   static const prayerStateKey = 'prayer.state';
 
+  /// The khatma's daily reminder setting (specs/014 data-model.md).
+  static const khatmaReminderKey = 'khatma.reminder';
+
+  /// Rows that features read when they load, not at startup.
+  static const _notAtStartup = [
+    prayerStateKey,
+    khatmaReminderKey,
+    // The group khatma (specs/014 data-model.md › 2).
+    'group.name',
+    'group.terms',
+    'group.installed',
+    'group.key',
+  ];
+
   final Database _db;
+
+  /// The database, for features that keep their own tables in it (specs/014 khatmas).
+  Database get database => _db;
 
   /// Bookmarks, newest first (FR-015). Kept in memory; the table is small.
   List<Bookmark> _bookmarks = const [];
@@ -109,6 +126,55 @@ class UserRepository extends ChangeNotifier {
           ) WITHOUT ROWID''');
       await batch.commit(noResult: true);
     }
+    if (from < 2) {
+      // The personal khatma (specs/014 data-model.md). Adds tables only.
+      final batch = db.batch()
+        ..execute('''
+          CREATE TABLE khatmas (
+            id              INTEGER PRIMARY KEY AUTOINCREMENT,
+            state           TEXT NOT NULL,
+            plan            TEXT NOT NULL,
+            start_ayah      INTEGER NOT NULL,
+            start_date      TEXT NOT NULL,
+            planned_finish  TEXT NOT NULL,
+            paused_on       TEXT,
+            place_page      INTEGER NOT NULL,
+            wird_count      INTEGER NOT NULL,
+            finished_on     TEXT,
+            created_at      INTEGER NOT NULL
+          )''')
+        ..execute('''
+          CREATE TABLE khatma_wirds (
+            khatma_id   INTEGER NOT NULL,
+            number      INTEGER NOT NULL,
+            first_ayah  INTEGER NOT NULL,
+            last_ayah   INTEGER NOT NULL,
+            read_on     TEXT,
+            PRIMARY KEY (khatma_id, number)
+          ) WITHOUT ROWID''');
+      await batch.commit(noResult: true);
+    }
+    if (from < 3) {
+      // Group khatmas the reader keeps, and the parts they hold (specs/014 data-model.md › 2).
+      final batch = db.batch()
+        ..execute('''
+          CREATE TABLE group_khatmas (
+            code      TEXT PRIMARY KEY,
+            snapshot  TEXT NOT NULL,
+            version   INTEGER NOT NULL,
+            seen_at   INTEGER NOT NULL,
+            hidden    TEXT NOT NULL DEFAULT '[]'
+          ) WITHOUT ROWID''')
+        ..execute('''
+          CREATE TABLE group_parts (
+            code        TEXT NOT NULL,
+            number      INTEGER NOT NULL,
+            place_page  INTEGER NOT NULL,
+            pending     INTEGER NOT NULL DEFAULT 0,
+            PRIMARY KEY (code, number)
+          ) WITHOUT ROWID''');
+      await batch.commit(noResult: true);
+    }
   }
 
   /// Anchor and all preferences in one call, before the first reader frame (≤ 30 ms).
@@ -116,8 +182,11 @@ class UserRepository extends ChangeNotifier {
   Future<(AyahRef, ReaderPreferences)> loadStartup() async {
     final results = await Future.wait([
       _db.query('reading_state', where: 'id = 1'),
-      // Prayer times read their own row only when needed (specs/009 research R11).
-      _db.query('preferences', where: 'key != ?', whereArgs: [prayerStateKey]),
+      // Prayer times and the khatma read their own rows only when needed (specs/009 research
+      // R11, specs/014 research R10).
+      _db.query('preferences',
+          where: 'key NOT IN (${List.filled(_notAtStartup.length, '?').join(', ')})',
+          whereArgs: _notAtStartup),
     ]);
     final state = results[0];
     final anchor = state.isEmpty

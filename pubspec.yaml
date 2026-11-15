@@ -18,6 +18,8 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   flutter_local_notifications: 22.3.3
+  # The group khatma's device key, in the platform's secure storage (specs/014 research R15).
+  flutter_secure_storage: 11.2.0
   geolocator: 14.0.1
   # Recordings over HTTP on phones and in browsers (specs/008 research R18a).
   http: ^1.6.0

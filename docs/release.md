@@ -161,6 +161,31 @@ release; releases bundle the latest one (above).
 - [ ] Every quickstart scenario passes on both reference devices; numbers recorded below.
 - [ ] About screen shows Tanzil (with link), QUL and KFGQPC attributions.
 - [ ] Store privacy answers match `docs/store/privacy.md`.
+- [ ] Khatma (specs/014 quickstart A1 to A9) passes on one iPhone and one Android phone: the
+      reminder fires with the app closed and after a restart, and prayer alerts still keep at
+      least seven days pending (at most 52 on iPhone now, leaving 10 for the reminder).
+
+## Group khatma setup (specs/014 release B)
+
+Once, before the release that carries the group khatma (quickstart Part B › Setup):
+
+- [x] D1 databases `mthani-khatma` and `mthani-khatma-preview` created (2026-11-15); ids in
+      `wrangler.toml`. Apply the schema to both:
+      `npx wrangler@4 d1 execute <name> --remote --file functions/_lib/khatma-schema.sql`.
+- [ ] Worker: `npx wrangler@4 deploy` in `workers/khatma-ops/` (emails each report to the owner
+      through Email Routing; or set `REPORT_WEBHOOK`). Check: a row in the preview `reports`
+      table emails within two minutes.
+- [ ] Rate limiting rule in the dashboard: path starts with `/api/khatma`, over 100 requests in
+      10 s from one IP, block 10 s.
+- [ ] Apple: enable Associated Domains for `com.mthani.app` and renew the profiles (the app now
+      carries `Runner.entitlements`; signing fails until the profile has the capability).
+- [ ] Play Console › App integrity: put the SHA-256 of the app signing key and of the upload key
+      in `web/.well-known/assetlinks.json` (in place of the two placeholders).
+- [ ] After the web deploy: `curl.exe -sI https://get.mthani.app/.well-known/assetlinks.json` and
+      `…/apple-app-site-association` answer `200` with `application/json`.
+- [ ] Contact address confirmed (`mathaniContact`, now `support@mthani.app`).
+- [ ] Store answers, the age rating and the published policy updated (`docs/store/privacy.md` ›
+      Khatma); review notes carry a group khatma link and where Report is.
 
 ## Release log
 

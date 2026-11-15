@@ -1304,4 +1304,687 @@ class AppLocalizationsAr extends AppLocalizations {
   String similarOnPage(String list) {
     return 'فيها متشابه: الآيات $list';
   }
+
+  @override
+  String get khatmaTitle => 'الختمة';
+
+  @override
+  String get khatmaIntro =>
+      'خطّط لختمة كاملة للقرآن: يقسّمها التطبيق أورادًا يومية، ويعلّم نهاية كل ورد، ويحفظ موضعك.';
+
+  @override
+  String get khatmaStart => 'ابدأ ختمة';
+
+  @override
+  String get khatmaAlreadyInProgress =>
+      'لديك ختمة قائمة. أتمّها أو أنهِها أولًا.';
+
+  @override
+  String get khatmaTodaysWird => 'ورد اليوم';
+
+  @override
+  String khatmaWirdOf(String number, String total) {
+    return 'الورد $number من $total';
+  }
+
+  @override
+  String khatmaHizb(String number) {
+    return 'الحزب $number';
+  }
+
+  @override
+  String khatmaQuarter(String quarter, String hizb) {
+    return 'الربع $quarter من الحزب $hizb';
+  }
+
+  @override
+  String khatmaWirdNumber(String number) {
+    return 'الورد $number';
+  }
+
+  @override
+  String khatmaAyahRef(String surah, String ayah) {
+    return '$surah $ayah';
+  }
+
+  @override
+  String khatmaRange(String from, String to) {
+    return 'من $from إلى $to';
+  }
+
+  @override
+  String khatmaPagesRange(String first, String last) {
+    return 'الصفحات $first إلى $last';
+  }
+
+  @override
+  String khatmaPageCount(int count, String shown) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$shown صفحة',
+      few: '$shown صفحات',
+      two: 'صفحتان',
+      one: 'صفحة واحدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get khatmaRead => 'اقرأ';
+
+  @override
+  String get khatmaContinue => 'تابع';
+
+  @override
+  String get khatmaDone => 'أتممت الورد';
+
+  @override
+  String get khatmaTodayDone => 'أتممت ورد اليوم';
+
+  @override
+  String get khatmaReadNow => 'اقرأ الآن';
+
+  @override
+  String khatmaNext(String name) {
+    return 'التالي: $name';
+  }
+
+  @override
+  String khatmaStartsOn(String date) {
+    return 'تبدأ في $date';
+  }
+
+  @override
+  String khatmaPausedSince(String date) {
+    return 'متوقفة منذ $date';
+  }
+
+  @override
+  String get khatmaUndo => 'تراجع';
+
+  @override
+  String khatmaPagesLeft(int count, String shown) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'بقي $shown صفحة',
+      few: 'بقيت $shown صفحات',
+      two: 'بقيت صفحتان',
+      one: 'بقيت صفحة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String khatmaEndAt(String ayah) {
+    return 'نهاية ورد اليوم عند الآية $ayah';
+  }
+
+  @override
+  String get khatmaEndsHere => 'ينتهي ورد اليوم في هذه الصفحة';
+
+  @override
+  String get khatmaSetPlace => 'اجعل موضع الختمة هنا';
+
+  @override
+  String khatmaSetPlaceConfirm(String read, String unread) {
+    return 'أوراد تصبح مقروءة: $read. أوراد تصبح غير مقروءة: $unread. وتستمر الختمة من هذه الآية.';
+  }
+
+  @override
+  String get khatmaSetPlaceDone => 'تستمر الختمة من هنا.';
+
+  @override
+  String get khatmaConfirm => 'تأكيد';
+
+  @override
+  String get khatmaCancel => 'إلغاء';
+
+  @override
+  String get khatmaPlanTitle => 'الخطة';
+
+  @override
+  String get khatmaDailyAmount => 'مقدار يومي';
+
+  @override
+  String get khatmaAmount1 => 'ربع حزب يوميًا';
+
+  @override
+  String get khatmaAmount2 => 'نصف حزب يوميًا';
+
+  @override
+  String get khatmaAmount4 => 'حزب يوميًا';
+
+  @override
+  String get khatmaAmount8 => 'جزء يوميًا';
+
+  @override
+  String get khatmaAmount16 => 'جزءان يوميًا';
+
+  @override
+  String get khatmaAmount24 => 'ثلاثة أجزاء يوميًا';
+
+  @override
+  String get khatmaAmount80 => 'عشرة أجزاء يوميًا';
+
+  @override
+  String get khatmaSevenDays => 'سبعة أيام بسور كاملة';
+
+  @override
+  String get khatmaCustom => 'مخصّصة';
+
+  @override
+  String get khatmaCustomDays => 'عدد الأيام';
+
+  @override
+  String get khatmaCustomPages => 'صفحات في اليوم';
+
+  @override
+  String get khatmaCustomDate => 'تاريخ الختم';
+
+  @override
+  String get khatmaChooseDate => 'اختر تاريخًا';
+
+  @override
+  String khatmaNumberRange(String min, String max) {
+    return 'أدخل رقمًا من $min إلى $max.';
+  }
+
+  @override
+  String khatmaDaysCount(int count, String shown) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$shown يومًا',
+      few: '$shown أيام',
+      two: 'يومان',
+      one: 'يوم واحد',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get khatmaStartFrom => 'ابدأ من';
+
+  @override
+  String get khatmaFromBeginning => 'البداية';
+
+  @override
+  String khatmaFromThisPage(String page) {
+    return 'هذه الصفحة ($page)';
+  }
+
+  @override
+  String get khatmaFromJuz => 'جزء';
+
+  @override
+  String get khatmaFromSurah => 'سورة';
+
+  @override
+  String get khatmaFromPage => 'صفحة';
+
+  @override
+  String get khatmaStartOn => 'تبدأ في';
+
+  @override
+  String get khatmaToday => 'اليوم';
+
+  @override
+  String get khatmaLaterDate => 'تاريخ لاحق';
+
+  @override
+  String khatmaSummaryRange(String days, String from, String to, String date) {
+    return '$days · من $from إلى $to صفحة يوميًا · تنتهي $date';
+  }
+
+  @override
+  String khatmaSummaryOne(String days, String pages, String date) {
+    return '$days · $pages يوميًا · تنتهي $date';
+  }
+
+  @override
+  String khatmaFromPlace(String page) {
+    return 'من الصفحة $page';
+  }
+
+  @override
+  String get khatmaDateBeforeStart => 'اختر تاريخًا لا يسبق تاريخ البدء.';
+
+  @override
+  String khatmaProgressWirds(String read, String total) {
+    return 'الأوراد المقروءة: $read من $total';
+  }
+
+  @override
+  String khatmaProgressPages(String read, String left) {
+    return 'الصفحات المقروءة: $read · الباقية: $left';
+  }
+
+  @override
+  String khatmaPercent(String percent) {
+    return '$percent مقروء';
+  }
+
+  @override
+  String khatmaStarted(String date) {
+    return 'بدأت $date';
+  }
+
+  @override
+  String khatmaPlannedFinish(String date) {
+    return 'الختم المقرّر $date';
+  }
+
+  @override
+  String khatmaExpectedFinish(String date) {
+    return 'الختم المتوقّع $date';
+  }
+
+  @override
+  String khatmaExpectedLate(String date, String days) {
+    return 'الختم المتوقّع $date، بعد الموعد المقرّر بـ$days';
+  }
+
+  @override
+  String khatmaExpectedEarly(String date, String days) {
+    return 'الختم المتوقّع $date، قبل الموعد المقرّر بـ$days';
+  }
+
+  @override
+  String get khatmaAllWirds => 'كل الأوراد';
+
+  @override
+  String get khatmaChangePlan => 'غيّر الخطة';
+
+  @override
+  String get khatmaPause => 'أوقف مؤقتًا';
+
+  @override
+  String get khatmaResume => 'استأنف';
+
+  @override
+  String get khatmaEnd => 'أنهِ الختمة';
+
+  @override
+  String get khatmaEndConfirm =>
+      'أتريد إنهاء هذه الختمة؟ لن تُضاف إلى الختمات السابقة، وتبقى علاماتك وموضع قراءتك.';
+
+  @override
+  String get khatmaNotRead => 'لم يُقرأ';
+
+  @override
+  String khatmaReadOn(String date) {
+    return 'قُرئ $date';
+  }
+
+  @override
+  String get khatmaCurrent => 'الحالي';
+
+  @override
+  String get khatmaReminder => 'التذكير اليومي';
+
+  @override
+  String get khatmaReminderHint =>
+      'تذكير واحد في اليوم، حين يكون لديك ما لم تقرأه.';
+
+  @override
+  String get khatmaReminderTime => 'الوقت';
+
+  @override
+  String get khatmaReminderBlocked =>
+      'التذكيرات محظورة. اختيارك محفوظ؛ اسمح بإشعارات مثاني من إعدادات هاتفك.';
+
+  @override
+  String get khatmaReminderLate => 'قد تتأخر التذكيرات بضع دقائق.';
+
+  @override
+  String get khatmaReminderWeb => 'التذكيرات متاحة في تطبيقي الهاتف.';
+
+  @override
+  String khatmaReminderBody(String name, String pages) {
+    return '$name · $pages';
+  }
+
+  @override
+  String get khatmaRecordTitle => 'الختمات السابقة';
+
+  @override
+  String khatmaRecordCount(int count, String shown) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$shown ختمة',
+      few: '$shown ختمات',
+      two: 'ختمتان',
+      one: 'ختمة واحدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String khatmaDateRange(String from, String to) {
+    return 'من $from إلى $to';
+  }
+
+  @override
+  String get khatmaDeleteRecord => 'احذف';
+
+  @override
+  String get khatmaDeleteRecordConfirm => 'أتريد حذف هذه الختمة من القائمة؟';
+
+  @override
+  String get khatmaStartNew => 'ابدأ ختمة جديدة';
+
+  @override
+  String get khatmaComplete => 'تمّت الختمة';
+
+  @override
+  String get khatmaClose => 'إغلاق';
+
+  @override
+  String get tourKhatma => 'خطّط لختمة، واقرأ ورد كل يوم، واحفظ موضعك.';
+
+  @override
+  String khatmaPartEndsHere(String title) {
+    return 'ينتهي جزؤك في «$title» في هذه الصفحة';
+  }
+
+  @override
+  String khatmaPartEndAt(String ayah) {
+    return 'نهاية جزئك عند الآية $ayah';
+  }
+
+  @override
+  String khatmaPartReminder(String title, String part) {
+    return 'جزؤك في «$title»: $part';
+  }
+
+  @override
+  String get khatmaReminderOn => 'ذكّرني كل يوم';
+
+  @override
+  String get groupSection => 'الختمات الجماعية';
+
+  @override
+  String get groupStart => 'ابدأ ختمة جماعية';
+
+  @override
+  String get groupOpenLink => 'افتح رابطًا أو رمزًا';
+
+  @override
+  String get groupOpen => 'افتح';
+
+  @override
+  String get groupCodeHint => 'الصق رابطًا أو رمزًا';
+
+  @override
+  String get groupCodeInvalid => 'هذا ليس رابط ختمة جماعية ولا رمزها.';
+
+  @override
+  String groupProgress(String read, String total) {
+    return 'قُرئ $read من $total';
+  }
+
+  @override
+  String groupCounts(String free, String taken, String read) {
+    return 'متاح $free · محجوز $taken · مقروء $read';
+  }
+
+  @override
+  String groupFinishBy(String date) {
+    return 'الختم قبل $date';
+  }
+
+  @override
+  String groupFinishPassed(String date) {
+    return 'مضى تاريخ الختم $date';
+  }
+
+  @override
+  String groupCompleteOn(String date) {
+    return 'اكتملت في $date';
+  }
+
+  @override
+  String get groupMyParts => 'أجزائي';
+
+  @override
+  String get groupAllParts => 'كل الأجزاء';
+
+  @override
+  String get groupFree => 'متاح';
+
+  @override
+  String get groupTake => 'خذ هذا الجزء';
+
+  @override
+  String get groupGiveBack => 'أعِد الجزء';
+
+  @override
+  String get groupDone => 'أتممت الجزء';
+
+  @override
+  String get groupUndoRead => 'لم أُتمّه بعد';
+
+  @override
+  String get groupYou => 'أنت';
+
+  @override
+  String get groupRead => 'مقروء';
+
+  @override
+  String get groupWaiting => 'بانتظار الإرسال';
+
+  @override
+  String groupLastUpdated(String time) {
+    return 'آخر تحديث $time. قد لا يكون محدّثًا.';
+  }
+
+  @override
+  String get groupShare => 'شارك';
+
+  @override
+  String get groupRefresh => 'حدّث';
+
+  @override
+  String get groupReport => 'بلّغ';
+
+  @override
+  String get groupLeave => 'غادر الختمة';
+
+  @override
+  String get groupLeaveConfirm =>
+      'أتريد مغادرة هذه الختمة؟ يُحذف اسمك وتصبح أجزاؤك غير المقروءة متاحة.';
+
+  @override
+  String groupShareText(String title, String link) {
+    return '«$title»: ختمة جماعية في مثاني. خذ جزءك: $link';
+  }
+
+  @override
+  String get groupLinkWarning =>
+      'كل من لديه الرابط يرى الأسماء ويستطيع أخذ الأجزاء.';
+
+  @override
+  String get groupNameWarning => 'سيرى اسمك كل من لديه الرابط.';
+
+  @override
+  String get groupYourName => 'اسمك';
+
+  @override
+  String get groupTitleField => 'العنوان';
+
+  @override
+  String get groupDivision => 'الأجزاء';
+
+  @override
+  String get groupThirty => '٣٠ جزءًا';
+
+  @override
+  String get groupSixty => '٦٠ حزبًا';
+
+  @override
+  String get groupFinishDate => 'تاريخ الختم (اختياري)';
+
+  @override
+  String get groupNoDate => 'بلا تاريخ ختم';
+
+  @override
+  String get groupCreate => 'ابدأ';
+
+  @override
+  String get groupNeedsConnection => 'يلزم اتصال بالإنترنت.';
+
+  @override
+  String get groupRetry => 'أعد المحاولة';
+
+  @override
+  String get groupJustTaken => 'أخذ أحدهم هذا الجزء للتو.';
+
+  @override
+  String get groupNoLongerYours => 'لم يعد هذا الجزء لك.';
+
+  @override
+  String get groupGone => 'هذه الختمة لم تعد موجودة.';
+
+  @override
+  String get groupRemoveFromList => 'احذفها من القائمة';
+
+  @override
+  String groupBlocked(String email) {
+    return 'لا يستطيع هذا الجهاز بدء ختمات جماعية أو الانضمام إليها. للاستفسار راسل $email.';
+  }
+
+  @override
+  String get groupLimitOrganised =>
+      'تنظّم بالفعل الحد الأقصى من الختمات الجماعية.';
+
+  @override
+  String get groupLimitStarted => 'بدأت اليوم الحد الأقصى من الختمات الجماعية.';
+
+  @override
+  String get groupLimitBusy => 'بُدئت ختمات جماعية كثيرة اليوم. حاول غدًا.';
+
+  @override
+  String get groupLimitReports => 'أرسلت اليوم الحد الأقصى من البلاغات.';
+
+  @override
+  String get groupProblemEmpty => 'اكتب نصًا.';
+
+  @override
+  String get groupProblemLong => 'النص طويل.';
+
+  @override
+  String get groupProblemCharacters => 'فيه رموز غير مسموحة.';
+
+  @override
+  String get groupProblemLink => 'الروابط والعناوين غير مسموحة.';
+
+  @override
+  String get groupProblemWord => 'فيه كلمة غير مسموحة.';
+
+  @override
+  String get groupUpdateNeeded => 'تحتاج هذه الختمة إلى تحديث التطبيق.';
+
+  @override
+  String get groupError => 'حدث خطأ. أعد المحاولة.';
+
+  @override
+  String get groupTermsTitle => 'قبل أن تشارك';
+
+  @override
+  String get groupTerms1 =>
+      'يرى كل من لديه الرابط عنوان الختمة واسمك والأجزاء التي أخذتها.';
+
+  @override
+  String get groupTerms2 =>
+      'لا تُقبل الأسماء والعناوين المسيئة؛ تُحذف، وقد يُحظر الجهاز الذي كتبها.';
+
+  @override
+  String get groupTerms3 => 'بلّغ عن اسم أو ختمة من زر «بلّغ» في صفحتها.';
+
+  @override
+  String groupTerms4(String email) {
+    return 'للتواصل مع مثاني راسل $email.';
+  }
+
+  @override
+  String get groupAgree => 'أوافق';
+
+  @override
+  String get groupReportName => 'بلّغ عن اسم';
+
+  @override
+  String get groupReportKhatma => 'بلّغ عن هذه الختمة';
+
+  @override
+  String groupReportConfirm(String name) {
+    return 'أتريد إبلاغ مثاني عن «$name»؟ سيُخفى على هذا الجهاز.';
+  }
+
+  @override
+  String get groupReportKhatmaConfirm =>
+      'أتريد إبلاغ مثاني عن هذه الختمة؟ ستُحذف من قائمتك.';
+
+  @override
+  String get groupReportSent => 'أُرسل البلاغ.';
+
+  @override
+  String get groupHidden => 'مخفي';
+
+  @override
+  String get groupFreeIt => 'حرّر الجزء';
+
+  @override
+  String get groupMarkRead => 'اجعله مقروءًا';
+
+  @override
+  String get groupMarkUnread => 'اجعله غير مقروء';
+
+  @override
+  String get groupGiveTo => 'أعطه لاسم';
+
+  @override
+  String get groupRemoveParticipant => 'احذفه من هذه الختمة';
+
+  @override
+  String groupRemoveConfirm(String name) {
+    return 'أتريد حذف «$name»؟ تصبح أجزاؤه غير المقروءة متاحة ولا يستطيع الانضمام مجددًا.';
+  }
+
+  @override
+  String get groupEdit => 'عدّل العنوان أو تاريخ الختم';
+
+  @override
+  String get groupDelete => 'احذف الختمة';
+
+  @override
+  String groupDeleteConfirm(String title) {
+    return 'أتريد حذف «$title» للجميع؟';
+  }
+
+  @override
+  String get groupSave => 'احفظ';
+
+  @override
+  String groupTakenBy(String name) {
+    return 'أخذه $name';
+  }
+
+  @override
+  String groupReadBy(String name) {
+    return 'قرأه $name';
+  }
+
+  @override
+  String groupPartSemantics(String part, String range, String state) {
+    return '$part، $range، $state';
+  }
+
+  @override
+  String get groupCopied => 'نُسخ الرابط.';
+
+  @override
+  String get contactTitle => 'تواصل';
 }

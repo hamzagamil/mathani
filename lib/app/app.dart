@@ -5,6 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import '../data/models.dart';
+import '../features/khatma/group/group_controller.dart';
+import '../features/khatma/group/group_link_host.dart';
+import '../features/khatma/khatma_controller.dart';
+import '../features/khatma/khatma_reminders.dart';
+import '../features/khatma/reminder_open_host.dart';
 import '../features/memorization/memorization_controller.dart';
 import '../features/onboarding/onboarding_controller.dart';
 import '../features/onboarding/onboarding_screen.dart';
@@ -15,6 +20,7 @@ import '../features/reader/reader_screen.dart';
 import '../features/prayer_times/prayer_alerts.dart';
 import '../features/prayer_times/prayer_notification_open_host.dart';
 import '../shared/reader_state.dart';
+import '../platform/app_links.dart';
 import 'l10n/app_localizations.dart';
 import 'theme/app_theme.dart';
 
@@ -31,6 +37,9 @@ class MathaniApp extends StatelessWidget {
     this.onboarding,
     this.memorization,
     this.prayer,
+    this.khatma,
+    this.reminders,
+    this.groups,
   });
 
   final ReaderController controller;
@@ -46,6 +55,15 @@ class MathaniApp extends StatelessWidget {
 
   /// Prayer times and their alerts (specs/009). Null in tests that do not need them.
   final PrayerAlerts? prayer;
+
+  /// The personal khatma (specs/014). Null in tests that do not need it: no Khatma button then.
+  final KhatmaController? khatma;
+
+  /// The khatma's daily reminder (specs/014). Null in tests that do not need it.
+  final KhatmaReminders? reminders;
+
+  /// Group khatmas (specs/014 release B). Null in tests that do not need them.
+  final GroupController? groups;
 
   static const supportedLocales = [Locale('ar'), Locale('en')];
 
@@ -91,7 +109,12 @@ class MathaniApp extends StatelessWidget {
               resolveLocale(prefs.language, deviceLocales),
           // Around the Navigator, so sheets, dialogs and snack bars stay inside the column.
           builder: kIsWeb ? (context, child) => PhoneColumn(child: child!) : null,
-          home: const PrayerNotificationOpenHost(child: _Home()),
+          home: PrayerNotificationOpenHost(
+            child: ReminderOpenHost(
+              // Group khatma links (specs/014 FR-046).
+              child: this.groups == null ? const _Home() : GroupLinkHost(source: AppLinks.instance, child: const _Home()),
+            ),
+          ),
         );
       },
     );
@@ -105,9 +128,18 @@ class MathaniApp extends StatelessWidget {
     final withPrayer = prayer == null
         ? withMemorization
         : PrayerScope(alerts: prayer, child: withMemorization);
+    final khatma = this.khatma;
+    final groups = this.groups;
+    final withGroups = groups == null ? withPrayer : GroupScope(controller: groups, child: withPrayer);
+    final reminders = this.reminders;
+    final withReminders = reminders == null
+        ? withGroups
+        : KhatmaRemindersScope(reminders: reminders, child: withGroups);
+    final withKhatma =
+        khatma == null ? withReminders : KhatmaScope(controller: khatma, child: withReminders);
     final scoped = onboarding == null
-        ? withPrayer
-        : OnboardingScope(controller: onboarding, child: withPrayer);
+        ? withKhatma
+        : OnboardingScope(controller: onboarding, child: withKhatma);
     return ReaderScope(
       controller: controller,
       child: recitation == null

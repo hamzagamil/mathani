@@ -11,6 +11,11 @@ import 'package:mathani/app/l10n/app_localizations.dart';
 import 'package:mathani/data/models.dart';
 import 'package:mathani/features/index/goto_sheet.dart';
 import 'package:mathani/features/index/index_screen.dart';
+import 'package:mathani/features/khatma/khatma_complete_screen.dart';
+import 'package:mathani/features/khatma/khatma_models.dart';
+import 'package:mathani/features/khatma/khatma_screen.dart';
+import 'package:mathani/features/khatma/plan_sheet.dart';
+import 'package:mathani/features/khatma/wird_list_screen.dart';
 import 'package:mathani/features/memorization/memorization_controller.dart';
 import 'package:mathani/features/memorization/range_sheet.dart';
 import 'package:mathani/features/mutashabihat/similar_sheet.dart';
@@ -30,6 +35,7 @@ import 'package:mathani/shared/reader_state.dart';
 import '../support/fake_memorization.dart';
 import '../support/fake_recitation.dart';
 import '../support/harness.dart';
+import '../support/khatma_support.dart';
 import '../support/prayer_fakes.dart';
 
 const sideways = Size(780, 360);
@@ -78,9 +84,10 @@ void main() {
           recogniser: FakeSpeechRecogniser.new,
           mic: FakeMicSource.new,
         );
+        final khatma = await openTestKhatma(tester, reader);
         setScreen(tester, textScale);
         await tester.pumpWidget(MathaniApp(
-            controller: reader, recitation: recitation, memorization: memorization));
+            controller: reader, recitation: recitation, memorization: memorization, khatma: khatma));
         await settle(tester);
         expectNoOverflow(tester, 'Mushaf layout');
 
@@ -103,6 +110,24 @@ void main() {
         await screen('search', const SearchScreen());
         await screen('settings', const SettingsScreen());
         await screen('downloads', const DownloadsScreen());
+        // The khatma (specs/014 FR-041): with none, with one in progress, its wirds, its end.
+        await screen('khatma, none', const KhatmaScreen());
+        showPlanSheet(context(), controller: khatma, currentPage: 1);
+        await close('plan sheet');
+        await tester.runAsync(() =>
+            khatma.start(const MarksPlan(8), startAyah: 1, startDate: khatma.today));
+        await screen('khatma, in progress', const KhatmaScreen());
+        await screen('all wirds', const WirdListScreen());
+        showPlanSheet(context(), controller: khatma, changing: true);
+        await close('change plan');
+        await tester.runAsync(() => khatma.changePlan(const DaysPlan(1)));
+        await tester.runAsync(khatma.markRead); // pushes the completion screen
+        await settle(tester, 2);
+        expect(find.byType(KhatmaCompleteScreen), findsOneWidget);
+        expectNoOverflow(tester, 'khatma complete');
+        Navigator.of(tester.element(find.byType(KhatmaCompleteScreen))).pop();
+        await settle(tester, 2);
+        await screen('khatma, record', const KhatmaScreen());
 
         showGoToSheet(context());
         await close('go-to sheet');
@@ -131,6 +156,7 @@ void main() {
         await tester.pump(const Duration(seconds: 3)); // let the reading position save
         await tester.pumpWidget(const SizedBox());
         recitation.dispose();
+        khatma.dispose();
         await tester.pump(const Duration(seconds: 2));
       });
 

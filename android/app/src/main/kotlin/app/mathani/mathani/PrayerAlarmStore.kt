@@ -13,7 +13,7 @@ data class PrayerAlert(
 ) {
     init {
         require(id >= 0 && atUtcMs > 0)
-        require(kind in setOf("fajr", "dhuhr", "asr", "maghrib", "isha", "qiyam"))
+        require(kind in setOf("fajr", "dhuhr", "asr", "maghrib", "isha", "qiyam", "wird"))
         require(Regex("[a-z0-9_]{1,64}").matches(sound))
         require(title.length in 1..160 && body.length <= 512)
     }
@@ -25,17 +25,24 @@ interface PrayerStoreBackend {
     fun write(value: String)
 }
 
-private class PreferencesBackend(context: Context) : PrayerStoreBackend {
-    private val prefs = context.applicationContext.getSharedPreferences("mathani_prayer_alerts", Context.MODE_PRIVATE)
+private class PreferencesBackend(context: Context, file: String) : PrayerStoreBackend {
+    private val prefs = context.applicationContext.getSharedPreferences(file, Context.MODE_PRIVATE)
     override fun read(): String? = prefs.getString("alerts", null)
     override fun write(value: String) { check(prefs.edit().putString("alerts", value).commit()) }
 }
 
 /** The alerts Dart scheduled, so the receiver can post them and reboots can restore them without
- * starting Flutter. A derived copy: every refill from the app replaces it (research R7). */
+ * starting Flutter. A derived copy: every refill from the app replaces it (research R7). Prayer
+ * alerts and the khatma reminders (specs/014) keep separate files, so a refill of one never
+ * replaces the other. */
 class PrayerAlarmStore(private val backend: PrayerStoreBackend) {
-    constructor(context: Context) : this(PreferencesBackend(context))
-    companion object { private val lock = Any(); const val MAX = 64 }
+    constructor(context: Context, file: String = PRAYER_FILE) : this(PreferencesBackend(context, file))
+    companion object {
+        private val lock = Any()
+        const val MAX = 64
+        const val PRAYER_FILE = "mathani_prayer_alerts"
+        const val REMINDER_FILE = "mathani_khatma_reminders"
+    }
     private data class Snapshot(val generation: Long, val alerts: List<PrayerAlert>)
 
     private fun load(): Snapshot {
@@ -100,12 +107,17 @@ object PrayerAlertRules {
     /** Alerts later than this are missed, not delivered (FR-022). */
     const val LATENESS_MS = 15 * 60_000L
 
+    /** A late reminder for today's wird is still useful (specs/014 research R9). */
+    const val REMINDER_LATENESS_MS = 3 * 60 * 60_000L
+
+    fun lateness(kind: String) = if (kind == "wird") REMINDER_LATENESS_MS else LATENESS_MS
+
     fun decide(
         alert: PrayerAlert?, alertGeneration: Long, storedGeneration: Long, nowMs: Long,
         fullFileExists: Boolean, canStartFull: Boolean,
     ): AlertAction = when {
         alert == null || alertGeneration != storedGeneration -> AlertAction.IGNORE
-        nowMs - alert.atUtcMs > LATENESS_MS -> AlertAction.DROP
+        nowMs - alert.atUtcMs > lateness(alert.kind) -> AlertAction.DROP
         alert.full && alert.kind != "qiyam" && fullFileExists && canStartFull -> AlertAction.PLAY_FULL
         else -> AlertAction.POST
     }

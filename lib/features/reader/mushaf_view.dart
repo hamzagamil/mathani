@@ -8,6 +8,7 @@ import '../../data/models.dart';
 import '../../data/quran_repository.dart';
 import '../../shared/numerals.dart';
 import '../../shared/reader_state.dart';
+import '../khatma/khatma_controller.dart';
 import '../memorization/memorization_controller.dart';
 import '../onboarding/onboarding_controller.dart';
 import '../recitation/recitation_controller.dart';
@@ -148,7 +149,9 @@ class _MushafViewState extends State<MushafView> {
       _cache = _PageCache(reader.quran, printed: _printed(reader));
       if (_pages != null) _prefetch(reader.page);
     }
-    final pages = _controllerFor(showsSpread(context), reader);
+    final spread = showsSpread(context);
+    reader.spreadOnScreen = spread;
+    final pages = _controllerFor(spread, reader);
     // No page turns under the onboarding's button hints; the latest jump applies when they end
     // (specs/005, FR-017a).
     if (reader.jumpSerial != _handledJump && !OnboardingScope.holdsReaderOf(context)) {
@@ -414,16 +417,20 @@ class _MushafPageItemState extends State<_MushafPageItem> {
       if (ref != null && !inSession) widget.onAyahLongPress!(ref);
     }
 
-    final pageLabel = l10n.pageSemantics(
-      toEasternArabic(page.number),
-      quran.surahList[head.surah - 1].nameAr,
-    );
-    return Semantics(
+    // Where a wird or a group part ends on this page (specs/014 FR-010). None while memorizing.
+    final khatma = KhatmaScope.maybeOf(context);
+    final endMarks = khatma?.endMarksOn(page.number) ?? const <int>{};
+    final endAyahs = khatma?.endAyahsOn(page.number) ?? const <int>[];
+    final pageLabel = [
+      l10n.pageSemantics(toEasternArabic(page.number), quran.surahList[head.surah - 1].nameAr),
       // Screen readers hear which ayat on the page have similar ayat (specs/010 FR-004).
-      label: linked.isEmpty
-          ? pageLabel
-          : '$pageLabel. ${l10n.similarOnPage(linked.map((r) => formatNumber(r.ayah, locale))
-              .join(locale.languageCode == 'ar' ? '، ' : ', '))}',
+      if (linked.isNotEmpty)
+        l10n.similarOnPage(linked.map((r) => formatNumber(r.ayah, locale))
+            .join(locale.languageCode == 'ar' ? '، ' : ', ')),
+      for (final a in endAyahs) l10n.khatmaEndAt(formatNumber(a, locale)),
+    ].join('. ');
+    return Semantics(
+      label: pageLabel,
       customSemanticsActions: {
         CustomSemanticsAction(label: l10n.showControls): ?onTapPage,
       },
@@ -453,9 +460,11 @@ class _MushafPageItemState extends State<_MushafPageItem> {
               hint: colors.hint,
               mistake: colors.mistake,
               similar: colors.similar,
+              khatmaMark: colors.khatmaMark,
             ),
             quarterStartWords: widget.cache.quarterStartWords(page.number),
             sajdahEndWords: widget.cache.sajdahEndWords(page.number),
+            endMarks: endMarks,
             selected: reader.selected,
             highlighted: reader.highlighted,
             recited: recited == null || recited.isBasmala ? null : recited.ref,

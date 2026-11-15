@@ -9,6 +9,7 @@ import '../../platform/share.dart';
 import '../../shared/mathani_icons.dart';
 import '../../shared/numerals.dart';
 import '../../shared/reader_state.dart';
+import '../khatma/khatma_controller.dart';
 import '../memorization/memorization_controller.dart';
 import '../memorization/range_sheet.dart';
 import '../mutashabihat/similar_sheet.dart';
@@ -61,6 +62,8 @@ class _AyahActionsSheet extends StatelessWidget {
     final messenger = ScaffoldMessenger.of(context);
     final recitation = RecitationScope.read(context);
     final memorization = MemorizationScope.read(context);
+    final khatma = KhatmaScope.read(context);
+    final ayahId = reader.quran.ayahAt(ayah).id;
 
     Future<String> text() async => formatAyahForShare(
           await reader.quran.wordsOf(ayah),
@@ -137,6 +140,42 @@ class _AyahActionsSheet extends StatelessWidget {
               await shareText(t);
             },
           ),
+          // Set khatma place here (specs/014 FR-017), while a personal khatma covers this ayah.
+          if (khatma != null && khatma.canSetPlaceAt(ayahId))
+            ListTile(
+              leading: const Icon(MathaniIcons.khatma),
+              title: Text(l10n.khatmaSetPlace),
+              onTap: () async {
+                final changes = khatma.countChangesFor(ayahId);
+                Navigator.of(context).pop();
+                final ok = await showDialog<bool>(
+                  context: screen,
+                  builder: (dialog) => AlertDialog(
+                    title: Text(l10n.khatmaSetPlace),
+                    content: Text(l10n.khatmaSetPlaceConfirm(
+                        formatNumber(changes.read, locale), formatNumber(changes.unread, locale))),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(dialog).pop(false),
+                        child: Text(l10n.khatmaCancel),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.of(dialog).pop(true),
+                        child: Text(l10n.khatmaConfirm),
+                      ),
+                    ],
+                  ),
+                );
+                if (ok != true) return;
+                await khatma.setPlaceAt(ayahId);
+                messenger
+                  ..hideCurrentSnackBar()
+                  ..showSnackBar(SnackBar(
+                    content: Text(l10n.khatmaSetPlaceDone),
+                    duration: const Duration(seconds: 2),
+                  ));
+              },
+            ),
           ListTile(
             leading: const Icon(MathaniIcons.bookmark),
             title: Text(l10n.bookmarkAyah),

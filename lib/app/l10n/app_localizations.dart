@@ -2262,6 +2262,1086 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Similar ayat on this page: {list}'**
   String similarOnPage(String list);
+
+  /// Khatma screen title and the reading toolbar's Khatma button (specs/014).
+  ///
+  /// In en, this message translates to:
+  /// **'Khatma'**
+  String get khatmaTitle;
+
+  /// Khatma screen with no khatma: what a plan does.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan a complete reading of the Quran. The app divides it into a daily wird, marks where each one ends, and keeps your place.'**
+  String get khatmaIntro;
+
+  /// Button that opens the plan sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a khatma'**
+  String get khatmaStart;
+
+  /// Starting a khatma while one is in progress (FR-005).
+  ///
+  /// In en, this message translates to:
+  /// **'A khatma is already in progress. Finish or end it first.'**
+  String get khatmaAlreadyInProgress;
+
+  /// The wird card's heading, and the reminder's title.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s wird'**
+  String get khatmaTodaysWird;
+
+  /// Position of the current wird. Numbers are pre-formatted.
+  ///
+  /// In en, this message translates to:
+  /// **'Wird {number} of {total}'**
+  String khatmaWirdOf(String number, String total);
+
+  /// A wird that is exactly one hizb. Number is pre-formatted.
+  ///
+  /// In en, this message translates to:
+  /// **'Hizb {number}'**
+  String khatmaHizb(String number);
+
+  /// A wird that is exactly one quarter hizb. Numbers are pre-formatted.
+  ///
+  /// In en, this message translates to:
+  /// **'Quarter {quarter} of Hizb {hizb}'**
+  String khatmaQuarter(String quarter, String hizb);
+
+  /// A wird that is not exactly one Mushaf mark. Number is pre-formatted.
+  ///
+  /// In en, this message translates to:
+  /// **'Wird {number}'**
+  String khatmaWirdNumber(String number);
+
+  /// One end of a wird's range: surah name and ayah number (pre-formatted).
+  ///
+  /// In en, this message translates to:
+  /// **'{surah} {ayah}'**
+  String khatmaAyahRef(String surah, String ayah);
+
+  /// A wird's range, from one ayah to another.
+  ///
+  /// In en, this message translates to:
+  /// **'{from} to {to}'**
+  String khatmaRange(String from, String to);
+
+  /// A wird's pages. Numbers are pre-formatted.
+  ///
+  /// In en, this message translates to:
+  /// **'Pages {first} to {last}'**
+  String khatmaPagesRange(String first, String last);
+
+  /// A number of pages; count selects the plural form, shown is the same number formatted.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 page} other{{shown} pages}}'**
+  String khatmaPageCount(int count, String shown);
+
+  /// Opens the Mushaf at the wird's place, before it is begun (FR-008).
+  ///
+  /// In en, this message translates to:
+  /// **'Read'**
+  String get khatmaRead;
+
+  /// Opens the Mushaf at the khatma place once the wird is begun (FR-008).
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get khatmaContinue;
+
+  /// Marks the current wird as read (FR-012).
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get khatmaDone;
+
+  /// After a wird is marked as read, and on the Khatma screen when a wird was read today.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s wird is done'**
+  String get khatmaTodayDone;
+
+  /// Opens the next wird after today's is done.
+  ///
+  /// In en, this message translates to:
+  /// **'Read now'**
+  String get khatmaReadNow;
+
+  /// The next wird after today's is done.
+  ///
+  /// In en, this message translates to:
+  /// **'Next: {name}'**
+  String khatmaNext(String name);
+
+  /// A khatma whose start date is later. Date is pre-formatted.
+  ///
+  /// In en, this message translates to:
+  /// **'Starts on {date}'**
+  String khatmaStartsOn(String date);
+
+  /// A paused khatma (FR-031). Date is pre-formatted.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused since {date}'**
+  String khatmaPausedSince(String date);
+
+  /// Undoes marking a wird as read (FR-016).
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get khatmaUndo;
+
+  /// Reader header: pages left in the wird (FR-011).
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 page left} other{{shown} pages left}}'**
+  String khatmaPagesLeft(int count, String shown);
+
+  /// Screen-reader label of the end mark (FR-010). Number is pre-formatted.
+  ///
+  /// In en, this message translates to:
+  /// **'End of today\'s wird at ayah {ayah}'**
+  String khatmaEndAt(String ayah);
+
+  /// The Done row on the reading screen (FR-012).
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s wird ends on this page'**
+  String get khatmaEndsHere;
+
+  /// Long-press item (FR-017).
+  ///
+  /// In en, this message translates to:
+  /// **'Set khatma place here'**
+  String get khatmaSetPlace;
+
+  /// Confirmation of Set khatma place here, with how many wirds change. Numbers are pre-formatted.
+  ///
+  /// In en, this message translates to:
+  /// **'Wirds that become read: {read}. Wirds that become not read: {unread}. The khatma continues from this ayah.'**
+  String khatmaSetPlaceConfirm(String read, String unread);
+
+  /// After Set khatma place here.
+  ///
+  /// In en, this message translates to:
+  /// **'The khatma continues from here.'**
+  String get khatmaSetPlaceDone;
+
+  /// Confirms a khatma action.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get khatmaConfirm;
+
+  /// Cancels a khatma action.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get khatmaCancel;
+
+  /// Plan sheet title.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan'**
+  String get khatmaPlanTitle;
+
+  /// Plan sheet section: amounts by the Mushaf's marks.
+  ///
+  /// In en, this message translates to:
+  /// **'A daily amount'**
+  String get khatmaDailyAmount;
+
+  /// Plan by marks.
+  ///
+  /// In en, this message translates to:
+  /// **'A quarter hizb a day'**
+  String get khatmaAmount1;
+
+  /// Plan by marks.
+  ///
+  /// In en, this message translates to:
+  /// **'Half a hizb a day'**
+  String get khatmaAmount2;
+
+  /// Plan by marks.
+  ///
+  /// In en, this message translates to:
+  /// **'A hizb a day'**
+  String get khatmaAmount4;
+
+  /// Plan by marks.
+  ///
+  /// In en, this message translates to:
+  /// **'A juz a day'**
+  String get khatmaAmount8;
+
+  /// Plan by marks.
+  ///
+  /// In en, this message translates to:
+  /// **'Two ajza\' a day'**
+  String get khatmaAmount16;
+
+  /// Plan by marks.
+  ///
+  /// In en, this message translates to:
+  /// **'Three ajza\' a day'**
+  String get khatmaAmount24;
+
+  /// Plan by marks.
+  ///
+  /// In en, this message translates to:
+  /// **'Ten ajza\' a day'**
+  String get khatmaAmount80;
+
+  /// The seven-day plan.
+  ///
+  /// In en, this message translates to:
+  /// **'Seven days, by whole surahs'**
+  String get khatmaSevenDays;
+
+  /// Plan sheet section: a custom plan.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get khatmaCustom;
+
+  /// Custom plan by days.
+  ///
+  /// In en, this message translates to:
+  /// **'Number of days'**
+  String get khatmaCustomDays;
+
+  /// Custom plan by pages a day.
+  ///
+  /// In en, this message translates to:
+  /// **'Pages a day'**
+  String get khatmaCustomPages;
+
+  /// Custom plan by a finish date.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish date'**
+  String get khatmaCustomDate;
+
+  /// Button that opens a date picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a date'**
+  String get khatmaChooseDate;
+
+  /// Validation of a number field. Numbers are pre-formatted.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a number from {min} to {max}.'**
+  String khatmaNumberRange(String min, String max);
+
+  /// A number of days; count selects the plural form, shown is the same number formatted.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day} other{{shown} days}}'**
+  String khatmaDaysCount(int count, String shown);
+
+  /// Plan sheet: the start point (FR-004).
+  ///
+  /// In en, this message translates to:
+  /// **'Start from'**
+  String get khatmaStartFrom;
+
+  /// Start point: Al-Fatiha.
+  ///
+  /// In en, this message translates to:
+  /// **'The beginning'**
+  String get khatmaFromBeginning;
+
+  /// Start point: the page on screen. Number is pre-formatted.
+  ///
+  /// In en, this message translates to:
+  /// **'This page ({page})'**
+  String khatmaFromThisPage(String page);
+
+  /// Start point: a juz.
+  ///
+  /// In en, this message translates to:
+  /// **'A juz'**
+  String get khatmaFromJuz;
+
+  /// Start point: a surah.
+  ///
+  /// In en, this message translates to:
+  /// **'A surah'**
+  String get khatmaFromSurah;
+
+  /// Start point: a page.
+  ///
+  /// In en, this message translates to:
+  /// **'A page'**
+  String get khatmaFromPage;
+
+  /// Plan sheet: the start date.
+  ///
+  /// In en, this message translates to:
+  /// **'Start on'**
+  String get khatmaStartOn;
+
+  /// Start date: today.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get khatmaToday;
+
+  /// Start date: a later date.
+  ///
+  /// In en, this message translates to:
+  /// **'A later date'**
+  String get khatmaLaterDate;
+
+  /// Plan sheet summary. days is a formatted number of days; numbers and date are pre-formatted.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} · {from} to {to} pages a day · ends {date}'**
+  String khatmaSummaryRange(String days, String from, String to, String date);
+
+  /// Plan sheet summary when every wird has the same number of pages.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} · {pages} a day · ends {date}'**
+  String khatmaSummaryOne(String days, String pages, String date);
+
+  /// Change plan: where the new plan starts. Number is pre-formatted.
+  ///
+  /// In en, this message translates to:
+  /// **'From page {page}'**
+  String khatmaFromPlace(String page);
+
+  /// A finish date before the start date.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a date on or after the start date.'**
+  String get khatmaDateBeforeStart;
+
+  /// Progress (FR-027). Numbers are pre-formatted.
+  ///
+  /// In en, this message translates to:
+  /// **'Wirds read: {read} of {total}'**
+  String khatmaProgressWirds(String read, String total);
+
+  /// Progress (FR-027). Numbers are pre-formatted.
+  ///
+  /// In en, this message translates to:
+  /// **'Pages read: {read} · left: {left}'**
+  String khatmaProgressPages(String read, String left);
+
+  /// Progress as a percentage, pre-formatted with its sign.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent} read'**
+  String khatmaPercent(String percent);
+
+  /// Progress: the start date.
+  ///
+  /// In en, this message translates to:
+  /// **'Started {date}'**
+  String khatmaStarted(String date);
+
+  /// Progress: the planned finish date.
+  ///
+  /// In en, this message translates to:
+  /// **'Planned finish {date}'**
+  String khatmaPlannedFinish(String date);
+
+  /// Progress: the expected finish date.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected finish {date}'**
+  String khatmaExpectedFinish(String date);
+
+  /// Expected finish later than planned. days is a formatted number of days.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected finish {date}, {days} after the planned date'**
+  String khatmaExpectedLate(String date, String days);
+
+  /// Expected finish earlier than planned.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected finish {date}, {days} before the planned date'**
+  String khatmaExpectedEarly(String date, String days);
+
+  /// Opens the list of wirds (FR-033).
+  ///
+  /// In en, this message translates to:
+  /// **'All wirds'**
+  String get khatmaAllWirds;
+
+  /// Changes the plan of the khatma in progress (FR-030).
+  ///
+  /// In en, this message translates to:
+  /// **'Change plan'**
+  String get khatmaChangePlan;
+
+  /// Pauses the khatma (FR-031).
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get khatmaPause;
+
+  /// Resumes the khatma (FR-031).
+  ///
+  /// In en, this message translates to:
+  /// **'Resume'**
+  String get khatmaResume;
+
+  /// Ends the khatma (FR-032).
+  ///
+  /// In en, this message translates to:
+  /// **'End khatma'**
+  String get khatmaEnd;
+
+  /// Confirmation before ending a khatma.
+  ///
+  /// In en, this message translates to:
+  /// **'End this khatma? It won\'t be added to your finished khatmas. Your bookmarks and reading position are kept.'**
+  String get khatmaEndConfirm;
+
+  /// A wird not read yet, in the list of wirds.
+  ///
+  /// In en, this message translates to:
+  /// **'Not read'**
+  String get khatmaNotRead;
+
+  /// A wird read on a day, in the list of wirds.
+  ///
+  /// In en, this message translates to:
+  /// **'Read {date}'**
+  String khatmaReadOn(String date);
+
+  /// Marks the current wird in the list of wirds.
+  ///
+  /// In en, this message translates to:
+  /// **'Current'**
+  String get khatmaCurrent;
+
+  /// Reminder section title (FR-019).
+  ///
+  /// In en, this message translates to:
+  /// **'Daily reminder'**
+  String get khatmaReminder;
+
+  /// Reminder section: what it does.
+  ///
+  /// In en, this message translates to:
+  /// **'One reminder a day, only when something is waiting to be read.'**
+  String get khatmaReminderHint;
+
+  /// Reminder time.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get khatmaReminderTime;
+
+  /// Notifications refused (FR-020).
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders are blocked. Your choice is saved; allow notifications for Mathani in your phone\'s settings.'**
+  String get khatmaReminderBlocked;
+
+  /// Android without exact alarms.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders may come a few minutes late.'**
+  String get khatmaReminderLate;
+
+  /// Web app: no reminder (FR-042).
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders are available in the phone apps.'**
+  String get khatmaReminderWeb;
+
+  /// Reminder text naming the wird and its pages.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} · {pages}'**
+  String khatmaReminderBody(String name, String pages);
+
+  /// Record section title (FR-035).
+  ///
+  /// In en, this message translates to:
+  /// **'Finished khatmas'**
+  String get khatmaRecordTitle;
+
+  /// How many khatmas were finished.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 khatma finished} other{{shown} khatmas finished}}'**
+  String khatmaRecordCount(int count, String shown);
+
+  /// A khatma's start and end dates.
+  ///
+  /// In en, this message translates to:
+  /// **'{from} to {to}'**
+  String khatmaDateRange(String from, String to);
+
+  /// Deletes a record entry (FR-037).
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get khatmaDeleteRecord;
+
+  /// Confirmation before deleting a record entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this finished khatma from the list?'**
+  String get khatmaDeleteRecordConfirm;
+
+  /// Starts a new khatma with the previous plan (FR-036).
+  ///
+  /// In en, this message translates to:
+  /// **'Start a new khatma'**
+  String get khatmaStartNew;
+
+  /// Completion screen (FR-034).
+  ///
+  /// In en, this message translates to:
+  /// **'The khatma is complete'**
+  String get khatmaComplete;
+
+  /// Closes the completion screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get khatmaClose;
+
+  /// Tour stop on the Khatma button (FR-043).
+  ///
+  /// In en, this message translates to:
+  /// **'Plan a khatma, read each day\'s wird, and keep your place.'**
+  String get tourKhatma;
+
+  /// The Done row for a group part (release B).
+  ///
+  /// In en, this message translates to:
+  /// **'Your part in «{title}» ends on this page'**
+  String khatmaPartEndsHere(String title);
+
+  /// Screen-reader label of a group part's end mark. Number is pre-formatted.
+  ///
+  /// In en, this message translates to:
+  /// **'End of your part at ayah {ayah}'**
+  String khatmaPartEndAt(String ayah);
+
+  /// A reminder line naming a group part the reader holds (release B).
+  ///
+  /// In en, this message translates to:
+  /// **'Your part in «{title}»: {part}'**
+  String khatmaPartReminder(String title, String part);
+
+  /// The reminder's switch.
+  ///
+  /// In en, this message translates to:
+  /// **'Remind me each day'**
+  String get khatmaReminderOn;
+
+  /// Khatma screen section (specs/014 release B).
+  ///
+  /// In en, this message translates to:
+  /// **'Group khatmas'**
+  String get groupSection;
+
+  /// Opens the start sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a group khatma'**
+  String get groupStart;
+
+  /// Opens a group khatma from a pasted link or code (FR-046).
+  ///
+  /// In en, this message translates to:
+  /// **'Open a link or code'**
+  String get groupOpenLink;
+
+  /// Button.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get groupOpen;
+
+  /// Field hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste a link or a code'**
+  String get groupCodeHint;
+
+  /// The pasted text has no code.
+  ///
+  /// In en, this message translates to:
+  /// **'That is not a group khatma link or code.'**
+  String get groupCodeInvalid;
+
+  /// A kept khatma's progress. Numbers are pre-formatted.
+  ///
+  /// In en, this message translates to:
+  /// **'{read} of {total} read'**
+  String groupProgress(String read, String total);
+
+  /// Counts of parts. Numbers are pre-formatted.
+  ///
+  /// In en, this message translates to:
+  /// **'{free} free · {taken} taken · {read} read'**
+  String groupCounts(String free, String taken, String read);
+
+  /// The finish date.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish by {date}'**
+  String groupFinishBy(String date);
+
+  /// The finish date passed with parts unread.
+  ///
+  /// In en, this message translates to:
+  /// **'The finish date, {date}, has passed'**
+  String groupFinishPassed(String date);
+
+  /// Every part is read (FR-056).
+  ///
+  /// In en, this message translates to:
+  /// **'Complete on {date}'**
+  String groupCompleteOn(String date);
+
+  /// Heading.
+  ///
+  /// In en, this message translates to:
+  /// **'My parts'**
+  String get groupMyParts;
+
+  /// Heading.
+  ///
+  /// In en, this message translates to:
+  /// **'All parts'**
+  String get groupAllParts;
+
+  /// A part nobody holds.
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get groupFree;
+
+  /// Takes a free part.
+  ///
+  /// In en, this message translates to:
+  /// **'Take this part'**
+  String get groupTake;
+
+  /// Gives back a part not read.
+  ///
+  /// In en, this message translates to:
+  /// **'Give back'**
+  String get groupGiveBack;
+
+  /// Marks a part as read.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get groupDone;
+
+  /// Undoes a part's read mark.
+  ///
+  /// In en, this message translates to:
+  /// **'Not read yet'**
+  String get groupUndoRead;
+
+  /// Marks the reader's own parts.
+  ///
+  /// In en, this message translates to:
+  /// **'you'**
+  String get groupYou;
+
+  /// A read part.
+  ///
+  /// In en, this message translates to:
+  /// **'read'**
+  String get groupRead;
+
+  /// A read mark made offline (FR-053).
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting to be sent'**
+  String get groupWaiting;
+
+  /// Offline (FR-055).
+  ///
+  /// In en, this message translates to:
+  /// **'Last updated {time}. It may be out of date.'**
+  String groupLastUpdated(String time);
+
+  /// Shares the link.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get groupShare;
+
+  /// Reads the khatma again.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get groupRefresh;
+
+  /// Reports a name or the khatma (FR-061).
+  ///
+  /// In en, this message translates to:
+  /// **'Report'**
+  String get groupReport;
+
+  /// Leaves (FR-058).
+  ///
+  /// In en, this message translates to:
+  /// **'Leave the khatma'**
+  String get groupLeave;
+
+  /// Confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave this khatma? Your name is removed, and the parts you have not read become free.'**
+  String get groupLeaveConfirm;
+
+  /// Share text (FR-045).
+  ///
+  /// In en, this message translates to:
+  /// **'{title}: a group khatma in Mathani. Take your part: {link}'**
+  String groupShareText(String title, String link);
+
+  /// Before the first share (FR-045).
+  ///
+  /// In en, this message translates to:
+  /// **'Anyone who has the link can see the names and take parts.'**
+  String get groupLinkWarning;
+
+  /// Before the first take (FR-049).
+  ///
+  /// In en, this message translates to:
+  /// **'Your name will be seen by everyone who has the link.'**
+  String get groupNameWarning;
+
+  /// Field.
+  ///
+  /// In en, this message translates to:
+  /// **'Your name'**
+  String get groupYourName;
+
+  /// Field.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get groupTitleField;
+
+  /// Heading of the division choice.
+  ///
+  /// In en, this message translates to:
+  /// **'Parts'**
+  String get groupDivision;
+
+  /// Division.
+  ///
+  /// In en, this message translates to:
+  /// **'30 ajza\''**
+  String get groupThirty;
+
+  /// Division.
+  ///
+  /// In en, this message translates to:
+  /// **'60 ahzab'**
+  String get groupSixty;
+
+  /// Field.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish date (optional)'**
+  String get groupFinishDate;
+
+  /// Clears the finish date.
+  ///
+  /// In en, this message translates to:
+  /// **'No finish date'**
+  String get groupNoDate;
+
+  /// Starts a group khatma.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get groupCreate;
+
+  /// An action that needs the server, offline (FR-053).
+  ///
+  /// In en, this message translates to:
+  /// **'A connection is needed.'**
+  String get groupNeedsConnection;
+
+  /// Button.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get groupRetry;
+
+  /// 409 taken (FR-050).
+  ///
+  /// In en, this message translates to:
+  /// **'Someone took this part just now.'**
+  String get groupJustTaken;
+
+  /// A waiting mark refused.
+  ///
+  /// In en, this message translates to:
+  /// **'This part is no longer yours.'**
+  String get groupNoLongerYours;
+
+  /// Deleted, removed or expired.
+  ///
+  /// In en, this message translates to:
+  /// **'This khatma no longer exists.'**
+  String get groupGone;
+
+  /// Button.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from the list'**
+  String get groupRemoveFromList;
+
+  /// 403 blocked.
+  ///
+  /// In en, this message translates to:
+  /// **'This device cannot start or join group khatmas. To ask why, write to {email}.'**
+  String groupBlocked(String email);
+
+  /// 429 organised.
+  ///
+  /// In en, this message translates to:
+  /// **'You already organise as many group khatmas as allowed.'**
+  String get groupLimitOrganised;
+
+  /// 429 started.
+  ///
+  /// In en, this message translates to:
+  /// **'You have started as many group khatmas as allowed today.'**
+  String get groupLimitStarted;
+
+  /// 429 busy.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many group khatmas were started today. Try again tomorrow.'**
+  String get groupLimitBusy;
+
+  /// 429 reports.
+  ///
+  /// In en, this message translates to:
+  /// **'You have sent as many reports as allowed today.'**
+  String get groupLimitReports;
+
+  /// Refused text.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter some text.'**
+  String get groupProblemEmpty;
+
+  /// Refused text.
+  ///
+  /// In en, this message translates to:
+  /// **'It is too long.'**
+  String get groupProblemLong;
+
+  /// Refused text.
+  ///
+  /// In en, this message translates to:
+  /// **'It has characters that are not allowed.'**
+  String get groupProblemCharacters;
+
+  /// Refused text.
+  ///
+  /// In en, this message translates to:
+  /// **'Links and addresses are not allowed.'**
+  String get groupProblemLink;
+
+  /// Refused text.
+  ///
+  /// In en, this message translates to:
+  /// **'It contains a word that is not allowed.'**
+  String get groupProblemWord;
+
+  /// Terms or format newer than the app.
+  ///
+  /// In en, this message translates to:
+  /// **'An update is needed for this khatma.'**
+  String get groupUpdateNeeded;
+
+  /// Unexpected failure.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Try again.'**
+  String get groupError;
+
+  /// Terms (FR-059).
+  ///
+  /// In en, this message translates to:
+  /// **'Before you take part'**
+  String get groupTermsTitle;
+
+  /// Terms point 1.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone who has the link sees the khatma\'s title, your name and the parts you hold.'**
+  String get groupTerms1;
+
+  /// Terms point 2.
+  ///
+  /// In en, this message translates to:
+  /// **'Offensive or abusive names and titles are not tolerated. They are removed, and the device that posted them can be blocked.'**
+  String get groupTerms2;
+
+  /// Terms point 3.
+  ///
+  /// In en, this message translates to:
+  /// **'Report a name or a khatma with Report on its screen.'**
+  String get groupTerms3;
+
+  /// Terms point 4.
+  ///
+  /// In en, this message translates to:
+  /// **'To reach Mathani, write to {email}.'**
+  String groupTerms4(String email);
+
+  /// Accepts the terms.
+  ///
+  /// In en, this message translates to:
+  /// **'I agree'**
+  String get groupAgree;
+
+  /// Report choice.
+  ///
+  /// In en, this message translates to:
+  /// **'Report a name'**
+  String get groupReportName;
+
+  /// Report choice.
+  ///
+  /// In en, this message translates to:
+  /// **'Report this khatma'**
+  String get groupReportKhatma;
+
+  /// Confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Report «{name}» to Mathani? It is hidden on this device.'**
+  String groupReportConfirm(String name);
+
+  /// Confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Report this khatma to Mathani? It leaves your list.'**
+  String get groupReportKhatmaConfirm;
+
+  /// After a report.
+  ///
+  /// In en, this message translates to:
+  /// **'Report sent.'**
+  String get groupReportSent;
+
+  /// A name the reader reported.
+  ///
+  /// In en, this message translates to:
+  /// **'hidden'**
+  String get groupHidden;
+
+  /// Organiser: frees a taken part (FR-062).
+  ///
+  /// In en, this message translates to:
+  /// **'Free it'**
+  String get groupFreeIt;
+
+  /// Organiser (FR-071).
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as read'**
+  String get groupMarkRead;
+
+  /// Organiser (FR-071).
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as not read'**
+  String get groupMarkUnread;
+
+  /// Organiser (FR-070).
+  ///
+  /// In en, this message translates to:
+  /// **'Give to a name'**
+  String get groupGiveTo;
+
+  /// Organiser (FR-062).
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from this khatma'**
+  String get groupRemoveParticipant;
+
+  /// Confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove «{name}»? Their unread parts become free, and they cannot join again.'**
+  String groupRemoveConfirm(String name);
+
+  /// Organiser (FR-072).
+  ///
+  /// In en, this message translates to:
+  /// **'Edit the title or the finish date'**
+  String get groupEdit;
+
+  /// Organiser (FR-062).
+  ///
+  /// In en, this message translates to:
+  /// **'Delete the khatma'**
+  String get groupDelete;
+
+  /// Confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete «{title}» for everyone?'**
+  String groupDeleteConfirm(String title);
+
+  /// Button.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get groupSave;
+
+  /// Part state for screen readers.
+  ///
+  /// In en, this message translates to:
+  /// **'taken by {name}'**
+  String groupTakenBy(String name);
+
+  /// Part state for screen readers.
+  ///
+  /// In en, this message translates to:
+  /// **'read by {name}'**
+  String groupReadBy(String name);
+
+  /// A part row read as one sentence.
+  ///
+  /// In en, this message translates to:
+  /// **'{part}, {range}, {state}'**
+  String groupPartSemantics(String part, String range, String state);
+
+  /// No share sheet: the link was copied.
+  ///
+  /// In en, this message translates to:
+  /// **'Link copied.'**
+  String get groupCopied;
+
+  /// About: the address to reach Mathani (FR-068).
+  ///
+  /// In en, this message translates to:
+  /// **'Contact'**
+  String get contactTitle;
 }
 
 class _AppLocalizationsDelegate

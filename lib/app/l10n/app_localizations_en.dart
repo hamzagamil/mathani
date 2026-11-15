@@ -1303,4 +1303,688 @@ class AppLocalizationsEn extends AppLocalizations {
   String similarOnPage(String list) {
     return 'Similar ayat on this page: $list';
   }
+
+  @override
+  String get khatmaTitle => 'Khatma';
+
+  @override
+  String get khatmaIntro =>
+      'Plan a complete reading of the Quran. The app divides it into a daily wird, marks where each one ends, and keeps your place.';
+
+  @override
+  String get khatmaStart => 'Start a khatma';
+
+  @override
+  String get khatmaAlreadyInProgress =>
+      'A khatma is already in progress. Finish or end it first.';
+
+  @override
+  String get khatmaTodaysWird => 'Today\'s wird';
+
+  @override
+  String khatmaWirdOf(String number, String total) {
+    return 'Wird $number of $total';
+  }
+
+  @override
+  String khatmaHizb(String number) {
+    return 'Hizb $number';
+  }
+
+  @override
+  String khatmaQuarter(String quarter, String hizb) {
+    return 'Quarter $quarter of Hizb $hizb';
+  }
+
+  @override
+  String khatmaWirdNumber(String number) {
+    return 'Wird $number';
+  }
+
+  @override
+  String khatmaAyahRef(String surah, String ayah) {
+    return '$surah $ayah';
+  }
+
+  @override
+  String khatmaRange(String from, String to) {
+    return '$from to $to';
+  }
+
+  @override
+  String khatmaPagesRange(String first, String last) {
+    return 'Pages $first to $last';
+  }
+
+  @override
+  String khatmaPageCount(int count, String shown) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$shown pages',
+      one: '1 page',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get khatmaRead => 'Read';
+
+  @override
+  String get khatmaContinue => 'Continue';
+
+  @override
+  String get khatmaDone => 'Done';
+
+  @override
+  String get khatmaTodayDone => 'Today\'s wird is done';
+
+  @override
+  String get khatmaReadNow => 'Read now';
+
+  @override
+  String khatmaNext(String name) {
+    return 'Next: $name';
+  }
+
+  @override
+  String khatmaStartsOn(String date) {
+    return 'Starts on $date';
+  }
+
+  @override
+  String khatmaPausedSince(String date) {
+    return 'Paused since $date';
+  }
+
+  @override
+  String get khatmaUndo => 'Undo';
+
+  @override
+  String khatmaPagesLeft(int count, String shown) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$shown pages left',
+      one: '1 page left',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String khatmaEndAt(String ayah) {
+    return 'End of today\'s wird at ayah $ayah';
+  }
+
+  @override
+  String get khatmaEndsHere => 'Today\'s wird ends on this page';
+
+  @override
+  String get khatmaSetPlace => 'Set khatma place here';
+
+  @override
+  String khatmaSetPlaceConfirm(String read, String unread) {
+    return 'Wirds that become read: $read. Wirds that become not read: $unread. The khatma continues from this ayah.';
+  }
+
+  @override
+  String get khatmaSetPlaceDone => 'The khatma continues from here.';
+
+  @override
+  String get khatmaConfirm => 'Confirm';
+
+  @override
+  String get khatmaCancel => 'Cancel';
+
+  @override
+  String get khatmaPlanTitle => 'Plan';
+
+  @override
+  String get khatmaDailyAmount => 'A daily amount';
+
+  @override
+  String get khatmaAmount1 => 'A quarter hizb a day';
+
+  @override
+  String get khatmaAmount2 => 'Half a hizb a day';
+
+  @override
+  String get khatmaAmount4 => 'A hizb a day';
+
+  @override
+  String get khatmaAmount8 => 'A juz a day';
+
+  @override
+  String get khatmaAmount16 => 'Two ajza\' a day';
+
+  @override
+  String get khatmaAmount24 => 'Three ajza\' a day';
+
+  @override
+  String get khatmaAmount80 => 'Ten ajza\' a day';
+
+  @override
+  String get khatmaSevenDays => 'Seven days, by whole surahs';
+
+  @override
+  String get khatmaCustom => 'Custom';
+
+  @override
+  String get khatmaCustomDays => 'Number of days';
+
+  @override
+  String get khatmaCustomPages => 'Pages a day';
+
+  @override
+  String get khatmaCustomDate => 'Finish date';
+
+  @override
+  String get khatmaChooseDate => 'Choose a date';
+
+  @override
+  String khatmaNumberRange(String min, String max) {
+    return 'Enter a number from $min to $max.';
+  }
+
+  @override
+  String khatmaDaysCount(int count, String shown) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$shown days',
+      one: '1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get khatmaStartFrom => 'Start from';
+
+  @override
+  String get khatmaFromBeginning => 'The beginning';
+
+  @override
+  String khatmaFromThisPage(String page) {
+    return 'This page ($page)';
+  }
+
+  @override
+  String get khatmaFromJuz => 'A juz';
+
+  @override
+  String get khatmaFromSurah => 'A surah';
+
+  @override
+  String get khatmaFromPage => 'A page';
+
+  @override
+  String get khatmaStartOn => 'Start on';
+
+  @override
+  String get khatmaToday => 'Today';
+
+  @override
+  String get khatmaLaterDate => 'A later date';
+
+  @override
+  String khatmaSummaryRange(String days, String from, String to, String date) {
+    return '$days · $from to $to pages a day · ends $date';
+  }
+
+  @override
+  String khatmaSummaryOne(String days, String pages, String date) {
+    return '$days · $pages a day · ends $date';
+  }
+
+  @override
+  String khatmaFromPlace(String page) {
+    return 'From page $page';
+  }
+
+  @override
+  String get khatmaDateBeforeStart =>
+      'Choose a date on or after the start date.';
+
+  @override
+  String khatmaProgressWirds(String read, String total) {
+    return 'Wirds read: $read of $total';
+  }
+
+  @override
+  String khatmaProgressPages(String read, String left) {
+    return 'Pages read: $read · left: $left';
+  }
+
+  @override
+  String khatmaPercent(String percent) {
+    return '$percent read';
+  }
+
+  @override
+  String khatmaStarted(String date) {
+    return 'Started $date';
+  }
+
+  @override
+  String khatmaPlannedFinish(String date) {
+    return 'Planned finish $date';
+  }
+
+  @override
+  String khatmaExpectedFinish(String date) {
+    return 'Expected finish $date';
+  }
+
+  @override
+  String khatmaExpectedLate(String date, String days) {
+    return 'Expected finish $date, $days after the planned date';
+  }
+
+  @override
+  String khatmaExpectedEarly(String date, String days) {
+    return 'Expected finish $date, $days before the planned date';
+  }
+
+  @override
+  String get khatmaAllWirds => 'All wirds';
+
+  @override
+  String get khatmaChangePlan => 'Change plan';
+
+  @override
+  String get khatmaPause => 'Pause';
+
+  @override
+  String get khatmaResume => 'Resume';
+
+  @override
+  String get khatmaEnd => 'End khatma';
+
+  @override
+  String get khatmaEndConfirm =>
+      'End this khatma? It won\'t be added to your finished khatmas. Your bookmarks and reading position are kept.';
+
+  @override
+  String get khatmaNotRead => 'Not read';
+
+  @override
+  String khatmaReadOn(String date) {
+    return 'Read $date';
+  }
+
+  @override
+  String get khatmaCurrent => 'Current';
+
+  @override
+  String get khatmaReminder => 'Daily reminder';
+
+  @override
+  String get khatmaReminderHint =>
+      'One reminder a day, only when something is waiting to be read.';
+
+  @override
+  String get khatmaReminderTime => 'Time';
+
+  @override
+  String get khatmaReminderBlocked =>
+      'Reminders are blocked. Your choice is saved; allow notifications for Mathani in your phone\'s settings.';
+
+  @override
+  String get khatmaReminderLate => 'Reminders may come a few minutes late.';
+
+  @override
+  String get khatmaReminderWeb => 'Reminders are available in the phone apps.';
+
+  @override
+  String khatmaReminderBody(String name, String pages) {
+    return '$name · $pages';
+  }
+
+  @override
+  String get khatmaRecordTitle => 'Finished khatmas';
+
+  @override
+  String khatmaRecordCount(int count, String shown) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$shown khatmas finished',
+      one: '1 khatma finished',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String khatmaDateRange(String from, String to) {
+    return '$from to $to';
+  }
+
+  @override
+  String get khatmaDeleteRecord => 'Delete';
+
+  @override
+  String get khatmaDeleteRecordConfirm =>
+      'Delete this finished khatma from the list?';
+
+  @override
+  String get khatmaStartNew => 'Start a new khatma';
+
+  @override
+  String get khatmaComplete => 'The khatma is complete';
+
+  @override
+  String get khatmaClose => 'Close';
+
+  @override
+  String get tourKhatma =>
+      'Plan a khatma, read each day\'s wird, and keep your place.';
+
+  @override
+  String khatmaPartEndsHere(String title) {
+    return 'Your part in «$title» ends on this page';
+  }
+
+  @override
+  String khatmaPartEndAt(String ayah) {
+    return 'End of your part at ayah $ayah';
+  }
+
+  @override
+  String khatmaPartReminder(String title, String part) {
+    return 'Your part in «$title»: $part';
+  }
+
+  @override
+  String get khatmaReminderOn => 'Remind me each day';
+
+  @override
+  String get groupSection => 'Group khatmas';
+
+  @override
+  String get groupStart => 'Start a group khatma';
+
+  @override
+  String get groupOpenLink => 'Open a link or code';
+
+  @override
+  String get groupOpen => 'Open';
+
+  @override
+  String get groupCodeHint => 'Paste a link or a code';
+
+  @override
+  String get groupCodeInvalid => 'That is not a group khatma link or code.';
+
+  @override
+  String groupProgress(String read, String total) {
+    return '$read of $total read';
+  }
+
+  @override
+  String groupCounts(String free, String taken, String read) {
+    return '$free free · $taken taken · $read read';
+  }
+
+  @override
+  String groupFinishBy(String date) {
+    return 'Finish by $date';
+  }
+
+  @override
+  String groupFinishPassed(String date) {
+    return 'The finish date, $date, has passed';
+  }
+
+  @override
+  String groupCompleteOn(String date) {
+    return 'Complete on $date';
+  }
+
+  @override
+  String get groupMyParts => 'My parts';
+
+  @override
+  String get groupAllParts => 'All parts';
+
+  @override
+  String get groupFree => 'Free';
+
+  @override
+  String get groupTake => 'Take this part';
+
+  @override
+  String get groupGiveBack => 'Give back';
+
+  @override
+  String get groupDone => 'Done';
+
+  @override
+  String get groupUndoRead => 'Not read yet';
+
+  @override
+  String get groupYou => 'you';
+
+  @override
+  String get groupRead => 'read';
+
+  @override
+  String get groupWaiting => 'Waiting to be sent';
+
+  @override
+  String groupLastUpdated(String time) {
+    return 'Last updated $time. It may be out of date.';
+  }
+
+  @override
+  String get groupShare => 'Share';
+
+  @override
+  String get groupRefresh => 'Refresh';
+
+  @override
+  String get groupReport => 'Report';
+
+  @override
+  String get groupLeave => 'Leave the khatma';
+
+  @override
+  String get groupLeaveConfirm =>
+      'Leave this khatma? Your name is removed, and the parts you have not read become free.';
+
+  @override
+  String groupShareText(String title, String link) {
+    return '$title: a group khatma in Mathani. Take your part: $link';
+  }
+
+  @override
+  String get groupLinkWarning =>
+      'Anyone who has the link can see the names and take parts.';
+
+  @override
+  String get groupNameWarning =>
+      'Your name will be seen by everyone who has the link.';
+
+  @override
+  String get groupYourName => 'Your name';
+
+  @override
+  String get groupTitleField => 'Title';
+
+  @override
+  String get groupDivision => 'Parts';
+
+  @override
+  String get groupThirty => '30 ajza\'';
+
+  @override
+  String get groupSixty => '60 ahzab';
+
+  @override
+  String get groupFinishDate => 'Finish date (optional)';
+
+  @override
+  String get groupNoDate => 'No finish date';
+
+  @override
+  String get groupCreate => 'Start';
+
+  @override
+  String get groupNeedsConnection => 'A connection is needed.';
+
+  @override
+  String get groupRetry => 'Retry';
+
+  @override
+  String get groupJustTaken => 'Someone took this part just now.';
+
+  @override
+  String get groupNoLongerYours => 'This part is no longer yours.';
+
+  @override
+  String get groupGone => 'This khatma no longer exists.';
+
+  @override
+  String get groupRemoveFromList => 'Remove from the list';
+
+  @override
+  String groupBlocked(String email) {
+    return 'This device cannot start or join group khatmas. To ask why, write to $email.';
+  }
+
+  @override
+  String get groupLimitOrganised =>
+      'You already organise as many group khatmas as allowed.';
+
+  @override
+  String get groupLimitStarted =>
+      'You have started as many group khatmas as allowed today.';
+
+  @override
+  String get groupLimitBusy =>
+      'Too many group khatmas were started today. Try again tomorrow.';
+
+  @override
+  String get groupLimitReports =>
+      'You have sent as many reports as allowed today.';
+
+  @override
+  String get groupProblemEmpty => 'Enter some text.';
+
+  @override
+  String get groupProblemLong => 'It is too long.';
+
+  @override
+  String get groupProblemCharacters =>
+      'It has characters that are not allowed.';
+
+  @override
+  String get groupProblemLink => 'Links and addresses are not allowed.';
+
+  @override
+  String get groupProblemWord => 'It contains a word that is not allowed.';
+
+  @override
+  String get groupUpdateNeeded => 'An update is needed for this khatma.';
+
+  @override
+  String get groupError => 'Something went wrong. Try again.';
+
+  @override
+  String get groupTermsTitle => 'Before you take part';
+
+  @override
+  String get groupTerms1 =>
+      'Everyone who has the link sees the khatma\'s title, your name and the parts you hold.';
+
+  @override
+  String get groupTerms2 =>
+      'Offensive or abusive names and titles are not tolerated. They are removed, and the device that posted them can be blocked.';
+
+  @override
+  String get groupTerms3 =>
+      'Report a name or a khatma with Report on its screen.';
+
+  @override
+  String groupTerms4(String email) {
+    return 'To reach Mathani, write to $email.';
+  }
+
+  @override
+  String get groupAgree => 'I agree';
+
+  @override
+  String get groupReportName => 'Report a name';
+
+  @override
+  String get groupReportKhatma => 'Report this khatma';
+
+  @override
+  String groupReportConfirm(String name) {
+    return 'Report «$name» to Mathani? It is hidden on this device.';
+  }
+
+  @override
+  String get groupReportKhatmaConfirm =>
+      'Report this khatma to Mathani? It leaves your list.';
+
+  @override
+  String get groupReportSent => 'Report sent.';
+
+  @override
+  String get groupHidden => 'hidden';
+
+  @override
+  String get groupFreeIt => 'Free it';
+
+  @override
+  String get groupMarkRead => 'Mark as read';
+
+  @override
+  String get groupMarkUnread => 'Mark as not read';
+
+  @override
+  String get groupGiveTo => 'Give to a name';
+
+  @override
+  String get groupRemoveParticipant => 'Remove from this khatma';
+
+  @override
+  String groupRemoveConfirm(String name) {
+    return 'Remove «$name»? Their unread parts become free, and they cannot join again.';
+  }
+
+  @override
+  String get groupEdit => 'Edit the title or the finish date';
+
+  @override
+  String get groupDelete => 'Delete the khatma';
+
+  @override
+  String groupDeleteConfirm(String title) {
+    return 'Delete «$title» for everyone?';
+  }
+
+  @override
+  String get groupSave => 'Save';
+
+  @override
+  String groupTakenBy(String name) {
+    return 'taken by $name';
+  }
+
+  @override
+  String groupReadBy(String name) {
+    return 'read by $name';
+  }
+
+  @override
+  String groupPartSemantics(String part, String range, String state) {
+    return '$part, $range, $state';
+  }
+
+  @override
+  String get groupCopied => 'Link copied.';
+
+  @override
+  String get contactTitle => 'Contact';
 }

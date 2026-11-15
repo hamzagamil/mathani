@@ -35,4 +35,16 @@ class PrayerAlarmReceiverTest {
 
     @Test fun qiyamNeverPlaysAnAthan() =
         assertEquals(AlertAction.POST, decide(alert = alert(full = true, kind = "qiyam")))
+
+    // A khatma reminder (specs/014 research R9): up to 3 hours late it is still shown.
+    private fun reminder() = PrayerAlert(1, "wird", at, "Today's wird", "Juz 3 · pages 42 to 62", "default")
+
+    @Test fun reminderTwoHoursLatePosts() =
+        assertEquals(AlertAction.POST, decide(alert = reminder(), late = 2 * 60 * 60_000L))
+
+    @Test fun reminderMoreThanThreeHoursLateIsDropped() =
+        assertEquals(AlertAction.DROP, decide(alert = reminder(), late = 3 * 60 * 60_000L + 1))
+
+    @Test fun reminderNeverPlaysAnAthan() =
+        assertEquals(AlertAction.POST, decide(alert = reminder(), file = true, canStart = true))
 }

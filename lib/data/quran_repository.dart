@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:typed_data';
 
 import 'package:flutter/services.dart' show rootBundle;
@@ -269,6 +270,13 @@ class QuranRepository {
         }(),
     ];
   }
+
+  /// Every ayah in Mushaf order (index = id − 1), already in memory: what the khatma divides
+  /// (specs/014 research R2).
+  List<Ayah> get ayahList => UnmodifiableListView(_ayahs);
+
+  /// The ayah with [id], 1 to 6236.
+  Ayah ayahById(int id) => _ayahs[id - 1];
 
   /// All surahs, after [open] (preloaded).
   List<Surah> get surahList => _surahs!;

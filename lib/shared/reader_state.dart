@@ -59,6 +59,11 @@ class ReaderController extends ChangeNotifier with WidgetsBindingObserver {
   /// Increments on every programmatic navigation; views jump to [page] when it changes.
   int get jumpSerial => _jumpSerial;
 
+  /// Whether the Mushaf shows two facing pages, the odd page and the next (specs/012), set by
+  /// the Mushaf view as it builds. Not a change of its own: listeners read it with the next page
+  /// change (specs/014 research R3).
+  bool spreadOnScreen = false;
+
   /// Ayah whose surah and juz the header shows: the anchor when it is on the current page (so
   /// opening Al-Kahf mid-page shows Al-Kahf), otherwise the first ayah on the page.
   Ayah get pageHead {

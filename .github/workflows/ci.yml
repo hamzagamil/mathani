@@ -35,6 +35,8 @@ jobs:
           node-version: 24
       - name: Mutashabihat editor functions
         run: node --test tool/mutashabihat/*.test.mjs
+      - name: Group khatma functions and Worker
+        run: node --test tool/khatma/*.test.mjs
 
   android:
     name: Android build, size and emulator tests
