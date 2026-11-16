@@ -12,6 +12,7 @@ import '../../data/quran_repository.dart';
 import '../../shared/mathani_icons.dart';
 import '../../shared/numerals.dart';
 import '../../shared/reader_state.dart';
+import '../index/bookmark_note.dart';
 import '../index/index_screen.dart';
 import '../khatma/khatma_controller.dart';
 import '../khatma/khatma_screen.dart';
@@ -419,18 +420,28 @@ class _BookmarkToggle extends StatelessWidget {
           tooltip: marked ? l10n.removeBookmark : l10n.addBookmark,
           onPressed: () async {
             final messenger = ScaffoldMessenger.of(context);
+            Bookmark? added;
             if (marked) {
               for (final b in onPage) {
                 await reader.user.removeBookmark(b.id);
               }
             } else {
-              await reader.user.addBookmark(reader.quran.firstAyahOnPage(reader.page).ref, reader.page);
+              added = await reader.user
+                  .addBookmark(reader.quran.firstAyahOnPage(reader.page).ref, reader.page);
             }
             messenger
               ..hideCurrentSnackBar()
               ..showSnackBar(SnackBar(
                 content: Text(marked ? l10n.bookmarkRemoved : l10n.bookmarkAdded),
-                duration: const Duration(seconds: 2),
+                duration: Duration(seconds: added == null ? 2 : 4),
+                action: added == null || !context.mounted
+                    ? null
+                    : SnackBarAction(
+                        label: l10n.bookmarkNoteAdd,
+                        onPressed: () {
+                          if (context.mounted) editBookmarkNote(context, reader, added!);
+                        },
+                      ),
               ));
           },
         );

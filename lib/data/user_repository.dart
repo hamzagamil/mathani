@@ -12,7 +12,7 @@ import 'models.dart';
 class UserRepository extends ChangeNotifier {
   UserRepository._(this._db);
 
-  static const _schemaVersion = 3;
+  static const _schemaVersion = 4;
 
   /// The prayer-times state, one JSON value in `preferences` (specs/009 data-model.md).
   static const prayerStateKey = 'prayer.state';
@@ -60,6 +60,7 @@ class UserRepository extends ChangeNotifier {
           ref: AyahRef(r['surah'] as int, r['ayah'] as int),
           page: r['page'] as int,
           createdAt: DateTime.fromMillisecondsSinceEpoch(r['created_at'] as int),
+          note: r['note'] as String?,
         ),
     ];
   }
@@ -86,6 +87,17 @@ class UserRepository extends ChangeNotifier {
 
   Future<void> removeBookmark(int id) async {
     await _db.delete('bookmarks', where: 'id = ?', whereArgs: [id]);
+    await _loadBookmarks();
+    notifyListeners();
+  }
+
+  /// Sets the note on bookmark [id]. A blank note removes it. Longer notes are cut to
+  /// [Bookmark.maxNoteLength].
+  Future<void> setBookmarkNote(int id, String? note) async {
+    var text = note?.trim() ?? '';
+    if (text.length > Bookmark.maxNoteLength) text = text.substring(0, Bookmark.maxNoteLength);
+    await _db.update('bookmarks', {'note': text.isEmpty ? null : text},
+        where: 'id = ?', whereArgs: [id]);
     await _loadBookmarks();
     notifyListeners();
   }
@@ -176,6 +188,13 @@ class UserRepository extends ChangeNotifier {
             PRIMARY KEY (code, number)
           ) WITHOUT ROWID''');
       await batch.commit(noResult: true);
+    }
+    if (from < 4) {
+      // A note on each bookmark. Checked first: ADD COLUMN fails when it is already there.
+      final columns = await db.rawQuery('PRAGMA table_info(bookmarks)');
+      if (!columns.any((c) => c['name'] == 'note')) {
+        await db.execute('ALTER TABLE bookmarks ADD COLUMN note TEXT');
+      }
     }
   }
 

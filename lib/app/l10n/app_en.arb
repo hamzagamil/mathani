@@ -159,6 +159,12 @@
     }
   },
   "deleteBookmark": "Delete bookmark",
+  "bookmarkNoteAdd": "Add note",
+  "@bookmarkNoteAdd": {
+    "description": "Adds a note to a bookmark: the button, the snackbar action and the dialog title."
+  },
+  "bookmarkNoteEdit": "Edit note",
+  "bookmarkNoteHint": "Why you saved this place",
   "settingsTitle": "Settings",
   "openSettings": "Open settings",
   "layoutSetting": "Reading layout",

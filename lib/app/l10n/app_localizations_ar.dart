@@ -152,6 +152,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get deleteBookmark => 'احذف العلامة';
 
   @override
+  String get bookmarkNoteAdd => 'أضف ملاحظة';
+
+  @override
+  String get bookmarkNoteEdit => 'عدّل الملاحظة';
+
+  @override
+  String get bookmarkNoteHint => 'لماذا حفظت هذا الموضع';
+
+  @override
   String get settingsTitle => 'الإعدادات';
 
   @override

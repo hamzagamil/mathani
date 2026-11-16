@@ -33,11 +33,20 @@ CREATE TABLE preferences (
 -- keys and allowed values: see data-model.md › Preferences
 ```
 
+## Schema v4
+
+```sql
+-- The reader's note on a bookmark; NULL when there is none. Added only if missing, so the step
+-- can run again over a table that already has it.
+ALTER TABLE bookmarks ADD COLUMN note TEXT;
+```
+
 ## Operations
 
 | Operation | Behaviour |
 | --- | --- |
 | `addBookmark(surah, ayah)` | `INSERT OR IGNORE`, then returns the row. A duplicate is a no-op (FR-015). |
+| `setBookmarkNote(id, note)` | trims the note and keeps at most 500 characters; a blank note stores NULL |
 | `removeBookmark(id)` | deletes the row; the page indicator updates through change notification |
 | `listBookmarks()` | `ORDER BY created_at DESC` |
 | `isBookmarked(page)` | true if any bookmark's page equals *page* (page indicator) |

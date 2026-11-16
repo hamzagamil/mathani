@@ -9,6 +9,7 @@ import '../../platform/share.dart';
 import '../../shared/mathani_icons.dart';
 import '../../shared/numerals.dart';
 import '../../shared/reader_state.dart';
+import '../index/bookmark_note.dart';
 import '../khatma/khatma_controller.dart';
 import '../memorization/memorization_controller.dart';
 import '../memorization/range_sheet.dart';
@@ -180,8 +181,18 @@ class _AyahActionsSheet extends StatelessWidget {
             leading: const Icon(MathaniIcons.bookmark),
             title: Text(l10n.bookmarkAyah),
             onTap: () async {
-              await reader.user.addBookmark(ayah, reader.quran.pageOf(ayah));
-              done(l10n.bookmarkAdded);
+              final bookmark = await reader.user.addBookmark(ayah, reader.quran.pageOf(ayah));
+              if (context.mounted) Navigator.of(context).pop();
+              messenger
+                ..hideCurrentSnackBar()
+                ..showSnackBar(SnackBar(
+                  content: Text(l10n.bookmarkAdded),
+                  duration: const Duration(seconds: 4),
+                  action: SnackBarAction(
+                    label: bookmark.note == null ? l10n.bookmarkNoteAdd : l10n.bookmarkNoteEdit,
+                    onPressed: () => editBookmarkNote(screen, reader, bookmark),
+                  ),
+                ));
             },
           ),
           const SizedBox(height: Space.s2),

@@ -64,7 +64,7 @@ void main() {
 
     final user = await UserRepository.open();
     expect(user.bookmarks.single.page, 42);
-    expect(await user.database.getVersion(), 3);
+    expect(await user.database.getVersion(), 4);
     expect(await KhatmaRepository.of(user).loadOpen(), isNull);
     expect(dir, isNotEmpty);
   });

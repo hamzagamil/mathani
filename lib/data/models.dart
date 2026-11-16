@@ -157,12 +157,19 @@ class Bookmark {
     required this.ref,
     required this.page,
     required this.createdAt,
+    this.note,
   });
 
   final int id;
   final AyahRef ref;
   final int page;
   final DateTime createdAt;
+
+  /// The reader's own words about this place, or null when there are none.
+  final String? note;
+
+  /// The longest note kept, in characters.
+  static const maxNoteLength = 500;
 }
 
 /// Where a reciter's recordings come from (specs/006 data-model › Reciter).

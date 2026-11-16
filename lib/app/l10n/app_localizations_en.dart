@@ -150,6 +150,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deleteBookmark => 'Delete bookmark';
 
   @override
+  String get bookmarkNoteAdd => 'Add note';
+
+  @override
+  String get bookmarkNoteEdit => 'Edit note';
+
+  @override
+  String get bookmarkNoteHint => 'Why you saved this place';
+
+  @override
   String get settingsTitle => 'Settings';
 
   @override

@@ -308,6 +308,24 @@ abstract class AppLocalizations {
   /// **'Delete bookmark'**
   String get deleteBookmark;
 
+  /// Adds a note to a bookmark: the button, the snackbar action and the dialog title.
+  ///
+  /// In en, this message translates to:
+  /// **'Add note'**
+  String get bookmarkNoteAdd;
+
+  /// No description provided for @bookmarkNoteEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit note'**
+  String get bookmarkNoteEdit;
+
+  /// No description provided for @bookmarkNoteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Why you saved this place'**
+  String get bookmarkNoteHint;
+
   /// No description provided for @settingsTitle.
   ///
   /// In en, this message translates to:

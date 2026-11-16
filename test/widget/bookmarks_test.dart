@@ -49,6 +49,22 @@ void main() {
     await settle();
     expect(find.byIcon(MathaniIcons.bookmarked), findsNWidgets(3));
 
+    // A note: added from the list, shown under the place, then edited.
+    await tester.tap(find.byIcon(MathaniIcons.edit).first); // 36:1 (newest)
+    await settle();
+    expect(find.text('Add note'), findsOneWidget);
+    await tester.enterText(find.byType(TextField), 'Yasin on Friday');
+    await tester.tap(find.text('Save'));
+    await settle();
+    expect(reader.user.bookmarks.first.note, 'Yasin on Friday');
+    expect(find.text('Yasin on Friday'), findsOneWidget);
+    await tester.tap(find.byTooltip('Edit note'));
+    await settle();
+    await tester.enterText(find.byType(TextField), 'Yasin every Friday');
+    await tester.tap(find.text('Save'));
+    await settle();
+    expect(find.text('Yasin every Friday'), findsOneWidget);
+
     await tester.tap(find.byIcon(MathaniIcons.delete).first); // removes 36:1 (newest)
     await settle();
     expect(reader.user.bookmarks.length, 2);

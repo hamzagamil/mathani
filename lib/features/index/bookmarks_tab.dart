@@ -7,8 +7,10 @@ import '../../app/theme/tokens.dart';
 import '../../shared/mathani_icons.dart';
 import '../../shared/numerals.dart';
 import '../../shared/reader_state.dart';
+import 'bookmark_note.dart';
 
-/// Saved places, newest first (FR-015). Tap opens; swipe or the delete button removes.
+/// Saved places, newest first (FR-015). Tap opens; swipe or the delete button removes; the note
+/// button adds or edits the reader's note, shown under the place.
 class BookmarksTab extends StatelessWidget {
   const BookmarksTab({super.key});
 
@@ -58,14 +60,39 @@ class BookmarksTab extends StatelessWidget {
                   english ? surah.nameTranslit : surah.nameAr,
                   formatNumber(b.ref.ayah, locale),
                 )),
-                subtitle: Text(
-                  '${l10n.pageLabel(formatNumber(b.page, locale))} · ${dates.format(b.createdAt)}',
-                  style: TypeScale.caption.copyWith(color: colors.inkMuted),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${l10n.pageLabel(formatNumber(b.page, locale))} · ${dates.format(b.createdAt)}',
+                      style: TypeScale.caption.copyWith(color: colors.inkMuted),
+                    ),
+                    if (b.note != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: Space.s1),
+                        child: Text(
+                          b.note!,
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                          style: TypeScale.body.copyWith(color: colors.ink),
+                        ),
+                      ),
+                  ],
                 ),
-                trailing: IconButton(
-                  icon: const Icon(MathaniIcons.delete),
-                  tooltip: l10n.deleteBookmark,
-                  onPressed: () => reader.user.removeBookmark(b.id),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(MathaniIcons.edit),
+                      tooltip: b.note == null ? l10n.bookmarkNoteAdd : l10n.bookmarkNoteEdit,
+                      onPressed: () => editBookmarkNote(context, reader, b),
+                    ),
+                    IconButton(
+                      icon: const Icon(MathaniIcons.delete),
+                      tooltip: l10n.deleteBookmark,
+                      onPressed: () => reader.user.removeBookmark(b.id),
+                    ),
+                  ],
                 ),
                 onTap: () {
                   reader.jumpTo(b.ref);
