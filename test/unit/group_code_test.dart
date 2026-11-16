@@ -15,6 +15,9 @@ void main() {
   test('a whole link', () {
     expect(GroupCode.parse('https://get.mthani.app/k/$code'), code);
     expect(GroupCode.parse('Take your part: https://get.mthani.app/k/abcd2345efgh6789'), code);
+    // The same link on the main domain (it opens the app, or redirects to the web app).
+    expect(GroupCode.parse('https://mthani.app/k/$code'), code);
+    expect(GroupCode.parse('https://www.mthani.app/k/$code'), code);
   });
 
   test('Crockford look-alikes are read as digits', () {

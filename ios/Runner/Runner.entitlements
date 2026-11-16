@@ -2,11 +2,13 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<!-- Group khatma links open the app (specs/014 research R16), verified through
-	     https://get.mthani.app/.well-known/apple-app-site-association. -->
+	<!-- Mathani links open the app (specs/014 research R16): get.mthani.app and group khatma
+	     links on mthani.app, each verified through its /.well-known/apple-app-site-association. -->
 	<key>com.apple.developer.associated-domains</key>
 	<array>
 		<string>applinks:get.mthani.app</string>
+		<string>applinks:mthani.app</string>
+		<string>applinks:www.mthani.app</string>
 	</array>
 </dict>
 </plist>

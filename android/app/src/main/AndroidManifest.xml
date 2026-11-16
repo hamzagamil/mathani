@@ -48,13 +48,24 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-            <!-- Group khatma links open the app (specs/014 research R16), verified through
-                 https://get.mthani.app/.well-known/assetlinks.json. MainActivity reads them. -->
+            <!-- Mathani links open the app (specs/014 research R16), each host verified through its
+                 /.well-known/assetlinks.json: the web app's home page, and group khatma links on
+                 get.mthani.app, mthani.app and www.mthani.app. MainActivity reads khatma links. -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:scheme="https" android:host="get.mthani.app" android:pathPrefix="/k/"/>
+                <data android:scheme="https" android:host="get.mthani.app" android:path="/"/>
+            </intent-filter>
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="https"/>
+                <data android:host="get.mthani.app"/>
+                <data android:host="mthani.app"/>
+                <data android:host="www.mthani.app"/>
+                <data android:pathPrefix="/k/"/>
             </intent-filter>
             <!-- Links are read natively, never pushed as a route name. -->
             <meta-data android:name="flutter_deeplinking_enabled" android:value="false"/>

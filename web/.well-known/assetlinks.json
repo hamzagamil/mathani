@@ -5,8 +5,8 @@
       "namespace": "android_app",
       "package_name": "com.mthani.app",
       "sha256_cert_fingerprints": [
-        "PLACEHOLDER_PLAY_APP_SIGNING_KEY_SHA256",
-        "PLACEHOLDER_UPLOAD_KEY_SHA256"
+        "D4:49:93:8B:CF:14:49:3B:3B:4C:48:91:54:CA:D3:69:8B:AB:B2:D5:51:52:F3:EF:0D:7F:C7:93:7F:74:15:F7",
+        "43:65:6C:58:A0:83:A5:3C:9B:C0:5F:C5:D4:F5:2E:B7:56:25:FB:44:77:3E:C2:B2:95:C6:B2:32:CE:9B:20:C9"
       ]
     }
   }

@@ -3,7 +3,10 @@
     "details": [
       {
         "appIDs": ["YJBH85NYZU.com.mthani.app"],
-        "components": [{ "/": "/k/*", "comment": "A group khatma (specs/014)" }]
+        "components": [
+          { "/": "/", "comment": "The web app's home page opens the app" },
+          { "/": "/k/*", "comment": "A group khatma (specs/014)" }
+        ]
       }
     ]
   }

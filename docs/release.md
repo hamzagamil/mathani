@@ -179,10 +179,16 @@ Once, before the release that carries the group khatma (quickstart Part B › Se
       10 s from one IP, block 10 s.
 - [ ] Apple: enable Associated Domains for `com.mthani.app` and renew the profiles (the app now
       carries `Runner.entitlements`; signing fails until the profile has the capability).
-- [ ] Play Console › App integrity: put the SHA-256 of the app signing key and of the upload key
-      in `web/.well-known/assetlinks.json` (in place of the two placeholders).
-- [ ] After the web deploy: `curl.exe -sI https://get.mthani.app/.well-known/assetlinks.json` and
-      `…/apple-app-site-association` answer `200` with `application/json`.
+- [ ] Play Console › App integrity: add the SHA-256 of the app signing key next to the upload
+      key's in `web/.well-known/assetlinks.json` and in `Mathani-landing/.well-known/assetlinks.json`
+      (store installs are signed with the app signing key; without it Android opens links in
+      the browser).
+- [ ] Links that open the app: `get.mthani.app/` and `/k/<code>` on get.mthani.app, mthani.app
+      and www.mthani.app (`Runner.entitlements`, `AndroidManifest.xml`). Deploy both sites
+      (`tool/web_deploy.mjs`, `Mathani-landing/_deploy/deploy.mjs`), then check that
+      `curl.exe -sI https://<host>/.well-known/assetlinks.json` and `…/apple-app-site-association`
+      answer `200` with `application/json` on all three hosts, and that
+      `https://mthani.app/k/<code>` redirects to get.mthani.app in a browser.
 - [ ] Contact address confirmed (`mathaniContact`, now `support@mthani.app`).
 - [ ] Store answers, the age rating and the published policy updated (`docs/store/privacy.md` ›
       Khatma); review notes carry a group khatma link and where Report is.
