@@ -37,10 +37,15 @@ final class DeviceChannel {
   private var mistakeSound: SystemSoundID = 0
   private var pendingLink: String?
 
+  /// The hosts whose links open the app (Runner.entitlements).
+  private static let linkHosts: Set<String> = ["get.mthani.app", "mthani.app", "www.mthani.app"]
+
   /// A group khatma link (specs/014 research R16): kept for `takeLink` at launch, when Dart is
-  /// not listening yet, or sent as a `link` event while the app runs.
+  /// not listening yet, or sent as a `link` event while the app runs. Any other Mathani link
+  /// only opens the app.
   func noteLink(_ url: URL?, launch: Bool) {
-    guard let url, url.host == "get.mthani.app", url.path.hasPrefix("/k/") else { return }
+    guard let url, let host = url.host?.lowercased(), Self.linkHosts.contains(host),
+      url.path.hasPrefix("/k/") else { return }
     if launch || channel == nil {
       pendingLink = url.absoluteString
     } else {

@@ -34,6 +34,9 @@ class MainActivity : AudioServiceActivity() {
     }
 }
 
+/** The hosts whose links open the app (AndroidManifest.xml). */
+private val LINK_HOSTS = setOf("get.mthani.app", "mthani.app", "www.mthani.app")
+
 /// Network type and free storage for recitation downloads (specs/004, research R8); device
 /// support, the Settings link and the mistake tone for memorization (specs/006, R12, R15).
 object DeviceChannel {
@@ -41,10 +44,11 @@ object DeviceChannel {
     private var pendingLink: String? = null
 
     /** A group khatma link the app was opened with, or that arrived while it runs (specs/014
-     * research R16): handed to Dart once by `takeLink`, or sent as a `link` event. */
+     * research R16): handed to Dart once by `takeLink`, or sent as a `link` event. Any other
+     * Mathani link only opens the app. */
     fun noteLink(intent: Intent?, launch: Boolean) {
         val data = intent?.data ?: return
-        if (intent.action != Intent.ACTION_VIEW || data.host != "get.mthani.app" ||
+        if (intent.action != Intent.ACTION_VIEW || data.host?.lowercase() !in LINK_HOSTS ||
             data.path?.startsWith("/k/") != true) return
         val link = data.toString()
         val events = channel
