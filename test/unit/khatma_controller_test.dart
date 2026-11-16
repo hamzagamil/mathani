@@ -16,8 +16,16 @@ void main() {
   late DateTime now;
   var memorizing = false;
 
+  /// Lets the controller's database work finish. A fixed wait alone was flaky on busy CI
+  /// machines: sqflite runs one operation at a time, so a query queued after each step of the
+  /// controller's chain returns only once that step's writes are done.
   Future<void> settle(WidgetTester tester) async {
-    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 30)));
+    await tester.runAsync(() async {
+      for (var i = 0; i < 4; i++) {
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+        await reader.user.database.rawQuery('SELECT 1');
+      }
+    });
     await tester.pump();
   }
 
