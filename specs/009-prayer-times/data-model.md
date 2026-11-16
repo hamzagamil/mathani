@@ -100,7 +100,7 @@ to 2 days ahead. Never Sunrise.
 | `id` | 31-bit int from hash(place id, local date, kind). Stable across refills so replacing the list does not duplicate. |
 | `kind` | One of the five prayers, or `qiyam`. |
 | `atUtc` | Future instant. |
-| `title`, `body` | Localized at refill time: prayer name, time, place name. The language follows the app. |
+| `title`, `body` | Localized at refill time: "Time for {prayer} prayer", and words from the athan ("Prayer is better than sleep." for Fajr, "Come to prayer, come to success." otherwise). No time (the phone shows it) and no place. The language follows the app. |
 | `sound` | Recitation id, `tone` or `silent`. Qiyam is always `tone`. |
 | `full` | true when `athan = full` and the full recording is downloaded. |
 | `fullPath` | Android only: absolute path of the downloaded full recording. |

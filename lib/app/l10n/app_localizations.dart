@@ -2155,11 +2155,23 @@ abstract class AppLocalizations {
   /// **'The last third of the night has begun.'**
   String get prayerQiyamNotification;
 
+  /// No description provided for @prayerAlertTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Time for {prayer} prayer'**
+  String prayerAlertTitle(String prayer);
+
   /// No description provided for @prayerAlertBody.
   ///
   /// In en, this message translates to:
-  /// **'{time} · {place}'**
-  String prayerAlertBody(String time, String place);
+  /// **'Come to prayer, come to success.'**
+  String get prayerAlertBody;
+
+  /// No description provided for @prayerAlertBodyFajr.
+  ///
+  /// In en, this message translates to:
+  /// **'Prayer is better than sleep.'**
+  String get prayerAlertBodyFajr;
 
   /// No description provided for @prayerChannelSound.
   ///

@@ -1233,9 +1233,15 @@ class AppLocalizationsEn extends AppLocalizations {
       'The last third of the night has begun.';
 
   @override
-  String prayerAlertBody(String time, String place) {
-    return '$time · $place';
+  String prayerAlertTitle(String prayer) {
+    return 'Time for $prayer prayer';
   }
+
+  @override
+  String get prayerAlertBody => 'Come to prayer, come to success.';
+
+  @override
+  String get prayerAlertBodyFajr => 'Prayer is better than sleep.';
 
   @override
   String prayerChannelSound(String sound) {

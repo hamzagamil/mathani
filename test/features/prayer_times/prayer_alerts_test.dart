@@ -61,6 +61,20 @@ void main() {
       expect(alerts.every((a) => a.generation == 9), isTrue);
     });
 
+    test('text: the prayer time and words from the athan, never the place', () {
+      final alerts = build(state());
+      final fajr = alerts.firstWhere((a) => a.kind == PrayerKind.fajr);
+      final dhuhr = alerts.firstWhere((a) => a.kind == PrayerKind.dhuhr);
+      expect(fajr.title, 'Time for Fajr prayer');
+      expect(fajr.body, 'Prayer is better than sleep.');
+      expect(dhuhr.title, 'Time for Dhuhr prayer');
+      expect(dhuhr.body, 'Come to prayer, come to success.');
+      expect(
+        alerts.any((a) => '${a.title} ${a.body}'.contains('Cairo')),
+        isFalse,
+      );
+    });
+
     test('ids are stable across refills, so a refill never duplicates', () {
       final a = build(state()).map((a) => a.id).toList();
       final b = build(state(generation: 4)).map((a) => a.id).toList();

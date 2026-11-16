@@ -1234,9 +1234,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get prayerQiyamNotification => 'بدأ الثلث الأخير من الليل.';
 
   @override
-  String prayerAlertBody(String time, String place) {
-    return '$time · $place';
+  String prayerAlertTitle(String prayer) {
+    return 'حان وقت صلاة $prayer';
   }
+
+  @override
+  String get prayerAlertBody => 'حيّ على الصلاة، حيّ على الفلاح';
+
+  @override
+  String get prayerAlertBodyFajr => 'الصلاة خير من النوم';
 
   @override
   String prayerChannelSound(String sound) {

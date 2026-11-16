@@ -3,8 +3,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:intl/intl.dart' show DateFormat;
-import 'package:timezone/timezone.dart' as tz;
 
 import '../../app/l10n/app_localizations.dart';
 import '../../platform/prayer_location.dart';
@@ -17,7 +15,6 @@ import 'prayer_copy.dart';
 import 'prayer_models.dart';
 import 'prayer_repository.dart';
 import 'prayer_services.dart';
-import 'prayer_time_zones.dart';
 
 /// What the prayer screens and the alerts share, created on first use (research R11).
 class PrayerServices {
@@ -85,19 +82,6 @@ List<Alert> buildAlerts({
       settings.athan == AthanLength.full &&
       fullReady &&
       catalogue.byId(sound) != null;
-  final zone = prayerTimeZone(place.timezoneId);
-  String time(DateTime at) {
-    final local = tz.TZDateTime.from(at, zone);
-    try {
-      return DateFormat.jm(l10n.localeName).format(local);
-    } on Object {
-      // Date data not loaded yet (before the first localized frame): 24-hour digits.
-      String two(int v) => v.toString().padLeft(2, '0');
-      return '${two(local.hour)}:${two(local.minute)}';
-    }
-  }
-
-  String body(DateTime at) => l10n.prayerAlertBody(time(at), place.name);
   final alerts = <Alert>[];
   // Yesterday too: its Qiyam may still be ahead, after midnight.
   final first = PrayerCalculator.localDay(
@@ -118,8 +102,11 @@ List<Alert> buildAlerts({
           id: alertId(place.id, date, e.kind),
           kind: e.kind,
           atUtc: e.atUtc!,
-          title: prayerName(l10n, e.kind),
-          body: body(e.atUtc!),
+          title: l10n.prayerAlertTitle(prayerName(l10n, e.kind)),
+          // Words from the athan; the phone already shows the time.
+          body: e.kind == PrayerKind.fajr
+              ? l10n.prayerAlertBodyFajr
+              : l10n.prayerAlertBody,
           sound: sound,
           full: full,
           fullPath: full ? fullPath : null,
