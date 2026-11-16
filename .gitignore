@@ -68,3 +68,6 @@ __pycache__/
 *.log
 *.tmp
 *.swp
+
+# Wrangler local state
+.wrangler/

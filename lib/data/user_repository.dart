@@ -98,12 +98,14 @@ class UserRepository extends ChangeNotifier {
 
   bool isBookmarked(AyahRef ref) => _bookmarks.any((b) => b.ref == ref);
 
-  /// Forward-only migrations. A migration never deletes bookmarks.
+  /// Forward-only migrations. A migration never deletes bookmarks. Each step may run again over
+  /// tables it already made: a browser can keep the new tables but lose the version bump when the
+  /// tab closes mid-upgrade, and the next visit then upgrades again.
   static Future<void> _migrate(Database db, int from, int to) async {
     if (from < 1) {
       final batch = db.batch()
         ..execute('''
-          CREATE TABLE bookmarks (
+          CREATE TABLE IF NOT EXISTS bookmarks (
             id          INTEGER PRIMARY KEY AUTOINCREMENT,
             surah       INTEGER NOT NULL,
             ayah        INTEGER NOT NULL,
@@ -111,16 +113,16 @@ class UserRepository extends ChangeNotifier {
             created_at  INTEGER NOT NULL,
             UNIQUE (surah, ayah)
           )''')
-        ..execute('CREATE INDEX bookmarks_created ON bookmarks(created_at DESC)')
+        ..execute('CREATE INDEX IF NOT EXISTS bookmarks_created ON bookmarks(created_at DESC)')
         ..execute('''
-          CREATE TABLE reading_state (
+          CREATE TABLE IF NOT EXISTS reading_state (
             id            INTEGER PRIMARY KEY CHECK (id = 1),
             anchor_surah  INTEGER NOT NULL DEFAULT 1,
             anchor_ayah   INTEGER NOT NULL DEFAULT 1,
             updated_at    INTEGER NOT NULL
           )''')
         ..execute('''
-          CREATE TABLE preferences (
+          CREATE TABLE IF NOT EXISTS preferences (
             key    TEXT PRIMARY KEY,
             value  TEXT NOT NULL
           ) WITHOUT ROWID''');
@@ -130,7 +132,7 @@ class UserRepository extends ChangeNotifier {
       // The personal khatma (specs/014 data-model.md). Adds tables only.
       final batch = db.batch()
         ..execute('''
-          CREATE TABLE khatmas (
+          CREATE TABLE IF NOT EXISTS khatmas (
             id              INTEGER PRIMARY KEY AUTOINCREMENT,
             state           TEXT NOT NULL,
             plan            TEXT NOT NULL,
@@ -144,7 +146,7 @@ class UserRepository extends ChangeNotifier {
             created_at      INTEGER NOT NULL
           )''')
         ..execute('''
-          CREATE TABLE khatma_wirds (
+          CREATE TABLE IF NOT EXISTS khatma_wirds (
             khatma_id   INTEGER NOT NULL,
             number      INTEGER NOT NULL,
             first_ayah  INTEGER NOT NULL,
@@ -158,7 +160,7 @@ class UserRepository extends ChangeNotifier {
       // Group khatmas the reader keeps, and the parts they hold (specs/014 data-model.md › 2).
       final batch = db.batch()
         ..execute('''
-          CREATE TABLE group_khatmas (
+          CREATE TABLE IF NOT EXISTS group_khatmas (
             code      TEXT PRIMARY KEY,
             snapshot  TEXT NOT NULL,
             version   INTEGER NOT NULL,
@@ -166,7 +168,7 @@ class UserRepository extends ChangeNotifier {
             hidden    TEXT NOT NULL DEFAULT '[]'
           ) WITHOUT ROWID''')
         ..execute('''
-          CREATE TABLE group_parts (
+          CREATE TABLE IF NOT EXISTS group_parts (
             code        TEXT NOT NULL,
             number      INTEGER NOT NULL,
             place_page  INTEGER NOT NULL,

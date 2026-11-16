@@ -53,6 +53,22 @@ void main() {
     expect(await repo.loadFinished(), isEmpty);
   });
 
+  test('an upgrade that kept its tables but lost the version bump runs again', () async {
+    // Seen in a browser: the schema 3 tables were saved but user_version stayed 1, so every
+    // visit re-ran the upgrade and failed on «table khatmas already exists» (blank page).
+    final dir = await freshDir();
+    final first = await UserRepository.open();
+    await first.addBookmark(const AyahRef(2, 255), 42);
+    await first.database.setVersion(1);
+    await first.database.close();
+
+    final user = await UserRepository.open();
+    expect(user.bookmarks.single.page, 42);
+    expect(await user.database.getVersion(), 3);
+    expect(await KhatmaRepository.of(user).loadOpen(), isNull);
+    expect(dir, isNotEmpty);
+  });
+
   test('start, and a second start is refused while one is open', () async {
     await freshDir();
     final repo = KhatmaRepository.of(await UserRepository.open());
