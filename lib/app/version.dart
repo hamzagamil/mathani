@@ -1,3 +1,3 @@
 /// App version shown on the About screen. Must equal `version` in pubspec.yaml
 /// (test/unit/version_test.dart fails otherwise); avoids a runtime package-info dependency.
-const appVersion = '1.8.0+29';
+const appVersion = '1.8.0+30';
