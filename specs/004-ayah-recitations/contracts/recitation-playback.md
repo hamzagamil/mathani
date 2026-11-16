@@ -19,7 +19,7 @@ first `play`.
 | `setReciter(String id)` | Saves the preference. During a session: resolves the **current item** with the new reciter, then restarts that item from its start. If that fails with `offline`, the session keeps its reciter and shows the message «{name} غير منزّل لهذه السورة» / "{name} isn't downloaded for this surah", and the preference is set back. |
 | `returnToRecitation()` | Calls the follow jump (`_followJump`, see Following), then sets `following = true`. |
 | `retry()` | Retries the item that failed. |
-| `repeat`, `setRepeat(RecitationRepeat)` | `off`, `ayah`, `page` or `surah`. Kept while the app runs, across sessions; never persisted. See Repeat. |
+| `repeat`, `repeatTimes`, `repeatRange`, `setRepeat(RecitationRepeat, {times, range})` | `off`, `ayah`, `page`, `surah` or `range` (an `AyahRange`, from and to inclusive); `times` 1 to 99, or null for no end. Kept while the app runs, across sessions; never persisted. See Repeat. |
 
 Starting a new `play*` while a session exists replaces the item and keeps the reciter.
 `following` becomes `true` on every `play*`.
@@ -68,6 +68,12 @@ Starting a new `play*` while a session exists replaces the item and keeps the re
   loads a fresh window. Items already queued past the end when repeat is chosen are not played:
   the recitation goes back as soon as the player reaches one. Turning repeat off lets the
   lookahead carry on.
+- **Range**: the span is the reader's range; its end is its last ayah, its start the first ayah
+  (its basmala when that is ayah 1). Outside the range nothing repeats.
+- **Times**: with a number set, a span is recited that many times in all. Then `ayah`, `page` and
+  `surah` go on to the next span, which is recited as many times; `range` ends the recitation
+  (`ended`), and the lookahead never queues past its last ayah. The count starts again on
+  `setRepeat`, `next`, `previous`, `playFrom` and `stop`.
 
 ## Following (FR-012 to FR-014)
 

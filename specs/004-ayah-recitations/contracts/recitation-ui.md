@@ -28,7 +28,7 @@ the toolbar sits above it. It takes no part in tap-to-show.
 | Element | Behaviour |
 | --- | --- |
 | Previous / Play-Pause / Next | `previous()`, `pause()`/`resume()`, `next()`. In `loading`, Play-Pause shows a spinner and stays tappable as Pause. |
-| Repeat | One button. Each tap moves `off → ayah → page → surah → off` (`setRepeat`). Off: the repeat icon, muted. On: the accent colour, `repeat-1` for an ayah or `repeat` otherwise, with «آية» / «صفحة» / «سورة» (Ayah / Page / Surah) under it. Tooltip: «التكرار متوقف» / «تكرار هذه الآية» / «تكرار هذه الصفحة» / «تكرار هذه السورة». It sits after Next in the left-to-right media order. |
+| Repeat | One button; a tap opens the repeat sheet: off · ayah · page · surah · range (a surah and From/To ayat, from the recited ayah to the end of its page by default), and the times, «بلا نهاية» (No end) or 1–99. Done applies; for a range, «شغّل المقطع» (Play range) also plays it from its start unless the recitation is already inside it. An ayah's actions offer «كرّر آيات من هنا» (Repeat ayat from here), which opens the sheet on a range from that ayah. Off: the repeat icon, muted. On: the accent colour, `repeat-1` for an ayah or `repeat` otherwise, with «آية» / «صفحة» / «سورة» / «مقطع» under it, and «×٣» when a number of times is set. Tooltip: «التكرار متوقف» / «تكرار هذه الآية» / «تكرار هذه الصفحة» / «تكرار هذه السورة» / «تكرار {surah} من {from} إلى {to}». It sits after Next in the left-to-right media order. |
 | Item text | Surah and ayah (or «البسملة» / "Basmala") in the interface language and numerals. Tap: `returnToRecitation()`. |
 | Reciter chip | The short name from the catalogue (`short_ar` / `short_en`: الحصري / المنشاوي, Al-Husary / El-Minshawi). Tap: reciter sheet. |
 | Close ✕ | `stop()` |

@@ -356,6 +356,61 @@ void main() {
       expect(reader.page, 50);
     });
 
+    recitationTest('an ayah set to 3 times is recited 3 times, then the next ayah 3 times',
+        (tester) async {
+      c.setRepeat(RecitationRepeat.ayah, times: 3);
+      c.playFrom(const AyahRef(67, 12));
+      await settle(tester);
+      final heard = <RecitedItem>[engine.currentItem!];
+      for (var i = 0; i < 5; i++) {
+        engine.finishCurrent();
+        await settle(tester);
+        heard.add(engine.currentItem!);
+      }
+      expect(heard, [
+        ayah(67, 12), ayah(67, 12), ayah(67, 12),
+        ayah(67, 13), ayah(67, 13), ayah(67, 13),
+      ]);
+      expect(session().status, RecitationStatus.playing);
+    });
+
+    recitationTest('a range goes back to its start, and stops after its last time', (tester) async {
+      c.setRepeat(RecitationRepeat.range,
+          times: 2, range: AyahRange(const AyahRef(67, 14), const AyahRef(67, 12)));
+      expect(c.repeatRange!.from, const AyahRef(67, 12), reason: 'either order');
+      c.playFrom(const AyahRef(67, 12));
+      await settle(tester);
+      expect(engine.window, isNot(contains(ayah(67, 15))),
+          reason: 'nothing is queued past the end of the range');
+      final heard = <RecitedItem>[engine.currentItem!];
+      for (var i = 0; i < 6; i++) {
+        engine.finishCurrent();
+        await settle(tester);
+        if (session().status == RecitationStatus.ended) break;
+        heard.add(engine.currentItem!);
+      }
+      expect(heard, [
+        ayah(67, 12), ayah(67, 13), ayah(67, 14),
+        ayah(67, 12), ayah(67, 13), ayah(67, 14),
+      ]);
+      expect(session().status, RecitationStatus.ended);
+    });
+
+    recitationTest('a range with no end goes on repeating; one starting at ayah 1 has its basmala',
+        (tester) async {
+      c.setRepeat(RecitationRepeat.range, range: AyahRange(const AyahRef(67, 1), const AyahRef(67, 2)));
+      c.playFrom(const AyahRef(67, 1));
+      await settle(tester);
+      for (var pass = 0; pass < 3; pass++) {
+        expect(engine.currentItem, const RecitedItem.basmala(67));
+        for (var i = 0; i < 3; i++) {
+          engine.finishCurrent();
+          await settle(tester);
+        }
+      }
+      expect(session().status, RecitationStatus.playing);
+    });
+
     recitationTest('a surah goes back to its basmala, even at the end of the Quran', (tester) async {
       c.setRepeat(RecitationRepeat.surah);
       c.playFrom(const AyahRef(114, 5));

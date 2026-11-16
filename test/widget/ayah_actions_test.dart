@@ -158,8 +158,8 @@ void main() {
 
     final tiles = tester.widgetList<ListTile>(find.byType(ListTile)).toList();
     expect((tiles.first.title! as Text).data, 'تشغيل من هذه الآية');
-    expect([for (final t in tiles) (t.title! as Text).data].sublist(1, 4),
-        ['انسخ', 'شارك', 'احفظ']);
+    expect([for (final t in tiles) (t.title! as Text).data].sublist(1, 5),
+        ['كرّر آيات من هنا', 'انسخ', 'شارك', 'احفظ']);
 
     await tester.tap(find.text('تشغيل من هذه الآية'));
     await settle(tester);

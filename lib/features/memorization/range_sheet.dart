@@ -1,7 +1,6 @@
 // Choosing what to recite (specs/006 FR-009, contracts/memorization-ui.md › Range sheet): a surah
 // and its ayat, the current page by default; then the model, the microphone and the session.
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../app/l10n/app_localizations.dart';
 import '../../app/theme/app_theme.dart';
@@ -9,6 +8,7 @@ import '../../app/theme/tokens.dart';
 import '../../data/models.dart';
 import '../../platform/supported_browsers.dart';
 import '../../shared/mathani_icons.dart';
+import '../../shared/number_stepper.dart';
 import '../../shared/numerals.dart';
 import '../../shared/reader_state.dart';
 import '../recitation/download_queue.dart';
@@ -185,8 +185,9 @@ class _RangeSheetState extends State<_RangeSheet> {
           Row(
             children: [
               Expanded(
-                child: _AyahStepper(
+                child: NumberStepper(
                   label: l10n.memorizeFrom,
+                  hint: l10n.ayahField,
                   value: _from,
                   max: max,
                   onChanged: (v) => _setFrom(v, max),
@@ -194,8 +195,9 @@ class _RangeSheetState extends State<_RangeSheet> {
               ),
               const SizedBox(width: Space.s3),
               Expanded(
-                child: _AyahStepper(
+                child: NumberStepper(
                   label: l10n.memorizeTo,
+                  hint: l10n.ayahField,
                   value: _to,
                   max: max,
                   onChanged: (v) => _setTo(v, max),
@@ -296,67 +298,6 @@ class _RangeSheetState extends State<_RangeSheet> {
           ),
         ),
       ),
-    );
-  }
-}
-
-/// An ayah number in 1..[max]: minus and plus, or typed directly.
-class _AyahStepper extends StatefulWidget {
-  const _AyahStepper({required this.label, required this.value, required this.max, required this.onChanged});
-  final String label;
-  final int value;
-  final int max;
-  final ValueChanged<int> onChanged;
-
-  @override
-  State<_AyahStepper> createState() => _AyahStepperState();
-}
-
-class _AyahStepperState extends State<_AyahStepper> {
-  late final _text = TextEditingController(text: '${widget.value}');
-
-  @override
-  void didUpdateWidget(_AyahStepper old) {
-    super.didUpdateWidget(old);
-    if (int.tryParse(_text.text) != widget.value) _text.text = '${widget.value}';
-  }
-
-  @override
-  void dispose() {
-    _text.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    return Row(
-      children: [
-        IconButton(
-          icon: const Icon(MathaniIcons.minus),
-          tooltip: '${widget.label} −',
-          onPressed: widget.value > 1 ? () => widget.onChanged(widget.value - 1) : null,
-        ),
-        Expanded(
-          child: TextField(
-            controller: _text,
-            textAlign: TextAlign.center,
-            keyboardType: TextInputType.number,
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            decoration: InputDecoration(labelText: widget.label, hintText: l10n.ayahField),
-            onSubmitted: (s) => widget.onChanged(int.tryParse(s) ?? widget.value),
-            onTapOutside: (_) {
-              widget.onChanged(int.tryParse(_text.text) ?? widget.value);
-              FocusScope.of(context).unfocus();
-            },
-          ),
-        ),
-        IconButton(
-          icon: const Icon(MathaniIcons.plus),
-          tooltip: '${widget.label} +',
-          onPressed: widget.value < widget.max ? () => widget.onChanged(widget.value + 1) : null,
-        ),
-      ],
     );
   }
 }

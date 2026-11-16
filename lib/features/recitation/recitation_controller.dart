@@ -26,8 +26,33 @@ const endedBannerDuration = Duration(seconds: 3);
 enum RecitationStatus { loading, playing, paused, error, ended }
 
 /// What the recitation goes back over when it reaches the end of it: nothing, the ayah, the
-/// Mushaf page or the surah being recited.
-enum RecitationRepeat { off, ayah, page, surah }
+/// Mushaf page or the surah being recited, or a range of ayat the reader chose.
+enum RecitationRepeat { off, ayah, page, surah, range }
+
+/// The ayat a range repeat goes over, [from] to [to] inclusive, in Mushaf order.
+class AyahRange {
+  /// [a] and [b] in either order.
+  factory AyahRange(AyahRef a, AyahRef b) =>
+      a.compareTo(b) <= 0 ? AyahRange._(a, b) : AyahRange._(b, a);
+  const AyahRange._(this.from, this.to);
+
+  final AyahRef from;
+  final AyahRef to;
+
+  bool contains(AyahRef ref) => from.compareTo(ref) <= 0 && ref.compareTo(to) <= 0;
+
+  @override
+  bool operator ==(Object other) => other is AyahRange && other.from == from && other.to == to;
+
+  @override
+  int get hashCode => Object.hash(from, to);
+
+  @override
+  String toString() => '$from-$to';
+}
+
+/// The most times a span can be set to be recited.
+const maxRepeatTimes = 99;
 
 /// A one-off message for the bar (US2: switching to a reciter that isn't downloaded, offline).
 class RecitationNotice {
@@ -144,17 +169,38 @@ class RecitationController extends ChangeNotifier with WidgetsBindingObserver {
   RecitationRepeat get repeat => _repeat;
   RecitationRepeat _repeat = RecitationRepeat.off;
 
-  void setRepeat(RecitationRepeat value) {
-    if (value == _repeat) return;
+  /// How many times each ayah, page, surah or the range is recited; null for no end.
+  int? get repeatTimes => _repeatTimes;
+  int? _repeatTimes;
+
+  /// The ayat a [RecitationRepeat.range] repeat goes over; null in the other modes.
+  AyahRange? get repeatRange => _repeatRange;
+  AyahRange? _repeatRange;
+
+  /// Times the current span has been gone back over.
+  int _passes = 0;
+
+  /// Sets what is repeated and how many [times] it is recited (null: with no end; clamped to
+  /// 1 to [maxRepeatTimes]). [range] is needed for [RecitationRepeat.range]. A range recited a set
+  /// number of times ends the recitation after its last time; the others go on to the next ayah,
+  /// page or surah, which is then recited as many times.
+  void setRepeat(RecitationRepeat value, {int? times, AyahRange? range}) {
+    if (value == RecitationRepeat.range && range == null) return;
+    final r = value == RecitationRepeat.range ? range : null;
+    final t = value == RecitationRepeat.off ? null : times?.clamp(1, maxRepeatTimes);
+    if (value == _repeat && t == _repeatTimes && r == _repeatRange) return;
     _repeat = value;
+    _repeatTimes = t;
+    _repeatRange = r;
+    _passes = 0;
     notifyListeners();
     // The lookahead stops at the end of a repeated span: let it carry on past it now.
     unawaited(_fillAhead(_generation));
   }
 
-  /// Where the recitation goes back to after [item], or null when it goes on: [item] ends the
-  /// repeated ayah, page or surah. A basmala is not repeated on its own; its ayah 1 is.
-  RecitedItem? _repeatFrom(RecitedItem item) {
+  /// Where the span that [item] ends begins, or null when [item] does not end one: the ayah, the
+  /// page, the surah or the range. A basmala is not repeated on its own; its ayah 1 is.
+  RecitedItem? _spanStart(RecitedItem item) {
     final next = _order.next(item);
     switch (_repeat) {
       case RecitationRepeat.off:
@@ -168,8 +214,25 @@ class RecitationController extends ChangeNotifier with WidgetsBindingObserver {
       case RecitationRepeat.surah:
         if (next != null && next.surah == item.surah) return null;
         return _order.startItem(AyahRef(item.surah, 1));
+      case RecitationRepeat.range:
+        final range = _repeatRange!;
+        if (item.isBasmala || item.ref != range.to) return null;
+        return _order.startItem(range.from);
     }
   }
+
+  /// Where the recitation goes back to after [item], or null when it goes on: [item] ends the
+  /// repeated span and the span has times left.
+  RecitedItem? _repeatFrom(RecitedItem item) {
+    final start = _spanStart(item);
+    if (start == null) return null;
+    final times = _repeatTimes;
+    return times == null || _passes + 1 < times ? start : null;
+  }
+
+  /// [item] ends a range that has been recited all its times: the recitation ends after it.
+  bool _endsRange(RecitedItem item) =>
+      _repeat == RecitationRepeat.range && _spanStart(item) != null && _repeatFrom(item) == null;
 
   AudioEngine get _player {
     final e = _engine;
@@ -207,6 +270,7 @@ class RecitationController extends ChangeNotifier with WidgetsBindingObserver {
     _endedTimer?.cancel();
     _skipTimer?.cancel();
     final item = _order.startItem(ref);
+    _passes = 0;
     final s = _session;
     if (s == null) {
       _session = RecitationSession(reciter: reciter, item: item);
@@ -283,7 +347,8 @@ class RecitationController extends ChangeNotifier with WidgetsBindingObserver {
         final current = _window.indexOf(s.item);
         if (current < 0 || _window.length - 1 - current >= prefetchAhead) return;
         // Going back starts a fresh window when this one completes: an item is never in it twice.
-        if (_repeatFrom(_window.last) != null) return;
+        // A range's last ayah ends the recitation on its last time.
+        if (_repeatFrom(_window.last) != null || _endsRange(_window.last)) return;
         final next = _order.next(_window.last);
         if (next == null) return; // the end of the Quran
         final StoreFile file;
@@ -374,6 +439,13 @@ class RecitationController extends ChangeNotifier with WidgetsBindingObserver {
             _goTo(again);
             return;
           }
+          if (_endsRange(s.item)) {
+            unawaited(_player.stop());
+            _end();
+            return;
+          }
+          // Past the end of a span recited all its times: the next one starts its own count.
+          if (_spanStart(s.item) != null) _passes = 0;
           s.item = item;
           notifyListeners();
           unawaited(_followJump(item));
@@ -391,6 +463,11 @@ class RecitationController extends ChangeNotifier with WidgetsBindingObserver {
           _goTo(again);
           return;
         }
+        if (_endsRange(item)) {
+          _end();
+          return;
+        }
+        if (_spanStart(item) != null) _passes = 0;
         final next = _order.next(item);
         if (next == null) {
           _end();
@@ -419,6 +496,7 @@ class RecitationController extends ChangeNotifier with WidgetsBindingObserver {
 
   /// Plays on from [item] in a fresh window (repeat going back).
   void _goTo(RecitedItem item) {
+    _passes++;
     final s = _session!;
     s
       ..item = item
@@ -487,6 +565,7 @@ class RecitationController extends ChangeNotifier with WidgetsBindingObserver {
     }
     final wasPlaying = s.status != RecitationStatus.paused;
     ++_generation;
+    _passes = 0;
     unawaited(_player.pause());
     s
       ..item = target
@@ -523,6 +602,7 @@ class RecitationController extends ChangeNotifier with WidgetsBindingObserver {
     _window.clear();
     _windowEnded = false;
     _recitedPage = null;
+    _passes = 0;
     final had = _session != null;
     _session = null;
     if (had) notifyListeners();

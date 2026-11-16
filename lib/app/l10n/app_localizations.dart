@@ -697,6 +697,84 @@ abstract class AppLocalizations {
   /// **'Surah'**
   String get repeatSurahShort;
 
+  /// Repeat button tooltip while a range of ayat repeats.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeating {surah} {from} to {to}'**
+  String repeatRange(String surah, String from, String to);
+
+  /// No description provided for @repeatRangeShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Range'**
+  String get repeatRangeShort;
+
+  /// No description provided for @repeatOffShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get repeatOffShort;
+
+  /// No description provided for @repeatTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat'**
+  String get repeatTitle;
+
+  /// No description provided for @repeatTimes.
+  ///
+  /// In en, this message translates to:
+  /// **'Times'**
+  String get repeatTimes;
+
+  /// No description provided for @repeatEndless.
+  ///
+  /// In en, this message translates to:
+  /// **'No end'**
+  String get repeatEndless;
+
+  /// No description provided for @repeatEndlessHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeats until you stop it.'**
+  String get repeatEndlessHelp;
+
+  /// No description provided for @repeatEachHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Each one is recited this many times, then the recitation moves on.'**
+  String get repeatEachHelp;
+
+  /// No description provided for @repeatRangeHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'The range is recited this many times, then the recitation stops.'**
+  String get repeatRangeHelp;
+
+  /// Under the repeat icon: what repeats and how many times, e.g. Ayah ×3.
+  ///
+  /// In en, this message translates to:
+  /// **'{mode} ×{count}'**
+  String repeatTimesBadge(String mode, String count);
+
+  /// No description provided for @repeatDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get repeatDone;
+
+  /// No description provided for @repeatPlayRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Play range'**
+  String get repeatPlayRange;
+
+  /// No description provided for @repeatFromAyah.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat ayat from here'**
+  String get repeatFromAyah;
+
   /// No description provided for @recitationOffline.
   ///
   /// In en, this message translates to:

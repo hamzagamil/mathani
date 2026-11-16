@@ -389,6 +389,49 @@ class AppLocalizationsAr extends AppLocalizations {
   String get repeatSurahShort => 'سورة';
 
   @override
+  String repeatRange(String surah, String from, String to) {
+    return 'تكرار $surah من $from إلى $to';
+  }
+
+  @override
+  String get repeatRangeShort => 'مقطع';
+
+  @override
+  String get repeatOffShort => 'إيقاف';
+
+  @override
+  String get repeatTitle => 'التكرار';
+
+  @override
+  String get repeatTimes => 'عدد المرات';
+
+  @override
+  String get repeatEndless => 'بلا نهاية';
+
+  @override
+  String get repeatEndlessHelp => 'يتكرر حتى توقفه.';
+
+  @override
+  String get repeatEachHelp => 'تُتلى كل واحدة بهذا العدد، ثم تمضي التلاوة.';
+
+  @override
+  String get repeatRangeHelp => 'يُتلى المقطع بهذا العدد، ثم تتوقف التلاوة.';
+
+  @override
+  String repeatTimesBadge(String mode, String count) {
+    return '$mode ×$count';
+  }
+
+  @override
+  String get repeatDone => 'تم';
+
+  @override
+  String get repeatPlayRange => 'شغّل المقطع';
+
+  @override
+  String get repeatFromAyah => 'كرّر آيات من هنا';
+
+  @override
   String get recitationOffline =>
       'لا يوجد اتصال. نزّل السورة للاستماع دون إنترنت.';
 

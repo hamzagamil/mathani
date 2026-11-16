@@ -11,6 +11,7 @@ import '../../shared/numerals.dart';
 import 'ayah_fetcher.dart';
 import 'recitation_controller.dart';
 import 'recited_item.dart';
+import 'repeat_sheet.dart';
 
 /// Height of the bar's main row.
 const barHeight = 56.0;
@@ -201,8 +202,8 @@ class RecitationBar extends StatelessWidget {
   }
 }
 
-/// One button for repeat: each tap moves off → ayah → page → surah → off. When on, it is in the
-/// accent colour with what it repeats written under it.
+/// The repeat button: opens the repeat sheet. When on, it is in the accent colour with what it
+/// repeats written under it, and how many times when that is set.
 class _RepeatButton extends StatelessWidget {
   const _RepeatButton({required this.recitation, required this.enabled});
 
@@ -213,31 +214,49 @@ class _RepeatButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final colors = MathaniColors.of(context);
+    final locale = Localizations.localeOf(context);
     final repeat = recitation.repeat;
-    final (tooltip, label) = switch (repeat) {
+    final range = recitation.repeatRange;
+    final (tooltip, mode) = switch (repeat) {
       RecitationRepeat.off => (l10n.repeatOff, null),
       RecitationRepeat.ayah => (l10n.repeatAyah, l10n.repeatAyahShort),
       RecitationRepeat.page => (l10n.repeatPage, l10n.repeatPageShort),
       RecitationRepeat.surah => (l10n.repeatSurah, l10n.repeatSurahShort),
+      RecitationRepeat.range => (
+          l10n.repeatRange(
+            locale.languageCode == 'ar'
+                ? recitation.quran.surahList[range!.from.surah - 1].nameAr
+                : recitation.quran.surahList[range!.from.surah - 1].nameTranslit,
+            formatNumber(range.from.ayah, locale),
+            formatNumber(range.to.ayah, locale),
+          ),
+          l10n.repeatRangeShort
+        ),
     };
-    final next = RecitationRepeat.values[(repeat.index + 1) % RecitationRepeat.values.length];
+    final times = recitation.repeatTimes;
+    final label = mode == null || times == null
+        ? mode
+        : l10n.repeatTimesBadge(mode, formatNumber(times, locale));
     return SizedBox.square(
       dimension: 48,
       child: IconButton(
         tooltip: tooltip,
         isSelected: label != null,
         padding: EdgeInsets.zero,
-        onPressed: enabled ? () => recitation.setRepeat(next) : null,
+        onPressed: enabled ? () => showRepeatSheet(context, recitation) : null,
         icon: label == null
             ? Icon(MathaniIcons.repeat, color: colors.inkMuted)
             : Column(mainAxisSize: MainAxisSize.min, children: [
                 Icon(repeat == RecitationRepeat.ayah ? MathaniIcons.repeatOne : MathaniIcons.repeat,
                     size: 20, color: colors.accent),
-                Text(
-                  label,
-                  maxLines: 1,
-                  style: TypeScale.caption.copyWith(
-                      fontFamily: TypeScale.uiFamily, fontSize: 10, height: 1.2, color: colors.accent),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    style: TypeScale.caption.copyWith(
+                        fontFamily: TypeScale.uiFamily, fontSize: 10, height: 1.2, color: colors.accent),
+                  ),
                 ),
               ]),
       ),

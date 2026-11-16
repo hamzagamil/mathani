@@ -289,6 +289,27 @@
   "repeatAyahShort": "Ayah",
   "repeatPageShort": "Page",
   "repeatSurahShort": "Surah",
+  "repeatRange": "Repeating {surah} {from} to {to}",
+  "@repeatRange": {
+    "description": "Repeat button tooltip while a range of ayat repeats.",
+    "placeholders": {"surah": {"type": "String"}, "from": {"type": "String"}, "to": {"type": "String"}}
+  },
+  "repeatRangeShort": "Range",
+  "repeatOffShort": "Off",
+  "repeatTitle": "Repeat",
+  "repeatTimes": "Times",
+  "repeatEndless": "No end",
+  "repeatEndlessHelp": "Repeats until you stop it.",
+  "repeatEachHelp": "Each one is recited this many times, then the recitation moves on.",
+  "repeatRangeHelp": "The range is recited this many times, then the recitation stops.",
+  "repeatTimesBadge": "{mode} ×{count}",
+  "@repeatTimesBadge": {
+    "description": "Under the repeat icon: what repeats and how many times, e.g. Ayah ×3.",
+    "placeholders": {"mode": {"type": "String"}, "count": {"type": "String"}}
+  },
+  "repeatDone": "Done",
+  "repeatPlayRange": "Play range",
+  "repeatFromAyah": "Repeat ayat from here",
   "recitationOffline": "No connection. Download this surah to listen offline.",
   "recitationFetchFailed": "Couldn't load this ayah.",
   "retry": "Retry",

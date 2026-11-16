@@ -10,6 +10,7 @@ import '../../shared/mathani_icons.dart';
 import '../../shared/numerals.dart';
 import '../../shared/reader_state.dart';
 import '../index/bookmark_note.dart';
+import '../recitation/repeat_sheet.dart';
 import '../khatma/khatma_controller.dart';
 import '../memorization/memorization_controller.dart';
 import '../memorization/range_sheet.dart';
@@ -107,6 +108,15 @@ class _AyahActionsSheet extends StatelessWidget {
               onTap: () {
                 Navigator.of(context).pop();
                 recitation.playFrom(ayah);
+              },
+            ),
+          if (recitation != null)
+            ListTile(
+              leading: const Icon(MathaniIcons.repeat),
+              title: Text(l10n.repeatFromAyah),
+              onTap: () {
+                Navigator.of(context).pop();
+                showRepeatSheet(screen, recitation, from: ayah);
               },
             ),
           if (memorization != null && !memorization.active)

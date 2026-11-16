@@ -9,6 +9,7 @@ import 'package:mathani/features/recitation/ayah_fetcher.dart';
 import 'package:mathani/features/recitation/recitation_controller.dart';
 import 'package:mathani/features/recitation/recited_item.dart';
 import 'package:mathani/shared/mathani_icons.dart';
+import 'package:mathani/shared/numerals.dart';
 import 'package:mathani/shared/reader_state.dart';
 
 import '../support/fake_recitation.dart';
@@ -92,28 +93,78 @@ void main() {
     await finish(tester);
   });
 
-  testWidgets('the repeat button moves through off, ayah, page and surah', (tester) async {
+  testWidgets('the repeat button opens the sheet: a mode, a number of times, a range',
+      (tester) async {
+    Finder segment(String label) => find.descendant(
+        of: find.byType(SegmentedButton<RecitationRepeat>), matching: find.text(label));
     await pumpApp(tester);
     await tester.runAsync(() => recitation.playFrom(const AyahRef(67, 12)));
     await settle(tester);
-    var tip = 'التكرار متوقف';
-    final size = tester.getSize(find.byTooltip(tip));
+    const off = 'التكرار متوقف';
+    final size = tester.getSize(find.byTooltip(off));
     expect(size.width, greaterThanOrEqualTo(48));
     expect(size.height, greaterThanOrEqualTo(48));
-    for (final (next, label, mode) in [
-      ('تكرار هذه الآية', 'آية', RecitationRepeat.ayah),
-      ('تكرار هذه الصفحة', 'صفحة', RecitationRepeat.page),
-      ('تكرار هذه السورة', 'سورة', RecitationRepeat.surah),
-      ('التكرار متوقف', null, RecitationRepeat.off),
-    ]) {
-      await tester.tap(find.byTooltip(tip));
-      await settle(tester, 2);
-      tip = next;
-      expect(recitation.repeat, mode);
-      expect(find.byTooltip(tip), findsOneWidget);
-      if (label != null) expect(find.text(label), findsOneWidget);
-    }
-    expect(find.text('سورة'), findsNothing, reason: 'no label while off');
+
+    // The ayah, 3 times.
+    await tester.tap(find.byTooltip(off));
+    await settle(tester, 2);
+    expect(find.text('التكرار'), findsOneWidget);
+    await tester.tap(segment('آية'));
+    await settle(tester, 2);
+    await tester.tap(find.text('بلا نهاية'));
+    await settle(tester, 2);
+    await tester.tap(find.text('تم'));
+    await settle(tester, 2);
+    expect(recitation.repeat, RecitationRepeat.ayah);
+    expect(recitation.repeatTimes, 3);
+    expect(find.text('آية ×٣'), findsOneWidget);
+
+    // A range, 67:12 to the end of its page by default, with no end.
+    await tester.tap(find.byTooltip('تكرار هذه الآية'));
+    await settle(tester, 2);
+    await tester.tap(segment('مقطع'));
+    await settle(tester, 2);
+    await tester.tap(find.text('بلا نهاية'));
+    await settle(tester, 2);
+    await tester.tap(find.text('شغّل المقطع'));
+    await settle(tester, 2);
+    expect(recitation.repeat, RecitationRepeat.range);
+    expect(recitation.repeatTimes, isNull);
+    expect(recitation.repeatRange!.from, const AyahRef(67, 12));
+    expect(find.text('مقطع'), findsOneWidget);
+
+    // Off again: no label.
+    await tester.tap(find.byTooltip('تكرار الملك من ١٢ إلى ${toEasternArabic(recitation.repeatRange!.to.ayah)}'));
+    await settle(tester, 2);
+    await tester.tap(segment('إيقاف'));
+    await settle(tester, 2);
+    await tester.tap(find.text('تم'));
+    await settle(tester, 2);
+    expect(recitation.repeat, RecitationRepeat.off);
+    expect(find.text('مقطع'), findsNothing, reason: 'no label while off');
+    await finish(tester);
+  });
+
+  testWidgets('the repeat sheet fits a narrow phone in English, with a range and a count',
+      (tester) async {
+    await pumpApp(tester, language: LanguagePref.en);
+    tester.view.physicalSize = const Size(640, 1200); // 320 x 600
+    await tester.runAsync(() => recitation.playFrom(const AyahRef(67, 12)));
+    await settle(tester);
+    await tester.tap(find.byTooltip('Repeat off'));
+    await settle(tester, 2);
+    await tester.tap(find.descendant(
+        of: find.byType(SegmentedButton<RecitationRepeat>), matching: find.text('Range')));
+    await settle(tester, 2);
+    await tester.tap(find.text('No end'));
+    await settle(tester, 2);
+    await tester.tap(find.byTooltip('Times +'));
+    await settle(tester, 2);
+    await tester.ensureVisible(find.text('Play range'));
+    await tester.tap(find.text('Play range'));
+    await settle(tester, 2);
+    expect(recitation.repeatTimes, 4);
+    expect(find.text('Range ×4'), findsOneWidget);
     await finish(tester);
   });
 
