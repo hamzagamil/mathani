@@ -37,7 +37,7 @@ class PrayerNotificationsPlugin : FlutterPlugin, ActivityAware, MethodChannel.Me
     companion object {
         const val OPEN_ACTION = "app.mathani.OPEN_PRAYER"
         const val ALERT_ACTION = "app.mathani.PRAYER_ALERT"
-        const val QIYAM_CHANNEL = "prayer_qiyam_v1"
+        const val QIYAM_CHANNEL = "prayer_qiyam_v2"
         const val PLAYBACK_CHANNEL = "prayer_athan_playback_v1"
         const val REMINDER_ACTION = "app.mathani.KHATMA_REMINDER"
         const val REMINDER_CHANNEL = "khatma_reminder_v1"
@@ -68,10 +68,13 @@ class PrayerNotificationsPlugin : FlutterPlugin, ActivityAware, MethodChannel.Me
             (Build.VERSION.SDK_INT < 33 ||
                 ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED)
 
-        fun soundChannel(alert: PrayerAlert) = if (alert.kind == "qiyam") QIYAM_CHANNEL else "prayer_${alert.sound}_v1"
+        fun soundChannel(alert: PrayerAlert) = if (alert.kind == "qiyam") QIYAM_CHANNEL else channelId(alert.sound)
+
+        /** v2 for the tone: its sound became the takbira, and a channel's sound is fixed once created. */
+        fun channelId(sound: String) = if (sound == "tone") "prayer_tone_v2" else "prayer_${sound}_v1"
 
         fun soundUri(context: Context, sound: String): Uri? {
-            val name = if (sound == "tone") "qiyam_tone" else "athan_${sound}_opening"
+            val name = if (sound == "tone") "athan_takbira" else "athan_${sound}_opening"
             val res = context.resources.getIdentifier(name, "raw", context.packageName)
             return if (sound == "silent" || res == 0) null
             else Uri.parse("android.resource://${context.packageName}/$res")
@@ -135,7 +138,7 @@ class PrayerNotificationsPlugin : FlutterPlugin, ActivityAware, MethodChannel.Me
                             setSound(null, null)
                         })
                     else -> manager.createNotificationChannel(
-                        NotificationChannel("prayer_${sound}_v1", name, NotificationManager.IMPORTANCE_HIGH).apply {
+                        NotificationChannel(channelId(sound), name, NotificationManager.IMPORTANCE_HIGH).apply {
                             setSound(soundUri(context, sound), if (sound == "silent") null else attributes)
                             if (sound == "silent") enableVibration(false)
                         })
@@ -144,6 +147,9 @@ class PrayerNotificationsPlugin : FlutterPlugin, ActivityAware, MethodChannel.Me
             // The first draft's channels.
             manager.deleteNotificationChannel("mathani.prayer.default.v1")
             manager.deleteNotificationChannel("mathani.prayer.qiyam.v1")
+            // The generated-chime channels, before the takbira.
+            manager.deleteNotificationChannel("prayer_qiyam_v1")
+            manager.deleteNotificationChannel("prayer_tone_v1")
         }
 
         /** Texts the athan service shows, in the app's language, saved with each refill. */

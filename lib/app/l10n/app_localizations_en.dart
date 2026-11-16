@@ -1145,7 +1145,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get prayerSound => 'Sound';
 
   @override
-  String get prayerSoundTone => 'Simple tone';
+  String get prayerSoundTone => 'Takbir';
 
   @override
   String get prayerSoundSilent => 'Silent';

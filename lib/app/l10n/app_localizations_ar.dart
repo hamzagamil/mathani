@@ -1150,7 +1150,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get prayerSound => 'الصوت';
 
   @override
-  String get prayerSoundTone => 'نغمة بسيطة';
+  String get prayerSoundTone => 'تكبيرة';
 
   @override
   String get prayerSoundSilent => 'صامت';

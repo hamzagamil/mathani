@@ -2008,7 +2008,7 @@ abstract class AppLocalizations {
   /// No description provided for @prayerSoundTone.
   ///
   /// In en, this message translates to:
-  /// **'Simple tone'**
+  /// **'Takbir'**
   String get prayerSoundTone;
 
   /// No description provided for @prayerSoundSilent.

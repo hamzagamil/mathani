@@ -42,7 +42,7 @@ class AthanCatalogue {
   AthanRecording? byId(String id) =>
       recordings.where((r) => r.id == id).firstOrNull;
 
-  /// The sound list: recitations, then the simple tone and silent (FR-019).
+  /// The sound list: recitations, then the takbira (`toneSound`) and silent (FR-019).
   List<String> get soundChoices => [
     for (final r in recordings) r.id,
     toneSound,

@@ -317,7 +317,7 @@
   "prayerLater": "أخّر {prayer} دقيقة",
   "prayerAlerts": "التنبيهات",
   "prayerSound": "الصوت",
-  "prayerSoundTone": "نغمة بسيطة",
+  "prayerSoundTone": "تكبيرة",
   "prayerSoundSilent": "صامت",
   "prayerPreview": "استمع إلى {sound}",
   "prayerAthanStop": "إيقاف الأذان",

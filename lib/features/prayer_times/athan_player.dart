@@ -57,7 +57,7 @@ class AthanPlayer {
   final AthanPlaybackPort port;
   final void Function() pauseQuran, pauseMemorization;
 
-  static const toneAsset = 'assets/prayer/tone.wav';
+  static const toneAsset = 'assets/prayer/takbira.wav';
 
   /// What is playing: a sound id while previewing, `full` for an athan, null when silent.
   final playing = ValueNotifier<String?>(null);

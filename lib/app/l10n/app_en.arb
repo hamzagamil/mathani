@@ -682,7 +682,7 @@
   "@prayerLater": {"placeholders": {"prayer": {"type": "String"}}},
   "prayerAlerts": "Alerts",
   "prayerSound": "Sound",
-  "prayerSoundTone": "Simple tone",
+  "prayerSoundTone": "Takbir",
   "prayerSoundSilent": "Silent",
   "prayerPreview": "Preview {sound}",
   "@prayerPreview": {"placeholders": {"sound": {"type": "String"}}},

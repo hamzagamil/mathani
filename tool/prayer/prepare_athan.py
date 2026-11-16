@@ -9,11 +9,8 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-import math
 from pathlib import Path
-import struct
 import subprocess
-import wave
 
 SOURCES = json.loads(Path(__file__).with_name("athan_sources.json").read_text(encoding="utf-8"))["sources"]
 
@@ -82,20 +79,25 @@ def prepare(source_dir: Path, output: Path, reviews: dict, ffmpeg: str) -> dict:
             entry["iosShortEligible"] = entry["openingDurationMs"] < 30000
         manifest["recordings"].append(entry)
 
-    # Generated, non-verbal Qiyam tone; nothing is cut from an athan recording.
-    tone = output / "qiyam_tone.wav"
-    rate = 22050
-    with wave.open(str(tone), "wb") as stream:
-        stream.setparams((1, 2, rate, 0, "NONE", "not compressed"))
-        for index in range(round(rate * 1.2)):
-            t = index / rate
-            envelope = min(1, t / .015) * math.exp(-4*t) * min(1, (1.2-t)/.03)
-            sample = .22 * envelope * (math.sin(2*math.pi*523.25*t) + .35*math.sin(2*math.pi*783.99*t))
-            stream.writeframesraw(struct.pack("<h", round(sample * 32767)))
-    caf = output / "qiyam_tone.caf"
-    run(ffmpeg, "-y", "-i", str(tone), "-c:a", "adpcm_ima_qt", str(caf))
-    manifest["qiyamTone"] = {"licenseId": "CC0-1.0", "changeNotice": "Generated two-frequency decaying tone; no sampled recording.",
-                             "wav": describe(ffmpeg, tone, "pcm_s16le"), "caf": describe(ffmpeg, caf, "adpcm_ima_qt")}
+    # The bundled alert sound (sound id `tone`): the first takbira, cut at reviewed boundaries.
+    takbira_review = reviews.get("takbira", {})
+    takbira_source = next((s for s in SOURCES if s["id"] == takbira_review.get("sourceId")), None)
+    if takbira_source and (source_dir / takbira_source["filename"]).is_file():
+        original = source_dir / takbira_source["filename"]
+        if sha(original) != takbira_review.get("sourceSha256"):
+            raise ValueError("Takbira source revision changed")
+        start, end, fade = takbira_review["startMs"], takbira_review["endMs"], takbira_review["fadeOutMs"]
+        if not 0 <= start < end or not 0 <= fade <= end - start:
+            raise ValueError("Invalid takbira boundaries")
+        cut = ["-ss", str(start / 1000), "-t", str((end - start) / 1000), "-map_metadata", "-1", "-vn",
+               "-ac", "1", "-ar", "22050", "-af", f"afade=t=out:st={(end - start - fade) / 1000}:d={fade / 1000}"]
+        wav, caf = output / "athan_takbira.wav", output / "athan_takbira.caf"
+        run(ffmpeg, "-y", "-i", str(original), *cut, "-c:a", "pcm_s16le", str(wav))
+        run(ffmpeg, "-y", "-i", str(original), *cut, "-c:a", "adpcm_ima_qt", str(caf))
+        manifest["takbira"] = {"sourceId": takbira_source["id"], "licenseId": takbira_source["licenseId"],
+                               "startMs": start, "endMs": end,
+                               "changeNotice": "First takbira of the athan, resampled to mono 22.05 kHz with a fade-out.",
+                               "wav": describe(ffmpeg, wav, "pcm_s16le"), "caf": describe(ffmpeg, caf, "adpcm_ima_qt")}
     manifest["readyForShipping"] = len(manifest["recordings"]) == 2 and all(
         item["completeRecordingReviewed"] and item["fourTakbirsReviewed"] and item["iosShortEligible"] and item["redistributionConfirmed"]
         for item in manifest["recordings"])

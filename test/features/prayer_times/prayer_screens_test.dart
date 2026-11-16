@@ -150,7 +150,7 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Open settings'), findsOneWidget);
-    expect(find.text('Simple tone'), findsOneWidget);
+    expect(find.text('Takbir'), findsOneWidget);
     expect(find.text('Silent'), findsOneWidget);
     await tester.tap(find.byType(IconButton).last); // close
     await settle(tester);

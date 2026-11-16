@@ -154,7 +154,7 @@ class IosPrayerAlerts implements PrayerAlertPlatform {
           presentSound: a.sound != silentSound && !a.full,
           sound: switch (a.sound) {
             silentSound => null,
-            toneSound => 'qiyam_tone.caf',
+            toneSound => 'athan_takbira.caf',
             final id => 'athan_${id}_opening.caf',
           },
           threadIdentifier: 'mathani.prayer',
