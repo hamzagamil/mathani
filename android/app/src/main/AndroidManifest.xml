@@ -29,7 +29,7 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:screenOrientation="portrait"
+            android:screenOrientation="user"
             android:launchMode="singleTop"
             android:taskAffinity=""
             android:theme="@style/LaunchTheme"
@@ -48,6 +48,16 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+            <!-- Group khatma links open the app (specs/014 research R16), verified through
+                 https://get.mthani.app/.well-known/assetlinks.json. MainActivity reads them. -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="https" android:host="get.mthani.app" android:pathPrefix="/k/"/>
+            </intent-filter>
+            <!-- Links are read natively, never pushed as a route name. -->
+            <meta-data android:name="flutter_deeplinking_enabled" android:value="false"/>
         </activity>
         <!-- Prayer alerts and the full athan with the phone locked (specs/009 research R7, R9). -->
         <receiver android:name=".PrayerAlarmReceiver" android:exported="false">

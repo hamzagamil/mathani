@@ -12,12 +12,29 @@ import 'models.dart';
 class UserRepository extends ChangeNotifier {
   UserRepository._(this._db);
 
-  static const _schemaVersion = 1;
+  static const _schemaVersion = 3;
 
   /// The prayer-times state, one JSON value in `preferences` (specs/009 data-model.md).
   static const prayerStateKey = 'prayer.state';
 
+  /// The khatma's daily reminder setting (specs/014 data-model.md).
+  static const khatmaReminderKey = 'khatma.reminder';
+
+  /// Rows that features read when they load, not at startup.
+  static const _notAtStartup = [
+    prayerStateKey,
+    khatmaReminderKey,
+    // The group khatma (specs/014 data-model.md › 2).
+    'group.name',
+    'group.terms',
+    'group.installed',
+    'group.key',
+  ];
+
   final Database _db;
+
+  /// The database, for features that keep their own tables in it (specs/014 khatmas).
+  Database get database => _db;
 
   /// Bookmarks, newest first (FR-015). Kept in memory; the table is small.
   List<Bookmark> _bookmarks = const [];
@@ -81,12 +98,14 @@ class UserRepository extends ChangeNotifier {
 
   bool isBookmarked(AyahRef ref) => _bookmarks.any((b) => b.ref == ref);
 
-  /// Forward-only migrations. A migration never deletes bookmarks.
+  /// Forward-only migrations. A migration never deletes bookmarks. Each step may run again over
+  /// tables it already made: a browser can keep the new tables but lose the version bump when the
+  /// tab closes mid-upgrade, and the next visit then upgrades again.
   static Future<void> _migrate(Database db, int from, int to) async {
     if (from < 1) {
       final batch = db.batch()
         ..execute('''
-          CREATE TABLE bookmarks (
+          CREATE TABLE IF NOT EXISTS bookmarks (
             id          INTEGER PRIMARY KEY AUTOINCREMENT,
             surah       INTEGER NOT NULL,
             ayah        INTEGER NOT NULL,
@@ -94,18 +113,67 @@ class UserRepository extends ChangeNotifier {
             created_at  INTEGER NOT NULL,
             UNIQUE (surah, ayah)
           )''')
-        ..execute('CREATE INDEX bookmarks_created ON bookmarks(created_at DESC)')
+        ..execute('CREATE INDEX IF NOT EXISTS bookmarks_created ON bookmarks(created_at DESC)')
         ..execute('''
-          CREATE TABLE reading_state (
+          CREATE TABLE IF NOT EXISTS reading_state (
             id            INTEGER PRIMARY KEY CHECK (id = 1),
             anchor_surah  INTEGER NOT NULL DEFAULT 1,
             anchor_ayah   INTEGER NOT NULL DEFAULT 1,
             updated_at    INTEGER NOT NULL
           )''')
         ..execute('''
-          CREATE TABLE preferences (
+          CREATE TABLE IF NOT EXISTS preferences (
             key    TEXT PRIMARY KEY,
             value  TEXT NOT NULL
+          ) WITHOUT ROWID''');
+      await batch.commit(noResult: true);
+    }
+    if (from < 2) {
+      // The personal khatma (specs/014 data-model.md). Adds tables only.
+      final batch = db.batch()
+        ..execute('''
+          CREATE TABLE IF NOT EXISTS khatmas (
+            id              INTEGER PRIMARY KEY AUTOINCREMENT,
+            state           TEXT NOT NULL,
+            plan            TEXT NOT NULL,
+            start_ayah      INTEGER NOT NULL,
+            start_date      TEXT NOT NULL,
+            planned_finish  TEXT NOT NULL,
+            paused_on       TEXT,
+            place_page      INTEGER NOT NULL,
+            wird_count      INTEGER NOT NULL,
+            finished_on     TEXT,
+            created_at      INTEGER NOT NULL
+          )''')
+        ..execute('''
+          CREATE TABLE IF NOT EXISTS khatma_wirds (
+            khatma_id   INTEGER NOT NULL,
+            number      INTEGER NOT NULL,
+            first_ayah  INTEGER NOT NULL,
+            last_ayah   INTEGER NOT NULL,
+            read_on     TEXT,
+            PRIMARY KEY (khatma_id, number)
+          ) WITHOUT ROWID''');
+      await batch.commit(noResult: true);
+    }
+    if (from < 3) {
+      // Group khatmas the reader keeps, and the parts they hold (specs/014 data-model.md › 2).
+      final batch = db.batch()
+        ..execute('''
+          CREATE TABLE IF NOT EXISTS group_khatmas (
+            code      TEXT PRIMARY KEY,
+            snapshot  TEXT NOT NULL,
+            version   INTEGER NOT NULL,
+            seen_at   INTEGER NOT NULL,
+            hidden    TEXT NOT NULL DEFAULT '[]'
+          ) WITHOUT ROWID''')
+        ..execute('''
+          CREATE TABLE IF NOT EXISTS group_parts (
+            code        TEXT NOT NULL,
+            number      INTEGER NOT NULL,
+            place_page  INTEGER NOT NULL,
+            pending     INTEGER NOT NULL DEFAULT 0,
+            PRIMARY KEY (code, number)
           ) WITHOUT ROWID''');
       await batch.commit(noResult: true);
     }
@@ -116,8 +184,11 @@ class UserRepository extends ChangeNotifier {
   Future<(AyahRef, ReaderPreferences)> loadStartup() async {
     final results = await Future.wait([
       _db.query('reading_state', where: 'id = 1'),
-      // Prayer times read their own row only when needed (specs/009 research R11).
-      _db.query('preferences', where: 'key != ?', whereArgs: [prayerStateKey]),
+      // Prayer times and the khatma read their own rows only when needed (specs/009 research
+      // R11, specs/014 research R10).
+      _db.query('preferences',
+          where: 'key NOT IN (${List.filled(_notAtStartup.length, '?').join(', ')})',
+          whereArgs: _notAtStartup),
     ]);
     final state = results[0];
     final anchor = state.isEmpty

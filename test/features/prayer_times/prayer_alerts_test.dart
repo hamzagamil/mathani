@@ -40,9 +40,9 @@ void main() {
   );
 
   group('buildAlerts (SC-004)', () {
-    test('at most 60, all in the future, in time order, never sunrise', () {
+    test('at most 52, all in the future, in time order, never sunrise', () {
       final alerts = build(state(prayers: dailyPrayers, qiyam: true));
-      expect(alerts, hasLength(60));
+      expect(alerts, hasLength(52));
       expect(alerts.every((a) => a.atUtc.isAfter(now)), isTrue);
       expect(alerts.any((a) => a.kind == PrayerKind.sunrise), isFalse);
       for (var i = 1; i < alerts.length; i++) {

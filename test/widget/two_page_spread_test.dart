@@ -74,7 +74,6 @@ void main() {
     });
     reader.updatePreferences(reader.preferences.copyWith(language: language));
     reader.jumpToPage(page);
-    resetOrientationSync();
     setScreen(tester, size);
     addTearDown(tester.view.reset);
     platformCalls = [];
@@ -145,25 +144,6 @@ void main() {
       await pumpApp(tester, zFoldOpen);
       await waitForPages(tester, 2);
       expect(shownPages(tester), [49, 50]);
-      await leave(tester);
-    });
-
-    testWidgets('Android: portrait on phones, any orientation on large screens', (tester) async {
-      await pumpApp(tester, zFoldFolded);
-      List<Object?> orientations() => [
-            for (final c in platformCalls)
-              if (c.method == 'SystemChrome.setPreferredOrientations') c.arguments,
-          ];
-      expect(orientations(), [
-        ['DeviceOrientation.portraitUp'],
-      ]);
-      setScreen(tester, zFoldOpen);
-      await settle(tester, 2);
-      expect(orientations().last, isEmpty, reason: 'unlocked when open');
-      expect(orientations(), hasLength(2));
-      setScreen(tester, zFoldOpen);
-      await settle(tester, 2);
-      expect(orientations(), hasLength(2), reason: 'only a change is sent');
       await leave(tester);
     });
   });
@@ -347,11 +327,14 @@ void main() {
       });
     }
 
-    testWidgets('iOS: the orientation is never changed', (tester) async {
-      await pumpApp(tester, duoOpen);
+    // The platforms' own files say which way the app may turn (specs/013 research R3).
+    testWidgets('the app never sets the orientation itself', (tester) async {
+      await pumpApp(tester, zFoldFolded);
+      setScreen(tester, zFoldOpen);
+      await settle(tester, 2);
       expect(platformCalls.where((c) => c.method == 'SystemChrome.setPreferredOrientations'),
           isEmpty);
       await leave(tester);
-    }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+    }, variant: TargetPlatformVariant.only(TargetPlatform.android));
   });
 }

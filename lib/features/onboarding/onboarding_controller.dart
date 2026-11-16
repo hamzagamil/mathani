@@ -13,7 +13,8 @@ enum OnboardingPhase { none, setup, gestures, buttons }
 /// steps themselves, through the same calls as Settings; this controller writes only
 /// `onboardingDone`, and only when a first run is finished or skipped (FR-002, FR-003).
 class OnboardingController extends ChangeNotifier {
-  OnboardingController({required this.reader, this.recitation, this.hasMemorize = false})
+  OnboardingController(
+      {required this.reader, this.recitation, this.hasMemorize = false, this.hasKhatma = false})
       : _step = reader.preferences.onboardingDone ? null : OnboardingStep.language {
     // Readers who finished the onboarding before the coloured ayat existed see that one stop
     // once (specs/010).
@@ -30,6 +31,9 @@ class OnboardingController extends ChangeNotifier {
 
   /// Memorization exists (specs/006): its button gets a hint.
   final bool hasMemorize;
+
+  /// The Khatma button exists (specs/014): it gets a hint.
+  final bool hasKhatma;
 
   OnboardingStep? _step;
   bool _replay = false;
@@ -68,6 +72,7 @@ class OnboardingController extends ChangeNotifier {
         hasReciters: recitation != null && reader.quran.reciters.isNotEmpty,
         hasPlayer: recitation != null,
         hasMemorize: hasMemorize,
+        hasKhatma: hasKhatma,
         hasSimilar: hasSimilar,
         replay: _replay,
       );

@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 import '../features/prayer_times/prayer_models.dart';
 import '../features/prayer_times/prayer_services.dart';
+import 'local_notifications_io.dart';
 
 /// Alerts on this platform (contracts/prayer-ui-and-reminders.md › Native contract). [channels]
 /// names the Android notification channel of each sound.
@@ -21,28 +21,23 @@ PrayerAlertPlatform prayerAlertPlatform({
 /// Nothing to clean on phones: the encrypted snapshot of the first draft only reached browsers.
 Future<void> clearLegacyPrayerStorage() async {}
 
-const _channel = MethodChannel('app.mathani/prayer_notifications');
-final _androidEvents = StreamController<PrayerPlatformEvent>.broadcast();
+const _channel = AndroidAlertChannel.channel;
 
 PrayerKind? _kind(Object? name) =>
     PrayerKind.values.where((k) => k.name == name).firstOrNull;
 
-/// Android: the app's own alarm store, receiver and athan service (research R7, R9).
+/// Android: the app's own alarm store, receiver and athan service (research R7, R9). The channel
+/// is shared with the khatma reminder (specs/014): taps of its `wird` kind are not prayer alerts.
 class AndroidPrayerAlerts implements PrayerAlertPlatform {
   AndroidPrayerAlerts({required this.channels}) {
-    _channel.setMethodCallHandler((call) async {
-      final args = call.arguments is Map ? call.arguments as Map : const {};
-      switch (call.method) {
-        case 'opened':
-          _androidEvents.add(
-            AlertOpened(_kind(args['kind']), args['alertId'] as int?),
-          );
-        case 'athanStarted':
-          _androidEvents.add(const AthanStarted());
-      }
+    AndroidAlertChannel.taps.listen((t) {
+      final kind = _kind(t.kind);
+      if (kind != null) _events.add(AlertOpened(kind, t.alertId));
     });
+    AndroidAlertChannel.athanStarted.listen((_) => _events.add(const AthanStarted()));
   }
   final Map<String, String> Function() channels;
+  final _events = StreamController<PrayerPlatformEvent>.broadcast();
 
   AlertStatus _status(Map<Object?, Object?>? raw) => AlertStatus(
     raw?['notifications'] == true
@@ -75,25 +70,27 @@ class AndroidPrayerAlerts implements PrayerAlertPlatform {
   @override
   Future<void> cancelAll() => _channel.invokeMethod('cancelAll');
   @override
-  Stream<PrayerPlatformEvent> get events => _androidEvents.stream;
+  Stream<PrayerPlatformEvent> get events => _events.stream;
   @override
   Future<AlertOpened?> takeLaunchOpen() async {
-    final raw = await _channel.invokeMapMethod<Object?, Object?>('takeOpened');
-    return raw == null
-        ? null
-        : AlertOpened(_kind(raw['kind']), raw['alertId'] as int?);
+    final tap = await AndroidAlertChannel.takeLaunch();
+    final kind = _kind(tap?.kind);
+    return tap == null || kind == null ? null : AlertOpened(kind, tap.alertId);
   }
 }
 
-/// iOS: pending local notifications owned by the OS, at most 60 of its 64 (research R7).
+/// iOS: pending local notifications owned by the OS, at most 52 of its 64, leaving 10 for the
+/// khatma reminder (specs/014 research R8).
 class IosPrayerAlerts implements PrayerAlertPlatform {
-  IosPrayerAlerts({IOSFlutterLocalNotificationsPlugin? plugin})
-    : _plugin = plugin ?? IOSFlutterLocalNotificationsPlugin();
-  final IOSFlutterLocalNotificationsPlugin _plugin;
+  IosPrayerAlerts();
+  IOSFlutterLocalNotificationsPlugin get _plugin => IosNotifications.plugin;
   static const _payload = 'mathani.prayer.v2';
-  static const max = 60;
-  final _events = StreamController<PrayerPlatformEvent>.broadcast();
-  Future<void>? _initializing;
+  static const max = 52;
+  late final Stream<PrayerPlatformEvent> _events = IosNotifications.taps
+      .map((t) => _opened(t.payload))
+      .where((o) => o != null)
+      .cast<PrayerPlatformEvent>()
+      .asBroadcastStream();
 
   static AlertOpened? _opened(String? payload) {
     final parts = payload?.split('|');
@@ -103,19 +100,7 @@ class IosPrayerAlerts implements PrayerAlertPlatform {
     return AlertOpened(_kind(parts[1]), int.tryParse(parts[2]));
   }
 
-  Future<void> _initialize() => _initializing ??= _plugin
-      .initialize(
-        settings: const DarwinInitializationSettings(
-          requestAlertPermission: false,
-          requestBadgePermission: false,
-          requestSoundPermission: false,
-        ),
-        onDidReceiveNotificationResponse: (response) {
-          final opened = _opened(response.payload);
-          if (opened != null) _events.add(opened);
-        },
-      )
-      .then((_) {});
+  Future<void> _initialize() => IosNotifications.initialize();
 
   @override
   Future<AlertStatus> status() async {
@@ -143,10 +128,8 @@ class IosPrayerAlerts implements PrayerAlertPlatform {
     await _plugin.openAppNotificationSettings();
   }
 
-  Future<List<PendingNotificationRequest>> _owned() async => [
-    for (final r in await _plugin.pendingNotificationRequests())
-      if (r.payload?.startsWith('$_payload|') == true) r,
-  ];
+  Future<List<PendingNotificationRequest>> _owned() =>
+      IosNotifications.pending('$_payload|');
 
   @override
   Future<int> replace(List<Alert> alerts, int generation) async {
@@ -190,17 +173,9 @@ class IosPrayerAlerts implements PrayerAlertPlatform {
   }
 
   @override
-  Stream<PrayerPlatformEvent> get events {
-    unawaited(_initialize());
-    return _events.stream;
-  }
+  Stream<PrayerPlatformEvent> get events => _events;
 
   @override
-  Future<AlertOpened?> takeLaunchOpen() async {
-    await _initialize();
-    final launch = await _plugin.getNotificationAppLaunchDetails();
-    return launch?.didNotificationLaunchApp == true
-        ? _opened(launch?.notificationResponse?.payload)
-        : null;
-  }
+  Future<AlertOpened?> takeLaunchOpen() async =>
+      _opened(await IosNotifications.launchPayload());
 }

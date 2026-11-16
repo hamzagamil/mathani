@@ -1,0 +1,44 @@
+import 'dart:async';
+
+import '../features/khatma/group/group_link_host.dart';
+
+import 'package:flutter/services.dart';
+
+/// Group khatma links on phones (specs/014 research R16): the native side reads Universal Links
+/// and App Links and hands them over on the existing device channel.
+class AppLinks implements LinkSource {
+  AppLinks._();
+  static final instance = AppLinks._();
+
+  static const _channel = MethodChannel('app.mathani/device');
+  final _links = StreamController<String>.broadcast();
+  bool _listening = false;
+
+  void _listen() {
+    if (_listening) return;
+    _listening = true;
+    _channel.setMethodCallHandler((call) async {
+      if (call.method == 'link' && call.arguments is String) _links.add(call.arguments as String);
+    });
+  }
+
+  /// The link the app was opened with, once.
+  @override
+  Future<String?> takeLink() async {
+    _listen();
+    try {
+      return await _channel.invokeMethod<String>('takeLink');
+    } on MissingPluginException {
+      return null;
+    } on PlatformException {
+      return null;
+    }
+  }
+
+  /// Links that arrive while the app runs.
+  @override
+  Stream<String> get links {
+    _listen();
+    return _links.stream;
+  }
+}

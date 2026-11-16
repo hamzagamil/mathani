@@ -46,4 +46,22 @@ void main() {
     expect(PageGeometry.spreadRightPage(604), 603);
     expect(PageGeometry.spreadIndex(604), 301);
   });
+
+  // The page of a phone turned sideways (specs/013 research R5).
+  test('the scrolling page is as wide as the screen allows, and one line taller than it needs',
+      () {
+    for (final width in [692.0, 734.0, 667.0]) {
+      final height = PageGeometry.scrollPageHeight(width);
+      final g = PageGeometry.of(Size(width, height), 20);
+      final block = width * (1 - 2 * PageGeometry.markerMarginFraction);
+      expect(g.textBlock.width, closeTo(block, 1e-6), reason: 'limited by the width');
+      expect(g.textBlock.left, closeTo((width - block) / 2, 1e-6));
+      final line = block * PageGeometry.blockRatio / PageGeometry.linesPerPage;
+      expect(height,
+          closeTo(block * PageGeometry.blockRatio + 2 * PageGeometry.bandLines * line + line, 1e-6));
+      // Half a line of paper above the surah and juz line and below the page number.
+      expect(g.headerBand.top, closeTo(line / 2, 1e-6));
+      expect(height - g.footerBand.bottom, closeTo(line / 2, 1e-6));
+    }
+  });
 }

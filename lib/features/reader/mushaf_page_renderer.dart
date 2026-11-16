@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart' show setEquals;
 import 'package:flutter/widgets.dart';
 
 import '../../app/theme/tokens.dart';
@@ -25,6 +26,7 @@ class MushafPalette {
     this.hint = const Color(0x00000000),
     this.mistake = const Color(0x00000000),
     this.similar = const Color(0x00000000),
+    this.khatmaMark = const Color(0x00000000),
   });
 
   final Color ink;
@@ -35,6 +37,7 @@ class MushafPalette {
   final Color hint; // a hinted word in memorization (specs/006)
   final Color mistake; // the ayah-end mark of an ayah with a mistake (specs/006)
   final Color similar; // the text of an ayah with similar ayat (specs/010)
+  final Color khatmaMark; // where a wird or a group part ends (specs/014)
 
   @override
   bool operator ==(Object other) =>
@@ -46,11 +49,12 @@ class MushafPalette {
       other.recited == recited &&
       other.hint == hint &&
       other.mistake == mistake &&
-      other.similar == similar;
+      other.similar == similar &&
+      other.khatmaMark == khatmaMark;
 
   @override
-  int get hashCode =>
-      Object.hash(ink, accentInk, highlight, selection, recited, hint, mistake, similar);
+  int get hashCode => Object.hash(
+      ink, accentInk, highlight, selection, recited, hint, mistake, similar, khatmaMark);
 }
 
 /// What a memorization session hides and marks on the page (specs/006 research R13). Words keep
@@ -109,6 +113,12 @@ class MushafPageDetails {
 const _headerAdvanceEm = 3.302;
 const _headerInkEm = 0.40;
 
+/// Share of the glyph's width that its ink spans, centred.
+const _headerInkShare = 0.98;
+
+/// Clear paper kept between a header glyph and the page details beside it, in line heights.
+const _headerAir = 0.16;
+
 /// One page of the page-faithful Mushaf layout (001 research R4): 15 line slots, words shaped
 /// once into cached [TextPainter]s, `ayah` lines filled like print by kashida with normal word
 /// gaps (specs/002-print-like-mushaf-page/contracts/page-typesetting.md) or centred, surah
@@ -124,6 +134,7 @@ class MushafPageRenderer extends LeafRenderObjectWidget {
     required this.palette,
     this.quarterStartWords = const {},
     this.sajdahEndWords = const {},
+    this.endMarks = const {},
     this.selected,
     this.highlighted,
     this.recited,
@@ -144,6 +155,11 @@ class MushafPageRenderer extends LeafRenderObjectWidget {
   final MushafPalette palette;
   final Set<int> quarterStartWords; // word ids that begin a hizb quarter
   final Set<int> sajdahEndWords; // word ids that end a sajdah ayah
+
+  /// Ayah-end word ids where one of the reader's readings ends (specs/014 research R5): the sign
+  /// is drawn in [MushafPalette.khatmaMark], with a small triangle in the end-side margin. A
+  /// change repaints only.
+  final Set<int> endMarks;
   final AyahRef? selected;
   final AyahRef? highlighted;
 
@@ -210,6 +226,9 @@ class RenderMushafPage extends RenderBox {
 
   ({_Detail surah, _Detail juz, _Detail page})? _details;
   final Map<int, TextPainter> _wordPainters = {}; // natural shape, by word id
+
+  /// The font size the cached word painters were shaped at.
+  double? _shapedFontSize;
   // With kashida, by display string and whether its ayah is linked (specs/010): the same string
   // can be in a linked and an unlinked ayah.
   final Map<(bool, String), TextPainter> _stretchedPainters = {};
@@ -239,10 +258,36 @@ class RenderMushafPage extends RenderBox {
         old.highlighted != next.highlighted ||
         old.recited != next.recited ||
         old.recitedBasmala != next.recitedBasmala ||
-        old.marks != next.marks) {
+        old.marks != next.marks ||
+        !setEquals(old.endMarks, next.endMarks)) {
       markNeedsPaint();
     }
   }
+
+  /// The colour [wordId] is tinted with when painted, or null (specs/014 tests).
+  @visibleForTesting
+  Color? tintOfWord(int wordId) {
+    for (final line in _placements) {
+      for (final w in line.words) {
+        if (w.word.id == wordId) return _tintOf(w);
+      }
+    }
+    return null;
+  }
+
+  /// Where the end-of-reading triangles are drawn, one per marked line (specs/014 tests).
+  @visibleForTesting
+  List<Rect> get endMarkRects => [
+        for (final line in _placements)
+          if (_endsHere(line)) _endMarkRect(line, _geometry!),
+      ];
+
+  /// The font sizes the words on the page are drawn at: one value, the page's (specs/013 tests).
+  @visibleForTesting
+  Set<double?> get wordFontSizes => {
+        for (final line in _placements)
+          for (final w in line.words) w.painter.text?.style?.fontSize,
+      };
 
   /// The text colour [wordId] is drawn in, or null when it is not on this page (specs/010 tests).
   @visibleForTesting
@@ -282,6 +327,53 @@ class RenderMushafPage extends RenderBox {
     return true;
   }
 
+  /// The ink of each surah header on the page and its line slot, for the typesetting tests
+  /// (specs/013 contracts/reader-ui.md › Surah header).
+  @visibleForTesting
+  List<({Rect ink, Rect slot})> get surahHeaderRects {
+    final geometry = _geometry;
+    if (geometry == null) return const [];
+    return [
+      for (final line in _placements)
+        if (line.line.type == LineType.surahName)
+          (
+            ink: _hasHeaderGlyph(line)
+                ? Rect.fromCenter(
+                    center: Offset(size.width / 2, line.top + line.height / 2),
+                    width: _headerFontSize(geometry) * _headerAdvanceEm * _headerInkShare,
+                    height: _headerFontSize(geometry) * _headerInkEm,
+                  )
+                : _headerFrame(line, geometry),
+            slot: Rect.fromLTWH(
+                geometry.textBlock.left, line.top, geometry.textBlock.width, line.height),
+          ),
+    ];
+  }
+
+  /// Where [ref]'s words are on this page, or null when it has none here: what the sideways
+  /// page scrolls to (specs/013 FR-011).
+  Rect? ayahRect(AyahRef ref) {
+    Rect? rect;
+    for (final line in _placements) {
+      for (final w in line.words) {
+        if (w.word.ref != ref) continue;
+        final r = line.wordRect(w);
+        rect = rect?.expandToInclude(r) ?? r;
+      }
+    }
+    return rect;
+  }
+
+  /// The basmala line of [surah] on this page, or null.
+  Rect? basmalaRect(int surah) {
+    for (final line in _placements) {
+      if (line.line.type == LineType.basmallah && line.line.surah == surah) {
+        return Rect.fromLTWH(0, line.top, size.width, line.height);
+      }
+    }
+    return null;
+  }
+
   /// The ayah under [localPosition], for long-press selection (FR-020).
   AyahRef? ayahAt(Offset localPosition) {
     // Printed lines have almost no gap, so allow a little slack between words.
@@ -307,6 +399,12 @@ class RenderMushafPage extends RenderBox {
     size = constraints.biggest;
     final page = _config.page;
     final geometry = _geometry = PageGeometry.of(size, _config.targetEm);
+    // The words are shaped once and kept. At another text size (the phone turned, a foldable
+    // opened) they are shaped again, or they would keep their old size on the new page.
+    if (geometry.fontSize != _shapedFontSize) {
+      _disposePainters();
+      _shapedFontSize = geometry.fontSize;
+    }
     final block = geometry.textBlock;
     // Pages with fewer lines (1 and 2) keep the same spacing, centred in the block.
     final slots = math.max(PageGeometry.linesPerPage, page.lines.length);
@@ -467,9 +565,20 @@ class RenderMushafPage extends RenderBox {
       color: _config.palette.accentInk,
     );
     final header = geometry.headerBand, footer = geometry.footerBand;
+    // A header glyph on the first or last line is a little taller than its line (specs/013
+    // research R2): the details beside it move away by that much and a little air, so that
+    // the letters' tails never touch its frame (FR-026).
+    final lines = _config.page.lines;
+    double clearOf(MushafLine? line) =>
+        line != null && line.type == LineType.surahName && _config.surahHeaderFamily != null
+            ? math.max(0.0, _headerFontSize(geometry) * _headerInkEm - geometry.lineHeight) / 2 +
+                geometry.lineHeight * _headerAir
+            : 0;
+    final lift = clearOf(lines.firstOrNull), drop = clearOf(lines.lastOrNull);
     _Detail detail(String text, double Function(double width) left, Rect band) {
       final p = _painter(text, style);
-      return _Detail(text, p, Offset(left(p.width), band.center.dy - p.height / 2));
+      final shift = identical(band, header) ? -lift : drop;
+      return _Detail(text, p, Offset(left(p.width), band.center.dy - p.height / 2 + shift));
     }
 
     _details = (
@@ -506,25 +615,23 @@ class RenderMushafPage extends RenderBox {
       );
     }
     final marks = _config.marks;
+    if (_endsHere(line)) {
+      // Where a reading ends: a small triangle in the end-side (left) margin, on that line, so
+      // the end is clear without colour too (specs/014 research R5).
+      final r = _endMarkRect(line, geometry);
+      canvas.drawPath(
+        Path()
+          ..moveTo(r.left, r.top)
+          ..lineTo(r.right, r.center.dy)
+          ..lineTo(r.left, r.bottom)
+          ..close(),
+        Paint()..color = palette.khatmaMark,
+      );
+    }
     for (final w in line.words) {
       final y = line.top + (line.height - w.painter.height * line.scale) / 2;
-      // Memorization: hidden words leave their place empty; hinted words and the marks of the
-      // expected ayah or an ayah with a mistake are tinted.
-      Color? tint;
-      var hidden = false;
-      if (marks != null) {
-        if (w.word.isAyahEnd) {
-          tint = marks.mistake(w.word.ref)
-              ? palette.mistake
-              : w.word.ref == marks.expected
-                  ? palette.accentInk
-                  : null;
-        } else if (marks.hidden(w.word.id)) {
-          hidden = true;
-        } else if (marks.hinted(w.word.id)) {
-          tint = palette.hint;
-        }
-      }
+      final tint = _tintOf(w);
+      final hidden = marks != null && !w.word.isAyahEnd && marks.hidden(w.word.id);
       if (tint != null) {
         canvas.saveLayer(line.wordRect(w).inflate(geometry.fontSize * 0.2),
             Paint()..colorFilter = ColorFilter.mode(tint, BlendMode.srcIn));
@@ -563,21 +670,72 @@ class RenderMushafPage extends RenderBox {
     }
   }
 
-  void _paintSurahHeader(Canvas canvas, _LinePlacement line, PageGeometry geometry) {
+  /// The colour a word is tinted with. Memorization: hinted words, and the marks of the expected
+  /// ayah or an ayah with a mistake. Otherwise the ayah-end sign where a reading ends.
+  Color? _tintOf(_PlacedWord w) {
+    final marks = _config.marks;
+    final palette = _config.palette;
+    if (marks != null) {
+      if (w.word.isAyahEnd) {
+        return marks.mistake(w.word.ref)
+            ? palette.mistake
+            : w.word.ref == marks.expected
+                ? palette.accentInk
+                : null;
+      }
+      return !marks.hidden(w.word.id) && marks.hinted(w.word.id) ? palette.hint : null;
+    }
+    return _config.endMarks.contains(w.word.id) ? palette.khatmaMark : null;
+  }
+
+  /// Whether a reading ends on [line]. Never during memorization (FR-041).
+  bool _endsHere(_LinePlacement line) {
+    final ends = _config.endMarks;
+    if (ends.isEmpty || _config.marks != null || line.line.type != LineType.ayah) return false;
+    return line.line.words.any((w) => ends.contains(w.id));
+  }
+
+  /// The end-of-reading triangle: centred in the end-side margin, on [line].
+  Rect _endMarkRect(_LinePlacement line, PageGeometry geometry) {
+    final side = geometry.fontSize * 0.36;
+    final margin = geometry.textBlock.left;
+    return Rect.fromCenter(
+      center: Offset(margin / 2, line.top + line.height / 2),
+      width: math.min(side, margin * 0.8),
+      height: side,
+    );
+  }
+
+  /// Whether [line]'s title is drawn as its printed header glyph, not the plain frame.
+  bool _hasHeaderGlyph(_LinePlacement line) {
     final surah = line.line.surah;
-    final family = _config.surahHeaderFamily;
-    if (family != null && surah != null && surah >= 1 && surah <= surahHeaderGlyphs.length) {
-      // The glyph's ink spans 98% of its advance and 40% of the font size, centred on the
-      // baseline: fill the text block's width, at most 90% of the line's height.
-      final fontSize = math.min(
-        geometry.textBlock.width / _headerAdvanceEm,
-        line.height * 0.9 / _headerInkEm,
+    return _config.surahHeaderFamily != null &&
+        surah != null &&
+        surah >= 1 &&
+        surah <= surahHeaderGlyphs.length;
+  }
+
+  /// The header glyph's size: its ink is as wide as the text block, from side to side
+  /// (specs/013 FR-025). That makes it about 5% taller than the line, inside the clear space
+  /// around it (research R2).
+  double _headerFontSize(PageGeometry geometry) =>
+      geometry.textBlock.width / (_headerAdvanceEm * _headerInkShare);
+
+  Rect _headerFrame(_LinePlacement line, PageGeometry geometry) => Rect.fromLTWH(
+        geometry.textBlock.left,
+        line.top + line.height * 0.12,
+        geometry.textBlock.width,
+        line.height * 0.76,
       );
+
+  void _paintSurahHeader(Canvas canvas, _LinePlacement line, PageGeometry geometry) {
+    if (_hasHeaderGlyph(line)) {
+      // The glyph's ink is centred on its baseline.
       final p = _painter(
-        String.fromCharCode(surahHeaderGlyphs[surah - 1]),
+        String.fromCharCode(surahHeaderGlyphs[line.line.surah! - 1]),
         TextStyle(
-          fontFamily: family,
-          fontSize: fontSize,
+          fontFamily: _config.surahHeaderFamily,
+          fontSize: _headerFontSize(geometry),
           color: _config.palette.accentInk,
           height: 1,
         ),
@@ -587,13 +745,7 @@ class RenderMushafPage extends RenderBox {
       p.dispose();
       return;
     }
-    final rect = Rect.fromLTWH(
-      geometry.textBlock.left,
-      line.top + line.height * 0.12,
-      geometry.textBlock.width,
-      line.height * 0.76,
-    );
-    paintSurahFrame(canvas, rect, _config.palette.accentInk);
+    paintSurahFrame(canvas, _headerFrame(line, geometry), _config.palette.accentInk);
     final name = _config.surahNames[line.line.surah] ?? '';
     _paintCentered(canvas, line, 'سُورَةُ $name', geometry.fontSize * 0.8, _config.palette.accentInk);
   }

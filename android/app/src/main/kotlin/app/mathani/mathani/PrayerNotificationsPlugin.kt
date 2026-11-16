@@ -39,6 +39,9 @@ class PrayerNotificationsPlugin : FlutterPlugin, ActivityAware, MethodChannel.Me
         const val ALERT_ACTION = "app.mathani.PRAYER_ALERT"
         const val QIYAM_CHANNEL = "prayer_qiyam_v1"
         const val PLAYBACK_CHANNEL = "prayer_athan_playback_v1"
+        const val REMINDER_ACTION = "app.mathani.KHATMA_REMINDER"
+        const val REMINDER_CHANNEL = "khatma_reminder_v1"
+        const val REMINDER_TAG = "mathani.khatma"
         private const val PERMISSION_REQUEST = 7413
         private const val PREFS = "mathani_prayer_settings"
         private var pendingOpen: Map<String, Any?>? = null
@@ -74,32 +77,43 @@ class PrayerNotificationsPlugin : FlutterPlugin, ActivityAware, MethodChannel.Me
             else Uri.parse("android.resource://${context.packageName}/$res")
         }
 
-        private fun alarmIntent(context: Context, id: Int, generation: Long) =
-            PendingIntent.getBroadcast(context, id, Intent(context, PrayerAlarmReceiver::class.java)
-                .setAction(ALERT_ACTION).setData(Uri.parse("mathani-prayer://alert/$id"))
+        /** Reminder alarms have their own action and address, so their ids never meet prayer ids. */
+        private fun alarmBase(context: Context, id: Int, reminder: Boolean) =
+            Intent(context, PrayerAlarmReceiver::class.java)
+                .setAction(if (reminder) REMINDER_ACTION else ALERT_ACTION)
+                .setData(Uri.parse(if (reminder) "mathani-khatma://reminder/$id" else "mathani-prayer://alert/$id"))
+
+        private fun alarmIntent(context: Context, id: Int, generation: Long, reminder: Boolean) =
+            PendingIntent.getBroadcast(context, id, alarmBase(context, id, reminder)
                 .putExtra("id", id).putExtra("generation", generation),
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
 
         /** One alarm per alert; exact when allowed, otherwise Android may delay it (FR-021). */
-        fun install(context: Context, store: PrayerAlarmStore, nowMs: Long): Int {
+        fun install(context: Context, store: PrayerAlarmStore, nowMs: Long, reminder: Boolean = false): Int {
             val alarms = context.getSystemService(AlarmManager::class.java)
             val generation = store.generation()
             val future = store.future(nowMs)
             future.forEach {
-                val pending = alarmIntent(context, it.id, generation)
+                val pending = alarmIntent(context, it.id, generation, reminder)
                 if (exact(context)) alarms.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, it.atUtcMs, pending)
                 else alarms.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, it.atUtcMs, pending)
             }
             return future.size
         }
 
-        fun cancel(context: Context, ids: Collection<Int>) {
+        fun cancel(context: Context, ids: Collection<Int>, reminder: Boolean = false) {
             val alarms = context.getSystemService(AlarmManager::class.java)
             ids.forEach { id ->
-                PendingIntent.getBroadcast(context, id, Intent(context, PrayerAlarmReceiver::class.java)
-                    .setAction(ALERT_ACTION).setData(Uri.parse("mathani-prayer://alert/$id")),
+                PendingIntent.getBroadcast(context, id, alarmBase(context, id, reminder),
                     PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE)?.let { alarms.cancel(it); it.cancel() }
             }
+        }
+
+        /** The reminder's channel: the phone's default sound and importance (specs/014 FR-026). */
+        fun ensureReminderChannel(context: Context, name: String) {
+            if (Build.VERSION.SDK_INT < 26) return
+            context.getSystemService(NotificationManager::class.java).createNotificationChannel(
+                NotificationChannel(REMINDER_CHANNEL, name, NotificationManager.IMPORTANCE_DEFAULT))
         }
 
         /** Channel sounds are fixed once created, so each sound has its own channel. The reader's
@@ -202,6 +216,27 @@ class PrayerNotificationsPlugin : FlutterPlugin, ActivityAware, MethodChannel.Me
                     result.success(install(context, store, System.currentTimeMillis()))
                 }
                 "cancelAll" -> { cancel(context, store.clear()); result.success(null) }
+                // The khatma reminders (specs/014): a second store file, the `wird` kind.
+                "replaceReminders" -> {
+                    val reminders = PrayerAlarmStore(context, PrayerAlarmStore.REMINDER_FILE)
+                    val generation = call.argument<Number>("generation")!!.toLong()
+                    val alerts = call.argument<List<Map<String, Any?>>>("alerts")!!.map {
+                        PrayerAlert((it["id"] as Number).toInt(), "wird", (it["atUtcMs"] as Number).toLong(),
+                            it["title"] as String, it["body"] as String, "default")
+                    }
+                    ensureReminderChannel(context, call.argument<String>("channelName") ?: "Daily reminder")
+                    cancel(context, reminders.replace(generation, alerts), reminder = true)
+                    result.success(install(context, reminders, System.currentTimeMillis(), reminder = true))
+                }
+                "cancelReminders" -> {
+                    cancel(context, PrayerAlarmStore(context, PrayerAlarmStore.REMINDER_FILE).clear(), reminder = true)
+                    result.success(null)
+                }
+                "clearReminders" -> {
+                    val manager = context.getSystemService(NotificationManager::class.java)
+                    call.argument<List<Number>>("ids")?.forEach { manager.cancel(REMINDER_TAG, it.toInt()) }
+                    result.success(null)
+                }
                 "takeOpened" -> { result.success(pendingOpen); pendingOpen = null }
                 else -> result.notImplemented()
             }

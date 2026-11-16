@@ -70,7 +70,7 @@ List<Alert> buildAlerts({
   required AppLocalizations l10n,
   bool fullReady = false,
   String? fullPath,
-  int max = 60,
+  int max = 52,
 }) {
   final place = state.currentPlace;
   final settings = state.alerts;

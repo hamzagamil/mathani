@@ -43,3 +43,14 @@
 # A page font never changes under its name (a new font is a new name).
 /assets/assets/qcf/*
   Cache-Control: public, max-age=31536000, immutable
+
+# Group khatma links (specs/014 research R16): the app's page for /k/<code>, always fresh, and
+# the two files that let the installed apps open them.
+/k/*
+  Cache-Control: no-cache
+/.well-known/apple-app-site-association
+  Content-Type: application/json
+  Cache-Control: max-age=3600
+/.well-known/assetlinks.json
+  Content-Type: application/json
+  Cache-Control: max-age=3600

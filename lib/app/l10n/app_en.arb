@@ -763,5 +763,1062 @@
         "type": "String"
       }
     }
+  },
+  "khatmaTitle": "Khatma",
+  "@khatmaTitle": {
+    "description": "Khatma screen title and the reading toolbar's Khatma button (specs/014)."
+  },
+  "khatmaIntro": "Plan a complete reading of the Quran. The app divides it into a daily wird, marks where each one ends, and keeps your place.",
+  "@khatmaIntro": {
+    "description": "Khatma screen with no khatma: what a plan does."
+  },
+  "khatmaStart": "Start a khatma",
+  "@khatmaStart": {
+    "description": "Button that opens the plan sheet."
+  },
+  "khatmaAlreadyInProgress": "A khatma is already in progress. Finish or end it first.",
+  "@khatmaAlreadyInProgress": {
+    "description": "Starting a khatma while one is in progress (FR-005)."
+  },
+  "khatmaTodaysWird": "Today's wird",
+  "@khatmaTodaysWird": {
+    "description": "The wird card's heading, and the reminder's title."
+  },
+  "khatmaWirdOf": "Wird {number} of {total}",
+  "@khatmaWirdOf": {
+    "description": "Position of the current wird. Numbers are pre-formatted.",
+    "placeholders": {
+      "number": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "khatmaHizb": "Hizb {number}",
+  "@khatmaHizb": {
+    "description": "A wird that is exactly one hizb. Number is pre-formatted.",
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "khatmaQuarter": "Quarter {quarter} of Hizb {hizb}",
+  "@khatmaQuarter": {
+    "description": "A wird that is exactly one quarter hizb. Numbers are pre-formatted.",
+    "placeholders": {
+      "quarter": {
+        "type": "String"
+      },
+      "hizb": {
+        "type": "String"
+      }
+    }
+  },
+  "khatmaWirdNumber": "Wird {number}",
+  "@khatmaWirdNumber": {
+    "description": "A wird that is not exactly one Mushaf mark. Number is pre-formatted.",
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "khatmaAyahRef": "{surah} {ayah}",
+  "@khatmaAyahRef": {
+    "description": "One end of a wird's range: surah name and ayah number (pre-formatted).",
+    "placeholders": {
+      "surah": {
+        "type": "String"
+      },
+      "ayah": {
+        "type": "String"
+      }
+    }
+  },
+  "khatmaRange": "{from} to {to}",
+  "@khatmaRange": {
+    "description": "A wird's range, from one ayah to another.",
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "khatmaPagesRange": "Pages {first} to {last}",
+  "@khatmaPagesRange": {
+    "description": "A wird's pages. Numbers are pre-formatted.",
+    "placeholders": {
+      "first": {
+        "type": "String"
+      },
+      "last": {
+        "type": "String"
+      }
+    }
+  },
+  "khatmaPageCount": "{count, plural, =1{1 page} other{{shown} pages}}",
+  "@khatmaPageCount": {
+    "description": "A number of pages; count selects the plural form, shown is the same number formatted.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "shown": {
+        "type": "String"
+      }
+    }
+  },
+  "khatmaRead": "Read",
+  "@khatmaRead": {
+    "description": "Opens the Mushaf at the wird's place, before it is begun (FR-008)."
+  },
+  "khatmaContinue": "Continue",
+  "@khatmaContinue": {
+    "description": "Opens the Mushaf at the khatma place once the wird is begun (FR-008)."
+  },
+  "khatmaDone": "Done",
+  "@khatmaDone": {
+    "description": "Marks the current wird as read (FR-012)."
+  },
+  "khatmaTodayDone": "Today's wird is done",
+  "@khatmaTodayDone": {
+    "description": "After a wird is marked as read, and on the Khatma screen when a wird was read today."
+  },
+  "khatmaReadNow": "Read now",
+  "@khatmaReadNow": {
+    "description": "Opens the next wird after today's is done."
+  },
+  "khatmaNext": "Next: {name}",
+  "@khatmaNext": {
+    "description": "The next wird after today's is done.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "khatmaStartsOn": "Starts on {date}",
+  "@khatmaStartsOn": {
+    "description": "A khatma whose start date is later. Date is pre-formatted.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "khatmaPausedSince": "Paused since {date}",
+  "@khatmaPausedSince": {
+    "description": "A paused khatma (FR-031). Date is pre-formatted.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "khatmaUndo": "Undo",
+  "@khatmaUndo": {
+    "description": "Undoes marking a wird as read (FR-016)."
+  },
+  "khatmaPagesLeft": "{count, plural, =1{1 page left} other{{shown} pages left}}",
+  "@khatmaPagesLeft": {
+    "description": "Reader header: pages left in the wird (FR-011).",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "shown": {
+        "type": "String"
+      }
+    }
+  },
+  "khatmaEndAt": "End of today's wird at ayah {ayah}",
+  "@khatmaEndAt": {
+    "description": "Screen-reader label of the end mark (FR-010). Number is pre-formatted.",
+    "placeholders": {
+      "ayah": {
+        "type": "String"
+      }
+    }
+  },
+  "khatmaEndsHere": "Today's wird ends on this page",
+  "@khatmaEndsHere": {
+    "description": "The Done row on the reading screen (FR-012)."
+  },
+  "khatmaSetPlace": "Set khatma place here",
+  "@khatmaSetPlace": {
+    "description": "Long-press item (FR-017)."
+  },
+  "khatmaSetPlaceConfirm": "Wirds that become read: {read}. Wirds that become not read: {unread}. The khatma continues from this ayah.",
+  "@khatmaSetPlaceConfirm": {
+    "description": "Confirmation of Set khatma place here, with how many wirds change. Numbers are pre-formatted.",
+    "placeholders": {
+      "read": {
+        "type": "String"
+      },
+      "unread": {
+        "type": "String"
+      }
+    }
+  },
+  "khatmaSetPlaceDone": "The khatma continues from here.",
+  "@khatmaSetPlaceDone": {
+    "description": "After Set khatma place here."
+  },
+  "khatmaConfirm": "Confirm",
+  "@khatmaConfirm": {
+    "description": "Confirms a khatma action."
+  },
+  "khatmaCancel": "Cancel",
+  "@khatmaCancel": {
+    "description": "Cancels a khatma action."
+  },
+  "khatmaPlanTitle": "Plan",
+  "@khatmaPlanTitle": {
+    "description": "Plan sheet title."
+  },
+  "khatmaDailyAmount": "A daily amount",
+  "@khatmaDailyAmount": {
+    "description": "Plan sheet section: amounts by the Mushaf's marks."
+  },
+  "khatmaAmount1": "A quarter hizb a day",
+  "@khatmaAmount1": {
+    "description": "Plan by marks."
+  },
+  "khatmaAmount2": "Half a hizb a day",
+  "@khatmaAmount2": {
+    "description": "Plan by marks."
+  },
+  "khatmaAmount4": "A hizb a day",
+  "@khatmaAmount4": {
+    "description": "Plan by marks."
+  },
+  "khatmaAmount8": "A juz a day",
+  "@khatmaAmount8": {
+    "description": "Plan by marks."
+  },
+  "khatmaAmount16": "Two ajza' a day",
+  "@khatmaAmount16": {
+    "description": "Plan by marks."
+  },
+  "khatmaAmount24": "Three ajza' a day",
+  "@khatmaAmount24": {
+    "description": "Plan by marks."
+  },
+  "khatmaAmount80": "Ten ajza' a day",
+  "@khatmaAmount80": {
+    "description": "Plan by marks."
+  },
+  "khatmaSevenDays": "Seven days, by whole surahs",
+  "@khatmaSevenDays": {
+    "description": "The seven-day plan."
+  },
+  "khatmaCustom": "Custom",
+  "@khatmaCustom": {
+    "description": "Plan sheet section: a custom plan."
+  },
+  "khatmaCustomDays": "Number of days",
+  "@khatmaCustomDays": {
+    "description": "Custom plan by days."
+  },
+  "khatmaCustomPages": "Pages a day",
+  "@khatmaCustomPages": {
+    "description": "Custom plan by pages a day."
+  },
+  "khatmaCustomDate": "Finish date",
+  "@khatmaCustomDate": {
+    "description": "Custom plan by a finish date."
+  },
+  "khatmaChooseDate": "Choose a date",
+  "@khatmaChooseDate": {
+    "description": "Button that opens a date picker."
+  },
+  "khatmaNumberRange": "Enter a number from {min} to {max}.",
+  "@khatmaNumberRange": {
+    "description": "Validation of a number field. Numbers are pre-formatted.",
+    "placeholders": {
+      "min": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "khatmaDaysCount": "{count, plural, =1{1 day} other{{shown} days}}",
+  "@khatmaDaysCount": {
+    "description": "A number of days; count selects the plural form, shown is the same number formatted.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "shown": {
+        "type": "String"
+      }
+    }
+  },
+  "khatmaStartFrom": "Start from",
+  "@khatmaStartFrom": {
+    "description": "Plan sheet: the start point (FR-004)."
+  },
+  "khatmaFromBeginning": "The beginning",
+  "@khatmaFromBeginning": {
+    "description": "Start point: Al-Fatiha."
+  },
+  "khatmaFromThisPage": "This page ({page})",
+  "@khatmaFromThisPage": {
+    "description": "Start point: the page on screen. Number is pre-formatted.",
+    "placeholders": {
+      "page": {
+        "type": "String"
+      }
+    }
+  },
+  "khatmaFromJuz": "A juz",
+  "@khatmaFromJuz": {
+    "description": "Start point: a juz."
+  },
+  "khatmaFromSurah": "A surah",
+  "@khatmaFromSurah": {
+    "description": "Start point: a surah."
+  },
+  "khatmaFromPage": "A page",
+  "@khatmaFromPage": {
+    "description": "Start point: a page."
+  },
+  "khatmaStartOn": "Start on",
+  "@khatmaStartOn": {
+    "description": "Plan sheet: the start date."
+  },
+  "khatmaToday": "Today",
+  "@khatmaToday": {
+    "description": "Start date: today."
+  },
+  "khatmaLaterDate": "A later date",
+  "@khatmaLaterDate": {
+    "description": "Start date: a later date."
+  },
+  "khatmaSummaryRange": "{days} · {from} to {to} pages a day · ends {date}",
+  "@khatmaSummaryRange": {
+    "description": "Plan sheet summary. days is a formatted number of days; numbers and date are pre-formatted.",
+    "placeholders": {
+      "days": {
+        "type": "String"
+      },
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "khatmaSummaryOne": "{days} · {pages} a day · ends {date}",
+  "@khatmaSummaryOne": {
+    "description": "Plan sheet summary when every wird has the same number of pages.",
+    "placeholders": {
+      "days": {
+        "type": "String"
+      },
+      "pages": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "khatmaFromPlace": "From page {page}",
+  "@khatmaFromPlace": {
+    "description": "Change plan: where the new plan starts. Number is pre-formatted.",
+    "placeholders": {
+      "page": {
+        "type": "String"
+      }
+    }
+  },
+  "khatmaDateBeforeStart": "Choose a date on or after the start date.",
+  "@khatmaDateBeforeStart": {
+    "description": "A finish date before the start date."
+  },
+  "khatmaProgressWirds": "Wirds read: {read} of {total}",
+  "@khatmaProgressWirds": {
+    "description": "Progress (FR-027). Numbers are pre-formatted.",
+    "placeholders": {
+      "read": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "khatmaProgressPages": "Pages read: {read} · left: {left}",
+  "@khatmaProgressPages": {
+    "description": "Progress (FR-027). Numbers are pre-formatted.",
+    "placeholders": {
+      "read": {
+        "type": "String"
+      },
+      "left": {
+        "type": "String"
+      }
+    }
+  },
+  "khatmaPercent": "{percent} read",
+  "@khatmaPercent": {
+    "description": "Progress as a percentage, pre-formatted with its sign.",
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "khatmaStarted": "Started {date}",
+  "@khatmaStarted": {
+    "description": "Progress: the start date.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "khatmaPlannedFinish": "Planned finish {date}",
+  "@khatmaPlannedFinish": {
+    "description": "Progress: the planned finish date.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "khatmaExpectedFinish": "Expected finish {date}",
+  "@khatmaExpectedFinish": {
+    "description": "Progress: the expected finish date.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "khatmaExpectedLate": "Expected finish {date}, {days} after the planned date",
+  "@khatmaExpectedLate": {
+    "description": "Expected finish later than planned. days is a formatted number of days.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "khatmaExpectedEarly": "Expected finish {date}, {days} before the planned date",
+  "@khatmaExpectedEarly": {
+    "description": "Expected finish earlier than planned.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "khatmaAllWirds": "All wirds",
+  "@khatmaAllWirds": {
+    "description": "Opens the list of wirds (FR-033)."
+  },
+  "khatmaChangePlan": "Change plan",
+  "@khatmaChangePlan": {
+    "description": "Changes the plan of the khatma in progress (FR-030)."
+  },
+  "khatmaPause": "Pause",
+  "@khatmaPause": {
+    "description": "Pauses the khatma (FR-031)."
+  },
+  "khatmaResume": "Resume",
+  "@khatmaResume": {
+    "description": "Resumes the khatma (FR-031)."
+  },
+  "khatmaEnd": "End khatma",
+  "@khatmaEnd": {
+    "description": "Ends the khatma (FR-032)."
+  },
+  "khatmaEndConfirm": "End this khatma? It won't be added to your finished khatmas. Your bookmarks and reading position are kept.",
+  "@khatmaEndConfirm": {
+    "description": "Confirmation before ending a khatma."
+  },
+  "khatmaNotRead": "Not read",
+  "@khatmaNotRead": {
+    "description": "A wird not read yet, in the list of wirds."
+  },
+  "khatmaReadOn": "Read {date}",
+  "@khatmaReadOn": {
+    "description": "A wird read on a day, in the list of wirds.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "khatmaCurrent": "Current",
+  "@khatmaCurrent": {
+    "description": "Marks the current wird in the list of wirds."
+  },
+  "khatmaReminder": "Daily reminder",
+  "@khatmaReminder": {
+    "description": "Reminder section title (FR-019)."
+  },
+  "khatmaReminderHint": "One reminder a day, only when something is waiting to be read.",
+  "@khatmaReminderHint": {
+    "description": "Reminder section: what it does."
+  },
+  "khatmaReminderTime": "Time",
+  "@khatmaReminderTime": {
+    "description": "Reminder time."
+  },
+  "khatmaReminderBlocked": "Reminders are blocked. Your choice is saved; allow notifications for Mathani in your phone's settings.",
+  "@khatmaReminderBlocked": {
+    "description": "Notifications refused (FR-020)."
+  },
+  "khatmaReminderLate": "Reminders may come a few minutes late.",
+  "@khatmaReminderLate": {
+    "description": "Android without exact alarms."
+  },
+  "khatmaReminderWeb": "Reminders are available in the phone apps.",
+  "@khatmaReminderWeb": {
+    "description": "Web app: no reminder (FR-042)."
+  },
+  "khatmaReminderBody": "{name} · {pages}",
+  "@khatmaReminderBody": {
+    "description": "Reminder text naming the wird and its pages.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "pages": {
+        "type": "String"
+      }
+    }
+  },
+  "khatmaRecordTitle": "Finished khatmas",
+  "@khatmaRecordTitle": {
+    "description": "Record section title (FR-035)."
+  },
+  "khatmaRecordCount": "{count, plural, =1{1 khatma finished} other{{shown} khatmas finished}}",
+  "@khatmaRecordCount": {
+    "description": "How many khatmas were finished.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "shown": {
+        "type": "String"
+      }
+    }
+  },
+  "khatmaDateRange": "{from} to {to}",
+  "@khatmaDateRange": {
+    "description": "A khatma's start and end dates.",
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "khatmaDeleteRecord": "Delete",
+  "@khatmaDeleteRecord": {
+    "description": "Deletes a record entry (FR-037)."
+  },
+  "khatmaDeleteRecordConfirm": "Delete this finished khatma from the list?",
+  "@khatmaDeleteRecordConfirm": {
+    "description": "Confirmation before deleting a record entry."
+  },
+  "khatmaStartNew": "Start a new khatma",
+  "@khatmaStartNew": {
+    "description": "Starts a new khatma with the previous plan (FR-036)."
+  },
+  "khatmaComplete": "The khatma is complete",
+  "@khatmaComplete": {
+    "description": "Completion screen (FR-034)."
+  },
+  "khatmaClose": "Close",
+  "@khatmaClose": {
+    "description": "Closes the completion screen."
+  },
+  "tourKhatma": "Plan a khatma, read each day's wird, and keep your place.",
+  "@tourKhatma": {
+    "description": "Tour stop on the Khatma button (FR-043)."
+  },
+  "khatmaPartEndsHere": "Your part in «{title}» ends on this page",
+  "@khatmaPartEndsHere": {
+    "description": "The Done row for a group part (release B).",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "khatmaPartEndAt": "End of your part at ayah {ayah}",
+  "@khatmaPartEndAt": {
+    "description": "Screen-reader label of a group part's end mark. Number is pre-formatted.",
+    "placeholders": {
+      "ayah": {
+        "type": "String"
+      }
+    }
+  },
+  "khatmaPartReminder": "Your part in «{title}»: {part}",
+  "@khatmaPartReminder": {
+    "description": "A reminder line naming a group part the reader holds (release B).",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "part": {
+        "type": "String"
+      }
+    }
+  },
+  "khatmaReminderOn": "Remind me each day",
+  "@khatmaReminderOn": {
+    "description": "The reminder's switch."
+  },
+  "groupSection": "Group khatmas",
+  "@groupSection": {
+    "description": "Khatma screen section (specs/014 release B)."
+  },
+  "groupStart": "Start a group khatma",
+  "@groupStart": {
+    "description": "Opens the start sheet."
+  },
+  "groupOpenLink": "Open a link or code",
+  "@groupOpenLink": {
+    "description": "Opens a group khatma from a pasted link or code (FR-046)."
+  },
+  "groupOpen": "Open",
+  "@groupOpen": {
+    "description": "Button."
+  },
+  "groupCodeHint": "Paste a link or a code",
+  "@groupCodeHint": {
+    "description": "Field hint."
+  },
+  "groupCodeInvalid": "That is not a group khatma link or code.",
+  "@groupCodeInvalid": {
+    "description": "The pasted text has no code."
+  },
+  "groupProgress": "{read} of {total} read",
+  "@groupProgress": {
+    "description": "A kept khatma's progress. Numbers are pre-formatted.",
+    "placeholders": {
+      "read": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "groupCounts": "{free} free · {taken} taken · {read} read",
+  "@groupCounts": {
+    "description": "Counts of parts. Numbers are pre-formatted.",
+    "placeholders": {
+      "free": {
+        "type": "String"
+      },
+      "taken": {
+        "type": "String"
+      },
+      "read": {
+        "type": "String"
+      }
+    }
+  },
+  "groupFinishBy": "Finish by {date}",
+  "@groupFinishBy": {
+    "description": "The finish date.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "groupFinishPassed": "The finish date, {date}, has passed",
+  "@groupFinishPassed": {
+    "description": "The finish date passed with parts unread.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "groupCompleteOn": "Complete on {date}",
+  "@groupCompleteOn": {
+    "description": "Every part is read (FR-056).",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "groupMyParts": "My parts",
+  "@groupMyParts": {
+    "description": "Heading."
+  },
+  "groupAllParts": "All parts",
+  "@groupAllParts": {
+    "description": "Heading."
+  },
+  "groupFree": "Free",
+  "@groupFree": {
+    "description": "A part nobody holds."
+  },
+  "groupTake": "Take this part",
+  "@groupTake": {
+    "description": "Takes a free part."
+  },
+  "groupGiveBack": "Give back",
+  "@groupGiveBack": {
+    "description": "Gives back a part not read."
+  },
+  "groupDone": "Done",
+  "@groupDone": {
+    "description": "Marks a part as read."
+  },
+  "groupUndoRead": "Not read yet",
+  "@groupUndoRead": {
+    "description": "Undoes a part's read mark."
+  },
+  "groupYou": "you",
+  "@groupYou": {
+    "description": "Marks the reader's own parts."
+  },
+  "groupRead": "read",
+  "@groupRead": {
+    "description": "A read part."
+  },
+  "groupWaiting": "Waiting to be sent",
+  "@groupWaiting": {
+    "description": "A read mark made offline (FR-053)."
+  },
+  "groupLastUpdated": "Last updated {time}. It may be out of date.",
+  "@groupLastUpdated": {
+    "description": "Offline (FR-055).",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "groupShare": "Share",
+  "@groupShare": {
+    "description": "Shares the link."
+  },
+  "groupRefresh": "Refresh",
+  "@groupRefresh": {
+    "description": "Reads the khatma again."
+  },
+  "groupReport": "Report",
+  "@groupReport": {
+    "description": "Reports a name or the khatma (FR-061)."
+  },
+  "groupLeave": "Leave the khatma",
+  "@groupLeave": {
+    "description": "Leaves (FR-058)."
+  },
+  "groupLeaveConfirm": "Leave this khatma? Your name is removed, and the parts you have not read become free.",
+  "@groupLeaveConfirm": {
+    "description": "Confirmation."
+  },
+  "groupShareText": "{title}: a group khatma in Mathani. Take your part: {link}",
+  "@groupShareText": {
+    "description": "Share text (FR-045).",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "link": {
+        "type": "String"
+      }
+    }
+  },
+  "groupLinkWarning": "Anyone who has the link can see the names and take parts.",
+  "@groupLinkWarning": {
+    "description": "Before the first share (FR-045)."
+  },
+  "groupNameWarning": "Your name will be seen by everyone who has the link.",
+  "@groupNameWarning": {
+    "description": "Before the first take (FR-049)."
+  },
+  "groupYourName": "Your name",
+  "@groupYourName": {
+    "description": "Field."
+  },
+  "groupTitleField": "Title",
+  "@groupTitleField": {
+    "description": "Field."
+  },
+  "groupDivision": "Parts",
+  "@groupDivision": {
+    "description": "Heading of the division choice."
+  },
+  "groupThirty": "30 ajza'",
+  "@groupThirty": {
+    "description": "Division."
+  },
+  "groupSixty": "60 ahzab",
+  "@groupSixty": {
+    "description": "Division."
+  },
+  "groupFinishDate": "Finish date (optional)",
+  "@groupFinishDate": {
+    "description": "Field."
+  },
+  "groupNoDate": "No finish date",
+  "@groupNoDate": {
+    "description": "Clears the finish date."
+  },
+  "groupCreate": "Start",
+  "@groupCreate": {
+    "description": "Starts a group khatma."
+  },
+  "groupNeedsConnection": "A connection is needed.",
+  "@groupNeedsConnection": {
+    "description": "An action that needs the server, offline (FR-053)."
+  },
+  "groupRetry": "Retry",
+  "@groupRetry": {
+    "description": "Button."
+  },
+  "groupJustTaken": "Someone took this part just now.",
+  "@groupJustTaken": {
+    "description": "409 taken (FR-050)."
+  },
+  "groupNoLongerYours": "This part is no longer yours.",
+  "@groupNoLongerYours": {
+    "description": "A waiting mark refused."
+  },
+  "groupGone": "This khatma no longer exists.",
+  "@groupGone": {
+    "description": "Deleted, removed or expired."
+  },
+  "groupRemoveFromList": "Remove from the list",
+  "@groupRemoveFromList": {
+    "description": "Button."
+  },
+  "groupBlocked": "This device cannot start or join group khatmas. To ask why, write to {email}.",
+  "@groupBlocked": {
+    "description": "403 blocked.",
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "groupLimitOrganised": "You already organise as many group khatmas as allowed.",
+  "@groupLimitOrganised": {
+    "description": "429 organised."
+  },
+  "groupLimitStarted": "You have started as many group khatmas as allowed today.",
+  "@groupLimitStarted": {
+    "description": "429 started."
+  },
+  "groupLimitBusy": "Too many group khatmas were started today. Try again tomorrow.",
+  "@groupLimitBusy": {
+    "description": "429 busy."
+  },
+  "groupLimitReports": "You have sent as many reports as allowed today.",
+  "@groupLimitReports": {
+    "description": "429 reports."
+  },
+  "groupProblemEmpty": "Enter some text.",
+  "@groupProblemEmpty": {
+    "description": "Refused text."
+  },
+  "groupProblemLong": "It is too long.",
+  "@groupProblemLong": {
+    "description": "Refused text."
+  },
+  "groupProblemCharacters": "It has characters that are not allowed.",
+  "@groupProblemCharacters": {
+    "description": "Refused text."
+  },
+  "groupProblemLink": "Links and addresses are not allowed.",
+  "@groupProblemLink": {
+    "description": "Refused text."
+  },
+  "groupProblemWord": "It contains a word that is not allowed.",
+  "@groupProblemWord": {
+    "description": "Refused text."
+  },
+  "groupUpdateNeeded": "An update is needed for this khatma.",
+  "@groupUpdateNeeded": {
+    "description": "Terms or format newer than the app."
+  },
+  "groupError": "Something went wrong. Try again.",
+  "@groupError": {
+    "description": "Unexpected failure."
+  },
+  "groupTermsTitle": "Before you take part",
+  "@groupTermsTitle": {
+    "description": "Terms (FR-059)."
+  },
+  "groupTerms1": "Everyone who has the link sees the khatma's title, your name and the parts you hold.",
+  "@groupTerms1": {
+    "description": "Terms point 1."
+  },
+  "groupTerms2": "Offensive or abusive names and titles are not tolerated. They are removed, and the device that posted them can be blocked.",
+  "@groupTerms2": {
+    "description": "Terms point 2."
+  },
+  "groupTerms3": "Report a name or a khatma with Report on its screen.",
+  "@groupTerms3": {
+    "description": "Terms point 3."
+  },
+  "groupTerms4": "To reach Mathani, write to {email}.",
+  "@groupTerms4": {
+    "description": "Terms point 4.",
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "groupAgree": "I agree",
+  "@groupAgree": {
+    "description": "Accepts the terms."
+  },
+  "groupReportName": "Report a name",
+  "@groupReportName": {
+    "description": "Report choice."
+  },
+  "groupReportKhatma": "Report this khatma",
+  "@groupReportKhatma": {
+    "description": "Report choice."
+  },
+  "groupReportConfirm": "Report «{name}» to Mathani? It is hidden on this device.",
+  "@groupReportConfirm": {
+    "description": "Confirmation.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "groupReportKhatmaConfirm": "Report this khatma to Mathani? It leaves your list.",
+  "@groupReportKhatmaConfirm": {
+    "description": "Confirmation."
+  },
+  "groupReportSent": "Report sent.",
+  "@groupReportSent": {
+    "description": "After a report."
+  },
+  "groupHidden": "hidden",
+  "@groupHidden": {
+    "description": "A name the reader reported."
+  },
+  "groupFreeIt": "Free it",
+  "@groupFreeIt": {
+    "description": "Organiser: frees a taken part (FR-062)."
+  },
+  "groupMarkRead": "Mark as read",
+  "@groupMarkRead": {
+    "description": "Organiser (FR-071)."
+  },
+  "groupMarkUnread": "Mark as not read",
+  "@groupMarkUnread": {
+    "description": "Organiser (FR-071)."
+  },
+  "groupGiveTo": "Give to a name",
+  "@groupGiveTo": {
+    "description": "Organiser (FR-070)."
+  },
+  "groupRemoveParticipant": "Remove from this khatma",
+  "@groupRemoveParticipant": {
+    "description": "Organiser (FR-062)."
+  },
+  "groupRemoveConfirm": "Remove «{name}»? Their unread parts become free, and they cannot join again.",
+  "@groupRemoveConfirm": {
+    "description": "Confirmation.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "groupEdit": "Edit the title or the finish date",
+  "@groupEdit": {
+    "description": "Organiser (FR-072)."
+  },
+  "groupDelete": "Delete the khatma",
+  "@groupDelete": {
+    "description": "Organiser (FR-062)."
+  },
+  "groupDeleteConfirm": "Delete «{title}» for everyone?",
+  "@groupDeleteConfirm": {
+    "description": "Confirmation.",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "groupSave": "Save",
+  "@groupSave": {
+    "description": "Button."
+  },
+  "groupTakenBy": "taken by {name}",
+  "@groupTakenBy": {
+    "description": "Part state for screen readers.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "groupReadBy": "read by {name}",
+  "@groupReadBy": {
+    "description": "Part state for screen readers.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "groupPartSemantics": "{part}, {range}, {state}",
+  "@groupPartSemantics": {
+    "description": "A part row read as one sentence.",
+    "placeholders": {
+      "part": {
+        "type": "String"
+      },
+      "range": {
+        "type": "String"
+      },
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "groupCopied": "Link copied.",
+  "@groupCopied": {
+    "description": "No share sheet: the link was copied."
+  },
+  "contactTitle": "Contact",
+  "@contactTitle": {
+    "description": "About: the address to reach Mathani (FR-068)."
   }
 }

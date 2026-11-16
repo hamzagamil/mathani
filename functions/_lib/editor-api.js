@@ -2,6 +2,7 @@
 // Access token, then the owner's email or the editor list.
 import { verifyAccess } from './access.js';
 import { editorStore } from './editor-store.js';
+import { khatmaAdmin } from './khatma-admin.js';
 
 const statusOf = {
   notFound: 404, conflict: 409, invalid: 422, draftChanged: 409, nothingToPublish: 400,
@@ -46,6 +47,12 @@ export async function dispatch(request, env, { fetchCerts, now } = {}) {
   }
 
   const path = new URL(request.url).pathname.replace(/^\/api\/editor\/?/, '').split('/').filter(Boolean);
+  // Group khatma reports (specs/014): the owner only.
+  if (path[0] === 'khatma') {
+    if (!isOwner) return json(403, { error: 'ownerOnly' });
+    const result = await khatmaAdmin(method, path.slice(1).map(decodeURIComponent), body, env, now);
+    return json(result.status, result.body);
+  }
   const [resource, id, action] = path.map(decodeURIComponent);
   const route = `${method} ${resource ?? ''}${id ? ' :id' : ''}${action ? ` ${action}` : ''}`;
 

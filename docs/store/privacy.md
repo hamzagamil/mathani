@@ -138,3 +138,37 @@ no data collected, on-device storage only, recitation audio and the memorization
 with no identifiers from the hosts listed here, and the microphone used only during memorization,
 on the device, never recorded or sent. Updating the published page is an owner action before
 the 1.4 submission.
+
+### Khatma (specs/014)
+
+**Personal khatma (release A)**: nothing changes. The plan, the wirds, the place, the reminder
+and the record stay on the device; the feature makes no request (SC-012). The daily reminder is
+a local notification asked for only when the reader turns it on.
+
+**Group khatma (release B)**: the first feature that keeps something about readers on Mathani's
+server, and the first in which a reader sees text another reader typed. A reader who never
+starts or joins one is not affected.
+
+What the server keeps for each group khatma, and nothing else (FR-065, research R21): its title,
+division and finish date; the dates it was created and last changed; each part's state and the
+date it was read; the participants' names; and the SHA-256 of each device's random key. No
+account, email, phone number, location, device identifier or reading activity. Request logs
+are not kept by the functions. Beyond a khatma's life, two things are kept to act on abuse: a
+report's copy of the title and name (removed 30 days after the report is closed) and a blocked
+key's hash.
+
+How long: a group khatma is removed with every name in it 30 days after it is complete, or after
+90 days without a change. Leaving, removing a participant and deleting the khatma remove the
+names concerned at once.
+
+Answers to change before release B, for the product owner to confirm (FR-069, research R23):
+
+| Where | Change |
+| --- | --- |
+| Apple App Privacy | Name; Other User Content (the title); User ID (the key's hash). Purpose: App Functionality. Linked to the user: no account, so not linked to identity. Not used for tracking. |
+| Google Play Data safety | Name, other user-generated content, other IDs: collected, optional, for app functionality, encrypted in transit, not shared. Deletion: in the app (leave, delete) and on request at the contact address. |
+| Age-rating answers | The app lets users see text other users typed (names and a title), with reporting and blocking. |
+| Store listings | "No account, no ads, no data collected" becomes "No account, no ads. Nothing leaves your device unless you join a group khatma." (done in listing_en.md and listing_ar.md). |
+| Published policy | Add the paragraphs above, the contact address, and how to ask for removal. |
+| Review notes | A group khatma link that reviewers can open, and where to find Report and the terms (the menu on a group khatma's screen). |
+| Contact | `support@mthani.app` in About and the terms (`mathaniContact` in `lib/features/khatma/group/group_terms.dart`); change it there if the owner chooses another. Reports are emailed to the owner and reviewed within 24 hours (FR-063). |

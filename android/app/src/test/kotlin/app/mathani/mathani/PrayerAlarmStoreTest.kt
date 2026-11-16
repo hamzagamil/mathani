@@ -65,4 +65,27 @@ class PrayerAlarmStoreTest {
         val backend = Backend().apply { value = "00000001" + "0".repeat(24) }
         assertTrue(PrayerAlarmStore(backend).all().isEmpty())
     }
+
+    // The khatma reminders (specs/014): a second file, and the wird kind.
+    @Test fun remindersAndPrayersKeepSeparateLists() {
+        val prayers = PrayerAlarmStore(Backend())
+        val reminders = PrayerAlarmStore(Backend())
+        prayers.replace(1, listOf(alert(1), alert(2)))
+        reminders.replace(1, listOf(PrayerAlert(1, "wird", 100_000, "Today's wird", "Juz 3 · pages 42 to 62", "default")))
+        prayers.replace(2, listOf(alert(3)))
+        assertEquals(listOf(1), reminders.all().map { it.id })
+        reminders.clear()
+        assertEquals(listOf(3), prayers.all().map { it.id })
+    }
+
+    @Test fun theWirdKindIsAccepted() {
+        assertEquals("wird", PrayerAlert(5, "wird", 1, "Today's wird", "", "default").kind)
+        assertThrows(IllegalArgumentException::class.java) { PrayerAlert(5, "other", 1, "x", "", "default") }
+    }
+
+    @Test fun eachListHoldsSixtyFour() {
+        val store = PrayerAlarmStore(Backend())
+        store.replace(1, (1..64).map { alert(it) })
+        assertThrows(IllegalArgumentException::class.java) { store.replace(2, (1..65).map { alert(it) }) }
+    }
 }

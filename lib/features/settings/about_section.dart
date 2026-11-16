@@ -8,6 +8,7 @@ import '../../app/theme/app_theme.dart';
 import '../../app/theme/tokens.dart';
 import '../../app/version.dart';
 import '../../shared/mathani_icons.dart';
+import '../khatma/group/group_terms.dart' show mathaniContact;
 
 /// Registers the bundled font and icon licences, and those of the memorization runtime and model
 /// (specs/006, specs/007), so the licences page lists them.
@@ -61,6 +62,13 @@ class AboutSection extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(Space.s4, 0, Space.s4, Space.s2),
             child: Text(l10n.webDataKeptHere, style: caption),
           ),
+        // An address at which to reach Mathani (specs/014 FR-068).
+        ListTile(
+          title: Text(l10n.contactTitle),
+          subtitle: Text(_ltr(mathaniContact), style: caption.copyWith(color: colors.secondary)),
+          trailing: const Icon(MathaniIcons.externalLink),
+          onTap: () => launchUrl(Uri(scheme: 'mailto', path: mathaniContact)),
+        ),
         Padding(
           padding: const EdgeInsets.fromLTRB(Space.s4, Space.s2, Space.s4, 0),
           child: Text(l10n.sourcesTitle, style: TypeScale.titleSm.copyWith(color: colors.accentInk)),

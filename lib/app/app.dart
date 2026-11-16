@@ -2,10 +2,14 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import '../data/models.dart';
+import '../features/khatma/group/group_controller.dart';
+import '../features/khatma/group/group_link_host.dart';
+import '../features/khatma/khatma_controller.dart';
+import '../features/khatma/khatma_reminders.dart';
+import '../features/khatma/reminder_open_host.dart';
 import '../features/memorization/memorization_controller.dart';
 import '../features/onboarding/onboarding_controller.dart';
 import '../features/onboarding/onboarding_screen.dart';
@@ -16,6 +20,7 @@ import '../features/reader/reader_screen.dart';
 import '../features/prayer_times/prayer_alerts.dart';
 import '../features/prayer_times/prayer_notification_open_host.dart';
 import '../shared/reader_state.dart';
+import '../platform/app_links.dart';
 import 'l10n/app_localizations.dart';
 import 'theme/app_theme.dart';
 
@@ -32,6 +37,9 @@ class MathaniApp extends StatelessWidget {
     this.onboarding,
     this.memorization,
     this.prayer,
+    this.khatma,
+    this.reminders,
+    this.groups,
   });
 
   final ReaderController controller;
@@ -47,6 +55,15 @@ class MathaniApp extends StatelessWidget {
 
   /// Prayer times and their alerts (specs/009). Null in tests that do not need them.
   final PrayerAlerts? prayer;
+
+  /// The personal khatma (specs/014). Null in tests that do not need it: no Khatma button then.
+  final KhatmaController? khatma;
+
+  /// The khatma's daily reminder (specs/014). Null in tests that do not need it.
+  final KhatmaReminders? reminders;
+
+  /// Group khatmas (specs/014 release B). Null in tests that do not need them.
+  final GroupController? groups;
 
   static const supportedLocales = [Locale('ar'), Locale('en')];
 
@@ -91,13 +108,13 @@ class MathaniApp extends StatelessWidget {
           localeListResolutionCallback: (deviceLocales, _) =>
               resolveLocale(prefs.language, deviceLocales),
           // Around the Navigator, so sheets, dialogs and snack bars stay inside the column.
-          builder: kIsWeb
-              ? (context, child) => PhoneColumn(child: child!)
-              : (context, child) {
-                  syncOrientation(MediaQuery.sizeOf(context));
-                  return child!;
-                },
-          home: const PrayerNotificationOpenHost(child: _Home()),
+          builder: kIsWeb ? (context, child) => PhoneColumn(child: child!) : null,
+          home: PrayerNotificationOpenHost(
+            child: ReminderOpenHost(
+              // Group khatma links (specs/014 FR-046).
+              child: this.groups == null ? const _Home() : GroupLinkHost(source: AppLinks.instance, child: const _Home()),
+            ),
+          ),
         );
       },
     );
@@ -111,9 +128,18 @@ class MathaniApp extends StatelessWidget {
     final withPrayer = prayer == null
         ? withMemorization
         : PrayerScope(alerts: prayer, child: withMemorization);
+    final khatma = this.khatma;
+    final groups = this.groups;
+    final withGroups = groups == null ? withPrayer : GroupScope(controller: groups, child: withPrayer);
+    final reminders = this.reminders;
+    final withReminders = reminders == null
+        ? withGroups
+        : KhatmaRemindersScope(reminders: reminders, child: withGroups);
+    final withKhatma =
+        khatma == null ? withReminders : KhatmaScope(controller: khatma, child: withReminders);
     final scoped = onboarding == null
-        ? withPrayer
-        : OnboardingScope(controller: onboarding, child: withPrayer);
+        ? withKhatma
+        : OnboardingScope(controller: onboarding, child: withKhatma);
     return ReaderScope(
       controller: controller,
       child: recitation == null
@@ -164,25 +190,6 @@ class PhoneColumn extends StatelessWidget {
     );
   }
 }
-
-bool? _portraitOnly;
-
-/// On Android, portrait on phones and folded foldables, and any orientation on large screens
-/// (shortest side 600 dp or more), so an open foldable can be held either way (specs/012
-/// research R6). The manifest keeps phones in portrait from launch. iOS keeps its Info.plist
-/// orientations, which the iPhone Duo's inner screen ignores. Calls the platform only on a change.
-void syncOrientation(Size screen) {
-  if (kIsWeb || defaultTargetPlatform != TargetPlatform.android || screen.isEmpty) return;
-  final portrait = screen.shortestSide < 600;
-  if (portrait == _portraitOnly) return;
-  _portraitOnly = portrait;
-  SystemChrome.setPreferredOrientations(
-      portrait ? const [DeviceOrientation.portraitUp] : const []);
-}
-
-/// Forgets the last orientation sent, so a test sees the next call.
-@visibleForTesting
-void resetOrientationSync() => _portraitOnly = null;
 
 /// The onboarding while it is on a setup step or gesture stop, otherwise the reader (which lays
 /// the button hints over itself) (specs/005 contracts/onboarding-flow.md › App shell).

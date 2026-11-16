@@ -13,7 +13,7 @@
 // Static files on Pages carry no bandwidth charge, unlike Netlify's shared credit pool (R5).
 import { createHash } from 'node:crypto';
 import { execSync } from 'node:child_process';
-import { existsSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { gzipSync } from 'node:zlib';
@@ -52,6 +52,25 @@ function prepare() {
     }
   }
   writeFileSync(join(web, '_routes.json'), readFileSync(join(repo, 'web', '_routes.json')));
+
+  // Group khatmas (specs/014): the API function, and the two files that let the installed apps
+  // open /k/ links. Copied here, since the web build may leave out a folder whose name starts
+  // with a dot. An assetlinks.json still holding placeholder fingerprints is left out, so App
+  // Links stay unverified (links open the browser) until the owner fills them in.
+  if (!existsSync(join(repo, 'functions', 'api', 'khatma', '[[path]].js'))) fail('missing the group khatma Function');
+  mkdirSync(join(web, '.well-known'), { recursive: true });
+  const aasa = join(repo, 'web', '.well-known', 'apple-app-site-association');
+  if (!existsSync(aasa)) fail('missing web/.well-known/apple-app-site-association');
+  JSON.parse(readFileSync(aasa, 'utf8'));
+  writeFileSync(join(web, '.well-known', 'apple-app-site-association'), readFileSync(aasa));
+  const assetLinks = readFileSync(join(repo, 'web', '.well-known', 'assetlinks.json'), 'utf8');
+  JSON.parse(assetLinks);
+  if (assetLinks.includes('PLACEHOLDER')) {
+    rmSync(join(web, '.well-known', 'assetlinks.json'), { force: true });
+    console.warn('warning: assetlinks.json has placeholder fingerprints; left out of this deploy');
+  } else {
+    writeFileSync(join(web, '.well-known', 'assetlinks.json'), assetLinks);
+  }
 
   // No release with a bad Mutashabihat reference (specs/010 FR-016).
   try {
@@ -139,10 +158,18 @@ function prepare() {
   if (existsSync(swPath)) {
     const skip = new Set(['sw.js', '_headers', 'version.json', 'asset-hashes.json']);
     const onUse = (p) => p.startsWith('canvaskit/') || p.startsWith('main.dart.') || p.endsWith('.symbols');
-    const shell = files.map(rel).filter((p) => !runtime(p) && !skip.has(p) && !onUse(p));
+    // Never the editor (behind Cloudflare Access: a visitor without an editor session gets a
+    // redirect to the sign-in page, and one failed file fails the worker's whole install, which
+    // leaves the browser on its old build) or the link-association files the apps read.
+    const notShell = (p) => p.startsWith('editor/') || p.startsWith('.well-known/');
+    const shell = files.map(rel).filter((p) => !runtime(p) && !skip.has(p) && !onUse(p) && !notShell(p));
+    // The build id covers the content of every file the worker caches, the app build included: a
+    // fix deployed under the same version must still reach browsers that cached the old build.
+    const cached = files.map(rel).filter((p) => !runtime(p) && !skip.has(p) && !notShell(p)).sort()
+      .map((p) => `${p}:${sha('sha256', readFileSync(join(web, p)))}`);
     const sw = readFileSync(swPath, 'utf8')
       .replaceAll('__VERSION__', pubspec)
-      .replaceAll('__BUILD__', sha('sha1', JSON.stringify(hashes) + shell.join()).slice(0, 12))
+      .replaceAll('__BUILD__', sha('sha1', JSON.stringify(hashes) + cached.join()).slice(0, 12))
       // The page as `./` only: Netlify redirects /index.html to /, and the two entries would
       // collide ("Entry already exists"), failing the worker's install.
       .replace('self.__PRECACHE', JSON.stringify(['./', ...shell.filter((p) => p !== 'index.html' && !p.endsWith('.md') && p !== '.last_build_id')]));

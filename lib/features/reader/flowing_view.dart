@@ -10,6 +10,7 @@ import '../../data/quran_repository.dart';
 import '../../shared/numerals.dart';
 import '../../shared/quran_text.dart';
 import '../../shared/reader_state.dart';
+import '../khatma/khatma_controller.dart';
 import '../memorization/memorization_controller.dart';
 import '../onboarding/onboarding_controller.dart';
 import '../recitation/recitation_controller.dart';
@@ -369,6 +370,8 @@ class _FlowingPageState extends State<_FlowingPage> {
     final similar = memorization != null && memorization.active ? null : reader.similar;
     final l10n = AppLocalizations.of(context);
     final locale = Localizations.localeOf(context);
+    // Ayat where a reading ends (specs/014); empty while memorizing.
+    final endIds = KhatmaScope.maybeOf(context)?.endAyahIds ?? const <int>{};
     _disposeRecognizers();
 
     // Split into runs at surah starts; each run is one paragraph after its surah header.
@@ -406,19 +409,36 @@ class _FlowingPageState extends State<_FlowingPage> {
         if (inSession) {
           spans.add(
               _memorizationSpan(context, memorization, ayah.ref, words, quran.font, background));
-        } else if ((similar?.isLinked(ayah.ref) ?? false) && words.last.isAyahEnd) {
+        } else if (words.last.isAyahEnd &&
+            ((similar?.isLinked(ayah.ref) ?? false) || endIds.contains(ayah.id))) {
           // A linked ayah (specs/010): in the mutashabih colour, and its end marker tells screen
-          // readers it has similar ayat. Same text as below, so text positions don't move.
-          final end = '${ayahEndGlyphs(words.last.text, quran.font)} ';
+          // readers it has similar ayat. Where a wird or a group part ends (specs/014 FR-010):
+          // the end marker in the khatma colour, underlined. Same text as below, so text
+          // positions don't move.
+          final linkedAyah = similar?.isLinked(ayah.ref) ?? false;
+          final ends = endIds.contains(ayah.id);
+          final glyph = ayahEndGlyphs(words.last.text, quran.font);
+          final end = '$glyph ';
           spans.add(TextSpan(
-            style: TextStyle(color: colors.similar, backgroundColor: background),
+            style: TextStyle(color: linkedAyah ? colors.similar : null, backgroundColor: background),
             children: [
               TextSpan(text: s.substring(0, s.length - end.length), recognizer: recognizer),
               TextSpan(
-                text: end,
+                text: glyph,
                 recognizer: recognizer,
-                semanticsLabel: l10n.similarAyahSemantics(formatNumber(ayah.ayah, locale)),
+                style: ends
+                    ? TextStyle(
+                        color: colors.khatmaMark,
+                        decoration: TextDecoration.underline,
+                        decorationColor: colors.khatmaMark,
+                      )
+                    : null,
+                semanticsLabel: [
+                  if (linkedAyah) l10n.similarAyahSemantics(formatNumber(ayah.ayah, locale)),
+                  if (ends) l10n.khatmaEndAt(formatNumber(ayah.ayah, locale)),
+                ].join('. '),
               ),
+              TextSpan(text: ' ', recognizer: recognizer),
             ],
           ));
         } else {

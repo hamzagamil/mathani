@@ -10,6 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mathani/app/theme/app_theme.dart';
 import 'package:mathani/data/models.dart';
 import 'package:mathani/features/reader/mushaf_page_renderer.dart';
+import 'package:mathani/features/reader/page_geometry.dart';
 import 'package:mathani/shared/reader_state.dart';
 
 import '../support/harness.dart';
@@ -115,5 +116,30 @@ void main() {
     ));
     await expectLater(
         find.byKey(const ValueKey('spread')), matchesGoldenFile('goldens/spread_49_890.png'));
+  }, tags: ['golden']);
+
+  // Page 50 on a phone turned sideways: the same lines at the screen's full width (specs/013).
+  testWidgets('golden page 50 sideways at 692 dp', (tester) async {
+    final p = (await tester.runAsync(() => reader.quran.page(50)))!;
+    final size = Size(692, PageGeometry.scrollPageHeight(692));
+    tester.view.physicalSize = size;
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.rtl,
+      child: ColoredBox(
+        color: colors.surface,
+        child: MushafPageRenderer(
+          page: p,
+          surahNames: {for (final s in reader.quran.surahList) s.number: s.nameAr},
+          targetEm: reader.quran.justifyTargetEm,
+          font: reader.quran.font,
+          palette: palette,
+          details: MushafPageDetails.of(reader.quran, p.number),
+        ),
+      ),
+    ));
+    await expectLater(find.byType(MushafPageRenderer),
+        matchesGoldenFile('goldens/page_50_692_sideways.png'));
   }, tags: ['golden']);
 }

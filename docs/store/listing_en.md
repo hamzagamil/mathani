@@ -36,7 +36,7 @@ you.
 - Reading, search and bookmarks work fully offline from the first launch; recitations stream
   over the internet unless downloaded.
 - Arabic and English interface.
-- No account, no ads, no data collected.
+- No account, no ads. Nothing leaves your device unless you join a group khatma.
 
 Every ayah is verified against the Tanzil Project text (tanzil.net).
 

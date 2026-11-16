@@ -25,20 +25,39 @@ class MainActivity : AudioServiceActivity() {
         DeviceChannel.register(this, flutterEngine)
         PrayerNotificationsPlugin.register(flutterEngine)
         PrayerNotificationsPlugin.noteOpenIntent(intent)
+        DeviceChannel.noteLink(intent, launch = true)
     }
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         PrayerNotificationsPlugin.noteOpenIntent(intent)
+        DeviceChannel.noteLink(intent, launch = false)
     }
 }
 
 /// Network type and free storage for recitation downloads (specs/004, research R8); device
 /// support, the Settings link and the mistake tone for memorization (specs/006, R12, R15).
 object DeviceChannel {
+    private var channel: MethodChannel? = null
+    private var pendingLink: String? = null
+
+    /** A group khatma link the app was opened with, or that arrived while it runs (specs/014
+     * research R16): handed to Dart once by `takeLink`, or sent as a `link` event. */
+    fun noteLink(intent: Intent?, launch: Boolean) {
+        val data = intent?.data ?: return
+        if (intent.action != Intent.ACTION_VIEW || data.host != "get.mthani.app" ||
+            data.path?.startsWith("/k/") != true) return
+        val link = data.toString()
+        val events = channel
+        // At launch Dart is not listening yet: it asks with takeLink after the first frame.
+        if (launch || events == null) pendingLink = link else events.invokeMethod("link", link)
+    }
+
     fun register(context: Context, engine: FlutterEngine) {
-        MethodChannel(engine.dartExecutor.binaryMessenger, "app.mathani/device")
+        channel = MethodChannel(engine.dartExecutor.binaryMessenger, "app.mathani/device")
+        channel!!
             .setMethodCallHandler { call, result ->
                 when (call.method) {
+                    "takeLink" -> { result.success(pendingLink); pendingLink = null }
                     "networkState" -> result.success(networkState(context))
                     "freeBytes" -> result.success(StatFs(context.filesDir.path).availableBytes)
                     "excludeFromBackup" -> result.success(null) // iOS only

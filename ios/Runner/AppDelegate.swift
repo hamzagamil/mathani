@@ -35,6 +35,18 @@ final class DeviceChannel {
   private var path: NWPath?
   private var channel: FlutterMethodChannel?
   private var mistakeSound: SystemSoundID = 0
+  private var pendingLink: String?
+
+  /// A group khatma link (specs/014 research R16): kept for `takeLink` at launch, when Dart is
+  /// not listening yet, or sent as a `link` event while the app runs.
+  func noteLink(_ url: URL?, launch: Bool) {
+    guard let url, url.host == "get.mthani.app", url.path.hasPrefix("/k/") else { return }
+    if launch || channel == nil {
+      pendingLink = url.absoluteString
+    } else {
+      channel?.invokeMethod("link", arguments: url.absoluteString)
+    }
+  }
 
   func start() {
     monitor.pathUpdateHandler = { [weak self] path in
@@ -69,6 +81,9 @@ final class DeviceChannel {
       case "playMistakeTone":
         self.playMistakeTone()
         result(nil)
+      case "takeLink":
+        result(self.pendingLink)
+        self.pendingLink = nil
       default:
         result(FlutterMethodNotImplemented)
       }

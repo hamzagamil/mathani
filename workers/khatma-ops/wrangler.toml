@@ -1,0 +1,26 @@
+# mthani-khatma-ops (specs/014 contracts/group-api.md › The Worker): emails the owner each new
+# report, and removes group khatmas past their lifetime. No route: it has no public address.
+name = "mthani-khatma-ops"
+main = "src/index.js"
+compatibility_date = "2026-10-29"
+workers_dev = false
+
+[triggers]
+crons = ["* * * * *", "0 3 * * *"]
+
+[vars]
+OWNER_EMAIL = "hamzagamil@gmail.com"
+REPORT_FROM = "khatma@mthani.app"
+REPORTS_PAGE = "https://get.mthani.app/editor/khatma.html"
+
+[[d1_databases]]
+binding = "KHATMA_DB"
+database_name = "mthani-khatma"
+database_id = "66f17814-8791-4a0b-956a-a44aaa74a3a6"
+
+# Email to the owner's verified address through Cloudflare Email Routing (the owner's address is
+# already a verified destination). If sending cannot be enabled, remove this block and set
+# REPORT_WEBHOOK instead (research R14).
+[[send_email]]
+name = "EMAIL"
+destination_address = "hamzagamil@gmail.com"

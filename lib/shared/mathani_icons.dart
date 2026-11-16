@@ -47,6 +47,27 @@ abstract final class MathaniIcons {
   // Mutashabihat (specs/010).
   static const similar = IconData(0xe359, fontFamily: _family); // git-compare
 
+  // Khatma (specs/014).
+  static const khatma = IconData(0xe381, fontFamily: _family); // book-open-check
+  static const wirdEnd = IconData(0xe0d1, fontFamily: _family); // flag
+  static const wirdList = IconData(0xe1d1, fontFamily: _family); // list-ordered
+  static const changePlan = IconData(0xe29a, fontFamily: _family); // sliders-horizontal
+  static const pauseKhatma = IconData(0xe07f, fontFamily: _family); // circle-pause
+  static const resumeKhatma = IconData(0xe080, fontFamily: _family); // circle-play
+  static const reminder = IconData(0xe059, fontFamily: _family); // bell
+  static const calendar = IconData(0xe063, fontFamily: _family);
+  static const circle = IconData(0xe076, fontFamily: _family);
+
+  // Group khatma (specs/014, release B).
+  static const group = IconData(0xe1a4, fontFamily: _family); // users
+  static const link = IconData(0xe102, fontFamily: _family);
+  static const refresh = IconData(0xe145, fontFamily: _family); // refresh-cw
+  static const leave = IconData(0xe10e, fontFamily: _family); // log-out
+  static const removePerson = IconData(0xe1a3, fontFamily: _family); // user-x
+  static const assign = IconData(0xe1a2, fontFamily: _family); // user-plus
+  static const edit = IconData(0xe1f9, fontFamily: _family); // pencil
+  static const report = IconData(0xe238, fontFamily: _family); // flag-triangle-right
+
   // Media controls (specs/004). They keep their left-to-right form in Arabic, as media players
   // do everywhere: play points right, and previous/next follow the timeline, not the text.
   static const play = IconData(0xe13c, fontFamily: _family);

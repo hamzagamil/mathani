@@ -17,3 +17,28 @@ ACCESS_AUD = "03b7536fcf315ea507c5f74cdae03d886d686f3074a132e7b31f64b26932909f"
 binding = "DB"
 database_name = "mthani-mutashabihat"
 database_id = "d52eccee-04be-4981-ab9d-6c7a9fe91d9f"
+
+# Group khatmas (specs/014 data-model.md › 4): reader data, apart from the published content.
+[[d1_databases]]
+binding = "KHATMA_DB"
+database_name = "mthani-khatma"
+database_id = "66f17814-8791-4a0b-956a-a44aaa74a3a6"
+
+# Preview deployments use their own copy, so tests never touch readers' khatmas.
+[env.preview]
+[env.preview.vars]
+GEONAMES_USERNAME = "mthani"
+PRAYER_ALLOWED_ORIGINS = "https://get.mthani.app,https://read.mthani.app"
+OWNER_EMAIL = "hamzagamil@gmail.com"
+ACCESS_TEAM_DOMAIN = "mthani.cloudflareaccess.com"
+ACCESS_AUD = "03b7536fcf315ea507c5f74cdae03d886d686f3074a132e7b31f64b26932909f"
+
+[[env.preview.d1_databases]]
+binding = "DB"
+database_name = "mthani-mutashabihat"
+database_id = "d52eccee-04be-4981-ab9d-6c7a9fe91d9f"
+
+[[env.preview.d1_databases]]
+binding = "KHATMA_DB"
+database_name = "mthani-khatma-preview"
+database_id = "b4030786-7453-4876-a656-802e3e3371bb"

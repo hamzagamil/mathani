@@ -1,5 +1,11 @@
 {
   "version": 1,
-  "include": ["/api/prayer-*", "/api/mutashabihat", "/api/editor/*"],
+  "include": [
+    "/api/prayer-*",
+    "/api/mutashabihat",
+    "/api/editor/*",
+    "/api/khatma",
+    "/api/khatma/*"
+  ],
   "exclude": []
 }
