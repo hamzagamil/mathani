@@ -8,6 +8,7 @@ import '../../app/l10n/app_localizations.dart';
 import '../../platform/prayer_location.dart';
 import '../../platform/prayer_notifications.dart';
 import '../../platform/prayer_notifications_page.dart';
+import '../../shared/numerals.dart';
 import 'athan_catalogue.dart';
 import 'athan_player.dart';
 import 'prayer_calculator.dart';
@@ -58,7 +59,8 @@ double distanceKm(double lat1, double lon1, double lat2, double lon2) {
 }
 
 /// The next [max] alerts for the current place, starting after [now] (data model → Alert).
-/// Sunrise never has an alert; unavailable times are skipped (FR-014).
+/// Sunrise never has an alert; unavailable times are skipped (FR-014). On Fridays the Dhuhr
+/// alert is named Jumu'ah, and the Jumu'ah and Duha reminders join Qiyam (specs/015).
 List<Alert> buildAlerts({
   required PrayerState state,
   required DateTime now,
@@ -102,7 +104,9 @@ List<Alert> buildAlerts({
           id: alertId(place.id, date, e.kind),
           kind: e.kind,
           atUtc: e.atUtc!,
-          title: l10n.prayerAlertTitle(prayerName(l10n, e.kind)),
+          title: l10n.prayerAlertTitle(
+            prayerName(l10n, e.kind, friday: schedule.isFriday),
+          ),
           // Words from the athan; the phone already shows the time.
           body: e.kind == PrayerKind.fajr
               ? l10n.prayerAlertBodyFajr
@@ -114,23 +118,73 @@ List<Alert> buildAlerts({
         ),
       );
     }
-    final qiyam = schedule.qiyamUtc;
-    if (settings.qiyam && qiyam != null && qiyam.isAfter(now)) {
+    void reminder(PrayerKind kind, DateTime? at, String title, String body) {
+      if (at == null || !at.isAfter(now)) return;
       alerts.add(
         Alert(
-          id: alertId(place.id, date, PrayerKind.qiyam),
-          kind: PrayerKind.qiyam,
-          atUtc: qiyam,
-          title: l10n.prayerQiyam,
-          body: l10n.prayerQiyamNotification,
+          id: alertId(place.id, date, kind),
+          kind: kind,
+          atUtc: at,
+          title: title,
+          body: body,
           sound: toneSound,
           generation: state.generation,
         ),
       );
     }
+
+    if (settings.qiyam) {
+      reminder(
+        PrayerKind.qiyam,
+        schedule.qiyamUtc,
+        l10n.prayerQiyam,
+        l10n.prayerQiyamNotification,
+      );
+    }
+    if (settings.jumuahOn && schedule.isFriday) {
+      reminder(
+        PrayerKind.jumuah,
+        schedule.event(PrayerKind.dhuhr).atUtc?.subtract(jumuahReminderLead),
+        l10n.prayerJumuahReminderTitle(
+          formatNumber(jumuahReminderLead.inMinutes, Locale(l10n.localeName)),
+        ),
+        l10n.prayerJumuahReminderBody,
+      );
+    }
+    if (settings.duha) {
+      reminder(
+        PrayerKind.duha,
+        schedule.duhaUtc,
+        l10n.prayerDuhaTitle,
+        l10n.prayerDuhaBody,
+      );
+    }
   }
-  alerts.sort((a, b) => a.atUtc.compareTo(b.atUtc));
-  return alerts.take(max).toList();
+  return nearestAlerts(alerts, max);
+}
+
+/// The nearest [max] alerts in time order. At the far end of a full list, prayer alerts come
+/// before reminders: a reminder in the last day of the window gives way to a prayer alert of
+/// that day that was cut. Nearer alerts are never dropped (specs/015 R10).
+List<Alert> nearestAlerts(List<Alert> alerts, int max) {
+  final sorted = [...alerts]..sort((a, b) => a.atUtc.compareTo(b.atUtc));
+  if (sorted.length <= max || max == 0) return sorted.take(max).toList();
+  final kept = sorted.take(max).toList();
+  final edge = kept.last.atUtc.subtract(const Duration(days: 1));
+  final cutPrayers = [
+    for (final a in sorted.skip(max))
+      if (!reminderKinds.contains(a.kind) &&
+          a.atUtc.isBefore(kept.last.atUtc.add(const Duration(days: 1))))
+        a,
+  ];
+  for (final prayer in cutPrayers) {
+    final i = kept.lastIndexWhere(
+      (a) => reminderKinds.contains(a.kind) && !a.atUtc.isBefore(edge),
+    );
+    if (i < 0) break;
+    kept[i] = prayer;
+  }
+  return kept..sort((a, b) => a.atUtc.compareTo(b.atUtc));
 }
 
 /// App-scoped, created at launch but idle until after the first frame (FR-031). It owns the

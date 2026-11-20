@@ -276,6 +276,7 @@ class ReaderPreferences {
     this.similarIntroSeen = false,
     this.mistakeSignal = MistakeSignal.vibrate,
     this.twoPages = true,
+    this.announcements = true,
   });
 
   static const minFlowFontSize = 18;
@@ -306,6 +307,9 @@ class ReaderPreferences {
   /// Two facing pages in the Mushaf layout when the screen has room for them (specs/012 FR-017).
   final bool twoPages;
 
+  /// Announcements from the Firebase console, on phones (specs/015 FR-014). On by default.
+  final bool announcements;
+
   ReaderPreferences copyWith({
     ReadingLayout? layout,
     ThemePref? theme,
@@ -318,6 +322,7 @@ class ReaderPreferences {
     bool? similarIntroSeen,
     MistakeSignal? mistakeSignal,
     bool? twoPages,
+    bool? announcements,
   }) =>
       ReaderPreferences(
         layout: layout ?? this.layout,
@@ -331,5 +336,6 @@ class ReaderPreferences {
         similarIntroSeen: similarIntroSeen ?? this.similarIntroSeen,
         mistakeSignal: mistakeSignal ?? this.mistakeSignal,
         twoPages: twoPages ?? this.twoPages,
+        announcements: announcements ?? this.announcements,
       );
 }

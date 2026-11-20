@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:mathani/features/prayer_times/athan_catalogue.dart';
 import 'package:mathani/features/prayer_times/prayer_alerts.dart';
+import 'package:mathani/features/prayer_times/prayer_calculator.dart';
 import 'package:mathani/features/prayer_times/prayer_models.dart';
 import 'package:mathani/features/prayer_times/prayer_services.dart';
 
@@ -136,6 +137,191 @@ void main() {
         isEmpty,
       );
     });
+  });
+
+  group("Jumu'ah and Duha (specs/015)", () {
+    // 2026-03-20 is a Friday; `now` is Sunday 2026-03-15.
+    final friday = DateTime.utc(2026, 3, 20);
+    final cairo = place(cairoResult());
+
+    PrayerState with_(AlertSettings alerts, {Place? where}) {
+      final p = where ?? cairo;
+      return PrayerState(
+        places: [p],
+        current: p.id,
+        alerts: alerts,
+        generation: 1,
+      );
+    }
+
+    bool onFriday(Alert a) =>
+        a.atUtc.isAfter(friday.subtract(const Duration(hours: 3))) &&
+        a.atUtc.isBefore(friday.add(const Duration(hours: 21)));
+
+    test(
+      "Friday Dhuhr is named Jumu'ah, with the same id, time and body (FR-001)",
+      () {
+        final alerts = build(
+          with_(AlertSettings(prayers: {PrayerKind.dhuhr}, jumuah: false)),
+        );
+        final dhuhrs = alerts.where((a) => a.kind == PrayerKind.dhuhr).toList();
+        final fri = dhuhrs.singleWhere(onFriday);
+        expect(fri.title, "Time for Jumu'ah prayer");
+        expect(fri.body, 'Come to prayer, come to success.');
+        final fridayDhuhr = calculator
+            .schedule(cairo, friday)
+            .event(PrayerKind.dhuhr)
+            .atUtc;
+        expect(fri.atUtc, fridayDhuhr);
+        // Cairo's Dhuhr is near 10:00 UTC, so the UTC date is the place's date.
+        for (final a in dhuhrs) {
+          final isFriday = a.atUtc.weekday == DateTime.friday;
+          expect(
+            a.title,
+            isFriday ? "Time for Jumu'ah prayer" : 'Time for Dhuhr prayer',
+          );
+        }
+      },
+    );
+
+    test('the reminder is 20 minutes before Friday Dhuhr, only on Fridays (FR-004)', () {
+      final alerts = build(with_(AlertSettings(prayers: {PrayerKind.dhuhr})));
+      final reminders = alerts
+          .where((a) => a.kind == PrayerKind.jumuah)
+          .toList();
+      expect(reminders, isNotEmpty);
+      for (final r in reminders) {
+        final day = calculator.schedule(
+          cairo,
+          DateTime.utc(r.atUtc.year, r.atUtc.month, r.atUtc.day),
+        );
+        expect(day.isFriday, isTrue);
+        expect(
+          r.atUtc,
+          day
+              .event(PrayerKind.dhuhr)
+              .atUtc!
+              .subtract(const Duration(minutes: 20)),
+        );
+        expect(r.title, "Jumu'ah prayer in 20 minutes");
+        expect(r.sound, toneSound);
+        expect(r.full, isFalse);
+      }
+    });
+
+    test('the reminder follows an adjusted Dhuhr', () {
+      final adjusted = cairo.copyWith(
+        calculation: cairo.calculation.copyWith(offsets: {PrayerKind.dhuhr: 5}),
+      );
+      final r = build(
+        with_(AlertSettings(prayers: {PrayerKind.dhuhr}), where: adjusted),
+      ).firstWhere((a) => a.kind == PrayerKind.jumuah);
+      final dhuhr = calculator
+          .schedule(adjusted, friday)
+          .event(PrayerKind.dhuhr)
+          .atUtc!;
+      expect(r.atUtc, dhuhr.subtract(const Duration(minutes: 20)));
+    });
+
+    test(
+      'never changed: follows the Dhuhr alert; changed: independent (FR-005)',
+      () {
+        expect(AlertSettings(prayers: {PrayerKind.dhuhr}).jumuahOn, isTrue);
+        expect(AlertSettings(prayers: {PrayerKind.fajr}).jumuahOn, isFalse);
+        expect(
+          AlertSettings(prayers: {PrayerKind.dhuhr}, jumuah: false).jumuahOn,
+          isFalse,
+        );
+        expect(AlertSettings(jumuah: true).jumuahOn, isTrue);
+        expect(AlertSettings(jumuah: true).any, isTrue);
+        final off = build(
+          with_(AlertSettings(prayers: {PrayerKind.dhuhr}, jumuah: false)),
+        );
+        expect(off.any((a) => a.kind == PrayerKind.jumuah), isFalse);
+        final only = build(with_(AlertSettings(jumuah: true)));
+        expect(only.map((a) => a.kind).toSet(), {PrayerKind.jumuah});
+      },
+    );
+
+    test('settings JSON: old saves follow Dhuhr, Duha is off (FR-022)', () {
+      final old = AlertSettings.fromJson(
+        jsonDecode('{"prayers":["dhuhr"],"qiyam":false}')
+            as Map<String, dynamic>,
+      );
+      expect(old.jumuah, isNull);
+      expect(old.jumuahOn, isTrue);
+      expect(old.duha, isFalse);
+      expect(old.toJson().containsKey('jumuah'), isFalse);
+      final chosen = AlertSettings(jumuah: false, duha: true);
+      final back = AlertSettings.fromJson(
+        jsonDecode(jsonEncode(chosen.toJson())) as Map<String, dynamic>,
+      );
+      expect(back.jumuah, isFalse);
+      expect(back.duha, isTrue);
+    });
+
+    test('Duha: one tone reminder a day, halfway between Sunrise and Dhuhr (FR-008)', () {
+      final alerts = build(with_(AlertSettings(duha: true)));
+      expect(alerts.map((a) => a.kind).toSet(), {PrayerKind.duha});
+      final first = alerts.first;
+      final day = calculator.schedule(
+        cairo,
+        DateTime.utc(first.atUtc.year, first.atUtc.month, first.atUtc.day),
+      );
+      final sunrise = day.event(PrayerKind.sunrise).atUtc!,
+          dhuhr = day.event(PrayerKind.dhuhr).atUtc!;
+      final mid = sunrise.add(dhuhr.difference(sunrise) ~/ 2);
+      expect(
+        first.atUtc.difference(mid).inSeconds.abs(),
+        lessThanOrEqualTo(30),
+      );
+      expect(first.atUtc.second, 0);
+      expect(first.title, 'Duha prayer');
+      expect(first.sound, toneSound);
+    });
+
+    test('a full list keeps nearer reminders and gives its last day to prayers (R10)', () {
+      final alerts = build(
+        with_(AlertSettings(prayers: dailyPrayers, qiyam: true, duha: true)),
+      );
+      expect(alerts, hasLength(52));
+      // Today's reminders are kept even though prayer alerts were cut at the far end.
+      expect(alerts.take(8).any((a) => reminderKinds.contains(a.kind)), isTrue);
+      final lastDay = alerts.last.atUtc.subtract(const Duration(days: 1));
+      final cut = build(with_(AlertSettings(prayers: dailyPrayers)));
+      final prayerTimes = alerts
+          .where((a) => !reminderKinds.contains(a.kind))
+          .map((a) => a.atUtc)
+          .toSet();
+      // No prayer alert of the last day is missing while a reminder of that day is kept.
+      final keptLateReminders = alerts.where(
+        (a) => reminderKinds.contains(a.kind) && !a.atUtc.isBefore(lastDay),
+      );
+      final missingLatePrayers = cut.where(
+        (a) =>
+            !a.atUtc.isBefore(lastDay) &&
+            !a.atUtc.isAfter(alerts.last.atUtc) &&
+            !prayerTimes.contains(a.atUtc),
+      );
+      expect(
+        keptLateReminders.isNotEmpty && missingLatePrayers.isNotEmpty,
+        isFalse,
+      );
+      for (var i = 1; i < alerts.length; i++) {
+        expect(alerts[i].atUtc.isBefore(alerts[i - 1].atUtc), isFalse);
+      }
+    });
+  });
+
+  test('calculator: Duha is null when Sunrise or Dhuhr is missing', () {
+    expect(PrayerCalculator.duhaTime(null, DateTime.utc(2026)), isNull);
+    expect(
+      PrayerCalculator.duhaTime(
+        DateTime.utc(2026, 1, 1, 6, 10),
+        DateTime.utc(2026, 1, 1, 11, 50),
+      ),
+      DateTime.utc(2026, 1, 1, 9),
+    );
   });
 
   group('PrayerAlerts', () {

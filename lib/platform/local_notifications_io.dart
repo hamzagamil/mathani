@@ -6,12 +6,14 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
-/// A tap on a notification: Android's `kind` (`fajr` … `qiyam`, or `wird`), or iOS's payload.
+/// A tap on a notification: Android's `kind` (`fajr` … `duha`, `wird`, or `announcement` with
+/// its `link`, specs/015), or iOS's payload.
 class NotificationTap {
-  const NotificationTap({this.kind, this.alertId, this.payload});
+  const NotificationTap({this.kind, this.alertId, this.payload, this.link});
   final String? kind;
   final int? alertId;
   final String? payload;
+  final String? link;
 }
 
 /// The Android channel shared by prayer alerts and reminders (contracts › Native contract).
@@ -29,7 +31,8 @@ abstract final class AndroidAlertChannel {
       final args = call.arguments is Map ? call.arguments as Map : const {};
       switch (call.method) {
         case 'opened':
-          _taps.add(NotificationTap(kind: args['kind'] as String?, alertId: args['alertId'] as int?));
+          _taps.add(NotificationTap(
+              kind: args['kind'] as String?, alertId: args['alertId'] as int?, link: args['link'] as String?));
         case 'athanStarted':
           _athan.add(null);
       }
@@ -54,7 +57,8 @@ abstract final class AndroidAlertChannel {
         final raw = await channel.invokeMapMethod<Object?, Object?>('takeOpened');
         return raw == null
             ? null
-            : NotificationTap(kind: raw['kind'] as String?, alertId: raw['alertId'] as int?);
+            : NotificationTap(
+                kind: raw['kind'] as String?, alertId: raw['alertId'] as int?, link: raw['link'] as String?);
       }();
 }
 

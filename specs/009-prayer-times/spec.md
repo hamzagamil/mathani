@@ -399,3 +399,5 @@ unchanged.
 - **Web**: The web app from feature 008 is included with the limits in FR-028.
 - **Out of scope**: Qibla direction, Hijri calendar, home-screen widgets, reminders before prayer
   time, Jumu'ah-specific reminders, imsak and suhoor times, and per-prayer recitation choices.
+  Since 2026-11-20, specs/015 adds the Jumu'ah name on Fridays, a Jumu'ah reminder and a Duha
+  reminder; reminders before other prayers stay out of scope.

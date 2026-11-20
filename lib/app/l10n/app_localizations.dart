@@ -2269,6 +2269,96 @@ abstract class AppLocalizations {
   /// **'Prayer is better than sleep.'**
   String get prayerAlertBodyFajr;
 
+  /// The Friday prayer, shown instead of Dhuhr on Fridays (specs/015 FR-001).
+  ///
+  /// In en, this message translates to:
+  /// **'Jumu\'ah'**
+  String get prayerJumuah;
+
+  /// No description provided for @prayerJumuahReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Jumu\'ah reminder'**
+  String get prayerJumuahReminder;
+
+  /// No description provided for @prayerJumuahReminderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Jumu\'ah prayer in {minutes} minutes'**
+  String prayerJumuahReminderTitle(String minutes);
+
+  /// No description provided for @prayerJumuahReminderBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Hasten to the remembrance of Allah.'**
+  String get prayerJumuahReminderBody;
+
+  /// No description provided for @prayerJumuahReminderExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'20 minutes before Jumu\'ah, on Fridays.'**
+  String get prayerJumuahReminderExplanation;
+
+  /// No description provided for @prayerJumuahReminderUpcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Next: {time}'**
+  String prayerJumuahReminderUpcoming(String time);
+
+  /// No description provided for @prayerDuha.
+  ///
+  /// In en, this message translates to:
+  /// **'Duha'**
+  String get prayerDuha;
+
+  /// No description provided for @prayerDuhaTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Duha prayer'**
+  String get prayerDuhaTitle;
+
+  /// No description provided for @prayerDuhaBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The prayer of those who turn to Allah.'**
+  String get prayerDuhaBody;
+
+  /// No description provided for @prayerDuhaExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Halfway between sunrise and Dhuhr, the best time for Duha.'**
+  String get prayerDuhaExplanation;
+
+  /// No description provided for @prayerDuhaUpcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Next: {time}'**
+  String prayerDuhaUpcoming(String time);
+
+  /// No description provided for @prayerDuhaUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Unavailable: sunrise or Dhuhr can\'t be calculated here.'**
+  String get prayerDuhaUnavailable;
+
+  /// No description provided for @announcementsSetting.
+  ///
+  /// In en, this message translates to:
+  /// **'Announcements from Mathani'**
+  String get announcementsSetting;
+
+  /// No description provided for @announcementsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'News about new features and occasions, from the Mathani team.'**
+  String get announcementsHint;
+
+  /// No description provided for @announcementsChannel.
+  ///
+  /// In en, this message translates to:
+  /// **'Announcements from Mathani'**
+  String get announcementsChannel;
+
   /// No description provided for @prayerChannelSound.
   ///
   /// In en, this message translates to:
@@ -2278,7 +2368,7 @@ abstract class AppLocalizations {
   /// No description provided for @prayerChannelQiyam.
   ///
   /// In en, this message translates to:
-  /// **'Qiyam reminder'**
+  /// **'Reminders'**
   String get prayerChannelQiyam;
 
   /// No description provided for @prayerChannelAthan.

@@ -31,7 +31,7 @@ class PrayerAlarmReceiver : BroadcastReceiver() {
                 .setContentIntent(openIntent(context, alert))
                 .setCategory(NotificationCompat.CATEGORY_REMINDER)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setSound(PrayerNotificationsPlugin.soundUri(context, if (alert.kind == "qiyam") "tone" else alert.sound))
+                .setSound(PrayerNotificationsPlugin.soundUri(context, if (PrayerAlertRules.isReminder(alert.kind)) "tone" else alert.sound))
                 .setAutoCancel(true).build()
             context.getSystemService(NotificationManager::class.java).notify("mathani.prayer", alert.id, notification)
         }

@@ -1297,12 +1297,67 @@ class AppLocalizationsAr extends AppLocalizations {
   String get prayerAlertBodyFajr => 'الصلاة خير من النوم';
 
   @override
+  String get prayerJumuah => 'الجمعة';
+
+  @override
+  String get prayerJumuahReminder => 'تذكير الجمعة';
+
+  @override
+  String prayerJumuahReminderTitle(String minutes) {
+    return 'صلاة الجمعة بعد $minutes دقيقة';
+  }
+
+  @override
+  String get prayerJumuahReminderBody => 'فاسعوا إلى ذكر الله';
+
+  @override
+  String get prayerJumuahReminderExplanation =>
+      'قبل صلاة الجمعة بعشرين دقيقة، كل جمعة.';
+
+  @override
+  String prayerJumuahReminderUpcoming(String time) {
+    return 'التالي: $time';
+  }
+
+  @override
+  String get prayerDuha => 'الضحى';
+
+  @override
+  String get prayerDuhaTitle => 'صلاة الضحى';
+
+  @override
+  String get prayerDuhaBody => 'صلاة الأوّابين';
+
+  @override
+  String get prayerDuhaExplanation =>
+      'منتصف ما بين الشروق والظهر، أفضل وقت لصلاة الضحى.';
+
+  @override
+  String prayerDuhaUpcoming(String time) {
+    return 'التالي: $time';
+  }
+
+  @override
+  String get prayerDuhaUnavailable =>
+      'غير متاح: لا يمكن حساب الشروق أو الظهر هنا.';
+
+  @override
+  String get announcementsSetting => 'إعلانات مثاني';
+
+  @override
+  String get announcementsHint =>
+      'أخبار الميزات الجديدة والمناسبات من فريق مثاني.';
+
+  @override
+  String get announcementsChannel => 'إعلانات مثاني';
+
+  @override
   String prayerChannelSound(String sound) {
     return 'تنبيهات الصلاة: $sound';
   }
 
   @override
-  String get prayerChannelQiyam => 'تذكير القيام';
+  String get prayerChannelQiyam => 'التذكيرات';
 
   @override
   String get prayerChannelAthan => 'تشغيل الأذان';

@@ -3,7 +3,25 @@ import 'prayer_time_zones.dart';
 // Schema 2 of the prayer state (specs/009 data-model.md). City-level places live in user.db,
 // not secure storage (research R6).
 
-enum PrayerKind { fajr, sunrise, dhuhr, asr, maghrib, isha, qiyam }
+/// The six schedule events, then the reminders: Qiyam (specs/009), the Jumu'ah reminder 20
+/// minutes before Friday Dhuhr and Duha (specs/015). Reminders are never in [dailyPrayers].
+enum PrayerKind {
+  fajr,
+  sunrise,
+  dhuhr,
+  asr,
+  maghrib,
+  isha,
+  qiyam,
+  jumuah,
+  duha,
+}
+
+/// Reminders play the Qiyam sound on the Qiyam channel and never the full athan (specs/015 R3).
+const reminderKinds = {PrayerKind.qiyam, PrayerKind.jumuah, PrayerKind.duha};
+
+/// The Jumu'ah reminder's lead before Friday Dhuhr (specs/015 FR-006).
+const jumuahReminderLead = Duration(minutes: 20);
 
 const dailyPrayers = {
   PrayerKind.fajr,
@@ -305,6 +323,8 @@ class AlertSettings {
     this.sound = toneSound,
     this.athan = AthanLength.opening,
     this.qiyam = false,
+    this.jumuah,
+    this.duha = false,
   }) : prayers = Set.unmodifiable(prayers) {
     if (!dailyPrayers.containsAll(prayers) ||
         !RegExp(r'^[a-z0-9_]{1,64}$').hasMatch(sound)) {
@@ -320,18 +340,29 @@ class AlertSettings {
   final AthanLength athan;
   final bool qiyam;
 
-  bool get any => prayers.isNotEmpty || qiyam;
+  /// The Jumu'ah reminder as the reader set it; null = never changed, so it follows the Dhuhr
+  /// alert (specs/015 FR-005, R4).
+  final bool? jumuah;
+  final bool duha;
+
+  bool get jumuahOn => jumuah ?? prayers.contains(PrayerKind.dhuhr);
+
+  bool get any => prayers.isNotEmpty || qiyam || duha || jumuahOn;
 
   AlertSettings copyWith({
     Set<PrayerKind>? prayers,
     String? sound,
     AthanLength? athan,
     bool? qiyam,
+    bool? jumuah,
+    bool? duha,
   }) => AlertSettings(
     prayers: prayers ?? this.prayers,
     sound: sound ?? this.sound,
     athan: athan ?? this.athan,
     qiyam: qiyam ?? this.qiyam,
+    jumuah: jumuah ?? this.jumuah,
+    duha: duha ?? this.duha,
   );
 
   Map<String, Object?> toJson() => {
@@ -342,6 +373,8 @@ class AlertSettings {
     'sound': sound,
     'athan': athan.name,
     'qiyam': qiyam,
+    'jumuah': ?jumuah,
+    'duha': duha,
   };
 
   factory AlertSettings.fromJson(Map<String, dynamic> j) => AlertSettings(
@@ -352,6 +385,8 @@ class AlertSettings {
     sound: j['sound'] as String? ?? toneSound,
     athan: _byName(AthanLength.values, j['athan'] ?? 'opening'),
     qiyam: j['qiyam'] as bool? ?? false,
+    jumuah: j['jumuah'] as bool?,
+    duha: j['duha'] as bool? ?? false,
   );
 }
 
@@ -494,6 +529,7 @@ class DaySchedule {
     required List<PrayerEvent> events,
     this.qiyamUtc,
     this.qiyamUnavailableReason,
+    this.duhaUtc,
   }) : events = List.unmodifiable(events);
 
   final String placeId, timezoneId;
@@ -507,6 +543,12 @@ class DaySchedule {
   /// Start of the last third of the night after this day's Maghrib.
   final DateTime? qiyamUtc;
   final String? qiyamUnavailableReason;
+
+  /// Halfway between this day's adjusted Sunrise and Dhuhr, to the minute (specs/015 R5).
+  final DateTime? duhaUtc;
+
+  /// Friday at the place: [localDate] is the place's date (specs/015 R1).
+  bool get isFriday => localDate.weekday == DateTime.friday;
 
   PrayerEvent event(PrayerKind kind) =>
       events.firstWhere((e) => e.kind == kind);

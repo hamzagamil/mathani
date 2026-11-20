@@ -7,6 +7,7 @@ import 'app/app.dart';
 import 'app/l10n/app_localizations.dart';
 import 'data/quran_repository.dart';
 import 'data/user_repository.dart';
+import 'features/announcements/announcements.dart';
 import 'features/khatma/group/group_client.dart';
 import 'features/khatma/group/group_controller.dart';
 import 'features/khatma/group/group_repository.dart';
@@ -24,7 +25,9 @@ import 'features/recitation/ayah_fetcher.dart';
 import 'features/recitation/media_handler.dart';
 import 'features/recitation/recitation_controller.dart';
 import 'features/settings/about_section.dart';
+import 'platform/announcements.dart';
 import 'platform/api_base.dart';
+import 'platform/app_links.dart';
 import 'platform/database.dart';
 import 'platform/device.dart';
 import 'platform/key_store.dart';
@@ -123,6 +126,17 @@ Future<void> runMathani() async {
     pauseQuran: recitation.pause,
     pauseMemorization: memorization.pause,
   );
+  // Announcements from the Firebase console (specs/015): Firebase starts after the first frame,
+  // and only once the reader's setting is on or old topics need removing (research R6, R7).
+  final announcements = Announcements(
+    platform: announcementsPlatform(channelName: () => l10n().announcementsChannel),
+    enabled: () => controller.preferences.announcements,
+    language: () => l10n().localeName == 'ar' ? 'ar' : 'en',
+    readTopics: () => user.readPreference('announcement_topics'),
+    writeTopics: (topics) => user.writePreference('announcement_topics', topics),
+    onLink: AppLinks.instance.deliver,
+  );
+  controller.addListener(announcements.preferencesChanged);
   // Mutashabihat content updates (specs/011 R5): after the first frame and on resume, at most
   // every 6 hours, never blocking reading.
   final mutashabihat = MutashabihatUpdater(reader: controller);
@@ -151,5 +165,6 @@ Future<void> runMathani() async {
     unawaited(khatma.load().then((_) => groups.load()).then((_) => reminders.start()));
     unawaited(prayer.onAppActive());
     unawaited(mutashabihat.check());
+    unawaited(announcements.start());
   });
 }

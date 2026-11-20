@@ -63,6 +63,9 @@
 	<!-- Recitations keep playing with the screen locked or the app in the background (specs/004). -->
 	<!-- Memorization (specs/006 research R16); localised in InfoPlist.strings. -->
 	<!-- Prayer times (specs/009 FR-006): the system prompt offers approximate location by default. -->
+	<!-- Announcements (specs/015 research R6): no FCM token until the Announcements setting is on. -->
+	<key>FirebaseMessagingAutoInitEnabled</key>
+	<false/>
 	<key>NSLocationDefaultAccuracyReduced</key>
 	<true/>
 	<key>NSLocationWhenInUseUsageDescription</key>

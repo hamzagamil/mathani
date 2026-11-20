@@ -132,6 +132,43 @@ class PrayerController extends ChangeNotifier {
     return null;
   }
 
+  /// The next Jumu'ah reminder for the current place, within the coming week, or null
+  /// (specs/015).
+  DateTime? get nextJumuah {
+    final place = state.currentPlace;
+    if (place == null) return null;
+    final now = clock();
+    final today = PrayerCalculator.localDay(place, now);
+    for (var d = 0; d <= 7; d++) {
+      final day = services.calculator.schedule(
+        place,
+        today.add(Duration(days: d)),
+      );
+      if (!day.isFriday) continue;
+      final at = day
+          .event(PrayerKind.dhuhr)
+          .atUtc
+          ?.subtract(jumuahReminderLead);
+      if (at != null && at.isAfter(now)) return at;
+    }
+    return null;
+  }
+
+  /// Today's or tomorrow's Duha for the current place, or null when unavailable (specs/015).
+  DateTime? get nextDuha {
+    final place = state.currentPlace;
+    if (place == null) return null;
+    final now = clock();
+    final today = PrayerCalculator.localDay(place, now);
+    for (var d = 0; d <= 1; d++) {
+      final at = services.calculator
+          .schedule(place, today.add(Duration(days: d)))
+          .duhaUtc;
+      if (at != null && at.isAfter(now)) return at;
+    }
+    return null;
+  }
+
   Future<void> clearMovedNotice() async {
     if (state.movedNotice == null) return;
     await _save(state.copyWith(movedNotice: null));
@@ -388,6 +425,21 @@ class PrayerController extends ChangeNotifier {
     if (enabled) await _askPermission();
     await _save(
       state.copyWith(alerts: state.alerts.copyWith(qiyam: enabled)).bumped(),
+    );
+  });
+
+  /// Stores the reader's choice, so the reminder stops following the Dhuhr alert (FR-005).
+  Future<void> setJumuah(bool enabled) => _run(() async {
+    if (enabled) await _askPermission();
+    await _save(
+      state.copyWith(alerts: state.alerts.copyWith(jumuah: enabled)).bumped(),
+    );
+  });
+
+  Future<void> setDuha(bool enabled) => _run(() async {
+    if (enabled) await _askPermission();
+    await _save(
+      state.copyWith(alerts: state.alerts.copyWith(duha: enabled)).bumped(),
     );
   });
 

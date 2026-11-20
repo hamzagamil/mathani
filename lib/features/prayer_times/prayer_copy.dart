@@ -3,15 +3,19 @@ import 'athan_catalogue.dart';
 import 'prayer_models.dart';
 import 'prayer_services.dart';
 
-String prayerName(AppLocalizations l, PrayerKind kind) => switch (kind) {
-  PrayerKind.fajr => l.prayerFajr,
-  PrayerKind.sunrise => l.prayerSunrise,
-  PrayerKind.dhuhr => l.prayerDhuhr,
-  PrayerKind.asr => l.prayerAsr,
-  PrayerKind.maghrib => l.prayerMaghrib,
-  PrayerKind.isha => l.prayerIsha,
-  PrayerKind.qiyam => l.prayerQiyam,
-};
+/// A prayer's name; on Fridays at the place, Dhuhr is Jumu'ah (specs/015 FR-001, FR-002).
+String prayerName(AppLocalizations l, PrayerKind kind, {bool friday = false}) =>
+    switch (kind) {
+      PrayerKind.fajr => l.prayerFajr,
+      PrayerKind.sunrise => l.prayerSunrise,
+      PrayerKind.dhuhr => friday ? l.prayerJumuah : l.prayerDhuhr,
+      PrayerKind.asr => l.prayerAsr,
+      PrayerKind.maghrib => l.prayerMaghrib,
+      PrayerKind.isha => l.prayerIsha,
+      PrayerKind.qiyam => l.prayerQiyam,
+      PrayerKind.jumuah => l.prayerJumuahReminder,
+      PrayerKind.duha => l.prayerDuha,
+    };
 
 String prayerMethodName(AppLocalizations l, PrayerMethod method) =>
     switch (method) {
@@ -73,6 +77,7 @@ Map<String, String> prayerChannelNames(
 ) => {
   for (final sound in catalogue.soundChoices)
     sound: l.prayerChannelSound(prayerSoundName(l, catalogue, sound)),
+  // The reminders' channel: Qiyam, Jumu'ah and Duha (specs/015 R3).
   'qiyam': l.prayerChannelQiyam,
   'playback': l.prayerChannelAthan,
   'stop': l.prayerAthanStop,

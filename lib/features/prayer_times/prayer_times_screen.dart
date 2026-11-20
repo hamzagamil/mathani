@@ -207,7 +207,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
           Semantics(
             liveRegion: false,
             child: Text(
-              '${l.prayerNext}: ${prayerName(l, next.kind)} · ${time(next.atUtc!)}',
+              '${l.prayerNext}: ${prayerName(l, next.kind, friday: schedule.isFriday)} · ${time(next.atUtc!)}',
               style: theme.textTheme.titleMedium,
             ),
           ),
@@ -222,7 +222,8 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
           ListTile(
             contentPadding: EdgeInsets.zero,
             selected: next?.kind == e.kind,
-            title: Text(prayerName(l, e.kind)),
+            // Dhuhr is Jumu'ah on Fridays at the place (specs/015 FR-002).
+            title: Text(prayerName(l, e.kind, friday: schedule.isFriday)),
             subtitle: _marks(l, place, e),
             trailing: Text(
               e.atUtc == null ? l.prayerUnavailable : time(e.atUtc!),

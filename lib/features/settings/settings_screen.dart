@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show TargetPlatform, defaultTargetPlatform, kIsWeb;
 import 'package:flutter/material.dart';
 
 import '../../app/l10n/app_localizations.dart';
@@ -176,6 +177,25 @@ class SettingsScreen extends StatelessWidget {
               onChanged: (v) => set((p) => p.copyWith(keepScreenOn: v)),
             ),
           ),
+          // Announcements from the Mathani team, on phones only (specs/015 FR-014). Turning it on
+          // asks for notification permission if it was never asked (FR-016).
+          if (!kIsWeb &&
+              (defaultTargetPlatform == TargetPlatform.android ||
+                  defaultTargetPlatform == TargetPlatform.iOS))
+            Padding(
+              padding: const EdgeInsets.only(top: Space.s3),
+              child: SwitchListTile(
+                key: const ValueKey('announcements-setting'),
+                secondary: const Icon(Icons.campaign_outlined),
+                title: Text(l10n.announcementsSetting),
+                subtitle: Text(
+                  l10n.announcementsHint,
+                  style: TypeScale.caption.copyWith(color: colors.inkMuted),
+                ),
+                value: prefs.announcements,
+                onChanged: (v) => set((p) => p.copyWith(announcements: v)),
+              ),
+            ),
           const RecitationSettings(),
           section(
             l10n.languageSetting,

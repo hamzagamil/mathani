@@ -13,6 +13,7 @@ import android.media.AudioAttributes
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import androidx.core.app.NotificationCompat
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
@@ -42,6 +43,9 @@ class PrayerNotificationsPlugin : FlutterPlugin, ActivityAware, MethodChannel.Me
         const val REMINDER_ACTION = "app.mathani.KHATMA_REMINDER"
         const val REMINDER_CHANNEL = "khatma_reminder_v1"
         const val REMINDER_TAG = "mathani.khatma"
+        /** Announcements from the Firebase console (specs/015 R8); also the manifest default. */
+        const val ANNOUNCEMENT_CHANNEL = "announcements_v1"
+        const val ANNOUNCEMENT_TAG = "mathani.announcement"
         private const val PERMISSION_REQUEST = 7413
         private const val PREFS = "mathani_prayer_settings"
         private var pendingOpen: Map<String, Any?>? = null
@@ -54,7 +58,8 @@ class PrayerNotificationsPlugin : FlutterPlugin, ActivityAware, MethodChannel.Me
         /** MainActivity hands over the intent it was opened with. */
         fun noteOpenIntent(intent: Intent?) {
             if (intent?.action != OPEN_ACTION) return
-            val opened = mapOf("kind" to intent.getStringExtra("kind"), "alertId" to intent.getIntExtra("id", -1))
+            val opened = mapOf("kind" to intent.getStringExtra("kind"), "alertId" to intent.getIntExtra("id", -1),
+                "link" to intent.getStringExtra("link"))
             pendingOpen = opened
             events?.invokeMethod("opened", opened)
         }
@@ -68,7 +73,8 @@ class PrayerNotificationsPlugin : FlutterPlugin, ActivityAware, MethodChannel.Me
             (Build.VERSION.SDK_INT < 33 ||
                 ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED)
 
-        fun soundChannel(alert: PrayerAlert) = if (alert.kind == "qiyam") QIYAM_CHANNEL else channelId(alert.sound)
+        fun soundChannel(alert: PrayerAlert) =
+            if (PrayerAlertRules.isReminder(alert.kind)) QIYAM_CHANNEL else channelId(alert.sound)
 
         /** v2 for the tone: its sound became the takbira, and a channel's sound is fixed once created. */
         fun channelId(sound: String) = if (sound == "tone") "prayer_tone_v2" else "prayer_${sound}_v1"
@@ -117,6 +123,29 @@ class PrayerNotificationsPlugin : FlutterPlugin, ActivityAware, MethodChannel.Me
             if (Build.VERSION.SDK_INT < 26) return
             context.getSystemService(NotificationManager::class.java).createNotificationChannel(
                 NotificationChannel(REMINDER_CHANNEL, name, NotificationManager.IMPORTANCE_DEFAULT))
+        }
+
+        /** The announcements channel: the phone's default sound and importance (specs/015 R8). */
+        fun ensureAnnouncementChannel(context: Context, name: String) {
+            if (Build.VERSION.SDK_INT < 26) return
+            context.getSystemService(NotificationManager::class.java).createNotificationChannel(
+                NotificationChannel(ANNOUNCEMENT_CHANNEL, name, NotificationManager.IMPORTANCE_DEFAULT))
+        }
+
+        /** An announcement that arrived while the app is open, which FCM does not show itself. Silent,
+         * so reading and recitation are not interrupted (spec US4 scenario 2). */
+        fun postAnnouncement(context: Context, id: Int, title: String, body: String, link: String?) {
+            val open = PendingIntent.getActivity(context, id,
+                Intent(context, MainActivity::class.java).setAction(OPEN_ACTION)
+                    .putExtra("id", id).putExtra("kind", "announcement").putExtra("link", link)
+                    .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+            val notification = NotificationCompat.Builder(context, ANNOUNCEMENT_CHANNEL)
+                .setSmallIcon(R.drawable.ic_stat_recitation)
+                .setContentTitle(title).setContentText(body)
+                .setStyle(NotificationCompat.BigTextStyle().bigText(body))
+                .setContentIntent(open).setSilent(true).setAutoCancel(true).build()
+            context.getSystemService(NotificationManager::class.java).notify(ANNOUNCEMENT_TAG, id, notification)
         }
 
         /** Channel sounds are fixed once created, so each sound has its own channel. The reader's
@@ -222,6 +251,17 @@ class PrayerNotificationsPlugin : FlutterPlugin, ActivityAware, MethodChannel.Me
                     result.success(install(context, store, System.currentTimeMillis()))
                 }
                 "cancelAll" -> { cancel(context, store.clear()); result.success(null) }
+                "ensureAnnouncementChannel" -> {
+                    ensureAnnouncementChannel(context, call.argument<String>("name") ?: "Announcements")
+                    result.success(null)
+                }
+                "showAnnouncement" -> {
+                    ensureAnnouncementChannel(context, call.argument<String>("channelName") ?: "Announcements")
+                    if (granted(context)) postAnnouncement(context, call.argument<Number>("id")!!.toInt(),
+                        call.argument<String>("title") ?: "", call.argument<String>("body") ?: "",
+                        call.argument<String>("link"))
+                    result.success(null)
+                }
                 // The khatma reminders (specs/014): a second store file, the `wird` kind.
                 "replaceReminders" -> {
                     val reminders = PrayerAlarmStore(context, PrayerAlarmStore.REMINDER_FILE)

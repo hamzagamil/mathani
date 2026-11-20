@@ -143,7 +143,10 @@ void main() {
     await tester.tap(find.byTooltip('Alerts'));
     await tester.runAsync(() => Future<void>.delayed(Duration.zero));
     await settle(tester);
-    expect(find.byType(SwitchListTile), findsNWidgets(6)); // 5 prayers + Qiyam
+    expect(
+      find.byType(SwitchListTile),
+      findsNWidgets(8),
+    ); // 5 prayers, Qiyam, Jumu'ah, Duha
     expect(find.byKey(const ValueKey('alert-sunrise')), findsNothing);
     expect(
       find.text('Alerts are blocked. Your choices are saved.'),

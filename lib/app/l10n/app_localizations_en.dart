@@ -1298,12 +1298,67 @@ class AppLocalizationsEn extends AppLocalizations {
   String get prayerAlertBodyFajr => 'Prayer is better than sleep.';
 
   @override
+  String get prayerJumuah => 'Jumu\'ah';
+
+  @override
+  String get prayerJumuahReminder => 'Jumu\'ah reminder';
+
+  @override
+  String prayerJumuahReminderTitle(String minutes) {
+    return 'Jumu\'ah prayer in $minutes minutes';
+  }
+
+  @override
+  String get prayerJumuahReminderBody => 'Hasten to the remembrance of Allah.';
+
+  @override
+  String get prayerJumuahReminderExplanation =>
+      '20 minutes before Jumu\'ah, on Fridays.';
+
+  @override
+  String prayerJumuahReminderUpcoming(String time) {
+    return 'Next: $time';
+  }
+
+  @override
+  String get prayerDuha => 'Duha';
+
+  @override
+  String get prayerDuhaTitle => 'Duha prayer';
+
+  @override
+  String get prayerDuhaBody => 'The prayer of those who turn to Allah.';
+
+  @override
+  String get prayerDuhaExplanation =>
+      'Halfway between sunrise and Dhuhr, the best time for Duha.';
+
+  @override
+  String prayerDuhaUpcoming(String time) {
+    return 'Next: $time';
+  }
+
+  @override
+  String get prayerDuhaUnavailable =>
+      'Unavailable: sunrise or Dhuhr can\'t be calculated here.';
+
+  @override
+  String get announcementsSetting => 'Announcements from Mathani';
+
+  @override
+  String get announcementsHint =>
+      'News about new features and occasions, from the Mathani team.';
+
+  @override
+  String get announcementsChannel => 'Announcements from Mathani';
+
+  @override
   String prayerChannelSound(String sound) {
     return 'Prayer alerts: $sound';
   }
 
   @override
-  String get prayerChannelQiyam => 'Qiyam reminder';
+  String get prayerChannelQiyam => 'Reminders';
 
   @override
   String get prayerChannelAthan => 'Athan playback';

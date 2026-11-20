@@ -22,4 +22,7 @@ class AppLinks implements LinkSource {
 
   @override
   Stream<String> get links => const Stream.empty();
+
+  /// No announcements in browsers (specs/015).
+  void deliver(String link) {}
 }

@@ -54,6 +54,18 @@ class PrayerCalculator {
     return _minute(DateTime.fromMillisecondsSinceEpoch(instant, isUtc: true));
   }
 
+  /// Halfway between Sunrise and Dhuhr, rounded to the minute: the best time for Duha, "when
+  /// the young camels feel the heat" (Sahih Muslim 748; specs/015 R5).
+  static DateTime? duhaTime(DateTime? sunrise, DateTime? dhuhr) {
+    if (sunrise == null || dhuhr == null || !dhuhr.isAfter(sunrise)) {
+      return null;
+    }
+    final instant =
+        sunrise.toUtc().millisecondsSinceEpoch +
+        dhuhr.difference(sunrise).inMilliseconds ~/ 2;
+    return _minute(DateTime.fromMillisecondsSinceEpoch(instant, isUtc: true));
+  }
+
   static DateTime _minute(DateTime t, {bool up = false}) {
     final ms = t.millisecondsSinceEpoch;
     final minutes = up ? (ms / 60000).ceil() : (ms / 60000).round();
@@ -212,7 +224,8 @@ class PrayerCalculator {
 
   /// The schedule for [date] (a calendar date in the place's zone). Order of computation:
   /// library times, polar check, latitude cap, Asr correction, method offsets, the reader's
-  /// offsets, then Qiyam from the adjusted Maghrib and next Fajr (data-model.md).
+  /// offsets, then Qiyam from the adjusted Maghrib and next Fajr (data-model.md), and Duha from
+  /// the adjusted Sunrise and Dhuhr (specs/015).
   DaySchedule schedule(Place place, DateTime date) {
     final day = DateTime.utc(date.year, date.month, date.day);
     DaySchedule unavailable(String reason) => DaySchedule(
@@ -279,6 +292,10 @@ class PrayerCalculator {
         events: events,
         qiyamUtc: qiyam,
         qiyamUnavailableReason: qiyamReason,
+        duhaUtc: duhaTime(
+          shifted(PrayerKind.sunrise, t.sunrise),
+          shifted(PrayerKind.dhuhr, t.dhuhr),
+        ),
       );
     } on PrayerException catch (e) {
       return unavailable(e.reason.name);

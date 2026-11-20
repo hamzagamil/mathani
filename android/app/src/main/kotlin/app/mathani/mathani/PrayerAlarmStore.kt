@@ -13,7 +13,7 @@ data class PrayerAlert(
 ) {
     init {
         require(id >= 0 && atUtcMs > 0)
-        require(kind in setOf("fajr", "dhuhr", "asr", "maghrib", "isha", "qiyam", "wird"))
+        require(kind in setOf("fajr", "dhuhr", "asr", "maghrib", "isha", "qiyam", "jumuah", "duha", "wird"))
         require(Regex("[a-z0-9_]{1,64}").matches(sound))
         require(title.length in 1..160 && body.length <= 512)
     }
@@ -110,6 +110,10 @@ object PrayerAlertRules {
     /** A late reminder for today's wird is still useful (specs/014 research R9). */
     const val REMINDER_LATENESS_MS = 3 * 60 * 60_000L
 
+    /** Qiyam, and the Jumu'ah and Duha reminders (specs/015 R3): the Qiyam sound and channel,
+     * never the full athan. */
+    fun isReminder(kind: String) = kind == "qiyam" || kind == "jumuah" || kind == "duha"
+
     fun lateness(kind: String) = if (kind == "wird") REMINDER_LATENESS_MS else LATENESS_MS
 
     fun decide(
@@ -118,7 +122,7 @@ object PrayerAlertRules {
     ): AlertAction = when {
         alert == null || alertGeneration != storedGeneration -> AlertAction.IGNORE
         nowMs - alert.atUtcMs > lateness(alert.kind) -> AlertAction.DROP
-        alert.full && alert.kind != "qiyam" && fullFileExists && canStartFull -> AlertAction.PLAY_FULL
+        alert.full && !isReminder(alert.kind) && fullFileExists && canStartFull -> AlertAction.PLAY_FULL
         else -> AlertAction.POST
     }
 }

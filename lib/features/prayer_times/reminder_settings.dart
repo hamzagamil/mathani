@@ -83,7 +83,12 @@ class _AlertsSheetState extends State<AlertsSheet> with WidgetsBindingObserver {
     String local(DateTime t) =>
         DateFormat.jm(l.localeName)
             .format(tz.TZDateTime.from(t, prayerTimeZone(place!.timezoneId)));
-    final qiyam = c.nextQiyam;
+    final qiyam = c.nextQiyam, jumuah = c.nextJumuah, duha = c.nextDuha;
+    // The Jumu'ah reminder can be days away, so its date is shown too.
+    String dated(DateTime t) =>
+        DateFormat.MMMEd(l.localeName)
+            .add_jm()
+            .format(tz.TZDateTime.from(t, prayerTimeZone(place!.timezoneId)));
 
     return Column(
       children: [
@@ -199,6 +204,31 @@ class _AlertsSheetState extends State<AlertsSheet> with WidgetsBindingObserver {
                 isThreeLine: qiyam != null,
                 value: alerts.qiyam,
                 onChanged: editable ? c.setQiyam : null,
+              ),
+              // specs/015: on while the Dhuhr alert is on, until the reader changes it (FR-005).
+              SwitchListTile(
+                key: const ValueKey('alert-jumuah'),
+                title: Text(l.prayerJumuahReminder),
+                subtitle: Text(
+                  jumuah == null
+                      ? l.prayerJumuahReminderExplanation
+                      : '${l.prayerJumuahReminderUpcoming(dated(jumuah))}\n${l.prayerJumuahReminderExplanation}',
+                ),
+                isThreeLine: jumuah != null,
+                value: alerts.jumuahOn,
+                onChanged: editable ? c.setJumuah : null,
+              ),
+              SwitchListTile(
+                key: const ValueKey('alert-duha'),
+                title: Text(l.prayerDuha),
+                subtitle: Text(
+                  duha == null
+                      ? l.prayerDuhaUnavailable
+                      : '${l.prayerDuhaUpcoming(local(duha))}\n${l.prayerDuhaExplanation}',
+                ),
+                isThreeLine: duha != null,
+                value: alerts.duha,
+                onChanged: editable ? c.setDuha : null,
               ),
             ],
           ),

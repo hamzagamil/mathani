@@ -119,7 +119,8 @@ What the feature does with data:
 - **Kept on the phone**: saved places (city-level), calculation and alert settings in `user.db`.
   The Android alert list is a derived copy, excluded from backups. Everything is deleted with the
   app, or with "Delete all prayer data".
-- **Notifications**: local only, with no push service, account or server. Android uses exact
+- **Notifications**: local only, with no push service, account or server (announcements, from
+  specs/015, are separate: see below). Android uses exact
   alarms (Alarms & reminders access, asked in context) and restores them after a reboot. The full
   athan plays from a `mediaPlayback` foreground service started by the alarm.
 
@@ -172,3 +173,28 @@ Answers to change before release B, for the product owner to confirm (FR-069, re
 | Published policy | Add the paragraphs above, the contact address, and how to ask for removal. |
 | Review notes | A group khatma link that reviewers can open, and where to find Report and the terms (the menu on a group khatma's screen). |
 | Contact | `support@mthani.app` in About and the terms (`mathaniContact` in `lib/features/khatma/group/group_terms.dart`); change it there if the owner chooses another. Reports are emailed to the owner and reviewed within 24 hours (FR-063). |
+
+### Announcements (specs/015)
+
+The first push service in the app: Firebase Cloud Messaging (`firebase_core`,
+`firebase_messaging`), with no Firebase Analytics or any other Firebase product.
+
+- **What leaves the phone**: Firebase's installation id and the push token Google creates for it,
+  and the topics the app subscribes to (`all`, and `lang_ar` or `lang_en`). Nothing else: no
+  account, location, reading activity or other identifier (FR-017).
+- **When**: only while "Announcements from Mathani" is on (it is on by default). Auto-init is off
+  in the Android manifest and the iOS Info.plist, so no token exists until the app turns the
+  setting's topics on after the first frame. Turning the setting off unsubscribes every topic.
+- **Who receives it**: Google, as the push provider, and Apple's push service on iPhone.
+- **Prayer alerts and the Jumu'ah and Duha reminders** stay local notifications, as before.
+
+Answers to change before the release that turns announcements on, for the product owner to
+confirm:
+
+| Where | Change |
+| --- | --- |
+| Apple App Privacy | Device ID: App Functionality, not linked to the user, not used for tracking. |
+| Google Play Data safety | Device or other IDs: collected, for app functionality, not shared (Google acts as a service provider), optional (the setting). |
+| Store listings | "Nothing leaves your device unless you join a group khatma" also needs an exception for announcements while the setting is on. |
+| Published policy | Add the paragraphs above. |
+| Owner setup | Firebase project, `flutterfire configure` (replaces `lib/firebase_options.dart`), APNs key uploaded to Firebase, Push Notifications capability on the App ID. |

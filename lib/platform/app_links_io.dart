@@ -13,6 +13,17 @@ class AppLinks implements LinkSource {
   static const _channel = MethodChannel('app.mathani/device');
   final _links = StreamController<String>.broadcast();
   bool _listening = false;
+  String? _pending;
+
+  /// A link from inside the app: a tapped announcement (specs/015 research R8). Kept for
+  /// [takeLink] if the link host is not listening yet, as after a launch from a notification.
+  void deliver(String link) {
+    if (_links.hasListener) {
+      _links.add(link);
+    } else {
+      _pending = link;
+    }
+  }
 
   void _listen() {
     if (_listening) return;
@@ -26,6 +37,9 @@ class AppLinks implements LinkSource {
   @override
   Future<String?> takeLink() async {
     _listen();
+    final pending = _pending;
+    _pending = null;
+    if (pending != null) return pending;
     try {
       return await _channel.invokeMethod<String>('takeLink');
     } on MissingPluginException {
