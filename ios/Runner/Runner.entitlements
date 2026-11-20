@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<!-- Announcements from the Firebase console (specs/015): Apple's push service. The App Store
+	     export switches this to production; the "Mathani App Store" profile carries it. -->
+	<key>aps-environment</key>
+	<string>development</string>
 	<!-- Mathani links open the app (specs/014 research R16): get.mthani.app and group khatma
 	     links on mthani.app, each verified through its /.well-known/apple-app-site-association. -->
 	<key>com.apple.developer.associated-domains</key>

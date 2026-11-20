@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "32687352481",
+    "project_id": "mthani",
+    "storage_bucket": "mthani.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:32687352481:android:2f3e6438c5547d0ca49ee0",
+        "android_client_info": {
+          "package_name": "com.mthani.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAvHsVqK56Sy5FiCK-WavEIbpV4tAWgrpY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

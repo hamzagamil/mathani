@@ -75,7 +75,7 @@
 - [X] T028 [US4] Merge announcement links into the link source used by `GroupLinkHost` (`lib/platform/app_links_io.dart` or a merged `LinkSource` in `lib/main.dart`), and start the controller after the first frame in `lib/main.dart`
 - [X] T029 [US4] Add the "Announcements from Mathani" switch with its hint to `lib/features/settings/settings_screen.dart` (hidden on web), asking notification permission when switched on, plus strings `settingsAnnouncements`, `settingsAnnouncementsHint`, `announcementsChannel` in both ARB files
 - [X] T030 [P] [US4] Android: manifest meta-data `firebase_messaging_auto_init_enabled=false`, `com.google.firebase.messaging.default_notification_channel_id=announcements_v1`, default notification icon; create channel `announcements_v1` (default importance) in `PrayerNotificationsPlugin.kt` channel setup or from Dart, in `android/app/src/main/`
-- [X] T031 [P] [US4] iOS: `aps-environment` in `ios/Runner/Runner.entitlements` (deferred: added once the App ID has Push Notifications and the App Store profile is regenerated, or signing fails), `FirebaseMessagingAutoInitEnabled=false` in `ios/Runner/Info.plist`
+- [X] T031 [P] [US4] iOS: `aps-environment` in `ios/Runner/Runner.entitlements` (added with 1.9.0+34, after the App ID got Push Notifications and the profile was regenerated), `FirebaseMessagingAutoInitEnabled=false` in `ios/Runner/Info.plist`
 - [X] T032 [US4] Tests in `test/features/announcements/announcements_test.dart` with a fake platform: topics on start, language change, off unsubscribes, link host check, not started when preference off or platform unavailable
 
 ## Phase 7: Polish & Cross-Cutting
