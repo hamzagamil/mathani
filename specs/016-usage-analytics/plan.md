@@ -98,3 +98,15 @@ Firebase, nothing in `user.db`.
 
 Unchanged: Pass. The allowed-events list and the import test keep the privacy boundary
 reviewable; collection is release-only; size is measured before release.
+
+## Size (T024, measured 2026-11-21)
+
+- **Android** (arm64 download, `tool/size_check.dart`): 172.93 MB against the 1.4.0+9 baseline of
+  169.94 MB, **+3.00 MB**, over the 1 MB threshold. The baseline predates several features, so this
+  is the growth since 1.4.0, including both Firebase features (specs/015 messaging, specs/016
+  analytics), not analytics alone. Needs the `size-approved` call-out in review; the baseline is
+  left for the owner to update.
+- **iOS**: measured by the CI release build (not available on Windows).
+- **Web**: no bundle growth; the Firebase JS SDK and gtag (about 150 KB) load from Google's hosts
+  after the first frame, only on get.mthani.app.
+

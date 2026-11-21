@@ -70,7 +70,7 @@
 ## Phase 7: Polish
 
 - [X] T023 Run `flutter analyze` and `flutter test --exclude-tags web,golden`; fix failures
-- [ ] T024 Measure size (research R9) and record it in the plan
+- [X] T024 Measure size (research R9) and record it in the plan (Android +3.00 MB since the 1.4.0 baseline; see plan › Size)
 
 ## Dependencies & Execution Order
 
