@@ -6,6 +6,7 @@ import '../../data/models.dart';
 import '../../data/quran_repository.dart';
 import '../../platform/device.dart';
 import '../../shared/reader_state.dart';
+import '../analytics/usage.dart';
 import 'khatma_division.dart';
 import 'khatma_models.dart';
 import 'khatma_repository.dart';
@@ -396,6 +397,7 @@ class KhatmaController extends ChangeNotifier with WidgetsBindingObserver {
       placePage: index.pageOf(startAyah),
     );
     unawaited((keepBrowserData ?? const DeviceChannel().keepBrowserData)());
+    Usage.khatmaStarted();
     _khatma = open.khatma;
     _wirds = open.wirds;
     _undo = null;
@@ -409,6 +411,7 @@ class KhatmaController extends ChangeNotifier with WidgetsBindingObserver {
     final w = currentWird;
     if (k == null || w == null) return;
     _remember(byReadingOn: false);
+    Usage.wirdCompleted();
     final day = today;
     final wirds = [for (final x in _wirds) x.number == w.number ? x.withReadOn(day) : x];
     await _afterReads(k, wirds, {w.number: day}, byReadingOn: false);

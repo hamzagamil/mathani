@@ -2100,4 +2100,11 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get contactTitle => 'تواصل';
+
+  @override
+  String get aboutPrivacyPolicy => 'سياسة الخصوصية';
+
+  @override
+  String get aboutUsageStatistics =>
+      'يرسل مثاني إحصاءات استخدام مجهولة: فتح التطبيق والشاشات والميزات والإعدادات المستخدمة. ولا يدخل فيها ما تقرؤه أو تتلوه أو تبحث عنه، ولا أي معلومة شخصية.';
 }

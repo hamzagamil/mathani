@@ -269,6 +269,9 @@ the installed app, and confirm it starts and shows those pages.
 
 - **FR-027**: The web app MUST NOT add analytics, tracking, advertising, accounts or cookies beyond
   what the app itself needs to work; it collects no personal data, as in the phone app.
+  *Superseded in part by specs/016 (2026-11-21): the web app sends the anonymous usage statistics
+  of specs/016 contracts/usage-events.md, with a first-party analytics cookie; still no tracking,
+  advertising or accounts.*
 - **FR-028**: The privacy policy at mthani.app/privacypolicy MUST be updated to cover the web app
   before the web app is announced.
 - **FR-029**: Each web release MUST show the same version number as the matching phone release in

@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 
 import '../../shared/reader_state.dart';
+import '../analytics/usage.dart';
 import '../recitation/recitation_controller.dart';
 import 'onboarding_steps.dart';
 
@@ -116,6 +117,7 @@ class OnboardingController extends ChangeNotifier {
     if (_step == null) return;
     _stopSample();
     final sawSimilar = _steps.contains(OnboardingStep.similarAyat);
+    if (!_replay) Usage.onboardingCompleted();
     if (!_replay || sawSimilar) {
       reader.updatePreferences(reader.preferences.copyWith(
         onboardingDone: _replay ? null : true,

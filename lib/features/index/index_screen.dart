@@ -4,6 +4,7 @@ import '../../app/l10n/app_localizations.dart';
 import '../../app/theme/app_theme.dart';
 import '../../app/theme/tokens.dart';
 import '../../shared/mathani_icons.dart';
+import '../analytics/usage.dart';
 import 'ajza_tab.dart';
 import 'bookmarks_tab.dart';
 import 'goto_sheet.dart';
@@ -19,7 +20,10 @@ class IndexScreen extends StatefulWidget {
   State<IndexScreen> createState() => _IndexScreenState();
 }
 
-class _IndexScreenState extends State<IndexScreen> {
+class _IndexScreenState extends State<IndexScreen> with ScreenTracking<IndexScreen> {
+  @override
+  UsageScreen get usageScreen => UsageScreen.surahIndex;
+
   late int _tab = widget.initialTab;
 
   @override

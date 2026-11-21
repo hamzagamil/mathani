@@ -3,6 +3,9 @@
     <!-- Recitations (specs/004): streaming and downloads, and the metered-network check before a
          download. Install-time permissions; nothing is asked at runtime. -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Usage statistics (specs/016 research R3): the analytics library's advertising-id
+         permission is removed; Mathani never reads the advertising id. -->
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" tools:node="remove"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <!-- Prayer times (specs/009): approximate location only, asked when the reader taps "Use my
          location"; never precise or background (FR-006). Alerts, exact alarms and their restore
@@ -105,9 +108,20 @@
         <meta-data
             android:name="firebase_messaging_auto_init_enabled"
             android:value="false" />
+        <!-- Usage statistics (specs/016 research R2 to R4): off until the app turns collection on in
+             release builds; no advertising id, no ad signals, no automatic screen names. -->
         <meta-data
-            android:name="firebase_analytics_collection_deactivated"
-            android:value="true" />
+            android:name="firebase_analytics_collection_enabled"
+            android:value="false" />
+        <meta-data
+            android:name="google_analytics_adid_collection_enabled"
+            android:value="false" />
+        <meta-data
+            android:name="google_analytics_default_allow_ad_personalization_signals"
+            android:value="false" />
+        <meta-data
+            android:name="google_analytics_automatic_screen_reporting_enabled"
+            android:value="false" />
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="announcements_v1" />

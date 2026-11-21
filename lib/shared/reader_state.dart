@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import '../data/models.dart';
 import '../data/quran_repository.dart';
 import '../data/user_repository.dart';
+import '../features/analytics/usage.dart';
 import '../features/mutashabihat/mutashabihat_content.dart';
 
 /// Single source of truth for where the reader is (research R6): the anchor ayah, the page on
@@ -147,6 +148,7 @@ class ReaderController extends ChangeNotifier with WidgetsBindingObserver {
 
   void updatePreferences(ReaderPreferences p) {
     final layoutChanged = p.layout != _preferences.layout;
+    Usage.preferencesChanged(_preferences, p); // specs/016 research R6
     _preferences = p;
     if (layoutChanged) _jumpSerial++; // the new layout opens at the anchor (SC-010)
     unawaited(user.savePreferences(p));

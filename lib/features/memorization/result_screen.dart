@@ -10,6 +10,7 @@ import '../../shared/mathani_icons.dart';
 import '../../shared/numerals.dart';
 import '../../shared/quran_text.dart';
 import '../../shared/reader_state.dart';
+import '../analytics/usage.dart';
 import '../reader/flowing_view.dart' show flowingTextStyle;
 import 'memorization_controller.dart';
 import 'memorization_score.dart';
@@ -25,7 +26,10 @@ class ResultScreen extends StatefulWidget {
   State<ResultScreen> createState() => _ResultScreenState();
 }
 
-class _ResultScreenState extends State<ResultScreen> {
+class _ResultScreenState extends State<ResultScreen> with ScreenTracking<ResultScreen> {
+  @override
+  UsageScreen get usageScreen => UsageScreen.memorizationResult;
+
   List<List<Word>>? _words;
 
   @override

@@ -14,6 +14,7 @@ import '../../data/models.dart';
 import '../../platform/device.dart';
 import '../../platform/speech_host.dart';
 import '../../shared/reader_state.dart';
+import '../analytics/usage.dart';
 import '../recitation/recitation_controller.dart';
 import 'asr_model.dart';
 import 'device_support.dart';
@@ -176,6 +177,13 @@ class MemorizationController extends ChangeNotifier with WidgetsBindingObserver 
   /// when the system has not been asked yet.
   Future<StartOutcome> start(MemorizationRange range,
       {Future<bool> Function()? explain, bool micAskedBefore = false}) async {
+    final outcome = await _start(range, explain: explain, micAskedBefore: micAskedBefore);
+    Usage.memorizationStarted(outcome); // specs/016: the outcome, never the range
+    return outcome;
+  }
+
+  Future<StartOutcome> _start(MemorizationRange range,
+      {Future<bool> Function()? explain, required bool micAskedBefore}) async {
     await recitation?.stop();
     if (await memorizationSupport(device) != null) return StartOutcome.unsupportedDevice;
     await model.refresh();

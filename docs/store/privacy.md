@@ -1,7 +1,8 @@
 # Store Privacy Answers
 
-Mathani collects no data (FR-027). It has no account, no analytics, no crash reporting and no
-ads. Bookmarks, reading position and preferences stay in an on-device database that is deleted
+**Since specs/016, Mathani collects anonymous usage statistics** (see "Usage statistics" at the
+end); the "no data" answers below describe the app before it and are superseded where that section
+says so. It has no account, no crash reporting, no ads and no tracking. Bookmarks, reading position and preferences stay in an on-device database that is deleted
 with the app.
 
 **Network use (since specs/004, recitations; specs/006, more reciters and memorization).** The
@@ -198,3 +199,44 @@ confirm:
 | Store listings | "Nothing leaves your device unless you join a group khatma" also needs an exception for announcements while the setting is on. |
 | Published policy | Add the paragraphs above. |
 | Owner setup | Firebase project, `flutterfire configure` (replaces `lib/firebase_options.dart`), APNs key uploaded to Firebase, Push Notifications capability on the App ID. |
+
+### Usage statistics (specs/016)
+
+Firebase Analytics (`firebase_analytics`), feeding GA4 property 539746070 of Firebase project
+`mthani`, on Android, iOS and the web app. **Always on: no question, banner or switch** (owner
+decision, spec Clarifications 2026-11-21).
+
+- **What is sent**: the events of `specs/016-usage-analytics/contracts/usage-events.md` only:
+  app opens and sessions, screen names from a fixed list, a fixed list of actions (recitation
+  started with the reciter, memorization started with its outcome, search, bookmark added, khatma
+  started, wird completed, group khatma started or joined, prayer alert changed, announcement
+  opened, onboarding completed), and setting changes with values from the app's own lists. The
+  library adds the app version, OS version, device model category, language and the country it
+  derives from the connection.
+- **Never sent**: Quran text, surah, ayah, page or juz numbers, search words, audio or
+  recognition results, bookmark notes, khatma titles, names, codes or links, places, coordinates or
+  prayer times, announcement text, any name, email, phone number or free text. On the web the
+  page address is replaced by `https://get.mthani.app/`.
+- **Identifier**: the library's random app-instance id (a first-party cookie on the web). No
+  advertising id (the Android `AD_ID` permission is removed; iOS never shows the tracking prompt;
+  IDFV collection is off), no Google signals, no ad personalisation.
+- **Builds**: collection is off by default natively and turned on only in release builds, and on
+  the web only on get.mthani.app.
+- **Retention**: 2 months for detailed data (set in GA admin, owner action).
+- **Who receives it**: Google, as the analytics provider.
+- **Risk accepted by the owner**: EU and UK rules generally require consent before an analytics
+  identifier is stored on a device; the owner chose no consent and no switch (spec Assumptions).
+
+Answers to change before the release that turns usage statistics on, for the product owner to
+confirm (these replace "Data Not Collected" / "No data collected"):
+
+| Where | Change |
+| --- | --- |
+| Apple App Privacy | Identifiers › Device ID: Analytics and App Functionality (announcements). Usage Data › Product Interaction: Analytics. Not linked to the user, not used for tracking. |
+| iOS privacy manifest | `NSPrivacyCollectedDataTypes`: DeviceID (App Functionality, Analytics) and ProductInteraction (Analytics), not linked, not tracking (done in `ios/Runner/PrivacyInfo.xcprivacy`). |
+| Google Play Data safety | App activity › App interactions; Device or other IDs. Collected, **required** (no switch), for Analytics (and App functionality for the device id), not shared (Google is a service provider), encrypted in transit. Deletion: on request at the contact address. |
+| Store listings | Done in `listing_en.md`, `listing_ar.md`: "No account, no ads, no tracking. Anonymous usage statistics only…". |
+| About | One sentence and a link to the policy (`aboutUsageStatistics`). |
+| Published policy | A "Usage statistics" section with the paragraphs above (mthani.app/privacypolicy). |
+| GA admin (owner) | Data retention 2 months; Google signals off; ads personalisation off. |
+

@@ -6,6 +6,7 @@ import 'package:timezone/timezone.dart' as tz;
 
 import '../../app/l10n/app_localizations.dart';
 import '../../shared/numerals.dart';
+import '../analytics/usage.dart';
 import 'calculation_sheet.dart';
 import 'location_setup_sheet.dart';
 import 'locations_sheet.dart';
@@ -27,7 +28,10 @@ class PrayerTimesScreen extends StatefulWidget {
   State<PrayerTimesScreen> createState() => _PrayerTimesScreenState();
 }
 
-class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
+class _PrayerTimesScreenState extends State<PrayerTimesScreen> with ScreenTracking<PrayerTimesScreen> {
+  @override
+  UsageScreen get usageScreen => UsageScreen.prayerTimes;
+
   PrayerController? _controller;
   Timer? _ticker;
   String? _moved;

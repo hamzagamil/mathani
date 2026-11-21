@@ -10,6 +10,7 @@ import '../../data/models.dart';
 import '../../shared/mathani_icons.dart';
 import '../../shared/numerals.dart';
 import '../../shared/reader_state.dart';
+import '../analytics/usage.dart';
 import 'onboarding_controller.dart';
 import 'onboarding_steps.dart';
 import 'setup_steps.dart';
@@ -98,7 +99,10 @@ class OnboardingScreen extends StatefulWidget {
   State<OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
-class _OnboardingScreenState extends State<OnboardingScreen> {
+class _OnboardingScreenState extends State<OnboardingScreen> with ScreenTracking<OnboardingScreen> {
+  @override
+  UsageScreen get usageScreen => UsageScreen.onboarding;
+
   PageController? _pages;
   OnboardingStep? _shown;
 

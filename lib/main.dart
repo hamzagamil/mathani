@@ -7,6 +7,7 @@ import 'app/app.dart';
 import 'app/l10n/app_localizations.dart';
 import 'data/quran_repository.dart';
 import 'data/user_repository.dart';
+import 'features/analytics/usage.dart';
 import 'features/announcements/announcements.dart';
 import 'features/khatma/group/group_client.dart';
 import 'features/khatma/group/group_controller.dart';
@@ -31,6 +32,7 @@ import 'platform/app_links.dart';
 import 'platform/database.dart';
 import 'platform/device.dart';
 import 'platform/key_store.dart';
+import 'platform/usage_firebase.dart';
 import 'platform/khatma_reminders.dart';
 import 'shared/numerals.dart';
 import 'shared/reader_state.dart';
@@ -40,6 +42,9 @@ Future<void> main() => runMathani();
 /// Opens the databases and starts the app, on phones and in browsers (specs/008).
 Future<void> runMathani() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Usage statistics (specs/016): queued until Firebase starts after the first frame.
+  final usage = FirebaseUsage();
+  Usage.sink = usage;
   registerAssetLicences(); // lazy: the files are read only when the licences page opens
   await initDatabases();
   // Both databases open in parallel on phones; no network and no background work at startup. In
@@ -166,5 +171,6 @@ Future<void> runMathani() async {
     unawaited(prayer.onAppActive());
     unawaited(mutashabihat.check());
     unawaited(announcements.start());
+    unawaited(usage.start());
   });
 }

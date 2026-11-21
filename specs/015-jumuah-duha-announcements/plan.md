@@ -15,7 +15,8 @@ Two small extensions of the prayer alerts from feature 009, and one new channel:
   Jumu'ah setting is stored as a nullable boolean: `null` means "never changed", so it follows the
   Dhuhr alert (spec Q1), with no migration step.
 - **Announcements** use Firebase Cloud Messaging, which the owner asked for, with
-  `firebase_core` and `firebase_messaging` only (no Analytics). The app subscribes to the topics
+  `firebase_core` and `firebase_messaging` only (no Analytics; specs/016 later adds usage
+  statistics). The app subscribes to the topics
   `all` and `lang_ar` or `lang_en` when the Settings switch is on, and unsubscribes when it is off.
   Firebase starts after the first frame, and only on Android and iOS. The admin sends from the
   Firebase console to a topic. A `link` data field that is a Mathani link is handed to the

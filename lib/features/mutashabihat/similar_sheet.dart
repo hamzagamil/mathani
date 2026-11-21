@@ -10,6 +10,7 @@ import '../../data/quran_repository.dart';
 import '../../shared/mathani_icons.dart';
 import '../../shared/numerals.dart';
 import '../../shared/reader_state.dart';
+import '../analytics/usage.dart';
 import '../reader/flowing_view.dart' show flowingAyahText, flowingTextStyle;
 import '../search/arabic_normalizer.dart';
 import 'mutashabihat_content.dart';
@@ -86,7 +87,10 @@ class SimilarSheet extends StatefulWidget {
   State<SimilarSheet> createState() => _SimilarSheetState();
 }
 
-class _SimilarSheetState extends State<SimilarSheet> {
+class _SimilarSheetState extends State<SimilarSheet> with ScreenTracking<SimilarSheet> {
+  @override
+  UsageScreen get usageScreen => UsageScreen.mutashabihat;
+
   int _group = 0;
 
   void _select(int group) => setState(() => _group = group);

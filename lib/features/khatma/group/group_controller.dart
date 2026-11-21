@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 
+import '../../analytics/usage.dart';
 import '../khatma_controller.dart';
 import '../khatma_models.dart';
 import 'group_client.dart';
@@ -271,6 +272,7 @@ class GroupController extends ChangeNotifier with WidgetsBindingObserver impleme
         title: title, name: name, division: division, finishDate: finishDate, terms: groupTermsVersion);
     await _rememberName(name);
     unawaited(keepBrowserData?.call());
+    Usage.groupKhatmaStarted(parts: division); // specs/016: never the title or names
     await _keep(s);
     return s;
   }
@@ -283,7 +285,10 @@ class GroupController extends ChangeNotifier with WidgetsBindingObserver impleme
   /// Takes part [n]; [name] the first time the reader joins this khatma (FR-049).
   Future<void> take(String code, int n, {String? name}) => _call(code, () async {
         final s = await client.take(code, n, name: name, terms: name == null ? null : groupTermsVersion);
-        if (name != null) await _rememberName(name);
+        if (name != null) {
+          await _rememberName(name);
+          Usage.groupKhatmaJoined(); // the first part taken in this khatma (FR-049)
+        }
         unawaited(keepBrowserData?.call());
         await _keep(s);
       });

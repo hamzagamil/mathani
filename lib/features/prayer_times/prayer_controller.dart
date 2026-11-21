@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 
+import '../analytics/usage.dart';
 import 'prayer_alerts.dart';
 import 'prayer_calculator.dart';
 import 'prayer_models.dart';
@@ -396,6 +397,12 @@ class PrayerController extends ChangeNotifier {
       },
     );
     if (next == old) return;
+    // Usage statistics (specs/016 research R6): the choices, never the place or offsets.
+    if (next.method != old.method) Usage.settingChanged(UsageSetting.prayerMethod, next.method);
+    if (next.asr != old.asr) Usage.settingChanged(UsageSetting.asr, next.asr);
+    if (next.highLatitudeRule != old.highLatitudeRule) {
+      Usage.settingChanged(UsageSetting.highLatitude, next.highLatitudeRule);
+    }
     final updated = place.copyWith(calculation: next);
     var s = placeId == state.myLocation?.id
         ? state.copyWith(myLocation: updated)
@@ -416,6 +423,7 @@ class PrayerController extends ChangeNotifier {
     if (enabled) await _askPermission();
     final prayers = {...state.alerts.prayers};
     enabled ? prayers.add(kind) : prayers.remove(kind);
+    Usage.prayerAlertChanged(kind, on: enabled);
     await _save(
       state.copyWith(alerts: state.alerts.copyWith(prayers: prayers)).bumped(),
     );
@@ -423,6 +431,7 @@ class PrayerController extends ChangeNotifier {
 
   Future<void> setQiyam(bool enabled) => _run(() async {
     if (enabled) await _askPermission();
+    Usage.prayerAlertChanged(PrayerKind.qiyam, on: enabled);
     await _save(
       state.copyWith(alerts: state.alerts.copyWith(qiyam: enabled)).bumped(),
     );
@@ -431,6 +440,7 @@ class PrayerController extends ChangeNotifier {
   /// Stores the reader's choice, so the reminder stops following the Dhuhr alert (FR-005).
   Future<void> setJumuah(bool enabled) => _run(() async {
     if (enabled) await _askPermission();
+    Usage.prayerAlertChanged(PrayerKind.jumuah, on: enabled);
     await _save(
       state.copyWith(alerts: state.alerts.copyWith(jumuah: enabled)).bumped(),
     );
@@ -438,6 +448,7 @@ class PrayerController extends ChangeNotifier {
 
   Future<void> setDuha(bool enabled) => _run(() async {
     if (enabled) await _askPermission();
+    Usage.prayerAlertChanged(PrayerKind.duha, on: enabled);
     await _save(
       state.copyWith(alerts: state.alerts.copyWith(duha: enabled)).bumped(),
     );
@@ -445,12 +456,14 @@ class PrayerController extends ChangeNotifier {
 
   Future<void> setSound(String sound) => _run(() async {
     if (!services.catalogue.soundChoices.contains(sound)) return;
+    Usage.settingChanged(UsageSetting.athanSound, sound); // a catalogue id
     await _save(
       state.copyWith(alerts: state.alerts.copyWith(sound: sound)).bumped(),
     );
   });
 
   Future<void> setAthanLength(AthanLength length) => _run(() async {
+    Usage.settingChanged(UsageSetting.athanLength, length);
     await _save(
       state.copyWith(alerts: state.alerts.copyWith(athan: length)).bumped(),
     );

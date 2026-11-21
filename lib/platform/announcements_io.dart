@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:io' show Platform;
 
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 
+import '../features/analytics/usage.dart';
 import '../features/announcements/announcements.dart';
-import '../firebase_options.dart';
+import 'firebase_app.dart';
 import 'local_notifications_io.dart';
 
 /// Firebase Cloud Messaging on phones; nothing on desktop (specs/015 research R6–R9).
@@ -35,14 +35,8 @@ class FirebaseAnnouncements implements AnnouncementsPlatform {
   }
 
   Future<bool> _start() async {
-    final FirebaseOptions options;
+    if (!await firebaseReady()) return false; // not configured or offline (R11)
     try {
-      options = DefaultFirebaseOptions.currentPlatform;
-    } on UnsupportedError {
-      return false; // not configured yet (R11)
-    }
-    try {
-      if (Firebase.apps.isEmpty) await Firebase.initializeApp(options: options);
       if (Platform.isAndroid) {
         await _android.invokeMethod('ensureAnnouncementChannel', {
           'name': channelName(),
@@ -73,11 +67,13 @@ class FirebaseAnnouncements implements AnnouncementsPlatform {
   }
 
   void _tapped(NotificationTap tap) {
+    Usage.announcementOpened(hasLink: tap.link != null); // specs/016: never the text or link
     if (tap.link != null) _links.add(tap.link!);
   }
 
   void _opened(RemoteMessage message) {
     final link = message.data['link'];
+    Usage.announcementOpened(hasLink: link is String);
     if (link is String) _links.add(link);
   }
 

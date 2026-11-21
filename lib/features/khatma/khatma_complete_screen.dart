@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../app/l10n/app_localizations.dart';
 import '../../app/theme/app_theme.dart';
 import '../../app/theme/tokens.dart';
+import '../analytics/usage.dart';
 import 'khatma_controller.dart';
 import 'khatma_format.dart';
 import 'khatma_models.dart';
@@ -19,7 +20,10 @@ class KhatmaCompleteScreen extends StatelessWidget {
   const KhatmaCompleteScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) =>
+      TrackedScreen(UsageScreen.khatmaComplete, child: Builder(builder: _content));
+
+  Widget _content(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final colors = MathaniColors.of(context);
     final c = KhatmaScope.of(context);

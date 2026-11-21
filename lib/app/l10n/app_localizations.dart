@@ -3540,6 +3540,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Contact'**
   String get contactTitle;
+
+  /// About: link to the published privacy policy (specs/016 FR-007).
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy policy'**
+  String get aboutPrivacyPolicy;
+
+  /// About: what usage statistics include and never include (specs/016 FR-007).
+  ///
+  /// In en, this message translates to:
+  /// **'Mathani sends anonymous usage statistics: app opens, screens, features and settings used. What you read, recite or search, and anything personal, are never part of them.'**
+  String get aboutUsageStatistics;
 }
 
 class _AppLocalizationsDelegate

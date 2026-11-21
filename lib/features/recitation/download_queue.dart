@@ -12,6 +12,7 @@ import '../../data/quran_repository.dart';
 import '../../platform/device.dart';
 import '../../platform/file_store.dart';
 import '../../shared/numerals.dart';
+import '../analytics/usage.dart';
 import 'ayah_fetcher.dart';
 
 /// Requests at once across the whole queue (research R6, R7). The fetcher's gate enforces it,
@@ -219,6 +220,7 @@ class DownloadQueue with WidgetsBindingObserver {
       return;
     }
     _queue.add(key);
+    Usage.surahDownloadStarted(reciter: reciter); // specs/016: never the surah
     _set(d.copyWith(state: DownloadState.queued), key);
     unawaited(_pump());
   }

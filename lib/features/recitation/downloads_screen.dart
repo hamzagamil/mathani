@@ -8,6 +8,7 @@ import '../../app/theme/tokens.dart';
 import '../../shared/mathani_icons.dart';
 import '../../shared/numerals.dart';
 import '../../shared/reader_state.dart';
+import '../analytics/usage.dart';
 import '../memorization/asr_model.dart';
 import '../memorization/memorization_controller.dart';
 import 'download_queue.dart';
@@ -20,7 +21,10 @@ class DownloadsScreen extends StatefulWidget {
   State<DownloadsScreen> createState() => _DownloadsScreenState();
 }
 
-class _DownloadsScreenState extends State<DownloadsScreen> {
+class _DownloadsScreenState extends State<DownloadsScreen> with ScreenTracking<DownloadsScreen> {
+  @override
+  UsageScreen get usageScreen => UsageScreen.downloads;
+
   late final DownloadQueue _queue = RecitationScope.read(context)!.downloads;
 
   @override

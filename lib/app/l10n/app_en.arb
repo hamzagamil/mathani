@@ -1868,5 +1868,13 @@
   "contactTitle": "Contact",
   "@contactTitle": {
     "description": "About: the address to reach Mathani (FR-068)."
+  },
+  "aboutPrivacyPolicy": "Privacy policy",
+  "@aboutPrivacyPolicy": {
+    "description": "About: link to the published privacy policy (specs/016 FR-007)."
+  },
+  "aboutUsageStatistics": "Mathani sends anonymous usage statistics: app opens, screens, features and settings used. What you read, recite or search, and anything personal, are never part of them.",
+  "@aboutUsageStatistics": {
+    "description": "About: what usage statistics include and never include (specs/016 FR-007)."
   }
 }

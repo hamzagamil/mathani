@@ -36,6 +36,7 @@ String _ltr(String s) => '${String.fromCharCode(0x2066)}$s${String.fromCharCode(
 class AboutSection extends StatelessWidget {
   const AboutSection({super.key});
 
+  static final _privacyPolicy = Uri.parse('https://mthani.app/privacypolicy');
   static final _tanzil = Uri.parse('https://tanzil.net');
   static final _everyAyah = Uri.parse('https://everyayah.com');
   static final _qul = Uri.parse('https://qul.tarteel.ai/resources/recitation');
@@ -68,6 +69,14 @@ class AboutSection extends StatelessWidget {
           subtitle: Text(_ltr(mathaniContact), style: caption.copyWith(color: colors.secondary)),
           trailing: const Icon(MathaniIcons.externalLink),
           onTap: () => launchUrl(Uri(scheme: 'mailto', path: mathaniContact)),
+        ),
+        // What usage statistics include and never include, and the policy (specs/016 FR-007).
+        ListTile(
+          key: const ValueKey('about-privacy'),
+          title: Text(l10n.aboutPrivacyPolicy),
+          subtitle: Text(l10n.aboutUsageStatistics, style: caption),
+          trailing: const Icon(MathaniIcons.externalLink),
+          onTap: () => launchUrl(_privacyPolicy, mode: LaunchMode.externalApplication),
         ),
         Padding(
           padding: const EdgeInsets.fromLTRB(Space.s4, Space.s2, Space.s4, 0),

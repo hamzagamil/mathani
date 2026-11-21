@@ -6,6 +6,7 @@ import '../../app/theme/app_theme.dart';
 import '../../app/theme/tokens.dart';
 import '../../shared/mathani_icons.dart';
 import '../../shared/reader_state.dart';
+import '../analytics/usage.dart';
 import 'khatma_complete_screen.dart';
 import 'khatma_controller.dart';
 import 'khatma_format.dart';
@@ -22,7 +23,10 @@ class KhatmaScreen extends StatelessWidget {
   const KhatmaScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) =>
+      TrackedScreen(UsageScreen.khatma, child: Builder(builder: _content));
+
+  Widget _content(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final colors = MathaniColors.of(context);
     final khatma = KhatmaScope.of(context);

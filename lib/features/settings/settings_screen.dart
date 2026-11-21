@@ -8,6 +8,7 @@ import '../../data/models.dart';
 import '../../shared/mathani_icons.dart';
 import '../../shared/numerals.dart';
 import '../../shared/reader_state.dart';
+import '../analytics/usage.dart';
 import '../onboarding/onboarding_controller.dart';
 import '../recitation/recitation_settings.dart';
 import '../prayer_times/prayer_times_screen.dart';
@@ -21,7 +22,10 @@ class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) =>
+      TrackedScreen(UsageScreen.settings, child: Builder(builder: _content));
+
+  Widget _content(BuildContext context) {
     final reader = ReaderScope.of(context);
     final onboarding = OnboardingScope.read(context);
     final prefs = reader.preferences;

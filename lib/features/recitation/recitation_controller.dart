@@ -9,6 +9,7 @@ import '../../data/quran_repository.dart';
 import '../../platform/audio_engine.dart';
 import '../../platform/file_store.dart';
 import '../../shared/reader_state.dart';
+import '../analytics/usage.dart';
 import 'audio_engine.dart';
 import 'ayah_fetcher.dart';
 import 'download_queue.dart';
@@ -265,6 +266,7 @@ class RecitationController extends ChangeNotifier with WidgetsBindingObserver {
   Future<void> playFrom(AyahRef ref) async {
     final reciter = _session?.reciter ?? _preferredReciter;
     if (reciter == null) return; // no catalogue
+    Usage.recitationStarted(reciter: reciter.id); // specs/016: the reciter, never the ayah
     _player.prime(); // still inside the tap (specs/008: iOS Safari)
     _clearPreview(); // the recitation's window replaces the sample's
     _endedTimer?.cancel();

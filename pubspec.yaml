@@ -13,8 +13,9 @@ dependencies:
   audio_service: ^0.18.19
   audio_session: ^0.2.4
   crypto: ^3.0.7
-  # Announcements from the Firebase console, phones only (specs/015 research R6): exact
-  # versions, no Analytics.
+  # Announcements from the Firebase console, phones only (specs/015 research R6), and usage
+  # statistics on phones and the web (specs/016 research R1): exact versions.
+  firebase_analytics: 13.1.0
   firebase_core: 5.2.0
   firebase_messaging: 17.1.0
   flutter:

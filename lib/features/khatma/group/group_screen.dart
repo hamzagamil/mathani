@@ -5,6 +5,7 @@ import '../../../app/l10n/app_localizations.dart';
 import '../../../app/theme/app_theme.dart';
 import '../../../app/theme/tokens.dart';
 import '../../../shared/mathani_icons.dart';
+import '../../analytics/usage.dart';
 import '../khatma_controller.dart';
 import '../khatma_format.dart';
 import '../khatma_models.dart';
@@ -25,7 +26,10 @@ class GroupScreen extends StatefulWidget {
   State<GroupScreen> createState() => _GroupScreenState();
 }
 
-class _GroupScreenState extends State<GroupScreen> {
+class _GroupScreenState extends State<GroupScreen> with ScreenTracking<GroupScreen> {
+  @override
+  UsageScreen get usageScreen => UsageScreen.groupKhatma;
+
   GroupController? _groups;
   bool _offline = false;
   bool _loading = true;

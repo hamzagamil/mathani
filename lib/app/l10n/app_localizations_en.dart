@@ -2102,4 +2102,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get contactTitle => 'Contact';
+
+  @override
+  String get aboutPrivacyPolicy => 'Privacy policy';
+
+  @override
+  String get aboutUsageStatistics =>
+      'Mathani sends anonymous usage statistics: app opens, screens, features and settings used. What you read, recite or search, and anything personal, are never part of them.';
 }

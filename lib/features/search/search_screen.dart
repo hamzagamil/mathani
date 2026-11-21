@@ -9,6 +9,7 @@ import '../../data/models.dart';
 import '../../shared/mathani_icons.dart';
 import '../../shared/numerals.dart';
 import '../../shared/reader_state.dart';
+import '../analytics/usage.dart';
 import 'search_index.dart';
 
 /// Arabic search over the Quran text (FR-022): diacritic- and spelling-insensitive, results with
@@ -21,12 +22,16 @@ class SearchScreen extends StatefulWidget {
   State<SearchScreen> createState() => _SearchScreenState();
 }
 
-class _SearchScreenState extends State<SearchScreen> {
+class _SearchScreenState extends State<SearchScreen> with ScreenTracking<SearchScreen> {
+  @override
+  UsageScreen get usageScreen => UsageScreen.search;
+
   static const _debounce = Duration(milliseconds: 200);
 
   final _query = TextEditingController();
   late final Future<SearchIndex> _index = SearchIndex.load(ReaderScope.read(context).quran);
   SearchResults _results = SearchResults.empty;
+  bool _searchCounted = false;
   Timer? _timer;
 
   @override
@@ -40,7 +45,14 @@ class _SearchScreenState extends State<SearchScreen> {
     _timer?.cancel();
     _timer = Timer(_debounce, () async {
       final results = (await _index).search(text);
-      if (mounted && _query.text == text) setState(() => _results = results);
+      if (mounted && _query.text == text) {
+        // Once per visit, and never the words searched (specs/016).
+        if (!_searchCounted && results.hits.isNotEmpty) {
+          _searchCounted = true;
+          Usage.search();
+        }
+        setState(() => _results = results);
+      }
     });
   }
 

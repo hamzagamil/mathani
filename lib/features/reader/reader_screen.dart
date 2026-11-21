@@ -12,6 +12,7 @@ import '../../data/quran_repository.dart';
 import '../../shared/mathani_icons.dart';
 import '../../shared/numerals.dart';
 import '../../shared/reader_state.dart';
+import '../analytics/usage.dart';
 import '../index/bookmark_note.dart';
 import '../index/index_screen.dart';
 import '../khatma/khatma_controller.dart';
@@ -49,7 +50,10 @@ class ReaderScreen extends StatefulWidget {
   State<ReaderScreen> createState() => _ReaderScreenState();
 }
 
-class _ReaderScreenState extends State<ReaderScreen> {
+class _ReaderScreenState extends State<ReaderScreen> with ScreenTracking<ReaderScreen> {
+  @override
+  UsageScreen get usageScreen => UsageScreen.reader;
+
   static const _slide = Duration(milliseconds: 200);
 
   bool? _wakelock;

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import '../data/models.dart';
+import '../features/analytics/usage.dart';
 import '../features/khatma/group/group_controller.dart';
 import '../features/khatma/group/group_link_host.dart';
 import '../features/khatma/khatma_controller.dart';
@@ -109,6 +110,8 @@ class MathaniApp extends StatelessWidget {
               resolveLocale(prefs.language, deviceLocales),
           // Around the Navigator, so sheets, dialogs and snack bars stay inside the column.
           builder: kIsWeb ? (context, child) => PhoneColumn(child: child!) : null,
+          // Screen views for usage statistics (specs/016 research R4).
+          navigatorObservers: [usageRouteObserver],
           home: PrayerNotificationOpenHost(
             child: ReminderOpenHost(
               // Group khatma links (specs/014 FR-046).

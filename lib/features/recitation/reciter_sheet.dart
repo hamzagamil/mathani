@@ -8,6 +8,7 @@ import '../../app/theme/tokens.dart';
 import '../../data/models.dart';
 import '../../shared/mathani_icons.dart';
 import '../../shared/reader_state.dart';
+import '../analytics/usage.dart';
 import '../search/arabic_normalizer.dart';
 import 'recitation_controller.dart';
 
@@ -37,7 +38,10 @@ class _ReciterSheet extends StatelessWidget {
   final ScrollController controller;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) =>
+      TrackedScreen(UsageScreen.reciters, child: Builder(builder: _content));
+
+  Widget _content(BuildContext context) {
     final reader = ReaderScope.of(context);
     final recitation = RecitationScope.maybeOf(context);
     final l10n = AppLocalizations.of(context);

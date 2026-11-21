@@ -66,6 +66,18 @@
 	<!-- Announcements (specs/015 research R6): no FCM token until the Announcements setting is on. -->
 	<key>FirebaseMessagingAutoInitEnabled</key>
 	<false/>
+	<!-- Usage statistics (specs/016 research R2 to R4): off until the app turns collection on in
+	     release builds; no ad signals, no ad-network registration, no IDFV, no automatic screens. -->
+	<key>FIREBASE_ANALYTICS_COLLECTION_ENABLED</key>
+	<false/>
+	<key>FirebaseAutomaticScreenReportingEnabled</key>
+	<false/>
+	<key>GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_PERSONALIZATION_SIGNALS</key>
+	<false/>
+	<key>GOOGLE_ANALYTICS_REGISTRATION_WITH_AD_NETWORK_ENABLED</key>
+	<false/>
+	<key>GOOGLE_ANALYTICS_IDFV_COLLECTION_ENABLED</key>
+	<false/>
 	<key>NSLocationDefaultAccuracyReduced</key>
 	<true/>
 	<key>NSLocationWhenInUseUsageDescription</key>
