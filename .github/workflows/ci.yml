@@ -108,19 +108,16 @@ jobs:
       - run: flutter pub get
       - name: Build iOS (no codesign) with size analysis
         run: flutter build ios --release --no-codesign --analyze-size --code-size-directory=build/size
-      # The widgets' shared Swift code (specs/017 T024, T026), and the watch app on its own.
-      - name: Swift unit tests and the watch app build
+      # The widgets' shared Swift code (specs/017 T024, T026). The build above already compiled the
+      # widget extension, the watch app and the watch widgets.
+      - name: Swift unit tests
         if: hashFiles('ios/Shared/WidgetSnapshot.swift') != ''
         run: |
           set -o pipefail
-          flutter build ios --simulator --debug
+          # With a watch app, `flutter build ios --simulator` needs a device id; xcodebuild builds.
+          flutter build ios --config-only --debug --simulator
           UDID=$(xcrun simctl list devices available | grep -m1 "iPhone" | grep -oE '[0-9A-F-]{36}')
-          xcodebuild test -workspace ios/Runner.xcworkspace -scheme Runner -destination "id=$UDID" \
-            -only-testing:RunnerTests CODE_SIGNING_ALLOWED=NO | tail -60
-          if xcodebuild -list -project ios/Runner.xcodeproj | grep -q MathaniWatch; then
-            xcodebuild build -project ios/Runner.xcodeproj -scheme MathaniWatch \
-              -destination 'generic/platform=watchOS Simulator' CODE_SIGNING_ALLOWED=NO | tail -30
-          fi
+          xcodebuild test -workspace ios/Runner.xcworkspace -scheme Runner -destination "id=$UDID" -only-testing:RunnerTests CODE_SIGNING_ALLOWED=NO 2>&1 | grep -E "error:|Test Case|Executed|TEST (SUCCEEDED|FAILED)" | tail -80
       - name: Size check
         run: >
           dart run tool/size_check.dart ios
