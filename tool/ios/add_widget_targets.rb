@@ -54,6 +54,8 @@ def configure(target, runner_configs, bundle_id:, folder:, profile:, family:, ex
     config.base_configuration_reference = base if base
     s = config.build_settings
     s['PRODUCT_BUNDLE_IDENTIFIER'] = bundle_id
+    # xcodeproj leaves it empty, and every product would then be named ".app".
+    s['PRODUCT_NAME'] = '$(TARGET_NAME)'
     s['INFOPLIST_FILE'] = "#{folder}/Info.plist"
     s['GENERATE_INFOPLIST_FILE'] = 'NO'
     s['CODE_SIGN_ENTITLEMENTS'] = "#{folder}/#{folder}.entitlements"
