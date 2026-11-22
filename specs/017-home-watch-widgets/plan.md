@@ -169,3 +169,6 @@ surfaces match the app (FR-005). The only phone growth is the extension, the lay
   widgets; the App Store delivers those to the watch, so the iPhone download grows less. Check
   App Store Connect's size report for the first build with the watch app. The tool's iOS baseline
   (153.93 MB) is older still, like the Android one.
+- **Baselines reset** on 2026-11-22 at the owner's request: `docs/size_baseline.json` now holds
+  Android 173.04 MB (exact, from the local analysis) and iOS 191.44 MB (from the CI log, to within
+  0.005 MB, as the iOS analysis file stays on the runner). Later changes are measured from here.
