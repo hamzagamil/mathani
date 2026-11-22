@@ -74,6 +74,28 @@ builds use `BYPASS_PERMISSION_LOCATION_ALWAYS=1 flutter build ipa ...`.
 Every upload needs a new build number: bump `+build` in `pubspec.yaml`, or set the workflow's
 `build_number` input.
 
+### Widgets and the Apple Watch app (specs/017)
+
+Set up on 2026-11-22. The iPhone app carries three more targets, each signed with its own profile:
+
+| Target | Bundle ID | App Group | Profile | Secret |
+| --- | --- | --- | --- | --- |
+| Runner (the app) | `com.mthani.app` | `group.com.mthani.app` | Mathani App Store | `IOS_APPSTORE_PROFILE_BASE64` |
+| MathaniWidgets | `com.mthani.app.widgets` | `group.com.mthani.app` | Mathani Widgets App Store | `IOS_WIDGETS_PROFILE_BASE64` |
+| MathaniWatch | `com.mthani.app.watchkitapp` | `group.com.mthani.app.watch` | Mathani Watch App Store | `IOS_WATCH_PROFILE_BASE64` |
+| MathaniWatchWidgets | `com.mthani.app.watchkitapp.widgets` | `group.com.mthani.app.watch` | Mathani Watch Widgets App Store | `IOS_WATCH_WIDGETS_PROFILE_BASE64` |
+
+- The profile names must stay exactly as above: `ios/ExportOptions.plist` and the targets'
+  Release settings look them up by name. Offline copies are in the keys folder.
+- After any capability change in the developer portal, regenerate the affected profile, download
+  it, check its creation date and entitlements before setting the secret (a browser saves a repeat
+  download as `(1)`, `(2)`), and set the secret with
+  `[Convert]::ToBase64String([IO.File]::ReadAllBytes("<file>")) | gh secret set <SECRET>`.
+- The targets were added to `ios/Runner.xcodeproj` by `tool/ios/add_widget_targets.rb`, run once by
+  the "iOS add targets" workflow. Swift sources live in `ios/Shared`, `ios/MathaniWidgets`,
+  `ios/MathaniWatch` and `ios/MathaniWatchWidgets`; CI compiles them and runs the Swift tests.
+- App Store Connect needs Apple Watch screenshots for the version that first ships the watch app.
+
 ## Release builds
 
 ```powershell
@@ -83,6 +105,19 @@ dart run tool/check_mutashabihat.dart   # must print OK (specs/010); CI and the 
 flutter build appbundle --release --obfuscate --split-debug-info=symbols/android
 flutter build ipa --release --obfuscate --split-debug-info=symbols/ios   # macOS CI
 ```
+
+The Wear OS app (specs/017) is a separate bundle in the same Play listing, built from `android/`:
+
+```powershell
+cd android; ./gradlew :wear:bundleRelease   # build/wear/outputs/bundle/release/wear-release.aab
+```
+
+It uses the same upload key (`key.properties`) and the same applicationId. Its versionCode is the
+phone's `+build` plus 1 000 000, so every phone release has a matching watch release. Upload it to
+the Wear OS track (Play Console › Test and release, form factor Wear OS) and roll it out on the same
+day as the phone bundle (spec FR-024). CI also builds it and keeps it as an artifact. The Wear OS
+form factor was added on 2026-11-22; Play opens the "Opt-in to Wear OS" step once Wear OS
+screenshots are in every listing and a Wear bundle is on a testing track.
 
 Keep `symbols/` from each release (gitignored) to symbolicate crash stack traces. `--analyze-size`
 cannot be combined with `--split-debug-info`: measure size with a separate build, as CI does
@@ -164,6 +199,8 @@ release; releases bundle the latest one (above).
 - [ ] Khatma (specs/014 quickstart A1 to A9) passes on one iPhone and one Android phone: the
       reminder fires with the app closed and after a restart, and prayer alerts still keep at
       least seven days pending (at most 52 on iPhone now, leaving 10 for the reminder).
+- [ ] Widgets (specs/017 quickstart 1 to 22) pass on both phones and both watches; the Wear OS
+      bundle and the iPhone build (with the watch app) are released on the same day.
 
 ## Group khatma setup (specs/014 release B)
 

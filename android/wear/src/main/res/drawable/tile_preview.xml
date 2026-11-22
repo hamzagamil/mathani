@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Placeholder preview of the prayer tile in the watch's tile picker; replaced by a screenshot
+     before release (specs/017 T062). -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item><shape android:shape="oval"><solid android:color="#FF16263F"/><size android:width="192dp" android:height="192dp"/></shape></item>
+    <item android:gravity="center" android:width="72dp" android:height="72dp" android:drawable="@drawable/ic_complication"/>
+</layer-list>

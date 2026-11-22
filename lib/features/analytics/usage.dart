@@ -82,7 +82,11 @@ abstract final class Usage {
     'announcement_opened',
     'onboarding_completed',
     'setting_changed',
+    'widgets_present',
   };
+
+  /// Widget kinds `widgets_present` may name (specs/017 contracts/widget-surfaces.md › Usage).
+  static const widgetKinds = {'prayer', 'quran', 'khatma'};
 
   static void screen(UsageScreen screen) => _safe(() => sink.screen(screen.wire));
 
@@ -115,6 +119,16 @@ abstract final class Usage {
       _event('announcement_opened', {'has_link': '$hasLink'});
 
   static void onboardingCompleted() => _event('onboarding_completed', const {});
+
+  /// Which kinds of Mathani widgets are on the phone (specs/017 SC-007): a sorted list of known
+  /// kinds, or `none`. Anything else is dropped.
+  static void widgetsPresent(Iterable<String> kinds) {
+    final known = kinds.where(widgetKinds.contains).toSet().toList()..sort();
+    _event('widgets_present', {
+      'kinds': known.isEmpty ? 'none' : known.join(','),
+      'surface': 'phone',
+    });
+  }
 
   /// [value] is an enum (its name), a bool, an int, or a catalogue id for [UsageSetting.reciter]
   /// and [UsageSetting.athanSound].

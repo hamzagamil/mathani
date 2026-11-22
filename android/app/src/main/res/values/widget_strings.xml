@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Home screen widgets (specs/017): picker texts and the state before the app first runs.
+     Everything else comes from the app, in its own language (research R1). -->
+<resources>
+    <string name="widget_prayer_name">Prayer times</string>
+    <string name="widget_prayer_description">The next prayer and the time left</string>
+    <string name="widget_quran_name">Quran</string>
+    <string name="widget_quran_description">Continue reading or open today\'s wird</string>
+    <string name="widget_open_app">Open Mathani to set up</string>
+</resources>

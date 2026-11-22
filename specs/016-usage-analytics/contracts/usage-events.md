@@ -46,6 +46,7 @@ Parameter `screen_name` (and `screen_class` with the same value), one of:
 | `announcement_opened` | `has_link` | A tapped announcement opens the app |
 | `onboarding_completed` | none | Onboarding finishes |
 | `setting_changed` | `setting`, `value` (below) | A setting changes |
+| `widgets_present` | `kinds` (sorted subset of `prayer,quran,khatma`, or `none`), `surface` (`phone`) | At most once a day on resume, phones only (specs/017 SC-007) |
 
 ## `setting_changed` values
 

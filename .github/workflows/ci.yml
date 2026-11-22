@@ -59,6 +59,16 @@ jobs:
           dart run tool/size_check.dart android
           $(ls -t ~/.flutter-devtools/*code-size-analysis*.json | head -1)
           ${{ contains(github.event.pull_request.labels.*.name, 'size-approved') && '--approved' || '' }}
+      # The phone widgets' Kotlin tests and the Wear OS app (specs/017 T010). The Wear bundle is
+      # uploaded to Play next to the phone bundle (docs/release.md).
+      - name: Widget and Wear OS tests, Wear OS bundle
+        working-directory: android
+        run: ./gradlew :app:testDebugUnitTest :wear:testDebugUnitTest :wear:bundleRelease --console=plain
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wear-bundle-${{ github.run_number }}
+          path: build/wear/outputs/bundle/release/*.aab
+          if-no-files-found: error
       # The emulator needs more free disk than the runner has after the build.
       - name: Free disk space
         run: |
@@ -101,6 +111,19 @@ jobs:
           dart run tool/size_check.dart ios
           $(ls -t ~/.flutter-devtools/*code-size-analysis*.json | head -1)
           ${{ contains(github.event.pull_request.labels.*.name, 'size-approved') && '--approved' || '' }}
+      # The widgets' shared Swift code (specs/017 T024, T026), and the watch app on its own.
+      - name: Swift unit tests and the watch app build
+        if: hashFiles('ios/Shared/WidgetSnapshot.swift') != ''
+        run: |
+          set -o pipefail
+          flutter build ios --simulator --debug
+          UDID=$(xcrun simctl list devices available | grep -m1 "iPhone" | grep -oE '[0-9A-F-]{36}')
+          xcodebuild test -workspace ios/Runner.xcworkspace -scheme Runner -destination "id=$UDID" \
+            -only-testing:RunnerTests CODE_SIGNING_ALLOWED=NO | tail -60
+          if xcodebuild -list -project ios/Runner.xcodeproj | grep -q MathaniWatch; then
+            xcodebuild build -project ios/Runner.xcodeproj -scheme MathaniWatch \
+              -destination 'generic/platform=watchOS Simulator' CODE_SIGNING_ALLOWED=NO | tail -30
+          fi
       - name: Integration tests on iOS simulator (iPhone SE 3rd gen)
         if: hashFiles('integration_test/**') != ''
         run: |

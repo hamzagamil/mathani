@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">مثاني</string>
+    <string name="complication_prayer">الصلاة القادمة</string>
+    <string name="complication_khatma">الختمة</string>
+    <string name="tile_prayer">مواقيت الصلاة</string>
+    <string name="open_phone">افتح مثاني على هاتفك</string>
+</resources>

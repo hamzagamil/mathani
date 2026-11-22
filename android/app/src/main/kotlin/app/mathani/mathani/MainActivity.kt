@@ -13,6 +13,7 @@ import android.os.Handler
 import android.os.Looper
 import android.os.StatFs
 import android.provider.Settings
+import app.mathani.mathani.widgets.WidgetsPlugin
 import com.ryanheise.audioservice.AudioServiceActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -24,6 +25,7 @@ class MainActivity : AudioServiceActivity() {
         super.configureFlutterEngine(flutterEngine)
         DeviceChannel.register(this, flutterEngine)
         PrayerNotificationsPlugin.register(flutterEngine)
+        WidgetsPlugin.register(flutterEngine)
         PrayerNotificationsPlugin.noteOpenIntent(intent)
         DeviceChannel.noteLink(intent, launch = true)
     }
@@ -37,19 +39,23 @@ class MainActivity : AudioServiceActivity() {
 /** The hosts whose links open the app (AndroidManifest.xml). */
 private val LINK_HOSTS = setOf("get.mthani.app", "mthani.app", "www.mthani.app")
 
+/** Widget taps open the app with these links, in explicit intents only (specs/017). */
+private const val WIDGET_SCHEME = "mathani-widget"
+
 /// Network type and free storage for recitation downloads (specs/004, research R8); device
 /// support, the Settings link and the mistake tone for memorization (specs/006, R12, R15).
 object DeviceChannel {
     private var channel: MethodChannel? = null
     private var pendingLink: String? = null
 
-    /** A group khatma link the app was opened with, or that arrived while it runs (specs/014
-     * research R16): handed to Dart once by `takeLink`, or sent as a `link` event. Any other
-     * Mathani link only opens the app. */
+    /** A group khatma link (specs/014 research R16) or a widget tap (specs/017 research R8) the
+     * app was opened with, or that arrived while it runs: handed to Dart once by `takeLink`, or
+     * sent as a `link` event. Any other Mathani link only opens the app. */
     fun noteLink(intent: Intent?, launch: Boolean) {
         val data = intent?.data ?: return
-        if (intent.action != Intent.ACTION_VIEW || data.host?.lowercase() !in LINK_HOSTS ||
-            data.path?.startsWith("/k/") != true) return
+        if (intent.action != Intent.ACTION_VIEW) return
+        val group = data.host?.lowercase() in LINK_HOSTS && data.path?.startsWith("/k/") == true
+        if (!group && data.scheme != WIDGET_SCHEME) return
         val link = data.toString()
         val events = channel
         // At launch Dart is not listening yet: it asks with takeLink after the first frame.

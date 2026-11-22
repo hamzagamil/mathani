@@ -53,6 +53,18 @@ void main() {
     }
   });
 
+  test('widgets_present names only known kinds, sorted (specs/017 SC-007)', () {
+    Usage.widgetsPresent(['quran', 'prayer', 'quran']);
+    Usage.widgetsPresent(const []);
+    Usage.widgetsPresent(['Cairo', 'khatma']);
+    expect(sink.events, [
+      ['widgets_present', {'kinds': 'prayer,quran', 'surface': 'phone'}],
+      ['widgets_present', {'kinds': 'none', 'surface': 'phone'}],
+      ['widgets_present', {'kinds': 'khatma', 'surface': 'phone'}],
+    ]);
+    expect(Usage.actions, contains('widgets_present'));
+  });
+
   test('a settings change logs exactly the changed fields', () {
     const before = ReaderPreferences();
     final after = before.copyWith(theme: ThemePref.night, flowFontSize: 26, twoPages: !before.twoPages);

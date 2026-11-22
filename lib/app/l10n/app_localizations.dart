@@ -3552,6 +3552,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Mathani sends anonymous usage statistics: app opens, screens, features and settings used. What you read, recite or search, and anything personal, are never part of them.'**
   String get aboutUsageStatistics;
+
+  /// Before the live countdown on a widget, e.g. 'in 1:05:00' (specs/017).
+  ///
+  /// In en, this message translates to:
+  /// **'in {left}'**
+  String widgetIn(String left);
+
+  /// Quran widget title when there is no khatma (specs/017).
+  ///
+  /// In en, this message translates to:
+  /// **'Continue reading'**
+  String get widgetContinueReading;
+
+  /// Quran widget title before anything was read (specs/017).
+  ///
+  /// In en, this message translates to:
+  /// **'Start reading'**
+  String get widgetStartReading;
+
+  /// Prayer widget before a place is set (specs/017 FR-007).
+  ///
+  /// In en, this message translates to:
+  /// **'Set your place in Prayer Times'**
+  String get widgetSetPlace;
+
+  /// Watch prayer card and screen before a place is set (specs/017).
+  ///
+  /// In en, this message translates to:
+  /// **'Set a place in Mathani on your phone'**
+  String get widgetSetPlaceWatch;
+
+  /// Widgets after their 7 days of times run out (specs/017 FR-008).
+  ///
+  /// In en, this message translates to:
+  /// **'Open Mathani to update'**
+  String get widgetOpenToUpdate;
+
+  /// Khatma widget with no personal khatma (specs/017).
+  ///
+  /// In en, this message translates to:
+  /// **'No khatma'**
+  String get widgetNoKhatma;
+
+  /// First line of today's wird on a widget (specs/017).
+  ///
+  /// In en, this message translates to:
+  /// **'From {ayah}'**
+  String widgetWirdFrom(String ayah);
+
+  /// Second line of today's wird on a widget (specs/017).
+  ///
+  /// In en, this message translates to:
+  /// **'to {ayah}'**
+  String widgetWirdTo(String ayah);
+
+  /// Khatma progress on a widget; the numbers are already formatted (specs/017).
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% · {read} of {total} pages'**
+  String widgetProgress(String percent, String read, String total);
+
+  /// Screen reader sentence of the prayer widget (specs/017 FR-006).
+  ///
+  /// In en, this message translates to:
+  /// **'Next prayer: {name} at {time}'**
+  String widgetA11yNext(String name, String time);
+
+  /// A paused khatma on a widget (specs/017).
+  ///
+  /// In en, this message translates to:
+  /// **'Paused'**
+  String get widgetPaused;
 }
 
 class _AppLocalizationsDelegate

@@ -51,6 +51,10 @@ jobs:
           CERT_P12_BASE64: ${{ secrets.IOS_DIST_CERT_P12_BASE64 }}
           CERT_PASSWORD: ${{ secrets.IOS_DIST_CERT_PASSWORD }}
           PROFILE_BASE64: ${{ secrets.IOS_APPSTORE_PROFILE_BASE64 }}
+          # The widget extension, the watch app and the watch widgets (specs/017 research R4).
+          WIDGETS_PROFILE_BASE64: ${{ secrets.IOS_WIDGETS_PROFILE_BASE64 }}
+          WATCH_PROFILE_BASE64: ${{ secrets.IOS_WATCH_PROFILE_BASE64 }}
+          WATCH_WIDGETS_PROFILE_BASE64: ${{ secrets.IOS_WATCH_WIDGETS_PROFILE_BASE64 }}
         run: |
           KEYCHAIN="$RUNNER_TEMP/signing.keychain-db"
           KEYCHAIN_PASSWORD="$(uuidgen)"
@@ -64,9 +68,14 @@ jobs:
           PROFILES="$HOME/Library/MobileDevice/Provisioning Profiles"
           mkdir -p "$PROFILES"
           echo "$PROFILE_BASE64" | base64 --decode > "$PROFILES/mathani-app-store.mobileprovision"
+          for name in WIDGETS WATCH WATCH_WIDGETS; do
+            var="${name}_PROFILE_BASE64"
+            if [[ -z "${!var}" ]]; then echo "::error::Secret IOS_${var} is missing"; exit 1; fi
+            echo "${!var}" | base64 --decode > "$PROFILES/mathani-$(echo "$name" | tr 'A-Z_' 'a-z-').mobileprovision"
+          done
           # Xcode 16+ also reads profiles from this location.
           mkdir -p "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles"
-          cp "$PROFILES/mathani-app-store.mobileprovision" "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles/"
+          cp "$PROFILES"/mathani-*.mobileprovision "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles/"
           rm "$RUNNER_TEMP/dist.p12"
 
       - name: Build signed .ipa
@@ -121,4 +130,4 @@ jobs:
         run: |
           security delete-keychain "$RUNNER_TEMP/signing.keychain-db" || true
           rm -rf "$HOME/.appstoreconnect/private_keys"
-          rm -f "$HOME/Library/MobileDevice/Provisioning Profiles/mathani-app-store.mobileprovision"
+          rm -f "$HOME/Library/MobileDevice/Provisioning Profiles"/mathani-*.mobileprovision

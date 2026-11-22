@@ -72,5 +72,10 @@ flutter {
 
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+    // Sends the watch copy to a paired Wear OS watch (specs/017 research R6); the only supported
+    // phone-to-watch link. Firebase already brings the shared Play services base libraries.
+    implementation("com.google.android.gms:play-services-wearable:19.0.0")
     testImplementation("junit:junit:4.13.2")
+    // Plain JVM tests read the widget snapshot with the real org.json, not Android's stubs.
+    testImplementation("org.json:json:20240303")
 }

@@ -20,6 +20,7 @@ import '../features/reader/page_geometry.dart';
 import '../features/reader/reader_screen.dart';
 import '../features/prayer_times/prayer_alerts.dart';
 import '../features/prayer_times/prayer_notification_open_host.dart';
+import '../features/widgets/widget_link_host.dart';
 import '../shared/reader_state.dart';
 import '../platform/app_links.dart';
 import 'l10n/app_localizations.dart';
@@ -29,6 +30,9 @@ import 'theme/app_theme.dart';
 /// (specs/008 FR-012, research R13). The column widens for two facing Mushaf pages (specs/012).
 const wideWindowMin = 600.0;
 const phoneColumnWidth = 480.0;
+
+/// The platform's links, split between widget taps and group khatma links (specs/017).
+final _links = LinkSplitter(AppLinks.instance);
 
 class MathaniApp extends StatelessWidget {
   const MathaniApp({
@@ -114,8 +118,14 @@ class MathaniApp extends StatelessWidget {
           navigatorObservers: [usageRouteObserver],
           home: PrayerNotificationOpenHost(
             child: ReminderOpenHost(
-              // Group khatma links (specs/014 FR-046).
-              child: this.groups == null ? const _Home() : GroupLinkHost(source: AppLinks.instance, child: const _Home()),
+              // Widget taps (specs/017) and group khatma links (specs/014 FR-046) share the
+              // platform's one launch link.
+              child: this.groups == null
+                  ? const _Home()
+                  : WidgetLinkHost(
+                      source: _links.widgets,
+                      child: GroupLinkHost(source: _links.others, child: const _Home()),
+                    ),
             ),
           ),
         );

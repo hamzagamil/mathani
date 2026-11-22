@@ -574,5 +574,17 @@
   "groupCopied": "نُسخ الرابط.",
   "contactTitle": "تواصل",
   "aboutPrivacyPolicy": "سياسة الخصوصية",
-  "aboutUsageStatistics": "يرسل مثاني إحصاءات استخدام مجهولة: فتح التطبيق والشاشات والميزات والإعدادات المستخدمة. ولا يدخل فيها ما تقرؤه أو تتلوه أو تبحث عنه، ولا أي معلومة شخصية."
+  "aboutUsageStatistics": "يرسل مثاني إحصاءات استخدام مجهولة: فتح التطبيق والشاشات والميزات والإعدادات المستخدمة. ولا يدخل فيها ما تقرؤه أو تتلوه أو تبحث عنه، ولا أي معلومة شخصية.",
+  "widgetIn": "بعد {left}",
+  "widgetContinueReading": "تابع القراءة",
+  "widgetStartReading": "ابدأ القراءة",
+  "widgetSetPlace": "حدّد مكانك في مواقيت الصلاة",
+  "widgetSetPlaceWatch": "حدّد مكانًا في مثاني على هاتفك",
+  "widgetOpenToUpdate": "افتح مثاني للتحديث",
+  "widgetNoKhatma": "لا توجد ختمة",
+  "widgetWirdFrom": "من {ayah}",
+  "widgetWirdTo": "إلى {ayah}",
+  "widgetProgress": "{percent}٪ · {read} من {total} صفحة",
+  "widgetA11yNext": "الصلاة القادمة: {name} الساعة {time}",
+  "widgetPaused": "متوقفة"
 }

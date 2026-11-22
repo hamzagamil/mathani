@@ -15,6 +15,13 @@
 	<dict>
 		<key>com.mthani.app</key>
 		<string>Mathani App Store</string>
+		<!-- Widgets and the watch app (specs/017 research R4). -->
+		<key>com.mthani.app.widgets</key>
+		<string>Mathani Widgets App Store</string>
+		<key>com.mthani.app.watchkitapp</key>
+		<string>Mathani Watch App Store</string>
+		<key>com.mthani.app.watchkitapp.widgets</key>
+		<string>Mathani Watch Widgets App Store</string>
 	</dict>
 	<key>uploadSymbols</key>
 	<true/>

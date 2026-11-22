@@ -2109,4 +2109,50 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get aboutUsageStatistics =>
       'Mathani sends anonymous usage statistics: app opens, screens, features and settings used. What you read, recite or search, and anything personal, are never part of them.';
+
+  @override
+  String widgetIn(String left) {
+    return 'in $left';
+  }
+
+  @override
+  String get widgetContinueReading => 'Continue reading';
+
+  @override
+  String get widgetStartReading => 'Start reading';
+
+  @override
+  String get widgetSetPlace => 'Set your place in Prayer Times';
+
+  @override
+  String get widgetSetPlaceWatch => 'Set a place in Mathani on your phone';
+
+  @override
+  String get widgetOpenToUpdate => 'Open Mathani to update';
+
+  @override
+  String get widgetNoKhatma => 'No khatma';
+
+  @override
+  String widgetWirdFrom(String ayah) {
+    return 'From $ayah';
+  }
+
+  @override
+  String widgetWirdTo(String ayah) {
+    return 'to $ayah';
+  }
+
+  @override
+  String widgetProgress(String percent, String read, String total) {
+    return '$percent% · $read of $total pages';
+  }
+
+  @override
+  String widgetA11yNext(String name, String time) {
+    return 'Next prayer: $name at $time';
+  }
+
+  @override
+  String get widgetPaused => 'Paused';
 }

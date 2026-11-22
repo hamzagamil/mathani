@@ -24,6 +24,10 @@ plugins {
     id("com.google.gms.google-services") version("4.4.4") apply false
     // END: FlutterFire Configuration
     id("org.jetbrains.kotlin.android") version "2.4.0" apply false
+    // The Wear OS app's screen (specs/017 research R6).
+    id("org.jetbrains.kotlin.plugin.compose") version "2.4.0" apply false
 }
 
 include(":app")
+// The Wear OS app: complications, a tile and one screen (specs/017 research R6, R7).
+include(":wear")

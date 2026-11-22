@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Texts of the Wear OS app that the phone does not send (specs/017): names in the watch's lists,
+     and the state before the phone has sent anything. -->
+<resources>
+    <string name="app_name">Mathani</string>
+    <string name="complication_prayer">Next prayer</string>
+    <string name="complication_khatma">Khatma</string>
+    <string name="tile_prayer">Prayer times</string>
+    <string name="open_phone">Open Mathani on your phone</string>
+</resources>

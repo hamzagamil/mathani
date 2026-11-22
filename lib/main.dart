@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui' show PlatformDispatcher;
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 import 'app/app.dart';
@@ -26,11 +27,13 @@ import 'features/recitation/ayah_fetcher.dart';
 import 'features/recitation/media_handler.dart';
 import 'features/recitation/recitation_controller.dart';
 import 'features/settings/about_section.dart';
+import 'features/widgets/widget_sync.dart';
 import 'platform/announcements.dart';
 import 'platform/api_base.dart';
 import 'platform/app_links.dart';
 import 'platform/database.dart';
 import 'platform/device.dart';
+import 'platform/home_widgets.dart';
 import 'platform/key_store.dart';
 import 'platform/usage_firebase.dart';
 import 'platform/khatma_reminders.dart';
@@ -142,6 +145,22 @@ Future<void> runMathani() async {
     onLink: AppLinks.instance.deliver,
   );
   controller.addListener(announcements.preferencesChanged);
+  // Home screen, lock screen and watch widgets (specs/017): started after the khatma loads, so
+  // the first snapshot already has the wird (research R9).
+  final widgets = WidgetSync(
+    listenables: [controller, khatma, prayer],
+    l10n: l10n,
+    prayerBlock: (strings, now) => prayerBlockOf(prayer, strings, now),
+    quranInput: (strings) => quranInputOf(controller, khatma, strings),
+    send: const HomeWidgets().update,
+  );
+  // Which widgets are on the phone, at most once a day (specs/017 SC-007).
+  Future<void> reportWidgets() => reportWidgetsOncePerDay(
+    placed: const HomeWidgets().placed,
+    report: Usage.widgetsPresent,
+    readDay: () => user.readPreference('widgets_reported_day'),
+    writeDay: (day) => user.writePreference('widgets_reported_day', day),
+  );
   // Mutashabihat content updates (specs/011 R5): after the first frame and on resume, at most
   // every 6 hours, never blocking reading.
   final mutashabihat = MutashabihatUpdater(reader: controller);
@@ -150,6 +169,7 @@ Future<void> runMathani() async {
       unawaited(prayer.onAppActive());
       unawaited(reminders.sync());
       unawaited(mutashabihat.check());
+      if (!kIsWeb) unawaited(reportWidgets());
     },
     onHide: prayer.onAppInactive,
   );
@@ -167,7 +187,14 @@ Future<void> runMathani() async {
   // memorization to open; after the first frame, so cold start is unchanged (specs/007 FR-004).
   WidgetsBinding.instance.addPostFrameCallback((_) {
     unawaited(AsrModel.removeOtherVersions());
-    unawaited(khatma.load().then((_) => groups.load()).then((_) => reminders.start()));
+    unawaited(khatma.load().then((_) {
+      // Browsers have no widgets (specs/017 Edge Cases).
+      if (!kIsWeb) {
+        widgets.start();
+        unawaited(reportWidgets());
+      }
+      return groups.load();
+    }).then((_) => reminders.start()));
     unawaited(prayer.onAppActive());
     unawaited(mutashabihat.check());
     unawaited(announcements.start());

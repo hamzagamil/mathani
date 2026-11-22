@@ -1876,5 +1876,44 @@
   "aboutUsageStatistics": "Mathani sends anonymous usage statistics: app opens, screens, features and settings used. What you read, recite or search, and anything personal, are never part of them.",
   "@aboutUsageStatistics": {
     "description": "About: what usage statistics include and never include (specs/016 FR-007)."
-  }
+  },
+  "widgetIn": "in {left}",
+  "@widgetIn": {
+    "description": "Before the live countdown on a widget, e.g. 'in 1:05:00' (specs/017).",
+    "placeholders": { "left": { "type": "String" } }
+  },
+  "widgetContinueReading": "Continue reading",
+  "@widgetContinueReading": { "description": "Quran widget title when there is no khatma (specs/017)." },
+  "widgetStartReading": "Start reading",
+  "@widgetStartReading": { "description": "Quran widget title before anything was read (specs/017)." },
+  "widgetSetPlace": "Set your place in Prayer Times",
+  "@widgetSetPlace": { "description": "Prayer widget before a place is set (specs/017 FR-007)." },
+  "widgetSetPlaceWatch": "Set a place in Mathani on your phone",
+  "@widgetSetPlaceWatch": { "description": "Watch prayer card and screen before a place is set (specs/017)." },
+  "widgetOpenToUpdate": "Open Mathani to update",
+  "@widgetOpenToUpdate": { "description": "Widgets after their 7 days of times run out (specs/017 FR-008)." },
+  "widgetNoKhatma": "No khatma",
+  "@widgetNoKhatma": { "description": "Khatma widget with no personal khatma (specs/017)." },
+  "widgetWirdFrom": "From {ayah}",
+  "@widgetWirdFrom": {
+    "description": "First line of today's wird on a widget (specs/017).",
+    "placeholders": { "ayah": { "type": "String" } }
+  },
+  "widgetWirdTo": "to {ayah}",
+  "@widgetWirdTo": {
+    "description": "Second line of today's wird on a widget (specs/017).",
+    "placeholders": { "ayah": { "type": "String" } }
+  },
+  "widgetProgress": "{percent}% · {read} of {total} pages",
+  "@widgetProgress": {
+    "description": "Khatma progress on a widget; the numbers are already formatted (specs/017).",
+    "placeholders": { "percent": { "type": "String" }, "read": { "type": "String" }, "total": { "type": "String" } }
+  },
+  "widgetA11yNext": "Next prayer: {name} at {time}",
+  "@widgetA11yNext": {
+    "description": "Screen reader sentence of the prayer widget (specs/017 FR-006).",
+    "placeholders": { "name": { "type": "String" }, "time": { "type": "String" } }
+  },
+  "widgetPaused": "Paused",
+  "@widgetPaused": { "description": "A paused khatma on a widget (specs/017)." }
 }

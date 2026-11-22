@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_prayer_name">مواقيت الصلاة</string>
+    <string name="widget_prayer_description">الصلاة القادمة والوقت المتبقي</string>
+    <string name="widget_quran_name">القرآن</string>
+    <string name="widget_quran_description">تابع القراءة أو افتح ورد اليوم</string>
+    <string name="widget_open_app">افتح مثاني للإعداد</string>
+</resources>

@@ -33,6 +33,8 @@ you.
   the screen off; download surahs to listen offline.
 - Copy and share an ayah with its surah and ayah number.
 - Night theme and keep-screen-on for reading.
+- Widgets: the next prayer and today's wird on your home screen and lock screen, and on Apple
+  Watch and Wear OS watches.
 - Reading, search and bookmarks work fully offline from the first launch; recitations stream
   over the internet unless downloaded.
 - Arabic and English interface.
@@ -54,3 +56,9 @@ quran,mushaf,uthmani,hafs,madinah,recitation,tadabbur,mutashabihat,surah,juz
 ## Screenshot plan (phone, portrait)
 
 Same six screens as the Arabic listing, with the interface in English.
+
+## Watch screenshots (specs/017)
+
+Apple Watch (App Store, largest size listed) and Wear OS (Google Play, square, at least 384×384):
+the prayer complication on a watch face, the prayer card or tile, and the watch screen with
+today's times. Wear OS screenshots are needed in every listing before Play opens the Wear OS opt-in.

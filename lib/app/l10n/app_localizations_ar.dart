@@ -2107,4 +2107,50 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get aboutUsageStatistics =>
       'يرسل مثاني إحصاءات استخدام مجهولة: فتح التطبيق والشاشات والميزات والإعدادات المستخدمة. ولا يدخل فيها ما تقرؤه أو تتلوه أو تبحث عنه، ولا أي معلومة شخصية.';
+
+  @override
+  String widgetIn(String left) {
+    return 'بعد $left';
+  }
+
+  @override
+  String get widgetContinueReading => 'تابع القراءة';
+
+  @override
+  String get widgetStartReading => 'ابدأ القراءة';
+
+  @override
+  String get widgetSetPlace => 'حدّد مكانك في مواقيت الصلاة';
+
+  @override
+  String get widgetSetPlaceWatch => 'حدّد مكانًا في مثاني على هاتفك';
+
+  @override
+  String get widgetOpenToUpdate => 'افتح مثاني للتحديث';
+
+  @override
+  String get widgetNoKhatma => 'لا توجد ختمة';
+
+  @override
+  String widgetWirdFrom(String ayah) {
+    return 'من $ayah';
+  }
+
+  @override
+  String widgetWirdTo(String ayah) {
+    return 'إلى $ayah';
+  }
+
+  @override
+  String widgetProgress(String percent, String read, String total) {
+    return '$percent٪ · $read من $total صفحة';
+  }
+
+  @override
+  String widgetA11yNext(String name, String time) {
+    return 'الصلاة القادمة: $name الساعة $time';
+  }
+
+  @override
+  String get widgetPaused => 'متوقفة';
 }

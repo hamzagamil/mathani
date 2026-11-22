@@ -14,5 +14,10 @@
 		<string>applinks:mthani.app</string>
 		<string>applinks:www.mthani.app</string>
 	</array>
+	<!-- The widget snapshot, shared with the widget extension (specs/017 research R4). -->
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>group.com.mthani.app</string>
+	</array>
 </dict>
 </plist>

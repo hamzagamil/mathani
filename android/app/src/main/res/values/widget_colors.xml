@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Home screen widgets (specs/017): the app's own colours (lib/app/theme/tokens.dart). -->
+<resources>
+    <color name="widget_background">#FFFBF6F0</color>
+    <color name="widget_ink">#FF183159</color>
+    <color name="widget_ink_muted">#FF4C5466</color>
+    <color name="widget_accent">#FF755728</color>
+    <color name="widget_highlight">#FFEADCC0</color>
+    <color name="widget_track">#FFE9DFCD</color>
+</resources>
