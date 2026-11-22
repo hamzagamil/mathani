@@ -1,0 +1,40 @@
+name: iOS diagnose (temporary)
+
+# Temporary (specs/017): shows how Xcode builds the watch targets inside the iPhone app.
+on:
+  workflow_dispatch:
+
+env:
+  FLUTTER_VERSION: "3.47.7"
+  BYPASS_PERMISSION_LOCATION_ALWAYS: "1"
+
+jobs:
+  diagnose:
+    runs-on: xcode-27
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+      - run: flutter pub get
+      - run: flutter build ios --config-only --release --no-codesign
+      - name: Build settings of the watch targets
+        run: |
+          for t in MathaniWatch MathaniWatchWidgets MathaniWidgets; do
+            echo "== $t"
+            xcodebuild -project ios/Runner.xcodeproj -target "$t" -configuration Release -showBuildSettings 2>/dev/null \
+              | grep -E " (SDKROOT|PLATFORM_NAME|SUPPORTED_PLATFORMS|EFFECTIVE_PLATFORM_NAME|TARGET_BUILD_DIR) = "
+          done
+      - name: Build Runner as Flutter does, and show what is built for which platform
+        run: |
+          set +e
+          xcodebuild -workspace ios/Runner.xcworkspace -scheme Runner -configuration Release \
+            -destination 'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO build > build.log 2>&1
+          echo "exit $?"
+          grep -nE "^(SwiftDriver|SwiftCompile|CompileSwiftSources|ProcessInfoPlistFile|CodeSign|Ld) .*(Watch|Widgets)" build.log \
+            | sed -E 's/ \/Users\/runner\/work\/mathani\/mathani/ ./g' | cut -c1-220 | head -60
+          echo "== errors"
+          grep -nE "error:|note: Target dependency graph|warning: .*platform" build.log | cut -c1-300 | head -40
+          echo "== dependency graph"
+          awk '/Target dependency graph/{p=1} p{print} /^$/{if(p)exit}' build.log | head -40
