@@ -7,23 +7,67 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		03929E3977C681C9C59AF0D5 /* WidgetStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64AFC9D136012FF2352FE439 /* WidgetStyle.swift */; };
+		0CF8A68469461C9FAF85270C /* PrayerTimeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6724B3E715CB012907737F71 /* PrayerTimeline.swift */; };
 		1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */; };
+		16A7767DFC490B87600B10F9 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 7F9DA0524930286CAF472955 /* Localizable.xcstrings */; };
+		200E493D0B6FCDE39B50A6A0 /* WatchStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E881DEF106994E29F25F2313 /* WatchStore.swift */; };
+		2D491CC6F9924F4EAF873757 /* PrayerProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7012B3BFD0728EFB22802D22 /* PrayerProvider.swift */; };
 		331C808B294A63AB00263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C807B294A618700263BE5 /* RunnerTests.swift */; };
+		34A7C9218A6BDC8E661EA747 /* PrayerProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7012B3BFD0728EFB22802D22 /* PrayerProvider.swift */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
+		3CB2EE379B84FC0E2CD72DEB /* MathaniWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = A7E8AD5C6662ABDEDDCCC444 /* MathaniWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		3E952AFA92C9A3D5EA8EF2CD /* WidgetStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64AFC9D136012FF2352FE439 /* WidgetStyle.swift */; };
+		4E955506A4AA612DF32060CD /* PrayerWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 086A51F91E0BE3246431E20D /* PrayerWidget.swift */; };
+		5B811696E16F69DC93B76EB8 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 1EF2BD351CD8D22613E9CA11 /* Localizable.xcstrings */; };
+		5DA455F07150BDCABEB399B6 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 76A197D229ADF9F3D1E6A271 /* Foundation.framework */; };
+		6D24E8EBA9C7147F5938C2DF /* WatchWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC9302F15E73562D36C4C3A4 /* WatchWidgets.swift */; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
+		75D78BFCC5D2A2ABF34380E1 /* MathaniWidgetsBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3923409C7178622267E7B11 /* MathaniWidgetsBundle.swift */; };
 		7884E8682EC3CC0700C636F2 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7884E8672EC3CC0400C636F2 /* SceneDelegate.swift */; };
-		A17017B0A1B2C3D4E5F60002 /* WidgetBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = A17017B0A1B2C3D4E5F60001 /* WidgetBridge.swift */; };
 		78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile; productRef = 78A3181F2AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage */; };
+		81E7AA815288B169211286D0 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA7619BAD40914E27F69865C /* WidgetKit.framework */; };
+		842CC81D04ED4E092FCE03F4 /* PrayerProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7012B3BFD0728EFB22802D22 /* PrayerProvider.swift */; };
+		870299B40B823A3B35A21ECB /* PrayerTimeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6724B3E715CB012907737F71 /* PrayerTimeline.swift */; };
+		8A9FC24599F185325EB3900F /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 77D819A60C54F7968E00C31C /* SwiftUI.framework */; };
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
+		A04533F37EBF7D3BC08EAEDA /* PrayerProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7012B3BFD0728EFB22802D22 /* PrayerProvider.swift */; };
+		A17017B0A1B2C3D4E5F60002 /* WidgetBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = A17017B0A1B2C3D4E5F60001 /* WidgetBridge.swift */; };
+		A197C649ACF4858EE037AEBA /* PrayerTimeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6724B3E715CB012907737F71 /* PrayerTimeline.swift */; };
+		A45A09BAA59642F94875195E /* QuranWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = A74DC56DE6D063AFF81497BB /* QuranWidget.swift */; };
+		A7723EDCC0F3FA156ADB9775 /* WidgetSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F81496BB85CD981B2E7BA7 /* WidgetSnapshot.swift */; };
+		A90257257C785385E7717E89 /* WidgetStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64AFC9D136012FF2352FE439 /* WidgetStyle.swift */; };
+		AC742AFB7848677BDB79834A /* MathaniWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F8F2B1832B1D30F81BED579 /* MathaniWatchApp.swift */; };
+		B0A6050A0ED4E56F42AE3BE6 /* KhatmaWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7B4134BB43D63D495655E19 /* KhatmaWidget.swift */; };
+		B5A51D666C330DAD13FC214E /* WidgetStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64AFC9D136012FF2352FE439 /* WidgetStyle.swift */; };
+		B70CCD7D3393CB3D25A6A3F6 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 24AA97D4510289DD03A675EE /* Localizable.xcstrings */; };
+		B760D55714765E1EE3C3E09A /* WidgetSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F81496BB85CD981B2E7BA7 /* WidgetSnapshot.swift */; };
+		BEF7FB3CD2F8DE64724F06C7 /* PrayerTimeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6724B3E715CB012907737F71 /* PrayerTimeline.swift */; };
+		C1F7177C3AB68B4A5DB09A1A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2D063C348C7E6CB9790B67EA /* Assets.xcassets */; };
 		D1A0F00100000000000000A1 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = D1A0F00100000000000000A2 /* InfoPlist.strings */; };
+		D1A0F00100000000000000A5 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = D1A0F00100000000000000A6 /* PrivacyInfo.xcprivacy */; };
 		D1A0F00100000000000000A7 /* mistake.caf in Resources */ = {isa = PBXBuildFile; fileRef = D1A0F00100000000000000A8 /* mistake.caf */; };
 		D1A0F00100000000000000B1 /* athan_takbira.caf in Resources */ = {isa = PBXBuildFile; fileRef = D1A0F00100000000000000B2 /* athan_takbira.caf */; };
-		D1A0F00100000000000000A5 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = D1A0F00100000000000000A6 /* PrivacyInfo.xcprivacy */; };
+		D68EC27EE4D2C684338AAE1A /* WidgetSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F81496BB85CD981B2E7BA7 /* WidgetSnapshot.swift */; };
+		DE3816CF122E3A6CAC3F6281 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A5B97066FF3319471537C3CA /* Foundation.framework */; };
+		DEF7E4FEC9E6CDBBA4028234 /* WidgetSnapshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDDDA9EDE3EAE6E6401FAD21 /* WidgetSnapshotTests.swift */; };
+		DF319EAE91C9392AB2189145 /* MathaniWatchWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = DD6CAAB3B65817DB9D8B2ED9 /* MathaniWatchWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		F1D3F2099B232E29317361F6 /* PrayerTimelineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D3C2D85CCA6E747B2A9FF3A /* PrayerTimelineTests.swift */; };
+		FBB3D270DC38CF8603C5EA50 /* MathaniWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 1D712F674D33854431D81DA3 /* MathaniWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		FCE88D484FEB93EE8ACE8795 /* WidgetSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F81496BB85CD981B2E7BA7 /* WidgetSnapshot.swift */; };
+		FDF42D9DA66C0EF99CE820A4 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 76A197D229ADF9F3D1E6A271 /* Foundation.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		072D1CF11B7FF215980856D0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 60CD407E35D672FDF240A707;
+			remoteInfo = MathaniWatch;
+		};
 		331C8085294A63A400263BE5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
@@ -31,9 +75,56 @@
 			remoteGlobalIDString = 97C146ED1CF9000F007C117D;
 			remoteInfo = Runner;
 		};
+		8D79C3FD40F7FB9B5AA8392E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 544E6516960F2B8C8AE2FB77;
+			remoteInfo = MathaniWidgets;
+		};
+		9A5D020D19C29B4C41FFE0B5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8FBC89576862A82408C13710;
+			remoteInfo = MathaniWatchWidgets;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		2DCE040434C77005BD834BC5 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				DF319EAE91C9392AB2189145 /* MathaniWatchWidgets.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4E25A3E598DD766213C05A93 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				3CB2EE379B84FC0E2CD72DEB /* MathaniWatch.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9034F219DCDF54D2E5D405EE /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				FBB3D270DC38CF8603C5EA50 /* MathaniWidgets.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		9705A1C41CF9048500538489 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -47,17 +138,32 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		086A51F91E0BE3246431E20D /* PrayerWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PrayerWidget.swift; sourceTree = "<group>"; };
 		1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeneratedPluginRegistrant.h; sourceTree = "<group>"; };
 		1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneratedPluginRegistrant.m; sourceTree = "<group>"; };
+		1D712F674D33854431D81DA3 /* MathaniWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MathaniWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		1EF2BD351CD8D22613E9CA11 /* Localizable.xcstrings */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		208259EAE72DA464CB2C8ABB /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		24AA97D4510289DD03A675EE /* Localizable.xcstrings */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		273AF23E90042B9A50735813 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		2D063C348C7E6CB9790B67EA /* Assets.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		331C807B294A618700263BE5 /* RunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerTests.swift; sourceTree = "<group>"; };
 		331C8081294A63A400263BE5 /* RunnerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RunnerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = AppFrameworkInfo.plist; path = Flutter/AppFrameworkInfo.plist; sourceTree = "<group>"; };
+		4F8F2B1832B1D30F81BED579 /* MathaniWatchApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MathaniWatchApp.swift; sourceTree = "<group>"; };
+		5D3C2D85CCA6E747B2A9FF3A /* PrayerTimelineTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PrayerTimelineTests.swift; sourceTree = "<group>"; };
+		6329BCD448DF05868369C3A0 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		64AFC9D136012FF2352FE439 /* WidgetStyle.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WidgetStyle.swift; sourceTree = "<group>"; };
+		6724B3E715CB012907737F71 /* PrayerTimeline.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PrayerTimeline.swift; sourceTree = "<group>"; };
+		7012B3BFD0728EFB22802D22 /* PrayerProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PrayerProvider.swift; sourceTree = "<group>"; };
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		76A197D229ADF9F3D1E6A271 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS26.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		77D819A60C54F7968E00C31C /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/SwiftUI.framework; sourceTree = DEVELOPER_DIR; };
 		7884E8672EC3CC0400C636F2 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
-		A17017B0A1B2C3D4E5F60001 /* WidgetBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetBridge.swift; sourceTree = "<group>"; };
 		78E0A7A72DC9AD7400C4905E /* FlutterGeneratedPluginSwiftPackage */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = FlutterGeneratedPluginSwiftPackage; path = Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage; sourceTree = "<group>"; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Flutter/Release.xcconfig; sourceTree = "<group>"; };
+		7F9DA0524930286CAF472955 /* Localizable.xcstrings */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		9740EEB21CF90195004384FC /* Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Debug.xcconfig; path = Flutter/Debug.xcconfig; sourceTree = "<group>"; };
 		9740EEB31CF90195004384FC /* Generated.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Generated.xcconfig; path = Flutter/Generated.xcconfig; sourceTree = "<group>"; };
 		97C146EE1CF9000F007C117D /* Runner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Runner.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -65,14 +171,45 @@
 		97C146FD1CF9000F007C117D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		97C147001CF9000F007C117D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		97C147021CF9000F007C117D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		9C1A61BBBDFCFCCDAE88E14E /* MathaniWatch.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = MathaniWatch.entitlements; sourceTree = "<group>"; };
+		A17017B0A1B2C3D4E5F60001 /* WidgetBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetBridge.swift; sourceTree = "<group>"; };
+		A5B97066FF3319471537C3CA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		A5F81496BB85CD981B2E7BA7 /* WidgetSnapshot.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WidgetSnapshot.swift; sourceTree = "<group>"; };
+		A74DC56DE6D063AFF81497BB /* QuranWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QuranWidget.swift; sourceTree = "<group>"; };
+		A7E8AD5C6662ABDEDDCCC444 /* MathaniWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MathaniWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AC9302F15E73562D36C4C3A4 /* WatchWidgets.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchWidgets.swift; sourceTree = "<group>"; };
+		B3923409C7178622267E7B11 /* MathaniWidgetsBundle.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MathaniWidgetsBundle.swift; sourceTree = "<group>"; };
+		C4D56BB81C733B16B3E93DB2 /* MathaniWatchWidgets.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = MathaniWatchWidgets.entitlements; sourceTree = "<group>"; };
+		CD11DF2CD70AC6F2B258F8F5 /* MathaniWidgets.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = MathaniWidgets.entitlements; sourceTree = "<group>"; };
 		D1A0F00100000000000000A3 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		D1A0F00100000000000000A4 /* ar */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ar; path = ar.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		D1A0F00100000000000000A6 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		D1A0F00100000000000000A8 /* mistake.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = mistake.caf; sourceTree = "<group>"; };
 		D1A0F00100000000000000B2 /* athan_takbira.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = athan_takbira.caf; sourceTree = "<group>"; };
-		D1A0F00100000000000000A6 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		DA7619BAD40914E27F69865C /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/WidgetKit.framework; sourceTree = DEVELOPER_DIR; };
+		DD6CAAB3B65817DB9D8B2ED9 /* MathaniWatchWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MathaniWatchWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		E881DEF106994E29F25F2313 /* WatchStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchStore.swift; sourceTree = "<group>"; };
+		F7B4134BB43D63D495655E19 /* KhatmaWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KhatmaWidget.swift; sourceTree = "<group>"; };
+		FDDDA9EDE3EAE6E6401FAD21 /* WidgetSnapshotTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WidgetSnapshotTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		239FA29C40999C0EFFCD9827 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FDF42D9DA66C0EF99CE820A4 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3C5E1A2569B91AFE23E75684 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5DA455F07150BDCABEB399B6 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		97C146EB1CF9000F007C117D /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -81,15 +218,95 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		FB6EE17F4BD0EE2B34550502 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DE3816CF122E3A6CAC3F6281 /* Foundation.framework in Frameworks */,
+				81E7AA815288B169211286D0 /* WidgetKit.framework in Frameworks */,
+				8A9FC24599F185325EB3900F /* SwiftUI.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0C36956B428CFAC26B4F085F /* MathaniWatchWidgets */ = {
+			isa = PBXGroup;
+			children = (
+				6329BCD448DF05868369C3A0 /* Info.plist */,
+				24AA97D4510289DD03A675EE /* Localizable.xcstrings */,
+				C4D56BB81C733B16B3E93DB2 /* MathaniWatchWidgets.entitlements */,
+				AC9302F15E73562D36C4C3A4 /* WatchWidgets.swift */,
+			);
+			name = MathaniWatchWidgets;
+			path = MathaniWatchWidgets;
+			sourceTree = "<group>";
+		};
 		331C8082294A63A400263BE5 /* RunnerTests */ = {
 			isa = PBXGroup;
 			children = (
 				331C807B294A618700263BE5 /* RunnerTests.swift */,
+				FDDDA9EDE3EAE6E6401FAD21 /* WidgetSnapshotTests.swift */,
+				5D3C2D85CCA6E747B2A9FF3A /* PrayerTimelineTests.swift */,
 			);
 			path = RunnerTests;
+			sourceTree = "<group>";
+		};
+		595830699442219A57C61455 /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				A5B97066FF3319471537C3CA /* Foundation.framework */,
+				DA7619BAD40914E27F69865C /* WidgetKit.framework */,
+				77D819A60C54F7968E00C31C /* SwiftUI.framework */,
+			);
+			name = iOS;
+			sourceTree = "<group>";
+		};
+		5B3251537B39D2828E2FB353 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				595830699442219A57C61455 /* iOS */,
+				6F284A4C130D9E7657796D4E /* watchOS */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		5D521FADAFFAD3931D4480F7 /* MathaniWidgets */ = {
+			isa = PBXGroup;
+			children = (
+				208259EAE72DA464CB2C8ABB /* Info.plist */,
+				F7B4134BB43D63D495655E19 /* KhatmaWidget.swift */,
+				1EF2BD351CD8D22613E9CA11 /* Localizable.xcstrings */,
+				CD11DF2CD70AC6F2B258F8F5 /* MathaniWidgets.entitlements */,
+				B3923409C7178622267E7B11 /* MathaniWidgetsBundle.swift */,
+				086A51F91E0BE3246431E20D /* PrayerWidget.swift */,
+				A74DC56DE6D063AFF81497BB /* QuranWidget.swift */,
+			);
+			name = MathaniWidgets;
+			path = MathaniWidgets;
+			sourceTree = "<group>";
+		};
+		6F284A4C130D9E7657796D4E /* watchOS */ = {
+			isa = PBXGroup;
+			children = (
+				76A197D229ADF9F3D1E6A271 /* Foundation.framework */,
+			);
+			name = watchOS;
+			sourceTree = "<group>";
+		};
+		954A67B438EA39A26FCD9DE0 /* MathaniWatch */ = {
+			isa = PBXGroup;
+			children = (
+				2D063C348C7E6CB9790B67EA /* Assets.xcassets */,
+				273AF23E90042B9A50735813 /* Info.plist */,
+				7F9DA0524930286CAF472955 /* Localizable.xcstrings */,
+				9C1A61BBBDFCFCCDAE88E14E /* MathaniWatch.entitlements */,
+				4F8F2B1832B1D30F81BED579 /* MathaniWatchApp.swift */,
+				E881DEF106994E29F25F2313 /* WatchStore.swift */,
+			);
+			name = MathaniWatch;
+			path = MathaniWatch;
 			sourceTree = "<group>";
 		};
 		9740EEB11CF90186004384FC /* Flutter */ = {
@@ -111,6 +328,11 @@
 				97C146F01CF9000F007C117D /* Runner */,
 				97C146EF1CF9000F007C117D /* Products */,
 				331C8082294A63A400263BE5 /* RunnerTests */,
+				B2ADC6CF58A75C94FDA65E82 /* Shared */,
+				5D521FADAFFAD3931D4480F7 /* MathaniWidgets */,
+				954A67B438EA39A26FCD9DE0 /* MathaniWatch */,
+				0C36956B428CFAC26B4F085F /* MathaniWatchWidgets */,
+				5B3251537B39D2828E2FB353 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -119,6 +341,9 @@
 			children = (
 				97C146EE1CF9000F007C117D /* Runner.app */,
 				331C8081294A63A400263BE5 /* RunnerTests.xctest */,
+				1D712F674D33854431D81DA3 /* MathaniWidgets.appex */,
+				A7E8AD5C6662ABDEDDCCC444 /* MathaniWatch.app */,
+				DD6CAAB3B65817DB9D8B2ED9 /* MathaniWatchWidgets.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -144,6 +369,18 @@
 			path = Runner;
 			sourceTree = "<group>";
 		};
+		B2ADC6CF58A75C94FDA65E82 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				7012B3BFD0728EFB22802D22 /* PrayerProvider.swift */,
+				6724B3E715CB012907737F71 /* PrayerTimeline.swift */,
+				A5F81496BB85CD981B2E7BA7 /* WidgetSnapshot.swift */,
+				64AFC9D136012FF2352FE439 /* WidgetStyle.swift */,
+			);
+			name = Shared;
+			path = Shared;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -164,6 +401,59 @@
 			productReference = 331C8081294A63A400263BE5 /* RunnerTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		544E6516960F2B8C8AE2FB77 /* MathaniWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AE87C4E62F9732003A9EAE45 /* Build configuration list for PBXNativeTarget "MathaniWidgets" */;
+			buildPhases = (
+				ADF3FDCEE25D51DBBEA277E3 /* Sources */,
+				FB6EE17F4BD0EE2B34550502 /* Frameworks */,
+				E0CD15303924F1E32221190D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MathaniWidgets;
+			productName = MathaniWidgets;
+			productReference = 1D712F674D33854431D81DA3 /* MathaniWidgets.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		60CD407E35D672FDF240A707 /* MathaniWatch */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1FB72B5FE0CA0B6FF95929A3 /* Build configuration list for PBXNativeTarget "MathaniWatch" */;
+			buildPhases = (
+				19C05CC1ABAB05FBCFE64C15 /* Sources */,
+				3C5E1A2569B91AFE23E75684 /* Frameworks */,
+				A78F43DD4547C88B263D32AE /* Resources */,
+				2DCE040434C77005BD834BC5 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C6A74BFD67CAE8EEECEB09AF /* PBXTargetDependency */,
+			);
+			name = MathaniWatch;
+			productName = MathaniWatch;
+			productReference = A7E8AD5C6662ABDEDDCCC444 /* MathaniWatch.app */;
+			productType = "com.apple.product-type.application";
+		};
+		8FBC89576862A82408C13710 /* MathaniWatchWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BE16D5552C9EEFB7931AC9C1 /* Build configuration list for PBXNativeTarget "MathaniWatchWidgets" */;
+			buildPhases = (
+				7DA29C68C42E0F06C405857F /* Sources */,
+				239FA29C40999C0EFFCD9827 /* Frameworks */,
+				0DF91EB847EFECDACD8FE6F2 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MathaniWatchWidgets;
+			productName = MathaniWatchWidgets;
+			productReference = DD6CAAB3B65817DB9D8B2ED9 /* MathaniWatchWidgets.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		97C146ED1CF9000F007C117D /* Runner */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 97C147051CF9000F007C117D /* Build configuration list for PBXNativeTarget "Runner" */;
@@ -173,11 +463,15 @@
 				97C146EB1CF9000F007C117D /* Frameworks */,
 				97C146EC1CF9000F007C117D /* Resources */,
 				9705A1C41CF9048500538489 /* Embed Frameworks */,
+				9034F219DCDF54D2E5D405EE /* Embed Foundation Extensions */,
+				4E25A3E598DD766213C05A93 /* Embed Watch Content */,
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				8C3B74F62831E619B91BB34F /* PBXTargetDependency */,
+				9BD5715E74B3BE741E18BF93 /* PBXTargetDependency */,
 			);
 			name = Runner;
 			packageProductDependencies = (
@@ -218,7 +512,7 @@
 			);
 			mainGroup = 97C146E51CF9000F007C117D;
 			packageReferences = (
-				781AD8BC2B33823900A9FFBB /* XCLocalSwiftPackageReference "Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage" */,
+				781AD8BC2B33823900A9FFBB /* XCLocalSwiftPackageReference "FlutterGeneratedPluginSwiftPackage" */,
 			);
 			productRefGroup = 97C146EF1CF9000F007C117D /* Products */;
 			projectDirPath = "";
@@ -226,11 +520,22 @@
 			targets = (
 				97C146ED1CF9000F007C117D /* Runner */,
 				331C8080294A63A400263BE5 /* RunnerTests */,
+				544E6516960F2B8C8AE2FB77 /* MathaniWidgets */,
+				60CD407E35D672FDF240A707 /* MathaniWatch */,
+				8FBC89576862A82408C13710 /* MathaniWatchWidgets */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		0DF91EB847EFECDACD8FE6F2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B70CCD7D3393CB3D25A6A3F6 /* Localizable.xcstrings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		331C807F294A63A400263BE5 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -250,6 +555,23 @@
 				3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */,
 				97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */,
 				97C146FC1CF9000F007C117D /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A78F43DD4547C88B263D32AE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C1F7177C3AB68B4A5DB09A1A /* Assets.xcassets in Resources */,
+				16A7767DFC490B87600B10F9 /* Localizable.xcstrings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E0CD15303924F1E32221190D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5B811696E16F69DC93B76EB8 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -290,11 +612,42 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		19C05CC1ABAB05FBCFE64C15 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AC742AFB7848677BDB79834A /* MathaniWatchApp.swift in Sources */,
+				200E493D0B6FCDE39B50A6A0 /* WatchStore.swift in Sources */,
+				34A7C9218A6BDC8E661EA747 /* PrayerProvider.swift in Sources */,
+				870299B40B823A3B35A21ECB /* PrayerTimeline.swift in Sources */,
+				FCE88D484FEB93EE8ACE8795 /* WidgetSnapshot.swift in Sources */,
+				03929E3977C681C9C59AF0D5 /* WidgetStyle.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		331C807D294A63A400263BE5 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				331C808B294A63AB00263BE5 /* RunnerTests.swift in Sources */,
+				DEF7E4FEC9E6CDBBA4028234 /* WidgetSnapshotTests.swift in Sources */,
+				F1D3F2099B232E29317361F6 /* PrayerTimelineTests.swift in Sources */,
+				842CC81D04ED4E092FCE03F4 /* PrayerProvider.swift in Sources */,
+				A197C649ACF4858EE037AEBA /* PrayerTimeline.swift in Sources */,
+				B760D55714765E1EE3C3E09A /* WidgetSnapshot.swift in Sources */,
+				3E952AFA92C9A3D5EA8EF2CD /* WidgetStyle.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7DA29C68C42E0F06C405857F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6D24E8EBA9C7147F5938C2DF /* WatchWidgets.swift in Sources */,
+				2D491CC6F9924F4EAF873757 /* PrayerProvider.swift in Sources */,
+				0CF8A68469461C9FAF85270C /* PrayerTimeline.swift in Sources */,
+				D68EC27EE4D2C684338AAE1A /* WidgetSnapshot.swift in Sources */,
+				B5A51D666C330DAD13FC214E /* WidgetStyle.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -309,6 +662,21 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		ADF3FDCEE25D51DBBEA277E3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B0A6050A0ED4E56F42AE3BE6 /* KhatmaWidget.swift in Sources */,
+				75D78BFCC5D2A2ABF34380E1 /* MathaniWidgetsBundle.swift in Sources */,
+				4E955506A4AA612DF32060CD /* PrayerWidget.swift in Sources */,
+				A45A09BAA59642F94875195E /* QuranWidget.swift in Sources */,
+				A04533F37EBF7D3BC08EAEDA /* PrayerProvider.swift in Sources */,
+				BEF7FB3CD2F8DE64724F06C7 /* PrayerTimeline.swift in Sources */,
+				A7723EDCC0F3FA156ADB9775 /* WidgetSnapshot.swift in Sources */,
+				A90257257C785385E7717E89 /* WidgetStyle.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -316,6 +684,24 @@
 			isa = PBXTargetDependency;
 			target = 97C146ED1CF9000F007C117D /* Runner */;
 			targetProxy = 331C8085294A63A400263BE5 /* PBXContainerItemProxy */;
+		};
+		8C3B74F62831E619B91BB34F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = MathaniWidgets;
+			target = 544E6516960F2B8C8AE2FB77 /* MathaniWidgets */;
+			targetProxy = 8D79C3FD40F7FB9B5AA8392E /* PBXContainerItemProxy */;
+		};
+		9BD5715E74B3BE741E18BF93 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = MathaniWatch;
+			target = 60CD407E35D672FDF240A707 /* MathaniWatch */;
+			targetProxy = 072D1CF11B7FF215980856D0 /* PBXContainerItemProxy */;
+		};
+		C6A74BFD67CAE8EEECEB09AF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = MathaniWatchWidgets;
+			target = 8FBC89576862A82408C13710 /* MathaniWatchWidgets */;
+			targetProxy = 9A5D020D19C29B4C41FFE0B5 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -348,6 +734,35 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		1958210D9A53B16E5CA56146 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = MathaniWatchWidgets/MathaniWatchWidgets.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "Apple Distribution";
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = YJBH85NYZU;
+				ENABLE_BITCODE = NO;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = MathaniWatchWidgets/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.mthani.app.watchkitapp.widgets;
+				PROVISIONING_PROFILE_SPECIFIER = "Mathani Watch Widgets App Store";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Release;
+		};
 		249021D3217E4FDB00AE95B9 /* Profile */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -407,20 +822,20 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
-				ENABLE_BITCODE = NO;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Distribution";
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = YJBH85NYZU;
+				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.mthani.app;
-				CODE_SIGN_STYLE = Manual;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Distribution";
-				DEVELOPMENT_TEAM = YJBH85NYZU;
-				PROVISIONING_PROFILE_SPECIFIER = "Mathani App Store";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "Mathani App Store";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -471,6 +886,152 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Runner.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Runner";
+			};
+			name = Profile;
+		};
+		76442A8BC80C9653B70A2491 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = MathaniWatch/MathaniWatch.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "Apple Distribution";
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = YJBH85NYZU;
+				ENABLE_BITCODE = NO;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = MathaniWatch/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.mthani.app.watchkitapp;
+				PROVISIONING_PROFILE_SPECIFIER = "Mathani Watch App Store";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Release;
+		};
+		7834EAB2C58F351002A6104D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9740EEB21CF90195004384FC /* Debug.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = MathaniWidgets/MathaniWidgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = YJBH85NYZU;
+				ENABLE_BITCODE = NO;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = MathaniWidgets/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.mthani.app.widgets;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		7DB545C4FC7FA17B34C2A18A /* Profile */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = MathaniWatch/MathaniWatch.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "Apple Distribution";
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = YJBH85NYZU;
+				ENABLE_BITCODE = NO;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = MathaniWatch/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.mthani.app.watchkitapp;
+				PROVISIONING_PROFILE_SPECIFIER = "Mathani Watch App Store";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Profile;
+		};
+		7FD9927074068E47413CC540 /* Profile */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = MathaniWidgets/MathaniWidgets.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Distribution";
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = YJBH85NYZU;
+				ENABLE_BITCODE = NO;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = MathaniWidgets/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.mthani.app.widgets;
+				PROVISIONING_PROFILE_SPECIFIER = "Mathani Widgets App Store";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Profile;
+		};
+		901E99CE46B42C7BF9046895 /* Profile */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = MathaniWatchWidgets/MathaniWatchWidgets.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "Apple Distribution";
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = YJBH85NYZU;
+				ENABLE_BITCODE = NO;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = MathaniWatchWidgets/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.mthani.app.watchkitapp.widgets;
+				PROVISIONING_PROFILE_SPECIFIER = "Mathani Watch Widgets App Store";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
 			};
 			name = Profile;
 		};
@@ -593,16 +1154,16 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
-				ENABLE_BITCODE = NO;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = YJBH85NYZU;
+				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.mthani.app;
-				DEVELOPMENT_TEAM = YJBH85NYZU;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -617,29 +1178,122 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
-				ENABLE_BITCODE = NO;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Distribution";
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = YJBH85NYZU;
+				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.mthani.app;
-				CODE_SIGN_STYLE = Manual;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Distribution";
-				DEVELOPMENT_TEAM = YJBH85NYZU;
-				PROVISIONING_PROFILE_SPECIFIER = "Mathani App Store";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "Mathani App Store";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Release;
 		};
+		A4DC2BE20151356E2F4E0E25 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9740EEB21CF90195004384FC /* Debug.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = MathaniWatchWidgets/MathaniWatchWidgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = YJBH85NYZU;
+				ENABLE_BITCODE = NO;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = MathaniWatchWidgets/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.mthani.app.watchkitapp.widgets;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Debug;
+		};
+		A81539815C3747304ED5F757 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9740EEB21CF90195004384FC /* Debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = MathaniWatch/MathaniWatch.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = YJBH85NYZU;
+				ENABLE_BITCODE = NO;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = MathaniWatch/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.mthani.app.watchkitapp;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Debug;
+		};
+		C5C39B69004A2380F0E3B187 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = MathaniWidgets/MathaniWidgets.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Distribution";
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = YJBH85NYZU;
+				ENABLE_BITCODE = NO;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = MathaniWidgets/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.mthani.app.widgets;
+				PROVISIONING_PROFILE_SPECIFIER = "Mathani Widgets App Store";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		1FB72B5FE0CA0B6FF95929A3 /* Build configuration list for PBXNativeTarget "MathaniWatch" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				76442A8BC80C9653B70A2491 /* Release */,
+				A81539815C3747304ED5F757 /* Debug */,
+				7DB545C4FC7FA17B34C2A18A /* Profile */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		331C8087294A63A400263BE5 /* Build configuration list for PBXNativeTarget "RunnerTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -670,10 +1324,30 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		AE87C4E62F9732003A9EAE45 /* Build configuration list for PBXNativeTarget "MathaniWidgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C5C39B69004A2380F0E3B187 /* Release */,
+				7834EAB2C58F351002A6104D /* Debug */,
+				7FD9927074068E47413CC540 /* Profile */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BE16D5552C9EEFB7931AC9C1 /* Build configuration list for PBXNativeTarget "MathaniWatchWidgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1958210D9A53B16E5CA56146 /* Release */,
+				A4DC2BE20151356E2F4E0E25 /* Debug */,
+				901E99CE46B42C7BF9046895 /* Profile */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		781AD8BC2B33823900A9FFBB /* XCLocalSwiftPackageReference "Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage" */ = {
+		781AD8BC2B33823900A9FFBB /* XCLocalSwiftPackageReference "FlutterGeneratedPluginSwiftPackage" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage;
 		};
