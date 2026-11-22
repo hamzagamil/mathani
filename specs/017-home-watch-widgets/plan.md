@@ -163,5 +163,9 @@ surfaces match the app (FR-005). The only phone growth is the extension, the lay
   1.4.0+9 baseline (169.94 MB), which predates specs/015 and specs/016; the baseline is the owner's
   to update.
 - **Wear OS bundle**: 3.2 MB (`wear-release.aab`), downloaded only to watches.
-- **iOS**: measured by CI once the targets are in the Xcode project (the widget extension is in the
-  iPhone download; the watch app is delivered to the watch).
+- **iOS** (CI, `tool/size_check.dart ios`): 191.44 MB with the three new targets, against 188.98 MB
+  on the commit before them, so **about +2.46 MB**, over the 1 MB rule: this needs the review
+  call-out. The tool measures the whole iPhone app, which includes the watch app and the watch
+  widgets; the App Store delivers those to the watch, so the iPhone download grows less. Check
+  App Store Connect's size report for the first build with the watch app. The tool's iOS baseline
+  (153.93 MB) is older still, like the Android one.

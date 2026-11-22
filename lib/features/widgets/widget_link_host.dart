@@ -97,17 +97,20 @@ class _Side implements LinkSource {
 
 /// Opens what a widget tap names (FR-004): Prayer Times, the Mushaf at a page, the khatma place,
 /// or the Khatma screen. After the first frame; during a memorization session the link waits
-/// until it ends, as group links do.
+/// until it ends, as group links do. It splits [platform]'s links and gives every other link to
+/// the child [builder] makes (the group khatma host).
 class WidgetLinkHost extends StatefulWidget {
-  const WidgetLinkHost({super.key, required this.source, required this.child});
-  final LinkSource source;
-  final Widget child;
+  const WidgetLinkHost({super.key, required this.platform, required this.builder});
+  final LinkSource platform;
+  final Widget Function(LinkSource others) builder;
 
   @override
   State<WidgetLinkHost> createState() => _WidgetLinkHostState();
 }
 
 class _WidgetLinkHostState extends State<WidgetLinkHost> {
+  late final LinkSplitter _links = LinkSplitter(widget.platform);
+  late final Widget _child = widget.builder(_links.others);
   StreamSubscription<String>? _subscription;
   WidgetLink? _waiting;
   MemorizationController? _memorization;
@@ -117,8 +120,8 @@ class _WidgetLinkHostState extends State<WidgetLinkHost> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
-      _subscription = widget.source.links.listen(_arrived);
-      final first = await widget.source.takeLink();
+      _subscription = _links.widgets.links.listen(_arrived);
+      final first = await _links.widgets.takeLink();
       if (first != null) _arrived(first);
     });
   }
@@ -190,5 +193,5 @@ class _WidgetLinkHostState extends State<WidgetLinkHost> {
   }
 
   @override
-  Widget build(BuildContext context) => widget.child;
+  Widget build(BuildContext context) => _child;
 }

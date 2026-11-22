@@ -31,9 +31,6 @@ import 'theme/app_theme.dart';
 const wideWindowMin = 600.0;
 const phoneColumnWidth = 480.0;
 
-/// The platform's links, split between widget taps and group khatma links (specs/017).
-final _links = LinkSplitter(AppLinks.instance);
-
 class MathaniApp extends StatelessWidget {
   const MathaniApp({
     super.key,
@@ -123,8 +120,8 @@ class MathaniApp extends StatelessWidget {
               child: this.groups == null
                   ? const _Home()
                   : WidgetLinkHost(
-                      source: _links.widgets,
-                      child: GroupLinkHost(source: _links.others, child: const _Home()),
+                      platform: AppLinks.instance,
+                      builder: (others) => GroupLinkHost(source: others, child: const _Home()),
                     ),
             ),
           ),
