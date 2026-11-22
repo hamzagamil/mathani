@@ -56,6 +56,9 @@ def configure(target, runner_configs, bundle_id:, folder:, profile:, family:, ex
     s['PRODUCT_BUNDLE_IDENTIFIER'] = bundle_id
     # xcodeproj leaves it empty, and every product would then be named ".app".
     s['PRODUCT_NAME'] = '$(TARGET_NAME)'
+    # The Flutter template sets SUPPORTED_PLATFORMS = iphoneos for the project; without this the
+    # watch widget extension would be built for iOS inside the iPhone build.
+    s['SUPPORTED_PLATFORMS'] = 'watchos watchsimulator' if sdk == 'watchos'
     s['INFOPLIST_FILE'] = "#{folder}/Info.plist"
     s['GENERATE_INFOPLIST_FILE'] = 'NO'
     s['CODE_SIGN_ENTITLEMENTS'] = "#{folder}/#{folder}.entitlements"

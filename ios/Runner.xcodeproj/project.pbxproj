@@ -751,6 +751,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.mthani.app.watchkitapp.widgets;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "Mathani Watch Widgets App Store";
 				SDKROOT = watchos;
@@ -908,6 +909,7 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.mthani.app.watchkitapp;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "Mathani Watch App Store";
 				SDKROOT = watchos;
@@ -967,6 +969,7 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.mthani.app.watchkitapp;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "Mathani Watch App Store";
 				SDKROOT = watchos;
@@ -1028,6 +1031,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.mthani.app.watchkitapp.widgets;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "Mathani Watch Widgets App Store";
 				SDKROOT = watchos;
@@ -1220,6 +1224,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.mthani.app.watchkitapp.widgets;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
@@ -1248,6 +1253,7 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.mthani.app.watchkitapp;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
