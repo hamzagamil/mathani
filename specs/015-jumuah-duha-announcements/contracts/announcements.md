@@ -2,6 +2,9 @@
 
 ## What the admin sends (Firebase console › Messaging › New campaign › Notifications)
 
+The owner page `/editor/announcements.html` (specs/018) sends this same message and is preferred
+to the console; it also keeps a history of what was sent.
+
 | Field | Value |
 | --- | --- |
 | Notification title | Required |

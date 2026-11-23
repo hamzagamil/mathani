@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>إشعارات القراء · مثاني</title>
+  <link rel="icon" type="image/png" href="../favicon.png">
+  <link rel="stylesheet" href="editor.css">
+  <script src="announcements.js" defer></script>
+</head>
+<body>
+  <!-- Announcements to readers (specs/018): write, preview, confirm, send; then the history. -->
+  <header class="bar">
+    <a class="title" href="#">الإشعارات</a>
+    <nav class="actions">
+      <a class="button" href="khatma.html">بلاغات الختمات</a>
+      <a class="button" href="./">المتشابهات</a>
+    </nav>
+    <a class="button quiet" href="/cdn-cgi/access/logout">خروج</a>
+  </header>
+  <p class="status" id="status" role="status" aria-live="polite"></p>
+
+  <main class="view-pane announce">
+    <form id="form" novalidate>
+      <h1>إشعار جديد</h1>
+
+      <label for="title">العنوان <span class="count muted" id="title-count">0 / 65</span></label>
+      <input type="text" id="title" dir="auto" autocomplete="off">
+
+      <label for="body">النص <span class="count muted" id="body-count">0 / 240</span></label>
+      <textarea id="body" dir="auto" rows="4"></textarea>
+
+      <label for="link">رابط في مثاني (اختياري)</label>
+      <input type="url" id="link" dir="ltr" inputmode="url" autocomplete="off" placeholder="https://get.mthani.app/…">
+      <p class="field-error" id="link-error" hidden>يُسمح بروابط مثاني فقط (mthani.app)</p>
+
+      <fieldset class="choices">
+        <legend>إلى</legend>
+        <label><input type="radio" name="audience" value="all" checked> جميع القراء</label>
+        <label><input type="radio" name="audience" value="lang_ar"> قراء العربية</label>
+        <label><input type="radio" name="audience" value="lang_en"> قراء الإنجليزية</label>
+      </fieldset>
+
+      <label for="ttl">مدة محاولة التوصيل</label>
+      <select id="ttl">
+        <option value="3600">ساعة</option>
+        <option value="86400" selected>يوم</option>
+        <option value="604800">أسبوع</option>
+        <option value="2419200">٤ أسابيع</option>
+      </select>
+
+      <h2>المعاينة</h2>
+      <div class="preview" aria-label="معاينة الإشعار">
+        <p class="preview-app">مثاني</p>
+        <p class="preview-title" id="preview-title"></p>
+        <p class="preview-body" id="preview-body"></p>
+        <p class="preview-link" id="preview-link" dir="ltr"></p>
+      </div>
+
+      <div class="row">
+        <button class="button accent" type="submit" id="send" disabled>إرسال…</button>
+      </div>
+
+      <div class="confirm" id="confirm" hidden>
+        <p id="confirm-text"></p>
+        <div class="row">
+          <button class="button accent" type="button" id="confirm-send">تأكيد الإرسال</button>
+          <button class="button" type="button" id="confirm-cancel">إلغاء</button>
+        </div>
+      </div>
+    </form>
+
+    <section id="history" aria-label="الإشعارات المرسلة">
+      <h2>ما أُرسل</h2>
+      <div id="history-list"></div>
+    </section>
+  </main>
+</body>
+</html>

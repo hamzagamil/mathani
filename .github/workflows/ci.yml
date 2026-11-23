@@ -39,6 +39,9 @@ jobs:
         run: node --test tool/mutashabihat/*.test.mjs
       - name: Group khatma functions and Worker
         run: node --test tool/khatma/*.test.mjs
+      # Owner announcements (specs/018).
+      - name: Owner announcements functions
+        run: node --test tool/announcements/*.test.mjs
 
   android:
     name: Android build, size and emulator tests

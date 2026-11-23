@@ -3,6 +3,7 @@
 import { verifyAccess } from './access.js';
 import { editorStore } from './editor-store.js';
 import { khatmaAdmin } from './khatma-admin.js';
+import { announcementsAdmin } from './announcements.js';
 
 const statusOf = {
   notFound: 404, conflict: 409, invalid: 422, draftChanged: 409, nothingToPublish: 400,
@@ -18,7 +19,7 @@ const json = (status, body) =>
 /** A store result: an `{error}` becomes its status, anything else [ok] (200 or 201). */
 const reply = (result, ok = 200) => (result && result.error ? json(statusOf[result.error] ?? 400, result) : json(ok, result));
 
-export async function dispatch(request, env, { fetchCerts, now } = {}) {
+export async function dispatch(request, env, { fetchCerts, now, fetch } = {}) {
   if (!env.DB) return json(503, { error: 'unavailable' });
   const who = await verifyAccess(request, env, { fetchCerts, now: now?.() });
   if (!who) return json(401, { error: 'signIn' });
@@ -51,6 +52,13 @@ export async function dispatch(request, env, { fetchCerts, now } = {}) {
   if (path[0] === 'khatma') {
     if (!isOwner) return json(403, { error: 'ownerOnly' });
     const result = await khatmaAdmin(method, path.slice(1).map(decodeURIComponent), body, env, now);
+    return json(result.status, result.body);
+  }
+  // Announcements to readers (specs/018): the owner only.
+  if (path[0] === 'announcements') {
+    if (!isOwner) return json(403, { error: 'ownerOnly' });
+    if (path.length > 1) return json(404, { error: 'notFound' });
+    const result = await announcementsAdmin(method, body, env, who, { now, fetch });
     return json(result.status, result.body);
   }
   const [resource, id, action] = path.map(decodeURIComponent);

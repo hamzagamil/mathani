@@ -230,6 +230,21 @@ Once, before the release that carries the group khatma (quickstart Part B › Se
 - [ ] Store answers, the age rating and the published policy updated (`docs/store/privacy.md` ›
       Khatma); review notes carry a group khatma link and where Report is.
 
+## Owner announcements setup (specs/018)
+
+Once, before announcements can be sent from `/editor/announcements.html`
+(specs/018 quickstart › Owner setup). Until then the page says sending is not set up.
+
+- [ ] Google Cloud console for project `mthani` › IAM › Service accounts: create
+      `mthani-announcements` with the role **Firebase Cloud Messaging API Admin** only, and
+      check that the Firebase Cloud Messaging API (V1) is enabled. Keys › Add key › JSON.
+- [ ] Store it for **production only** (never preview, so preview deployments cannot reach
+      readers): `npx wrangler@4 pages secret put FCM_SERVICE_ACCOUNT --project-name mthani-web`,
+      paste the whole JSON, then delete the downloaded file.
+- [ ] Apply the table:
+      `npx wrangler@4 d1 execute mthani-mutashabihat --remote --file functions/_lib/announcements-schema.sql`.
+- [ ] Deploy the site, open the page, and send a test to one language (quickstart › Manual checks).
+
 ## Release log
 
 | Version | Date | quran.db SHA-256 | Android size | iOS size | Cold start (A15 / SE2) | Notes |

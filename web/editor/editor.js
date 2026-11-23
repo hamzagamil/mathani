@@ -130,6 +130,7 @@ async function load() {
   $('who').textContent = state.me.email;
   $('actions').hidden = false;
   $('editors-link').hidden = !state.me.isOwner;
+  $('announcements-link').hidden = !state.me.isOwner;
   await refresh();
   loadQuran();
   window.addEventListener('hashchange', route);
