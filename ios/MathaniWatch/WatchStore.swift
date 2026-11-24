@@ -12,6 +12,16 @@ final class WatchStore: NSObject, ObservableObject, WCSessionDelegate {
   override init() {
     super.init()
     snapshot = WidgetSnapshot.load(suite: WidgetSnapshot.watchSuite)
+    #if DEBUG
+      // Store screenshots on a simulator with no paired iPhone (.github/workflows/watch-screenshots.yml):
+      // `-demoSnapshotPath <file>` shows a watch copy from a file, without keeping it.
+      let args = ProcessInfo.processInfo.arguments
+      if let i = args.firstIndex(of: "-demoSnapshotPath"), i + 1 < args.count,
+        let text = try? String(contentsOfFile: args[i + 1], encoding: .utf8)
+      {
+        snapshot = WidgetSnapshot.decode(text)
+      }
+    #endif
   }
 
   func activate() {

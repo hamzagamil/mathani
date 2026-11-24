@@ -1,0 +1,70 @@
+name: Watch screenshots
+
+# Takes the Apple Watch store screenshots (specs/017 T064) on a watch simulator: the watch app's
+# screen with real prayer times for Makkah, in Arabic and English. Run it from the Actions tab;
+# the PNGs are saved as an artifact.
+on:
+  workflow_dispatch:
+    inputs:
+      device:
+        description: "Watch simulator (the largest App Store size is best)"
+        required: false
+        default: "Apple Watch Ultra 3 (49mm)"
+
+env:
+  FLUTTER_VERSION: "3.47.7" # keep in sync with pubspec.yaml environment.flutter
+
+jobs:
+  screenshots:
+    runs-on: xcode-27
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+      - run: flutter pub get
+      - name: Demo prayer times
+        run: WATCH_DEMO_OUT="$RUNNER_TEMP/demo" flutter test tool/ios/watch_demo_snapshot_test.dart
+      - name: Build the watch app for the simulator
+        run: |
+          set -o pipefail
+          flutter build ios --config-only --debug --simulator
+          xcodebuild -project ios/Runner.xcodeproj -target MathaniWatch -configuration Debug \
+            -sdk watchsimulator CODE_SIGNING_ALLOWED=NO SYMROOT="$PWD/build/watchsim" build | tail -5
+          ls build/watchsim/Debug-watchsimulator
+      - name: Boot a watch simulator
+        id: sim
+        run: |
+          xcrun simctl list devices available | grep -E "Apple Watch" || true
+          UDID=$(xcrun simctl list devices available | grep -m1 -F "${{ inputs.device }} (" | grep -oE '[0-9A-F-]{36}' || true)
+          if [ -z "$UDID" ]; then
+            UDID=$(xcrun simctl list devices available | grep -m1 "Apple Watch Ultra" | grep -oE '[0-9A-F-]{36}' || true)
+          fi
+          if [ -z "$UDID" ]; then
+            RUNTIME=$(xcrun simctl list runtimes available | grep -oE 'com\.apple\.CoreSimulator\.SimRuntime\.watchOS-[0-9-]+' | tail -1)
+            TYPE=$(xcrun simctl list devicetypes | grep -m1 "Apple Watch Ultra" | grep -oE 'com\.apple\.CoreSimulator\.SimDeviceType\.[A-Za-z0-9-]+')
+            UDID=$(xcrun simctl create "Watch CI" "$TYPE" "$RUNTIME")
+          fi
+          xcrun simctl list devices | grep "$UDID"
+          xcrun simctl boot "$UDID"
+          xcrun simctl bootstatus "$UDID" -b
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+      - name: Take screenshots
+        run: |
+          UDID="${{ steps.sim.outputs.udid }}"
+          mkdir -p build/watch_screenshots
+          xcrun simctl status_bar "$UDID" override --time "9:41" || true
+          xcrun simctl install "$UDID" build/watchsim/Debug-watchsimulator/MathaniWatch.app
+          for lang in ar en; do
+            xcrun simctl terminate "$UDID" com.mthani.app.watchkitapp || true
+            xcrun simctl launch "$UDID" com.mthani.app.watchkitapp \
+              -demoSnapshotPath "$RUNNER_TEMP/demo/watch_$lang.json" -AppleLanguages "($lang)" -AppleLocale "$lang"
+            sleep 6
+            xcrun simctl io "$UDID" screenshot "build/watch_screenshots/watch_today_$lang.png"
+          done
+          sips -g pixelWidth -g pixelHeight build/watch_screenshots/*.png
+      - uses: actions/upload-artifact@v4
+        with:
+          name: watch-screenshots
+          path: build/watch_screenshots/*.png
