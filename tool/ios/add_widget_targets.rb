@@ -72,6 +72,7 @@ def configure(target, runner_configs, bundle_id:, folder:, profile:, family:, ex
     extra.each { |k, v| s[k] = v }
     if config.name == 'Debug'
       s['CODE_SIGN_STYLE'] = 'Automatic'
+      s['SWIFT_ACTIVE_COMPILATION_CONDITIONS'] = 'DEBUG'
     else
       # Store builds sign manually with the profiles the release workflow installs.
       s['CODE_SIGN_STYLE'] = 'Manual'

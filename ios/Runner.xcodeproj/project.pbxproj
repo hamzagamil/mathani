@@ -941,6 +941,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.mthani.app.widgets;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -1224,6 +1225,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.mthani.app.watchkitapp.widgets;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SUPPORTED_PLATFORMS = "watchos watchsimulator";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
@@ -1253,6 +1255,7 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.mthani.app.watchkitapp;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SUPPORTED_PLATFORMS = "watchos watchsimulator";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
