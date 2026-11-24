@@ -35,28 +35,39 @@ struct TodayView: View {
     .environment(\.layoutDirection, (snapshot?.rtl ?? false) ? .rightToLeft : .leftToRight)
   }
 
+  /// Mathani's gold (lib/app/theme/tokens.dart, accentInk in the dark theme).
+  private static let gold = Color(red: 0xD9 / 255, green: 0xBD / 255, blue: 0x82 / 255)
+
   @ViewBuilder private func content(now: Date) -> some View {
     if let snapshot, let block = snapshot.prayer, !block.isExpired(at: now), let next = block.next(after: now) {
       let day = block.day(of: next.date)
-      List {
-        Section {
+      // Compact rows, so the five prayers fit on one screen.
+      ScrollView {
+        VStack(alignment: .leading, spacing: 4) {
+          Text(block.place).font(.headline).lineLimit(1)
+          Text(day.label).font(.caption2).foregroundColor(.secondary)
           ForEach(day.entries, id: \.self) { e in
+            let isNext = e == next
             HStack {
-              Text(e.name).fontWeight(e == next ? .bold : .regular)
-              Spacer()
+              Text(e.name).fontWeight(isNext ? .bold : .regular)
+              Spacer(minLength: 4)
               Text(e.time).monospacedDigit()
             }
-            .foregroundColor(e == next ? .accentColor : .primary)
+            .font(.body)
+            .lineLimit(1)
+            .minimumScaleFactor(0.8)
+            .foregroundColor(isNext ? .black : .primary)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 3)
+            .background(RoundedRectangle(cornerRadius: 8).fill(isNext ? Self.gold : Color.clear))
             .accessibilityElement(children: .combine)
           }
-        } header: {
-          VStack(alignment: .leading) {
-            Text(block.place).lineLimit(1)
-            Text(day.label).font(.caption2)
-          }
-        } footer: {
           Countdown(snapshot: snapshot, target: next.date)
+            .font(.footnote)
+            .foregroundColor(Self.gold)
+            .padding(.top, 2)
         }
+        .padding(.horizontal, 4)
       }
     } else {
       ScrollView {
