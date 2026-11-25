@@ -240,3 +240,18 @@ confirm (these replace "Data Not Collected" / "No data collected"):
 | Published policy | A "Usage statistics" section with the paragraphs above (mthani.app/privacypolicy). |
 | GA admin (owner) | Data retention 2 months; Google signals off; ads personalisation off. |
 
+### Microsoft Clarity (web only, 2026-11-25)
+
+Clarity project `zj4585wuk9` is on the landing site (mthani.app) and the web app (only when served
+from get.mthani.app, `web/index.html`; hosts allowed in `web/_headers`). Not in the phone apps, so
+the store answers above are unchanged.
+
+- **What is sent**: page interactions (clicks, scrolling, mouse movement), device type, browser,
+  approximate country; Clarity sets first-party cookies (`_clck`, `_clsk`). Typed text is masked.
+  The web app draws to a canvas, so its recordings show little beyond page loads.
+- **Who receives it**: Microsoft, under the Microsoft Privacy Statement.
+- **Consent**: none asked, as with usage statistics. Clarity's terms require consent for EEA, UK
+  and Swiss visitors (owner's risk to accept or to add a banner).
+- **Published policy**: the web-app and website sections of mthani.app/privacypolicy name Clarity
+  (AR and EN); "no tracking" / "no cookies" claims for the websites were removed.
+

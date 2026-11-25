@@ -17,6 +17,15 @@
   <link rel="manifest" href="manifest.json">
 
   <title>Mathani · مثاني</title>
+  <!-- Microsoft Clarity, project zj4585wuk9, on the production host only (as usage statistics,
+       lib/platform/usage_firebase.dart). Its hosts are allowed in web/_headers. -->
+  <script>
+    if (location.hostname === 'get.mthani.app') (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "zj4585wuk9");
+  </script>
   <style>
     html, body { margin: 0; height: 100%; background: #F2EADD; color: #183159; }
     @media (prefers-color-scheme: dark) { html, body { background: #0E1A2E; color: #EDE4D3; } }
@@ -28,7 +37,8 @@
   </style>
 </head>
 <body>
-  <!-- Keep in one inline script: web/_headers allows it by its SHA-256 (tool/web_deploy.mjs). -->
+  <!-- Inline scripts are allowed by their SHA-256 in web/_headers (tool/web_deploy.mjs hashes every
+       plain <script> tag, so do not add attributes to one). -->
   <script>
     (function () {
       // The page's language and direction follow the browser until the app takes over.
