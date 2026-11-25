@@ -37,8 +37,9 @@
   </style>
 </head>
 <body>
-  <!-- Inline scripts are allowed by their SHA-256 in web/_headers (tool/web_deploy.mjs hashes every
-       plain <script> tag, so do not add attributes to one). -->
+  <!-- Inline scripts are allowed by their SHA-256 in web/_headers: tool/web_deploy.mjs hashes each
+       script tag that has no attributes, so keep them bare, and never write the tag inside a
+       comment, where it would be hashed by mistake. -->
   <script>
     (function () {
       // The page's language and direction follow the browser until the app takes over.
