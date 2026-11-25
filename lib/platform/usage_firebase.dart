@@ -21,6 +21,9 @@ class FirebaseUsage implements UsageSink {
   /// The web sends this instead of the page's address, which can hold a group khatma code.
   static const _webLocation = 'https://get.mthani.app/';
 
+  /// The web app's production addresses, the only ones that collect (FR-013).
+  static const _webHosts = {'get.mthani.app', 'read.mthani.app'};
+
   final _queue = <void Function(FirebaseAnalytics)>[];
   var _state = _State.waiting;
   FirebaseAnalytics? _analytics;
@@ -52,11 +55,10 @@ class FirebaseUsage implements UsageSink {
   }
 
   /// After the first frame (FR-019). Collection is on only in release builds, and on the web
-  /// only on get.mthani.app (FR-013); the native default is off, so other builds send nothing.
+  /// only on the production hosts (FR-013); the native default is off, so other builds send nothing.
   Future<void> start() async {
     if (_state != _State.waiting) return;
-    final wanted = (kReleaseMode || _debug) &&
-        (!kIsWeb || Uri.base.host == 'get.mthani.app');
+    final wanted = (kReleaseMode || _debug) && (!kIsWeb || _webHosts.contains(Uri.base.host));
     // On the web, starting the library at all sends a hit, so it is left alone when unwanted.
     if ((kIsWeb && !wanted) || !await firebaseReady()) return _stop();
     try {

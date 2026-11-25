@@ -221,7 +221,7 @@ decision, spec Clarifications 2026-11-21).
   advertising id (the Android `AD_ID` permission is removed; iOS never shows the tracking prompt;
   IDFV collection is off), no Google signals, no ad personalisation.
 - **Builds**: collection is off by default natively and turned on only in release builds, and on
-  the web only on get.mthani.app.
+  the web only on get.mthani.app and read.mthani.app.
 - **Retention**: 2 months for detailed data (set in GA admin, owner action).
 - **Who receives it**: Google, as the analytics provider.
 - **Risk accepted by the owner**: EU and UK rules generally require consent before an analytics
@@ -243,7 +243,7 @@ confirm (these replace "Data Not Collected" / "No data collected"):
 ### Microsoft Clarity (web only, 2026-11-25)
 
 Clarity project `zj4585wuk9` is on the landing site (mthani.app) and the web app (only when served
-from get.mthani.app, `web/index.html`; hosts allowed in `web/_headers`). Not in the phone apps, so
+from get.mthani.app or read.mthani.app, `web/index.html`; hosts allowed in `web/_headers`). Not in the phone apps, so
 the store answers above are unchanged.
 
 - **What is sent**: page interactions (clicks, scrolling, mouse movement), device type, browser,

@@ -17,10 +17,10 @@
   <link rel="manifest" href="manifest.json">
 
   <title>Mathani · مثاني</title>
-  <!-- Microsoft Clarity, project zj4585wuk9, on the production host only (as usage statistics,
+  <!-- Microsoft Clarity, project zj4585wuk9, on the production hosts only (as usage statistics,
        lib/platform/usage_firebase.dart). Its hosts are allowed in web/_headers. -->
   <script>
-    if (location.hostname === 'get.mthani.app') (function(c,l,a,r,i,t,y){
+    if (/^(get|read)\.mthani\.app$/.test(location.hostname)) (function(c,l,a,r,i,t,y){
       c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
       t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
       y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
